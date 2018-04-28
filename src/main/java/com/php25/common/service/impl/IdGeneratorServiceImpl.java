@@ -13,25 +13,9 @@ import java.util.UUID;
  */
 @Service("idGeneratorService")
 public class IdGeneratorServiceImpl implements IdGeneratorService {
-
-    @Override
-    public String getGoodsOrderNumber() {
-        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(14);
-    }
-
-    @Override
-    public String getTicketsNumber() {
-        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(14);
-    }
-
-    @Override
-    public String getActivityOrderNumber() {
-        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(14);
-    }
-
     @Override
     public String getVipOrderNumber() {
-        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(14);
+        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(6);
     }
 
     @Override
