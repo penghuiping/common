@@ -8,7 +8,8 @@ import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
 import com.php25.common.service.SoftDeletable;
 import com.php25.common.specification.BaseSpecs;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,20 +17,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.transaction.Transactional;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Created by penghuiping on 16/8/12.
  */
 @Transactional
-public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MODEL>, SoftDeletable<DTO> {
+public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
+    private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
 
-    protected BaseRepository<MODEL, String> baseRepository;
+    protected BaseRepository<MODEL, ID> baseRepository;
 
     private Class<DTO> dtoClass;
 
@@ -51,39 +55,39 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
     }
 
     @Override
-    public DTO findOne(String id) {
+    public Optional<DTO> findOne(ID id) {
         return findOne(id, (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
     @Override
-    public DTO findOne(String id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
+    public Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         try {
             DTO dto = dtoClass.newInstance();
             MODEL model = baseRepository.findOne(id);
             modelToDtoTransferable.modelToDto(model, dto);
-            return dto;
+            return Optional.ofNullable(dto);
         } catch (Exception e) {
-            Logger.getLogger(BaseServiceImpl.class).error("", e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
 
     @Override
-    public DTO save(DTO obj) {
+    public Optional<DTO> save(DTO obj) {
         return save(obj, (dto, model) -> BeanUtils.copyProperties(dto, model), (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
     @Override
-    public DTO save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
+    public Optional<DTO> save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         try {
             MODEL a = modelClass.newInstance();
             dtoToModelTransferable.dtoToModel(obj, a);
             DTO dto = dtoClass.newInstance();
             a = baseRepository.save(a);
             modelToDtoTransferable.modelToDto(a, dto);
-            return dto;
+            return Optional.ofNullable(dto);
         } catch (Exception e) {
-            Logger.getLogger(BaseServiceImpl.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -114,7 +118,7 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
             BeanUtils.copyProperties(obj, a);
             baseRepository.delete(a);
         } catch (Exception e) {
-            Logger.getLogger(BaseServiceImpl.class).error(e);
+            logger.error("出错啦!", e);
         }
     }
 
@@ -133,35 +137,34 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
     }
 
     @Override
-    public DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams) {
-        return query(iDisplayStart, iDisplayLength, searchParams, Sort.Direction.DESC, "createTime");
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams) {
+        return query(pageNum, pageSize, searchParams, Sort.Direction.DESC, "createTime");
     }
 
     @Override
-    public DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, Sort.Direction direction, String... properties) {
-        return query(iDisplayStart, iDisplayLength, searchParams, (model, dto) -> BeanUtils.copyProperties(model, dto)
-                , direction, properties);
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, Sort.Direction direction, String property) {
+        return query(pageNum, pageSize, searchParams, (model, dto) -> BeanUtils.copyProperties(model, dto)
+                , direction, property);
     }
 
 
     @Override
-    public DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort.Direction direction, String... properties) {
-        Sort.Order order = new Sort.Order(direction,properties[0]);
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property) {
+        Sort.Order order = new Sort.Order(direction, property);
         Sort sort = new Sort(order);
-        return query(iDisplayStart, iDisplayLength, searchParams,customerModelToDtoTransferable,sort);
+        return query(pageNum, pageSize, searchParams, modelToDtoTransferable, sort);
     }
 
     @Override
-    public DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort sort) {
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
         List<MODEL> adminUserModelList = null;
 
-        if (-1 == iDisplayStart) {
-            pageRequest = new PageRequest(1, iDisplayLength, sort);
+        if (-1 == pageNum) {
             adminUserModelList = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams));
         } else {
-            pageRequest = new PageRequest(iDisplayStart - 1, iDisplayLength,sort);
+            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
             modelPage = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams), pageRequest);
             adminUserModelList = modelPage.getContent();
         }
@@ -170,64 +173,64 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();
-                customerModelToDtoTransferable.modelToDto(model, dto);
+                modelToDtoTransferable.modelToDto(model, dto);
                 return dto;
             } catch (Exception e) {
-                Logger.getLogger(BaseServiceImpl.class).error(e);
+                logger.error("出错啦!", e);
                 return null;
             }
         }).collect(Collectors.toList());
 
         PageImpl<DTO> dtoPage = null;
-        if (-1 == iDisplayStart) {
+        if (-1 == pageNum) {
             dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
         } else {
             dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
         }
 
-        return toDataGridPageDto(dtoPage);
+        return Optional.ofNullable(toDataGridPageDto(dtoPage));
     }
 
     @Override
-    public List<DTO> findAll(Iterable<String> ids) {
+    public Optional<List<DTO>> findAll(Iterable<ID> ids) {
         return findAll(ids, (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
     @Override
-    public List<DTO> findAll(Iterable<String> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
+    public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         List<MODEL> result = Lists.newArrayList(baseRepository.findAll(ids));
-        return result.stream()
+        return Optional.ofNullable(result.stream()
                 .map(model -> {
                     try {
                         DTO dto = dtoClass.newInstance();
                         modelToDtoTransferable.modelToDto(model, dto);
                         return dto;
                     } catch (Exception e) {
-                        Logger.getLogger(BaseServiceImpl.class).error(e);
+                        logger.error("出错啦!", e);
                         return null;
                     }
-                }).collect(Collectors.toList());
+                }).collect(Collectors.toList()));
     }
 
     @Override
-    public List<DTO> findAll() {
+    public Optional<List<DTO>> findAll() {
         return findAll((model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
     @Override
-    public List<DTO> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
+    public Optional<List<DTO>> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         List<MODEL> result = Lists.newArrayList(baseRepository.findAll());
-        return result.stream()
+        return Optional.ofNullable(result.stream()
                 .map(model -> {
                     try {
                         DTO dto = dtoClass.newInstance();
                         modelToDtoTransferable.modelToDto(model, dto);
                         return dto;
                     } catch (Exception e) {
-                        Logger.getLogger(BaseServiceImpl.class).error(e);
+                        logger.error("出错啦!", e);
                         return null;
                     }
-                }).collect(Collectors.toList());
+                }).collect(Collectors.toList()));
     }
 
     @Override
@@ -242,8 +245,7 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
                 this.save(obj);
             }
         } catch (Exception e) {
-            Logger.getLogger(BaseServiceImpl.class).info("此对象不支持软删除");
-            Logger.getLogger(BaseServiceImpl.class).error("此对象不支持软删除", e);
+            logger.error("此对象不支持软删除!", e);
         }
     }
 
@@ -262,7 +264,7 @@ public abstract class BaseServiceImpl<DTO, MODEL> implements BaseService<DTO, MO
                     this.save(objs);
                 }
             } catch (Exception e) {
-                Logger.getLogger(BaseServiceImpl.class).info("此对象不支持软删除");
+                logger.error("此对象不支持软删除!", e);
             }
         }
     }

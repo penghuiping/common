@@ -1,4 +1,3 @@
-
 package com.php25.common.constant;
 
 /**

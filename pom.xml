@@ -5,20 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>common-spring-boot-starter</artifactId>
     <groupId>com.php25</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <properties>
-        <guava>18.0</guava>
+        <guava>24.0-jre</guava>
         <commons.lang>2.6</commons.lang>
         <commons.io>2.4</commons.io>
         <redisson>2.8.2</redisson>
-        <fst>2.48</fst>
-        <snappy-java>1.1.2.6</snappy-java>
         <java.version>1.8</java.version>
         <okttp.version>3.6.0</okttp.version>
         <jackson.version>2.8.9</jackson.version>
-        <nutz>1.r.63</nutz>
+        <nutz>1.r.65</nutz>
+        <druid>1.0.18</druid>
     </properties>
 
     <dependencyManagement>
@@ -72,10 +71,17 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 内存数据库h2-->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okttp.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -92,35 +98,17 @@
             <artifactId>commons-io</artifactId>
             <version>${commons.io}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid}</version>
+            <scope>test</scope>
+        </dependency>
         <!--redis redisson-->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>${redisson}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-            <version>${fst}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xerial.snappy</groupId>
-            <artifactId>snappy-java</artifactId>
-            <version>${snappy-java}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.nutz</groupId>
-            <artifactId>nutz-plugins-spring-boot-starter</artifactId>
-            <version>${nutz}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -136,6 +124,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz</artifactId>
+            <version>${nutz}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

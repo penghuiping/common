@@ -2,7 +2,8 @@ package com.php25.common.interceptor;
 
 import com.php25.common.service.impl.HtmlServiceImpl;
 import com.php25.common.util.ThreadLocalUtil;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 public class CommonInterceptor extends HandlerInterceptorAdapter {
-    private static Logger logger = Logger.getLogger(CommonInterceptor.class);
+    private static Logger logger = LoggerFactory.getLogger(CommonInterceptor.class);
 
     @Resource
     HtmlServiceImpl htmlService;

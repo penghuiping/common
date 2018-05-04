@@ -3,9 +3,10 @@ package com.php25.common.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.service.RedisService;
-import org.apache.log4j.Logger;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,8 @@ import java.util.concurrent.TimeUnit;
  * Created by penghuiping on 16/9/2.
  */
 public class RedisServiceImpl implements RedisService {
+    private static Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
+
     private RedissonClient redisson;
     @Autowired
     private ObjectMapper objectMapper;
@@ -108,7 +111,7 @@ public class RedisServiceImpl implements RedisService {
             rBucket.set(objectMapper.writeValueAsString(value));
             result = true;
         } catch (Exception e) {
-            Logger.getLogger(RedisServiceImpl.class).error(e);
+            logger.error("出错啦!", e);
         }
         return result;
     }
@@ -128,7 +131,7 @@ public class RedisServiceImpl implements RedisService {
             rBucket.set(objectMapper.writeValueAsString(value), expireTime, TimeUnit.SECONDS);
             result = true;
         } catch (Exception e) {
-            Logger.getLogger(RedisServiceImpl.class).error(e);
+            logger.error("出错啦!", e);
         }
         return result;
     }

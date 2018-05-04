@@ -3,10 +3,11 @@ package com.php25.common.specification;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.util.StringUtil;
-import org.apache.log4j.Logger;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  */
 public class BaseEsSpecs {
     protected static final ObjectMapper objectMapper = new ObjectMapper();
+    private static Logger logger = LoggerFactory.getLogger(BaseEsSpecs.class);
 
     public static QueryBuilder getEsSpecs(final String json) {
         if (StringUtil.isBlank(json)) return null;
@@ -54,12 +56,11 @@ public class BaseEsSpecs {
                     default:
                         boolQueryBuilder.must(QueryBuilders.termQuery(s.getFieldName(), s.getValue()));
                         break;
-
                 }
             }
             return boolQueryBuilder;
         } catch (IOException e) {
-            Logger.getLogger(BaseEsSpecs.class).error(e);
+            logger.error("查询json解析出错", e);
             return null;
         }
     }

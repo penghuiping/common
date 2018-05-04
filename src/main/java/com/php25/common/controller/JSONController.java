@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.constant.ApiErrorCode;
 import com.php25.common.dto.JSONResponse;
 import com.php25.common.exception.JsonException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 @Validated
 @CrossOrigin
 public class JSONController {
+
+    private static Logger logger = LoggerFactory.getLogger(JSONController.class);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -56,7 +59,7 @@ public class JSONController {
             ret.setMessage(sw.toString());
             return ret;
         } else {
-            Logger.getLogger(JSONController.class).error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             JSONResponse ret = new JSONResponse();
             ret.setErrorCode(ApiErrorCode.server_error.value);
             StringWriter sw = new StringWriter();

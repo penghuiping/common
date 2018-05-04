@@ -1,6 +1,6 @@
 package com.php25.common.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -19,6 +19,7 @@ import java.util.Base64;
  */
 public class DigestUtil {
 
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(DigestUtil.class);
     /**
      * Used to build output as Hex
      */
@@ -41,7 +42,7 @@ public class DigestUtil {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             return messageDigest.digest(str.getBytes("utf8"));
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -73,7 +74,7 @@ public class DigestUtil {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             return md.digest(str.getBytes("utf8"));
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
 
@@ -95,7 +96,7 @@ public class DigestUtil {
             String base64Str = Base64.getEncoder().encodeToString(key.getEncoded());
             return base64Str;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -115,7 +116,7 @@ public class DigestUtil {
             SecretKey key = new SecretKeySpec(bytes, "DES");
             return key;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -136,7 +137,7 @@ public class DigestUtil {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(source);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -158,7 +159,7 @@ public class DigestUtil {
             byte[] bytes = cipher.doFinal(source);
             return bytes;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -179,7 +180,7 @@ public class DigestUtil {
             String base64Str = Base64.getEncoder().encodeToString(key.getEncoded());
             return base64Str;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -199,7 +200,7 @@ public class DigestUtil {
             SecretKey key = new SecretKeySpec(bytes, "AES");
             return key;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -220,7 +221,7 @@ public class DigestUtil {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(source);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
 
@@ -242,7 +243,7 @@ public class DigestUtil {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(source);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -261,7 +262,7 @@ public class DigestUtil {
             keyPairGenerator.initialize(512);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
 
@@ -281,7 +282,7 @@ public class DigestUtil {
             byte[] bytes = publicKey.getEncoded();
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -300,7 +301,7 @@ public class DigestUtil {
             byte[] bytes = privateKey.getEncoded();
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -322,7 +323,7 @@ public class DigestUtil {
             PublicKey publicKey = keyFactory.generatePublic(keySpec);
             return publicKey;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -344,7 +345,7 @@ public class DigestUtil {
             PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
             return privateKey;
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -365,7 +366,7 @@ public class DigestUtil {
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return cipher.doFinal(content);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -386,7 +387,7 @@ public class DigestUtil {
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(content);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -408,7 +409,7 @@ public class DigestUtil {
             signature.update(content);
             return signature.sign();
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }
@@ -431,7 +432,7 @@ public class DigestUtil {
             signature.update(content);
             return signature.verify(sign);
         } catch (Exception e) {
-            Logger.getLogger(DigestUtil.class).error(e);
+            logger.error("出错啦!", e);
             return false;
         }
     }
@@ -489,6 +490,7 @@ public class DigestUtil {
 
     /**
      * base64 解密
+     *
      * @param text
      * @return
      * @author penghuiping

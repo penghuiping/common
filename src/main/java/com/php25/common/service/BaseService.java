@@ -4,13 +4,15 @@ package com.php25.common.service;
 import com.php25.common.dto.DataGridPageDto;
 import org.springframework.data.domain.Sort;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author penghuiping
  * @Timer 16/8/12.
  */
-public interface BaseService<DTO, MODEL> {
+public interface BaseService<DTO, MODEL,ID extends Serializable> {
     /**
      * 根据id查找
      *
@@ -19,7 +21,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    DTO findOne(String id);
+    Optional<DTO> findOne(ID id);
 
     /**
      * 根据id查找
@@ -30,7 +32,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    DTO findOne(String id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
+    Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 保存或者更新
@@ -40,7 +42,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    DTO save(DTO obj);
+    Optional<DTO> save(DTO obj);
 
     /**
      * 保存或者更新
@@ -52,7 +54,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    public DTO save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
+    Optional<DTO> save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 保存或者更新批量
@@ -99,7 +101,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    List<DTO> findAll(Iterable<String> ids);
+    Optional<List<DTO>> findAll(Iterable<ID> ids);
 
     /**
      * 根据id查找
@@ -110,7 +112,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    List<DTO> findAll(Iterable<String> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
+    Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 查找所有的
@@ -119,7 +121,7 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    List<DTO> findAll();
+    Optional<List<DTO>> findAll();
 
 
     /**
@@ -130,57 +132,58 @@ public interface BaseService<DTO, MODEL> {
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    List<DTO> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
+    Optional<List<DTO>> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 分页条件筛选查找
      *
-     * @param iDisplayStart
-     * @param iDisplayLength
+     * @param pageNum
+     * @param pageSize
      * @param searchParams
      * @return
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams);
+    Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams);
 
     /**
      * 分页条件筛选查找
      *
-     * @param iDisplayStart
-     * @param iDisplayLength
+     * @param pageNum
+     * @param pageSize
      * @param searchParams
      * @param direction
-     * @param properties
+     * @param property
      * @return
      */
-    DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, Sort.Direction direction, String... properties);
+    Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, Sort.Direction direction, String property);
 
     /**
      * 分页条件筛选查找
      *
-     * @param iDisplayStart
-     * @param iDisplayLength
+     * @param pageNum
+     * @param pageSize
      * @param searchParams
      * @param modelToDtoTransferable
      * @param direction
-     * @param properties
+     * @param property
      * @return
      * @author penghuiping
      * @Timer 16/8/12.
      */
-    DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String... properties);
+    Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property);
 
     /**
      * 分页条件筛选查找
-     * @param iDisplayStart
-     * @param iDisplayLength
+     *
+     * @param pageNum
+     * @param pageSize
      * @param searchParams
      * @param customerModelToDtoTransferable
      * @param sort
      * @return
      */
-    public DataGridPageDto<DTO> query(Integer iDisplayStart, Integer iDisplayLength, String searchParams, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort sort);
+    Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort sort);
 
     /**
      * 筛选计算数量

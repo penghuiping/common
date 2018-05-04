@@ -1,7 +1,8 @@
 package com.php25.common.util;
 
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ import java.util.Date;
  * @Time 2014/8/13.
  */
 public class TimeUtil {
+    private static final Logger logger = LoggerFactory.getLogger(TimeUtil.class);
     public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final SimpleDateFormat DATE_FORMAT_DATE = new SimpleDateFormat("yyyy-MM-dd");
     public static final SimpleDateFormat NEW_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -37,7 +39,7 @@ public class TimeUtil {
         try {
             return DateUtils.parseDate(dateStr, new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "yyyyMMddHHmmss"});
         } catch (ParseException e) {
-            Logger.getLogger(TimeUtil.class).error(e);
+            logger.error("出错啦!", e);
             return null;
         }
     }

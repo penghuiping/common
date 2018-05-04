@@ -11,13 +11,14 @@ import java.io.Serializable;
 public abstract class BaseModel implements Serializable {
 
     @Id
-    private String id;
+    @org.nutz.dao.entity.annotation.Id(auto = false)
+    private Long id;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }

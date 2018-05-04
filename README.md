@@ -1,8 +1,9 @@
 ## 使用说明
 1. 基于spring boot框架
 
-## 配置maven依赖
+## 配置
 
+1. maven依赖
 ```
 <dependency>
     <artifactId>common-spring-boot-starter</artifactId>
@@ -11,15 +12,49 @@
 </dependency>
 ```
 
+2. 在spring boot的application.properties中配置
+
+
+```
+## 用于雪花算法 snowflakeWorkId取值0~31,snowflakeDataCenterId=0~31
+snowflakeWorkId=0
+snowflakeDataCenterId=0
+```
+
+## 日志请使用slfj4
+
+```
+private static final Logger logger = LoggerFactory.getLogger(DbCommonTest.class);
+
+try {
+    ...
+}catch(Exception e) {
+    logger.error("出错啦!",e);
+}
+```
+
 ## model实体类
 
 1. 实体类可以继承BaseModel
 
-BaseModel中有一个id主键属性项，生成规则是uuid
+BaseModel中有一个id主键属性项，Long类型，建议生成规则是snowflake
 
 2. 实体类可以继承BaseSoftDeleteModel
 
-BaseSoftDeleteModel继承于BaseModel，加入了enable属性项，可用于软删除
+BaseSoftDeleteModel继承于BaseModel，加入了enable属性项，可用于软删除，(0:无效;1:有效;2:软删除)
+
+3. 主键生成
+
+```
+@Autowired
+IdGeneratorService idGeneratorService;
+
+### 长整型唯一id基于雪花算法
+idGeneratorService.getModelPrimaryKeyNumber();
+
+### 字符串唯一id基于uuid
+idGeneratorService.getModelPrimaryKey();
+```
 
 ## repository层
 
@@ -31,7 +66,7 @@ BaseSoftDeleteModel继承于BaseModel，加入了enable属性项，可用于软�
 ```
 //所有的自定义的Repository接口，必须要继承BaseRepository接口
 @Repository
-public interface AdminUserRepository extends BaseRepository<AdminUser, String> {
+public interface AdminUserRepository extends BaseRepository<AdminUser, Long> {
 
     AdminUser findByLoginNameAndPassword(String username, String password);
 
@@ -72,7 +107,7 @@ BaseService泛型中有两个参数，从左至右分别是dto与model
 SoftDeletable泛型中传入dto
 
 ```
-public interface CustomerService extends BaseService<CustomerDto, Customer>, SoftDeletable<CustomerDto> {
+public interface CustomerService extends BaseService<CustomerDto, Customer,Long>, SoftDeletable<CustomerDto> {
 
 }
 ```
@@ -83,7 +118,7 @@ public interface CustomerService extends BaseService<CustomerDto, Customer>, Sof
 ```
 @Transactional
 @Service
-public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer> implements CustomerService {
+public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer,Long> implements CustomerService {
 
 }
 ```
@@ -93,10 +128,34 @@ public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer> 
 ```
 @Transactional
 @Service
-public class CustomerServiceImpl extends BaseNutzServiceImpl<CustomerDto, Customer> implements CustomerService {
+public class CustomerServiceImpl extends BaseNutzServiceImpl<CustomerDto, Customer,Long> implements CustomerService {
 
 }
 ```
+
+3. 高级分页查询
+
+```
+//构建searchParams
+List<Long> ids = Lists.newArrayList(1l,2l,3l);
+SearchParam searchParam = new SearchParam();
+searchParam.setFieldName("id");
+searchParam.setOperator(Operator.NIN.name());
+try {
+    searchParam.setValue(objectMapper.writeValueAsString(ids));
+} catch (JsonProcessingException e) {
+    e.printStackTrace();
+}
+try {
+    String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
+    customerService.query(-1, 1, searchParams).ifPresent(c -> {
+        c.getData();
+    });
+} catch (JsonProcessingException e) {
+    e.printStackTrace();
+}
+```
+
 ### es库
 
 1. 所有的自定义Service实现类，可以继承BaseEsServiceImpl类 ,此类可以用于操作es库
@@ -104,14 +163,14 @@ public class CustomerServiceImpl extends BaseNutzServiceImpl<CustomerDto, Custom
 ```
 @Transactional
 @Service
-public class CustomerServiceImpl extends BaseEsServiceImpl<CustomerDto, Customer> implements CustomerService {
+public class CustomerServiceImpl extends BaseEsServiceImpl<CustomerDto, Customer,String> implements CustomerService {
 
 }
 ```
 
 ## controller层
 
-1. 必须继承JsonController,并且使用@controller注解标识此controller类，自定义的controller类必须以Controller关键字结尾。如：
+1. 必须继承JsonController,并且使用@controller注解标识此controller类。如：
 
 ```
 @Controller
@@ -170,7 +229,6 @@ message | 如果发生错误如业务逻辑错误或者服务器错误，这里�
 
 api接口请统一throw一个JsonException
 
-5. 
 
 ## 分层
 
@@ -206,6 +264,7 @@ import org.springframework.beans.BeanUtils;
 
 BeanUtils.copyProperties(adminRole, adminRoleDto);
 ```
+
 
 
 
