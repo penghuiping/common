@@ -40,7 +40,7 @@ import java.util.Optional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @EntityScan(basePackages = {"com.php25"})
-@EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class, basePackages = {"com.php25.common.repository"})
+@EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class)
 public class DbCommonTest {
 
     private static final Logger logger = LoggerFactory.getLogger(DbCommonTest.class);

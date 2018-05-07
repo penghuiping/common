@@ -1,5 +1,16 @@
 package com.php25.common.specification;
 
+import org.hibernate.HibernateException;
+import org.hibernate.MappingException;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.Configurable;
+import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.Type;
+
+import java.io.Serializable;
+import java.util.Properties;
+
 /**
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
@@ -12,7 +23,7 @@ package com.php25.common.specification;
  * 加起来刚好64位，为一个Long型。<br>
  * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
  */
-public class SnowflakeIdWorker {
+public class SnowflakeIdWorker implements Configurable, IdentifierGenerator {
     // ==============================Fields===========================================
     /**
      * 开始时间截 (2018-01-01)
@@ -85,6 +96,11 @@ public class SnowflakeIdWorker {
     private long lastTimestamp = -1L;
 
     //==============================Constructors=====================================
+
+
+    public SnowflakeIdWorker() {
+        this(0l, 0l);
+    }
 
     /**
      * 构造函数
@@ -164,5 +180,16 @@ public class SnowflakeIdWorker {
      */
     protected long timeGen() {
         return System.currentTimeMillis();
+    }
+
+    @Override
+    public Serializable generate(SessionImplementor sessionImplementor, Object o) throws HibernateException {
+        return this.nextId();
+    }
+
+    @Override
+    public void configure(Type type, Properties properties, ServiceRegistry serviceRegistry) throws MappingException {
+        this.workerId = Long.parseLong(properties.getProperty("workerId"));
+        this.datacenterId = Long.parseLong(properties.getProperty("datacenterId"));
     }
 }
