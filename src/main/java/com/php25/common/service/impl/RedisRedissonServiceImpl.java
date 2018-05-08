@@ -14,14 +14,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by penghuiping on 16/9/2.
  */
-public class RedisServiceImpl implements RedisService {
-    private static Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
+public class RedisRedissonServiceImpl implements RedisService {
+    private static Logger logger = LoggerFactory.getLogger(RedisRedissonServiceImpl.class);
 
     private RedissonClient redisson;
     @Autowired
     private ObjectMapper objectMapper;
 
-    public RedisServiceImpl(RedissonClient redisson) {
+    public RedisRedissonServiceImpl(RedissonClient redisson) {
         this.redisson = redisson;
     }
 
