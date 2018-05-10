@@ -20,7 +20,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.util.Assert;
 
-import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 /**
  * Created by penghuiping on 16/8/12.
  */
-@Transactional
 public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID> {
 
     private static Logger logger = LoggerFactory.getLogger(BaseEsServiceImpl.class);

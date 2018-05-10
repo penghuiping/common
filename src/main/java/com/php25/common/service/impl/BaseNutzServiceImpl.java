@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.Assert;
 
-import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 /**
  * Created by penghuiping on 16/8/12.
  */
-@Transactional
 public abstract class BaseNutzServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
     private static Logger logger = LoggerFactory.getLogger(BaseNutzServiceImpl.class);
 
