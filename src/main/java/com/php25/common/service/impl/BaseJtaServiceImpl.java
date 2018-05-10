@@ -1,23 +1,34 @@
 package com.php25.common.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.php25.common.dto.DataGridPageDto;
-import com.php25.common.repository.BaseRepository;
 import com.php25.common.service.BaseService;
 import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
 import com.php25.common.service.SoftDeletable;
 import com.php25.common.specification.BaseSpecs;
+import com.php25.common.specification.Operator;
+import com.php25.common.specification.SearchParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.SynchronizationType;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,21 +41,25 @@ import java.util.stream.Collectors;
 /**
  * Created by penghuiping on 16/8/12.
  */
-//@Transactional
-public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
-    private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
+@Transactional
+public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
+    private static Logger logger = LoggerFactory.getLogger(BaseJtaServiceImpl.class);
 
-    protected BaseRepository<MODEL, ID> baseRepository;
+    protected EntityManagerFactory entityManagerFactory;
 
     private Class<DTO> dtoClass;
 
     private Class<MODEL> modelClass;
 
-    public BaseServiceImpl() {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public BaseJtaServiceImpl(EntityManagerFactory entityManagerFactory) {
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         dtoClass = (Class) params[0];
         modelClass = (Class) params[1];
+        this.entityManagerFactory = entityManagerFactory;
     }
 
     protected <T> DataGridPageDto<T> toDataGridPageDto(Page<T> page) {
@@ -66,8 +81,9 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.notNull(id, "id不能为null");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         try {
+            EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
             DTO dto = dtoClass.newInstance();
-            MODEL model = baseRepository.findOne(id);
+            MODEL model = entityManager.find(modelClass, id);
             modelToDtoTransferable.modelToDto(model, dto);
             return Optional.ofNullable(dto);
         } catch (Exception e) {
@@ -88,10 +104,11 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         try {
+            EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
             MODEL a = modelClass.newInstance();
             dtoToModelTransferable.dtoToModel(obj, a);
             DTO dto = dtoClass.newInstance();
-            a = baseRepository.save(a);
+            entityManager.persist(a);
             modelToDtoTransferable.modelToDto(a, dto);
             return Optional.ofNullable(dto);
         } catch (Exception e) {
@@ -110,6 +127,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     public void save(Iterable<DTO> objs, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable) {
         Assert.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
         Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
         List<MODEL> models = (Lists.newArrayList(objs)).stream().map(dto -> {
             try {
                 MODEL model = modelClass.newInstance();
@@ -119,16 +137,17 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 return null;
             }
         }).collect(Collectors.toList());
-        baseRepository.save(models);
+        models.forEach(entityManager::persist);
     }
 
     @Override
     public void delete(DTO obj) {
         Assert.notNull(obj, "dto不能为null");
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
         try {
             MODEL a = modelClass.newInstance();
             BeanUtils.copyProperties(obj, a);
-            baseRepository.delete(a);
+            entityManager.remove(a);
         } catch (Exception e) {
             logger.error("出错啦!", e);
         }
@@ -137,6 +156,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     @Override
     public void delete(List<DTO> objs) {
         Assert.notEmpty(objs, "dtos至少需要包含一个元素");
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
         List<MODEL> models = objs.stream().map(dto -> {
             try {
                 MODEL a = modelClass.newInstance();
@@ -146,7 +166,10 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 return null;
             }
         }).collect(Collectors.toList());
-        baseRepository.delete(models);
+        models.forEach(a -> {
+            entityManager.remove(a);
+        });
+
     }
 
     @Override
@@ -189,16 +212,35 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         Assert.notNull(sort, "sort不能为null");
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
         List<MODEL> adminUserModelList = null;
 
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
+        Root<MODEL> root = cq.from(modelClass);
+
+        sort.iterator().forEachRemaining(order -> {
+            Order order1 = null;
+            switch (order.getDirection()) {
+                case ASC:
+                    cb.asc(root.get(order.getProperty()));
+                    break;
+                case DESC:
+                    cb.desc(root.get(order.getProperty()));
+                    break;
+            }
+            cq.orderBy(order1);
+        });
+
+        BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
         if (-1 == pageNum) {
-            adminUserModelList = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams));
+            adminUserModelList = entityManager.createQuery(cq).getResultList();
         } else {
             pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-            modelPage = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams), pageRequest);
-            adminUserModelList = modelPage.getContent();
+            adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
         }
 
         if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
@@ -233,18 +275,23 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        List<MODEL> result = Lists.newArrayList(baseRepository.findAll(ids));
-        return Optional.ofNullable(result.stream()
-                .map(model -> {
-                    try {
-                        DTO dto = dtoClass.newInstance();
-                        modelToDtoTransferable.modelToDto(model, dto);
-                        return dto;
-                    } catch (Exception e) {
-                        logger.error("出错啦!", e);
-                        return null;
-                    }
-                }).collect(Collectors.toList()));
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+
+        List<ID> ids1 = Lists.newArrayList(ids);
+        SearchParam searchParam = new SearchParam();
+        searchParam.setFieldName("id");
+        searchParam.setOperator(Operator.IN.name());
+
+        try {
+            searchParam.setValue(objectMapper.writeValueAsString(ids));
+            String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
+            Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
+            return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     @Override
@@ -255,18 +302,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     @Override
     public Optional<List<DTO>> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        List<MODEL> result = Lists.newArrayList(baseRepository.findAll());
-        return Optional.ofNullable(result.stream()
-                .map(model -> {
-                    try {
-                        DTO dto = dtoClass.newInstance();
-                        modelToDtoTransferable.modelToDto(model, dto);
-                        return dto;
-                    } catch (Exception e) {
-                        logger.error("出错啦!", e);
-                        return null;
-                    }
-                }).collect(Collectors.toList()));
+        Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, "[]", modelToDtoTransferable, Sort.Direction.DESC, "id");
+        return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);
     }
 
     @Override
@@ -308,8 +345,12 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Long result = baseRepository.count(BaseSpecs.<MODEL>getSpecs(searchParams));
-        return result;
+        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
+        Root<MODEL> root = cq.from(modelClass);
+        BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
+        return new Long(entityManager.createQuery(cq).getResultList().size());
     }
 
 }

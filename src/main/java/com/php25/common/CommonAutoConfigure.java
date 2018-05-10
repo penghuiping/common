@@ -6,6 +6,7 @@ import org.nutz.dao.Dao;
 import org.nutz.dao.impl.NutDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,13 +27,11 @@ public class CommonAutoConfigure {
 
 
     @Bean
-    @ConditionalOnClass({Dao.class})
     SpringDaoRunner springDaoRunner() {
         return new SpringDaoRunner();
     }
 
     @Bean
-    @ConditionalOnClass({Dao.class})
     Dao dao(@Autowired DataSource datasource, @Autowired SpringDaoRunner springDaoRunner) {
         NutDao dao = new NutDao(datasource);
         dao.setRunner(springDaoRunner);
