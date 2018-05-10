@@ -8,10 +8,11 @@ import com.php25.common.exception.JsonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.ConstraintViolationException;
 import java.io.PrintWriter;
@@ -34,9 +35,7 @@ public class JSONController {
      * @return
      */
     @ExceptionHandler({JsonException.class})
-    public
-    @ResponseBody
-    JSONResponse exception(JsonException e) {
+    public ResponseEntity<JSONResponse> exception(JsonException e) {
 
         if (e.getCause() instanceof ConstraintViolationException) {
             ConstraintViolationException constraintViolationException = (ConstraintViolationException) e.getCause();
@@ -57,7 +56,7 @@ public class JSONController {
             }
             pw.write(result);
             ret.setMessage(sw.toString());
-            return ret;
+            return ResponseEntity.ok(ret);
         } else {
             logger.error(e.getMessage(), e);
             JSONResponse ret = new JSONResponse();
@@ -67,7 +66,7 @@ public class JSONController {
             //e.printStackTrace(pw);
             pw.write("server_error");
             ret.setMessage(sw.toString());
-            return ret;
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ret);
         }
 
     }

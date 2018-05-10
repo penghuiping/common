@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Created by penghuiping on 16/8/12.
  */
-//@Transactional
+@Transactional
 public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
     private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
 

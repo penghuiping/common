@@ -19,16 +19,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.SynchronizationType;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Root;
+import javax.persistence.*;
+import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -80,15 +76,21 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
     public Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         Assert.notNull(id, "id不能为null");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        EntityManager entityManager = null;
         try {
-            EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
             DTO dto = dtoClass.newInstance();
             MODEL model = entityManager.find(modelClass, id);
             modelToDtoTransferable.modelToDto(model, dto);
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦!", e);
-            return null;
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
         }
     }
 
@@ -103,17 +105,23 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         Assert.notNull(obj, "dto不能为null");
         Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        EntityManager entityManager = null;
         try {
-            EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
             MODEL a = modelClass.newInstance();
             dtoToModelTransferable.dtoToModel(obj, a);
             DTO dto = dtoClass.newInstance();
-            entityManager.persist(a);
+            entityManager.merge(a);
             modelToDtoTransferable.modelToDto(a, dto);
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦!", e);
-            return null;
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
         }
     }
 
@@ -127,49 +135,86 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
     public void save(Iterable<DTO> objs, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable) {
         Assert.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
         Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
-        List<MODEL> models = (Lists.newArrayList(objs)).stream().map(dto -> {
-            try {
-                MODEL model = modelClass.newInstance();
-                dtoToModelTransferable.dtoToModel(dto, model);
-                return model;
-            } catch (Exception e) {
-                return null;
+        EntityManager entityManager = null;
+        try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            List<MODEL> models = (Lists.newArrayList(objs)).stream().map(dto -> {
+                try {
+                    MODEL model = modelClass.newInstance();
+                    dtoToModelTransferable.dtoToModel(dto, model);
+                    return model;
+                } catch (Exception e) {
+                    return null;
+                }
+            }).collect(Collectors.toList());
+            EntityManager finalEntityManager = entityManager;
+            models.forEach(a -> {
+                finalEntityManager.merge(a);
+            });
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
             }
-        }).collect(Collectors.toList());
-        models.forEach(entityManager::persist);
+        }
+
     }
 
     @Override
     public void delete(DTO obj) {
         Assert.notNull(obj, "dto不能为null");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+        EntityManager entityManager = null;
         try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
             MODEL a = modelClass.newInstance();
             BeanUtils.copyProperties(obj, a);
+            if (!entityManager.contains(a))
+                a = entityManager.merge(a);
             entityManager.remove(a);
         } catch (Exception e) {
             logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
         }
     }
 
     @Override
     public void delete(List<DTO> objs) {
         Assert.notEmpty(objs, "dtos至少需要包含一个元素");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
-        List<MODEL> models = objs.stream().map(dto -> {
-            try {
-                MODEL a = modelClass.newInstance();
-                BeanUtils.copyProperties(dto, a);
-                return a;
-            } catch (Exception e) {
-                return null;
+        EntityManager entityManager = null;
+        try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            List<MODEL> models = objs.stream().map(dto -> {
+                try {
+                    MODEL a = modelClass.newInstance();
+                    BeanUtils.copyProperties(dto, a);
+                    return a;
+                } catch (Exception e) {
+                    return null;
+                }
+            }).collect(Collectors.toList());
+            EntityManager finalEntityManager = entityManager;
+            models.forEach(a -> {
+                if (!finalEntityManager.contains(a))
+                    a = finalEntityManager.merge(a);
+                finalEntityManager.remove(a);
+            });
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
             }
-        }).collect(Collectors.toList());
-        models.forEach(a -> {
-            entityManager.remove(a);
-        });
-
+        }
     }
 
     @Override
@@ -212,57 +257,72 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         Assert.notNull(sort, "sort不能为null");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+        EntityManager entityManager = null;
         PageRequest pageRequest = null;
-        Page<MODEL> modelPage = null;
         List<MODEL> adminUserModelList = null;
 
+        try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
+            Root<MODEL> root = cq.from(modelClass);
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
-        Root<MODEL> root = cq.from(modelClass);
-
-        sort.iterator().forEachRemaining(order -> {
-            Order order1 = null;
-            switch (order.getDirection()) {
-                case ASC:
-                    cb.asc(root.get(order.getProperty()));
-                    break;
-                case DESC:
-                    cb.desc(root.get(order.getProperty()));
-                    break;
+            sort.iterator().forEachRemaining(order -> {
+                Order order1 = null;
+                switch (order.getDirection()) {
+                    case ASC:
+                        order1 = cb.asc(root.get(order.getProperty()));
+                        break;
+                    case DESC:
+                        order1 = cb.desc(root.get(order.getProperty()));
+                        break;
+                }
+                cq.orderBy(order1);
+            });
+            cq.select(root);
+            Specification<MODEL> specification = BaseSpecs.<MODEL>getSpecs(searchParams);
+            Predicate predicate = specification.toPredicate(root, cq, cb);
+            if (-1 == pageNum) {
+                if (null != predicate) {
+                    cq.where(predicate);
+                    adminUserModelList = entityManager.createQuery(cq).getResultList();
+                } else {
+                    adminUserModelList = entityManager.createQuery("select a from " + modelClass.getName() + " a").getResultList();
+                }
+            } else {
+                pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+                adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
             }
-            cq.orderBy(order1);
-        });
 
-        BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
-        if (-1 == pageNum) {
-            adminUserModelList = entityManager.createQuery(cq).getResultList();
-        } else {
-            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-            adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
-        }
+            if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+            List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
+                try {
+                    DTO dto = dtoClass.newInstance();
+                    modelToDtoTransferable.modelToDto(model, dto);
+                    return dto;
+                } catch (Exception e) {
+                    logger.error("出错啦!", e);
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
 
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
-        List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
-            try {
-                DTO dto = dtoClass.newInstance();
-                modelToDtoTransferable.modelToDto(model, dto);
-                return dto;
-            } catch (Exception e) {
-                logger.error("出错啦!", e);
-                return null;
+            PageImpl<DTO> dtoPage = null;
+            if (-1 == pageNum) {
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+            } else {
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
             }
-        }).collect(Collectors.toList());
 
-        PageImpl<DTO> dtoPage = null;
-        if (-1 == pageNum) {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
-        } else {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
+            return Optional.ofNullable(toDataGridPageDto(dtoPage));
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
         }
-
-        return Optional.ofNullable(toDataGridPageDto(dtoPage));
     }
 
     @Override
@@ -275,8 +335,6 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
     public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
-
         List<ID> ids1 = Lists.newArrayList(ids);
         SearchParam searchParam = new SearchParam();
         searchParam.setFieldName("id");
@@ -288,10 +346,9 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
             Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
             return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);
         } catch (JsonProcessingException e) {
+            logger.error("出错啦!", e);
             throw new RuntimeException(e);
         }
-
-
     }
 
     @Override
@@ -345,12 +402,24 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
-        Root<MODEL> root = cq.from(modelClass);
-        BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
-        return new Long(entityManager.createQuery(cq).getResultList().size());
+        EntityManager entityManager = null;
+        try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
+            Root<MODEL> root = cq.from(modelClass);
+            BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
+            return new Long(entityManager.createQuery(cq).getResultList().size());
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
+        }
+
     }
 
 }
