@@ -2,6 +2,7 @@ package com.php25.common.service;
 
 
 import com.php25.common.dto.DataGridPageDto;
+import com.php25.common.specification.SearchParamBuilder;
 import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.Optional;
  * @author penghuiping
  * @Timer 16/8/12.
  */
-public interface BaseService<DTO, MODEL,ID extends Serializable> {
+public interface BaseService<DTO, MODEL, ID extends Serializable> {
     /**
      * 根据id查找
      *
@@ -184,6 +185,18 @@ public interface BaseService<DTO, MODEL,ID extends Serializable> {
      * @return
      */
     Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort sort);
+
+    /**
+     * 分页条件筛选查找
+     *
+     * @param pageNum
+     * @param pageSize
+     * @param searchParamBuilder
+     * @param customerModelToDtoTransferable
+     * @param sort
+     * @return
+     */
+    Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> customerModelToDtoTransferable, Sort sort);
 
     /**
      * 筛选计算数量

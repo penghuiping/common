@@ -11,7 +11,7 @@ import java.util.List;
  * Created by penghuiping on 2016/4/3.
  */
 @NoRepositoryBean
-public interface BaseRepository<T,ID extends Serializable> extends PagingAndSortingRepository<T, ID>, JpaSpecificationExecutor<T> {
+public interface BaseRepository<T, ID extends Serializable> extends PagingAndSortingRepository<T, ID>, JpaSpecificationExecutor<T> {
 
     public List<T> findAllEnabled();
 

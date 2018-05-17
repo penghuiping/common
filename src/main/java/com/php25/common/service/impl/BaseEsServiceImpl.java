@@ -6,7 +6,8 @@ import com.php25.common.repository.BaseEsRepository;
 import com.php25.common.service.BaseService;
 import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
-import com.php25.common.specification.BaseEsSpecs;
+import com.php25.common.specification.BaseSpecsFactory;
+import com.php25.common.specification.SearchParamBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -195,11 +196,58 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
         List<MODEL> adminUserModelList = null;
 
         if (-1 == pageNum) {
-            adminUserModelList = (List<MODEL>) baseRepository.search(BaseEsSpecs.getEsSpecs(searchParams));
+            adminUserModelList = (List<MODEL>) baseRepository.search(BaseSpecsFactory.getEsInstance().getSpecs(searchParams));
         } else {
             pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
             NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
-            searchQueryBuilder.withQuery(BaseEsSpecs.getEsSpecs(searchParams))
+            searchQueryBuilder.withQuery(BaseSpecsFactory.getEsInstance().getSpecs(searchParams))
+                    .withPageable(pageRequest)
+                    .withSort(SortBuilders.scoreSort()
+                            .order(SortOrder.DESC));
+            modelPage = baseRepository.search(searchQueryBuilder.build());
+            adminUserModelList = modelPage.getContent();
+        }
+
+        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
+            try {
+                DTO dto = dtoClass.newInstance();
+                modelToDtoTransferable.modelToDto(model, dto);
+                return dto;
+            } catch (Exception e) {
+                logger.error("出错啦！", e);
+                return null;
+            }
+        }).collect(Collectors.toList());
+
+        PageImpl<DTO> dtoPage = null;
+        if (-1 == pageNum) {
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+        } else {
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
+        }
+
+        return Optional.ofNullable(toDataGridPageDto(dtoPage));
+    }
+
+    @Override
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
+        Assert.notNull(pageNum, "pageNum不能为null");
+        Assert.notNull(pageSize, "pageSize不能为null");
+        Assert.notNull(searchParamBuilder, "SearchParamBuilder不能为null");
+        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        Assert.notNull(sort, "sort不能为null");
+
+        PageRequest pageRequest = null;
+        Page<MODEL> modelPage = null;
+        List<MODEL> adminUserModelList = null;
+
+        if (-1 == pageNum) {
+            adminUserModelList = (List<MODEL>) baseRepository.search(BaseSpecsFactory.getEsInstance().getSpecs(searchParamBuilder));
+        } else {
+            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+            NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
+            searchQueryBuilder.withQuery(BaseSpecsFactory.getEsInstance().getSpecs(searchParamBuilder))
                     .withPageable(pageRequest)
                     .withSort(SortBuilders.scoreSort()
                             .order(SortOrder.DESC));
@@ -299,7 +347,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        return new Long(Lists.newArrayList(baseRepository.search(BaseEsSpecs.getEsSpecs(searchParams))).size());
+        return new Long(Lists.newArrayList(baseRepository.search(BaseSpecsFactory.getEsInstance().getSpecs(searchParams))).size());
     }
+
 
 }

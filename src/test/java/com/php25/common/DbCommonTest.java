@@ -10,6 +10,7 @@ import com.php25.common.service.CustomerService;
 import com.php25.common.service.IdGeneratorService;
 import com.php25.common.specification.Operator;
 import com.php25.common.specification.SearchParam;
+import com.php25.common.specification.SearchParamBuilder;
 import com.php25.common.util.DigestUtil;
 import com.php25.common.util.RandomUtil;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by penghuiping on 2018/5/1.
@@ -112,8 +115,8 @@ public class DbCommonTest {
         Optional<List<CustomerDto>> customerDtos = customerService.findAll();
         customerDtos.ifPresent(a -> {
             print("<<<<<<<===========更新前===========>>>>>>", a);
-            a.forEach(b->{
-                b.setUsername("name-"+b.getUsername());
+            a.forEach(b -> {
+                b.setUsername("name-" + b.getUsername());
             });
             customerService.save(a);
             print("<<<<<<<===========更新后===========>>>>>>", a);
@@ -122,7 +125,7 @@ public class DbCommonTest {
 
     @Test
     public void queryList() throws Exception {
-        customerService.query(2, 1, "", Sort.Direction.ASC, "username").ifPresent(a -> {
+        customerService.query(2, 1, "[]", Sort.Direction.ASC, "username").ifPresent(a -> {
             print("<<<<<<<===========分页查询===========>>>>>>", a.getData());
 
             logger.info("<<<<<<<===========分页查询in  start===========>>>>>>");
@@ -131,22 +134,26 @@ public class DbCommonTest {
             a.getData().forEach(b -> {
                 ids.add(b.getId());
             });
-            SearchParam searchParam = new SearchParam();
-            searchParam.setFieldName("id");
-            searchParam.setOperator(Operator.NIN.name());
+            SearchParam searchParam = null;
+
             try {
-                searchParam.setValue(objectMapper.writeValueAsString(ids));
+                searchParam = new SearchParam().fieldName("id").operator(Operator.NIN.name()).value(objectMapper.writeValueAsString(ids));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            try {
-                String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
-                customerService.query(-1, 1, searchParams).ifPresent(c -> {
-                    print("<<<<<<<===========分页查询in===========>>>>>>", c.getData());
-                });
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            SearchParamBuilder searchParamBuilder = new SearchParamBuilder();
+            searchParamBuilder.append(searchParam);
+
+            Sort sort = new Sort(Sort.Direction.DESC, "id");
+
+            customerService.query(1, 10, searchParamBuilder, (customer, customerDto) -> BeanUtils.copyProperties(customer, customerDto), sort).ifPresent(c -> {
+                print("<<<<<<<===========分页查询in===========>>>>>>", c.getData());
+                List sorted = c.getData().stream().sorted((o1, o2) -> {
+                    return -(int) (o1.getId() - o2.getId());
+                }).collect(Collectors.toList());
+                print("<<<<<<<===========分页查询in===========>>>>>>", sorted);
+            });
+
             logger.info("<<<<<<<===========分页查询in  end===========>>>>>>");
         });
     }

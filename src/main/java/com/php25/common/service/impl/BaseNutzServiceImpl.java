@@ -6,7 +6,8 @@ import com.php25.common.service.BaseService;
 import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
 import com.php25.common.service.SoftDeletable;
-import com.php25.common.specification.BaseNutzSpecs;
+import com.php25.common.specification.BaseSpecsFactory;
+import com.php25.common.specification.SearchParamBuilder;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.pager.Pager;
@@ -205,10 +206,54 @@ public abstract class BaseNutzServiceImpl<DTO, MODEL, ID extends Serializable> i
         List<MODEL> adminUserModelList = null;
 
         if (-1 == pageNum) {
-            adminUserModelList = dao.query(modelClass, BaseNutzSpecs.<MODEL>getNutzSpecs(searchParams));
+            adminUserModelList = dao.query(modelClass, BaseSpecsFactory.getNutzInstance().getSpecs(searchParams));
         } else {
             pageRequest = new Pager(pageNum, pageSize);
-            final Criteria cri = BaseNutzSpecs.<MODEL>getNutzSpecs(searchParams);
+            final Criteria cri = BaseSpecsFactory.getNutzInstance().getSpecs(searchParams);
+            if (null != sort) {
+                sort.forEach(a -> {
+                    if (a.getDirection().isAscending()) {
+                        cri.getOrderBy().asc(a.getProperty());
+                    } else
+                        cri.getOrderBy().desc(a.getProperty());
+                });
+
+            }
+            adminUserModelList = dao.query(modelClass, cri, pageRequest);
+        }
+
+        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
+            try {
+                DTO dto = dtoClass.newInstance();
+                modelToDtoTransferable.modelToDto(model, dto);
+                return dto;
+            } catch (Exception e) {
+                logger.error("出错啦！", e);
+                return null;
+            }
+        }).collect(Collectors.toList());
+
+        PageImpl<DTO> dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+        return Optional.ofNullable(toDataGridPageDto(dtoPage));
+    }
+
+    @Override
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
+        Assert.notNull(pageNum, "pageNum不能为null");
+        Assert.notNull(pageSize, "pageSize不能为null");
+        Assert.notNull(searchParamBuilder, "searchParamBuilder不能为null");
+        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        Assert.notNull(sort, "sort不能为null");
+
+        Pager pageRequest = null;
+        List<MODEL> adminUserModelList = null;
+
+        if (-1 == pageNum) {
+            adminUserModelList = dao.query(modelClass, BaseSpecsFactory.getNutzInstance().getSpecs(searchParamBuilder));
+        } else {
+            pageRequest = new Pager(pageNum, pageSize);
+            final Criteria cri = BaseSpecsFactory.getNutzInstance().getSpecs(searchParamBuilder);
             if (null != sort) {
                 sort.forEach(a -> {
                     if (a.getDirection().isAscending()) {
@@ -329,7 +374,7 @@ public abstract class BaseNutzServiceImpl<DTO, MODEL, ID extends Serializable> i
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Long result = new Long(dao.count(modelClass, BaseNutzSpecs.getNutzSpecs(searchParams)));
+        Long result = new Long(dao.count(modelClass, BaseSpecsFactory.getNutzInstance().getSpecs(searchParams)));
         return result;
     }
 }

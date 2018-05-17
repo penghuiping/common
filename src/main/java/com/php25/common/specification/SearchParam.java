@@ -11,6 +11,27 @@ public class SearchParam {
     public SearchParam() {
     }
 
+    public SearchParam(String fieldName, Object value, String operator) {
+        this.fieldName = fieldName;
+        this.value = value;
+        this.operator = operator;
+    }
+
+    public SearchParam fieldName(String fieldName) {
+        this.fieldName = fieldName;
+        return this;
+    }
+
+    public SearchParam operator(String operator) {
+        this.operator = operator;
+        return this;
+    }
+
+    public SearchParam value(String value) {
+        this.value = value;
+        return this;
+    }
+
     public String getFieldName() {
         return fieldName;
     }

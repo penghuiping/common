@@ -76,6 +76,30 @@ public class SimpleJpa2Repository<T, ID extends Serializable>
     }
 
     /**
+     * Executes a count query and transparently sums up all values returned.
+     *
+     * @param query must not be {@literal null}.
+     * @return
+     */
+    private static Long executeCountQuery(TypedQuery<Long> query) {
+
+        Assert.notNull(query, "TypedQuery must not be null!");
+
+        List<Long> totals = query.getResultList();
+        Long total = 0L;
+
+        for (Long element : totals) {
+            total += element == null ? 0 : element;
+        }
+
+        return total;
+    }
+
+    protected CrudMethodMetadata getRepositoryMethodMetadata() {
+        return metadata;
+    }
+
+    /**
      * Configures a custom {@link CrudMethodMetadata} to be used to detect {@link LockModeType}s and query hints to be
      * applied to queries.
      *
@@ -83,10 +107,6 @@ public class SimpleJpa2Repository<T, ID extends Serializable>
      */
     public void setRepositoryMethodMetadata(CrudMethodMetadata crudMethodMetadata) {
         this.metadata = crudMethodMetadata;
-    }
-
-    protected CrudMethodMetadata getRepositoryMethodMetadata() {
-        return metadata;
     }
 
     protected Class<T> getDomainClass() {
@@ -713,26 +733,6 @@ public class SimpleJpa2Repository<T, ID extends Serializable>
         for (Entry<String, Object> hint : getQueryHints().entrySet()) {
             query.setHint(hint.getKey(), hint.getValue());
         }
-    }
-
-    /**
-     * Executes a count query and transparently sums up all values returned.
-     *
-     * @param query must not be {@literal null}.
-     * @return
-     */
-    private static Long executeCountQuery(TypedQuery<Long> query) {
-
-        Assert.notNull(query, "TypedQuery must not be null!");
-
-        List<Long> totals = query.getResultList();
-        Long total = 0L;
-
-        for (Long element : totals) {
-            total += element == null ? 0 : element;
-        }
-
-        return total;
     }
 
     /**

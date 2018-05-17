@@ -8,9 +8,10 @@ import com.php25.common.service.BaseService;
 import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
 import com.php25.common.service.SoftDeletable;
-import com.php25.common.specification.BaseSpecs;
+import com.php25.common.specification.BaseSpecsFactory;
 import com.php25.common.specification.Operator;
 import com.php25.common.specification.SearchParam;
+import com.php25.common.specification.SearchParamBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -280,7 +281,84 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                 cq.orderBy(order1);
             });
             cq.select(root);
-            Specification<MODEL> specification = BaseSpecs.<MODEL>getSpecs(searchParams);
+
+            Specification specification = BaseSpecsFactory.getJpaInstance().getSpecs(searchParams);
+            Predicate predicate = specification.toPredicate(root, cq, cb);
+            if (-1 == pageNum) {
+                if (null != predicate) {
+                    cq.where(predicate);
+                    adminUserModelList = entityManager.createQuery(cq).getResultList();
+                } else {
+                    adminUserModelList = entityManager.createQuery("select a from " + modelClass.getName() + " a").getResultList();
+                }
+            } else {
+                pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+                adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
+            }
+
+            if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+            List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
+                try {
+                    DTO dto = dtoClass.newInstance();
+                    modelToDtoTransferable.modelToDto(model, dto);
+                    return dto;
+                } catch (Exception e) {
+                    logger.error("出错啦!", e);
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+
+            PageImpl<DTO> dtoPage = null;
+            if (-1 == pageNum) {
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+            } else {
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+            }
+
+            return Optional.ofNullable(toDataGridPageDto(dtoPage));
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (null != entityManager && entityManager.isOpen()) {
+                entityManager.flush();
+                entityManager.close();
+            }
+        }
+    }
+
+    @Override
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
+        Assert.notNull(pageNum, "pageNum不能为null");
+        Assert.notNull(pageSize, "pageSize不能为null");
+        Assert.notNull(searchParamBuilder, "searchParamBuilder不能为null");
+        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        Assert.notNull(sort, "sort不能为null");
+        EntityManager entityManager = null;
+        PageRequest pageRequest = null;
+        List<MODEL> adminUserModelList = null;
+
+        try {
+            entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
+            Root<MODEL> root = cq.from(modelClass);
+
+            sort.iterator().forEachRemaining(order -> {
+                Order order1 = null;
+                switch (order.getDirection()) {
+                    case ASC:
+                        order1 = cb.asc(root.get(order.getProperty()));
+                        break;
+                    case DESC:
+                        order1 = cb.desc(root.get(order.getProperty()));
+                        break;
+                }
+                cq.orderBy(order1);
+            });
+            cq.select(root);
+
+            Specification specification = BaseSpecsFactory.getJpaInstance().getSpecs(searchParamBuilder);
             Predicate predicate = specification.toPredicate(root, cq, cb);
             if (-1 == pageNum) {
                 if (null != predicate) {
@@ -408,7 +486,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
             CriteriaQuery<MODEL> cq = cb.createQuery(modelClass);
             Root<MODEL> root = cq.from(modelClass);
-            BaseSpecs.<MODEL>getSpecs(searchParams).toPredicate(root, cq, cb);
+            BaseSpecsFactory.getJpaInstance().getSpecs(searchParams).toPredicate(root, cq, cb);
             return new Long(entityManager.createQuery(cq).getResultList().size());
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -419,7 +497,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                 entityManager.close();
             }
         }
-
     }
+
 
 }

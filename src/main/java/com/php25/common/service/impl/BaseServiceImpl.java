@@ -7,7 +7,8 @@ import com.php25.common.service.BaseService;
 import com.php25.common.service.DtoToModelTransferable;
 import com.php25.common.service.ModelToDtoTransferable;
 import com.php25.common.service.SoftDeletable;
-import com.php25.common.specification.BaseSpecs;
+import com.php25.common.specification.BaseSpecsFactory;
+import com.php25.common.specification.SearchParamBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -192,10 +193,10 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         List<MODEL> adminUserModelList = null;
 
         if (-1 == pageNum) {
-            adminUserModelList = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams));
+            adminUserModelList = baseRepository.findAll(BaseSpecsFactory.getJpaInstance().getSpecs(searchParams));
         } else {
             pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-            modelPage = baseRepository.findAll(BaseSpecs.<MODEL>getSpecs(searchParams), pageRequest);
+            modelPage = baseRepository.findAll(BaseSpecsFactory.getJpaInstance().getSpecs(searchParams), pageRequest);
             adminUserModelList = modelPage.getContent();
         }
 
@@ -218,6 +219,47 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
         }
 
+        return Optional.ofNullable(toDataGridPageDto(dtoPage));
+    }
+
+    @Override
+    public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
+        Assert.notNull(pageNum, "pageNum不能为null");
+        Assert.notNull(pageSize, "pageSize不能为null");
+        Assert.notNull(searchParamBuilder, "searchParamBuilder不能为null");
+        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        Assert.notNull(sort, "sort不能为null");
+
+        PageRequest pageRequest = null;
+        Page<MODEL> modelPage = null;
+        List<MODEL> adminUserModelList = null;
+
+        if (-1 == pageNum) {
+            adminUserModelList = baseRepository.findAll(BaseSpecsFactory.getJpaInstance().getSpecs(searchParamBuilder));
+        } else {
+            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+            modelPage = baseRepository.findAll(BaseSpecsFactory.getJpaInstance().getSpecs(searchParamBuilder), pageRequest);
+            adminUserModelList = modelPage.getContent();
+        }
+
+        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
+            try {
+                DTO dto = dtoClass.newInstance();
+                modelToDtoTransferable.modelToDto(model, dto);
+                return dto;
+            } catch (Exception e) {
+                logger.error("出错啦!", e);
+                return null;
+            }
+        }).collect(Collectors.toList());
+
+        PageImpl<DTO> dtoPage = null;
+        if (-1 == pageNum) {
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+        } else {
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
+        }
         return Optional.ofNullable(toDataGridPageDto(dtoPage));
     }
 
@@ -306,7 +348,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Long result = baseRepository.count(BaseSpecs.<MODEL>getSpecs(searchParams));
+        Long result = baseRepository.count(BaseSpecsFactory.getJpaInstance().getSpecs(searchParams));
         return result;
     }
 

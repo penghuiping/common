@@ -23,8 +23,8 @@ public class ResourceAwareServiceImpl implements ResourceAwareService {
     @Autowired
     ObjectMapper objectMapper;
 
-    public String loadBeetlProperties() throws IOException {
-        Resource r = new ClassPathResource("beetl.properties");
+    public String loadProperties(String fileName) throws IOException {
+        Resource r = new ClassPathResource(fileName);
         Properties p = PropertiesLoaderUtils.loadProperties(r);
         Map<String, String> map = new HashMap<>();
         Set<String> propertyNames = p.stringPropertyNames();
