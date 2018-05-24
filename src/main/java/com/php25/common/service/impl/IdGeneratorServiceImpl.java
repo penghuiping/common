@@ -2,6 +2,7 @@ package com.php25.common.service.impl;
 
 
 import com.php25.common.service.IdGeneratorService;
+import com.php25.common.service.RedisService;
 import com.php25.common.specification.SnowflakeIdWorker;
 import com.php25.common.util.RandomUtil;
 import com.php25.common.util.TimeUtil;
@@ -18,6 +19,9 @@ public class IdGeneratorServiceImpl implements IdGeneratorService {
 
     @Autowired
     private SnowflakeIdWorker snowflakeIdWorker;
+
+    @Autowired
+    private RedisService redisService;
 
     @Override
     public String getVipOrderNumber() {

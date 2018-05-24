@@ -141,4 +141,9 @@ public class RedisRedissonServiceImpl implements RedisService {
         RBucket rBucket = redisson.getBucket(key);
         return rBucket.remainTimeToLive();
     }
+
+    @Override
+    public Long incr(String key) {
+        return (redisson.getAtomicLong(key).getAndIncrement() + 1);
+    }
 }

@@ -7,6 +7,7 @@ import com.php25.common.service.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -139,5 +140,13 @@ public class RedisSpringBootServiceImpl implements RedisService {
         } else {
             return -1l;
         }
+    }
+
+    @Override
+    public Long incr(String key) {
+        Long result = redisTemplate.execute((RedisCallback<Long>) redisConnection -> {
+            return redisConnection.incr(key.getBytes());
+        });
+        return result;
     }
 }

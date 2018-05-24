@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * redis缓存帮助类
+ *
  * @author penghuiping
  * @Timer 2016/12/17.
  */
 public interface RedisService {
-
 
 
     /**
@@ -78,8 +78,17 @@ public interface RedisService {
 
     /**
      * 根据key获取存活时间
+     *
      * @param key
      * @return
      */
     public Long remainTimeToLive(final String key);
+
+    /**
+     * 根据指定key获取自增的id
+     *
+     * @param key
+     * @return
+     */
+    public Long incr(final String key);
 }
