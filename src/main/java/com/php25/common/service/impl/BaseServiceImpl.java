@@ -56,7 +56,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<DTO> findOne(ID id) {
-        Assert.notNull(id, "id不能为null");
         return findOne(id, (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
@@ -77,7 +76,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<DTO> save(DTO obj) {
-        Assert.notNull(obj, "dto不能为null");
         return save(obj, (dto, model) -> BeanUtils.copyProperties(dto, model), (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
@@ -101,7 +99,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public void save(Iterable<DTO> objs) {
-        Assert.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
         save(objs, (dto, model) -> BeanUtils.copyProperties(dto, model));
     }
 
@@ -150,19 +147,11 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         return query(pageNum, pageSize, searchParams, Sort.Direction.DESC, "createTime");
     }
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, Sort.Direction direction, String property) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Assert.notNull(direction, "direction不能为null");
-        Assert.notNull(property, "property不能为null");
         return query(pageNum, pageSize, searchParams, (model, dto) -> BeanUtils.copyProperties(model, dto)
                 , direction, property);
     }
@@ -170,10 +159,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.hasText(searchParams, "searchParams不能为空");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         Assert.notNull(direction, "direction不能为null");
         Assert.notNull(property, "property不能为null");
         Sort.Order order = new Sort.Order(direction, property);
@@ -265,7 +250,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<List<DTO>> findAll(Iterable<ID> ids) {
-        Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
         return findAll(ids, (model, dto) -> BeanUtils.copyProperties(model, dto));
     }
 
