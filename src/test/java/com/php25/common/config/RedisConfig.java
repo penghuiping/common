@@ -1,6 +1,8 @@
 package com.php25.common.config;
 
+import com.php25.common.service.ConsistentHashingService;
 import com.php25.common.service.RedisService;
+import com.php25.common.service.impl.ConsistentHashingServiceImpl;
 import com.php25.common.service.impl.RedisRedissonServiceImpl;
 import com.php25.common.service.impl.RedisSpringBootServiceImpl;
 import org.redisson.Redisson;
@@ -54,6 +56,11 @@ public class RedisConfig {
     @Bean
     public StringRedisTemplate stringRedisTemplate(@Autowired RedisConnectionFactory redisConnectionFactory) {
         return new StringRedisTemplate(redisConnectionFactory);
+    }
+
+    @Bean
+    public ConsistentHashingService consistentHashingService() {
+        return new ConsistentHashingServiceImpl(new String[]{"192.168.1.1", "192.168.1.2", "192.168.1.3"}, 100);
     }
 
 }

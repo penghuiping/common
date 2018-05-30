@@ -2,6 +2,7 @@ package com.php25.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.repository.impl.BaseRepositoryImpl;
+import com.php25.common.service.ConsistentHashingService;
 import com.php25.common.service.IdGeneratorService;
 import com.php25.common.service.RedisService;
 import com.php25.common.util.DigestUtil;
@@ -43,6 +44,9 @@ public class RedisCommonTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    ConsistentHashingService consistentHashingService;
+
 
     @Before
     public void test() throws Exception {
@@ -59,6 +63,12 @@ public class RedisCommonTest {
         System.out.println(new String(DigestUtil.bytes2hex(arr)));
     }
 
+
+    @Test
+    public void consistentHashing() throws Exception {
+        String serverIp = consistentHashingService.getServer("HELLOWORLD");
+        System.out.println("serverIp:" + serverIp);
+    }
 
     @Test
     public void idGeneratorService() throws Exception {
