@@ -59,6 +59,16 @@ public class DigestUtil {
 
 
     /**
+     * SHA1 加密
+     *
+     * @param str
+     * @return 直接返回32位的SHA1 加密字符串
+     */
+    public static String SHAStr(String str) {
+        return new String(DigestUtil.bytes2hex(DigestUtil.SHA(str)));
+    }
+
+    /**
      * sha1加密
      *
      * @param str
