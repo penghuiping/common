@@ -17,7 +17,7 @@ public class BaseEsSpecs extends BaseSpecs<QueryBuilder> {
         final List<SearchParam> searchParams = searchParamBuilder.build();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (SearchParam s : searchParams) {
-            switch (s.getOperator()) {
+            switch (s.getOperator().name()) {
                 case "eq":
                     boolQueryBuilder.must(QueryBuilders.termQuery(s.getFieldName(), s.getValue()));
                     break;

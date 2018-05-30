@@ -21,7 +21,7 @@ public class BaseJpaSpecs extends BaseSpecs<Specification> {
                                          CriteriaBuilder builder, SearchParam searchParam) {
 
         String fieldName = searchParam.getFieldName();
-        String operator = searchParam.getOperator();
+        String operator = searchParam.getOperator().name();
         Object value = searchParam.getValue();
 
         Path expression = null;

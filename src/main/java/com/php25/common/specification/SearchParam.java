@@ -6,15 +6,9 @@ package com.php25.common.specification;
 public class SearchParam {
     private String fieldName;
     private Object value;
-    private String operator;
+    private Operator operator;
 
     private SearchParam() {
-    }
-
-    private SearchParam(String fieldName, Object value, String operator) {
-        this.fieldName = fieldName;
-        this.value = value;
-        this.operator = operator;
     }
 
     public String getFieldName() {
@@ -27,7 +21,7 @@ public class SearchParam {
     }
 
 
-    public String getOperator() {
+    public Operator getOperator() {
         return operator;
     }
 
@@ -49,7 +43,7 @@ public class SearchParam {
             return this;
         }
 
-        public Builder operator(String operator) {
+        public Builder operator(Operator operator) {
             target.operator = operator;
             return this;
         }

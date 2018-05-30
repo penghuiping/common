@@ -400,7 +400,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         List<ID> ids1 = Lists.newArrayList(ids);
         SearchParam searchParam = null;
         try {
-            new SearchParam.Builder().fieldName("id").operator(Operator.IN.name()).value(objectMapper.writeValueAsString(ids)).build();
+            new SearchParam.Builder().fieldName("id").operator(Operator.IN).value(objectMapper.writeValueAsString(ids)).build();
             String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
             Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
             return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);

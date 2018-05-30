@@ -137,7 +137,7 @@ public class DbCommonTest {
             SearchParam searchParam = null;
 
             try {
-                searchParam = new SearchParam.Builder().fieldName("id").operator(Operator.NIN.name()).value(objectMapper.writeValueAsString(ids)).build();
+                searchParam = new SearchParam.Builder().fieldName("id").operator(Operator.NIN).value(objectMapper.writeValueAsString(ids)).build();
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

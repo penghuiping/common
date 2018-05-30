@@ -18,7 +18,7 @@ public class BaseNutzSpecs extends BaseSpecs<Criteria> {
         final List<SearchParam> searchParams = searchParamBuilder.build();
         Criteria cri = Cnd.cri();
         for (SearchParam s : searchParams) {
-            switch (s.getOperator().toLowerCase()) {
+            switch (s.getOperator().name().toLowerCase()) {
                 case "eq":
                     cri.where().andEquals(s.getFieldName(), s.getValue());
                     break;
