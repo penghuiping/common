@@ -398,12 +398,9 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         List<ID> ids1 = Lists.newArrayList(ids);
-        SearchParam searchParam = new SearchParam();
-        searchParam.setFieldName("id");
-        searchParam.setOperator(Operator.IN.name());
-
+        SearchParam searchParam = null;
         try {
-            searchParam.setValue(objectMapper.writeValueAsString(ids));
+            new SearchParam.Builder().fieldName("id").operator(Operator.IN.name()).value(objectMapper.writeValueAsString(ids)).build();
             String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
             Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
             return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);

@@ -8,51 +8,54 @@ public class SearchParam {
     private Object value;
     private String operator;
 
-    public SearchParam() {
+    private SearchParam() {
     }
 
-    public SearchParam(String fieldName, Object value, String operator) {
+    private SearchParam(String fieldName, Object value, String operator) {
         this.fieldName = fieldName;
         this.value = value;
         this.operator = operator;
-    }
-
-    public SearchParam fieldName(String fieldName) {
-        this.fieldName = fieldName;
-        return this;
-    }
-
-    public SearchParam operator(String operator) {
-        this.operator = operator;
-        return this;
-    }
-
-    public SearchParam value(String value) {
-        this.value = value;
-        return this;
     }
 
     public String getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
 
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
-    }
 
     public String getOperator() {
         return operator;
     }
 
-    public void setOperator(String operator) {
-        this.operator = operator;
+
+    public static class Builder {
+        private SearchParam target;
+
+        public Builder() {
+            this.target = new SearchParam();
+        }
+
+        public Builder fieldName(String fieldName) {
+            target.fieldName = fieldName;
+            return this;
+        }
+
+        public Builder value(Object value) {
+            target.value = value;
+            return this;
+        }
+
+        public Builder operator(String operator) {
+            target.operator = operator;
+            return this;
+        }
+
+        public SearchParam build() {
+            return this.target;
+        }
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 /**
  * Created by penghuiping on 2018/5/1.
  */
-
+@Primary
 @Service
 public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer,Long> implements CustomerService {
 
