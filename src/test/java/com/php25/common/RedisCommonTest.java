@@ -5,7 +5,6 @@ import com.php25.common.repository.impl.BaseRepositoryImpl;
 import com.php25.common.service.ConsistentHashingService;
 import com.php25.common.service.IdGeneratorService;
 import com.php25.common.service.RedisService;
-import com.php25.common.util.DigestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,12 +54,6 @@ public class RedisCommonTest {
 //            Long result = redisService.incr("test");
 //            System.out.println(result);
 //        }
-    }
-
-    @Test
-    public void sha1() throws Exception {
-        byte[] arr = DigestUtil.SHA("hello world");
-        System.out.println(new String(DigestUtil.bytes2hex(arr)));
     }
 
 
