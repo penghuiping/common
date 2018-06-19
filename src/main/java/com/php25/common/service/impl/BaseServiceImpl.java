@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦!", e);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -93,7 +94,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦!", e);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -114,7 +115,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             } catch (Exception e) {
                 return null;
             }
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
         baseRepository.save(models);
     }
 

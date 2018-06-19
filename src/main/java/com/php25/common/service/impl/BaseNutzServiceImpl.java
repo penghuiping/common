@@ -81,7 +81,7 @@ public abstract class BaseNutzServiceImpl<DTO, MODEL, ID extends Serializable> i
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦！", e);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class BaseNutzServiceImpl<DTO, MODEL, ID extends Serializable> i
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦！", e);
-            return null;
+            return Optional.empty();
         }
     }
 

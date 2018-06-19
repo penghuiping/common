@@ -72,7 +72,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦！", e);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -95,7 +95,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦！", e);
-            return null;
+            return Optional.empty();
         }
     }
 

@@ -114,6 +114,18 @@ public class RedisSpringBootServiceImpl implements RedisService {
         return result;
     }
 
+    @Override
+    public boolean setNx(String key, Object value) {
+        boolean result = false;
+        try {
+            redisTemplate.boundValueOps(key).setIfAbsent(objectMapper.writeValueAsString(value));
+            result = true;
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+        }
+        return result;
+    }
+
     /**
      * 写入缓存
      *

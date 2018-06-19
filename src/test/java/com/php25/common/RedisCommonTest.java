@@ -49,11 +49,11 @@ public class RedisCommonTest {
 
     @Before
     public void test() throws Exception {
-//        redisService.remove("test");
-//        for (int i = 0; i < 100; i++) {
-//            Long result = redisService.incr("test");
-//            System.out.println(result);
-//        }
+        redisService.remove("test");
+        for (int i = 0; i < 100; i++) {
+            Long result = redisService.incr("test");
+            System.out.println(result);
+        }
     }
 
 

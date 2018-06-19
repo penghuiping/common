@@ -54,6 +54,16 @@ public interface RedisService {
     public <T> T get(final String key, TypeReference<T> cls);
 
     /**
+     * 在key不存在的情况下写入缓存
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean setNx(final String key, Object value);
+
+
+    /**
      * 写入缓存
      *
      * @param key

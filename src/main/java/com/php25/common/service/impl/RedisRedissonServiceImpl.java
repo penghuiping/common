@@ -116,6 +116,18 @@ public class RedisRedissonServiceImpl implements RedisService {
         return result;
     }
 
+    @Override
+    public boolean setNx(String key, Object value) {
+        boolean result = false;
+        try {
+            RBucket rBucket = redisson.getBucket(key);
+            result = rBucket.trySet(objectMapper.writeValueAsString(value));
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+        }
+        return result;
+    }
+
     /**
      * 写入缓存
      *

@@ -5,6 +5,9 @@ import com.php25.common.util.DigestUtil;
 import com.php25.common.util.SortUtil;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @Auther: penghuiping
  * @Date: 2018/6/1 09:27
@@ -15,7 +18,8 @@ public class UtilTest {
 
     @Test
     public void test() {
-
+        List<Integer> lists = Lists.newArrayList(1, null, 2).stream().filter(a -> null != a).collect(Collectors.toList());
+        System.out.println(lists.toString());
     }
 
     @Test
@@ -35,4 +39,6 @@ public class UtilTest {
         SortUtil.heapSort(arr, true);
         System.out.println(Lists.newArrayList(arr));
     }
+
+
 }
