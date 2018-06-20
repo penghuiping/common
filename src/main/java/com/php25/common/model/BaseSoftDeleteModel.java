@@ -11,7 +11,6 @@ import java.io.Serializable;
 public abstract class BaseSoftDeleteModel extends BaseModel implements Serializable {
 
     @Column
-    @org.nutz.dao.entity.annotation.Column
     private Integer enable;//0.无效 1.有效 2.已删除
 
     public Integer getEnable() {

@@ -1,7 +1,5 @@
 package com.php25.common.model;
 
-import org.nutz.dao.entity.annotation.Name;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,11 +11,9 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "t_customer")
-@org.nutz.dao.entity.annotation.Table("t_customer")
 public class Customer {
 
     @Id
-    @org.nutz.dao.entity.annotation.Id(auto = false)
     //@Name
     private Long id;
 
@@ -30,23 +26,18 @@ public class Customer {
     }
 
     @Column
-    @org.nutz.dao.entity.annotation.Column
     private String username;
 
     @Column
-    @org.nutz.dao.entity.annotation.Column
     private String password;
 
     @Column(name = "create_time")
-    @org.nutz.dao.entity.annotation.Column("create_time")
     private Date createTime;
 
     @Column(name = "update_time")
-    @org.nutz.dao.entity.annotation.Column("update_time")
     private Date updateTime;
 
     @Column
-    @org.nutz.dao.entity.annotation.Column
     private Integer enable;
 
     public String getUsername() {

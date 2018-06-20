@@ -11,7 +11,6 @@ import java.io.Serializable;
 public abstract class BaseModel implements Serializable {
 
     @Id
-    @org.nutz.dao.entity.annotation.Id(auto = false)
     private Long id;
 
     public Long getId() {
