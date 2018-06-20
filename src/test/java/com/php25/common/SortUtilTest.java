@@ -1,7 +1,6 @@
 package com.php25.common;
 
 import com.google.common.collect.Lists;
-import com.php25.common.util.DigestUtil;
 import com.php25.common.util.SortUtil;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
  * @Date: 2018/6/1 09:27
  * @Description:
  */
-public class UtilTest {
+public class SortUtilTest {
 
 
     @Test
@@ -22,11 +21,6 @@ public class UtilTest {
         System.out.println(lists.toString());
     }
 
-    @Test
-    public void sha1() throws Exception {
-        byte[] arr = DigestUtil.SHA("hello world");
-        System.out.println(new String(DigestUtil.bytes2hex(arr)));
-    }
 
     @Test
     public void sort() throws Exception {

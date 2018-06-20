@@ -34,7 +34,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] MD5(String str) {
+    private static byte[] MD5(String str) {
         try {
             if (str == null) {
                 return null;
@@ -76,7 +76,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] SHA(String str) {
+    private static byte[] SHA(String str) {
         try {
             if (str == null) {
                 return null;
@@ -120,7 +120,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static SecretKey loadKeyDES(String base64Key) {
+    private static SecretKey loadKeyDES(String base64Key) {
         try {
             byte[] bytes = Base64.getDecoder().decode(base64Key);
             SecretKey key = new SecretKeySpec(bytes, "DES");
@@ -141,11 +141,32 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] encryptDES(byte[] source, SecretKey key) {
+    private static byte[] encryptDES(byte[] source, SecretKey key) {
         try {
             Cipher cipher = Cipher.getInstance("DES");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(source);
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * DES算法加密
+     *
+     * @param source
+     * @param key
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String encryptDES(String source, String key) {
+        try {
+            Cipher cipher = Cipher.getInstance("DES");
+            cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadKeyDES(key));
+            return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -162,12 +183,34 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] decryptDES(byte[] source, SecretKey key) {
+    private static byte[] decryptDES(byte[] source, SecretKey key) {
         try {
             Cipher cipher = Cipher.getInstance("DES");
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] bytes = cipher.doFinal(source);
             return bytes;
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * DES算法解密
+     *
+     * @param source
+     * @param key
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String decryptDES(String source, String key) {
+        try {
+            Cipher cipher = Cipher.getInstance("DES");
+            cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadKeyDES(key));
+            byte[] bytes = cipher.doFinal(DigestUtil.hex2bytes(source));
+            return new String(bytes);
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -204,7 +247,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static SecretKey loadKeyAES(String base64Key) {
+    private static SecretKey loadKeyAES(String base64Key) {
         try {
             byte[] bytes = Base64.getDecoder().decode(base64Key);
             SecretKey key = new SecretKeySpec(bytes, "AES");
@@ -225,11 +268,33 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] encryptAES(byte[] source, SecretKey key) {
+    private static byte[] encryptAES(byte[] source, SecretKey key) {
         try {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(source);
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+
+    }
+
+    /**
+     * AES加密
+     *
+     * @param source
+     * @param key
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String encryptAES(String source, String key) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadKeyAES(key));
+            return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -247,11 +312,32 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] decryptAES(byte[] source, SecretKey key) {
+    private static byte[] decryptAES(byte[] source, SecretKey key) {
         try {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(source);
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * AES解密
+     *
+     * @param source
+     * @param key
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String decryptAES(String source, String key) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadKeyAES(key));
+            return new String(cipher.doFinal(DigestUtil.hex2bytes(source)));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -325,7 +411,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static PublicKey loadPublicKey(String pubStr) {
+    private static PublicKey loadPublicKey(String pubStr) {
         try {
             byte[] keyBytes = Base64.getDecoder().decode(pubStr);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
@@ -347,7 +433,7 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static PrivateKey loadPrivateKey(String priStr) {
+    private static PrivateKey loadPrivateKey(String priStr) {
         try {
             byte[] keyBytes = Base64.getDecoder().decode(priStr);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
@@ -370,10 +456,52 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] publicEncrypt(byte[] content, PublicKey publicKey) {
+    private static byte[] publicEncrypt(byte[] content, PublicKey publicKey) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return cipher.doFinal(content);
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * RSA算法加密
+     *
+     * @param content
+     * @param publicKey
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String publicEncrypt(String content, String publicKey) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadPublicKey(publicKey));
+            return new String(DigestUtil.bytes2hex(cipher.doFinal(content.getBytes())));
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * RSA算法解密
+     *
+     * @param content
+     * @param privateKey
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    private static byte[] privateDecrypt(byte[] content, PrivateKey privateKey) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(content);
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -391,11 +519,11 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] privateDecrypt(byte[] content, PrivateKey privateKey) {
+    public static String privateDecrypt(String content, String privateKey) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return cipher.doFinal(content);
+            cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadPrivateKey(privateKey));
+            return new String(cipher.doFinal(DigestUtil.hex2bytes(content)));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -412,12 +540,34 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static byte[] sign(byte[] content, PrivateKey privateKey) {
+    private static byte[] sign(byte[] content, PrivateKey privateKey) {
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
             signature.initSign(privateKey);
             signature.update(content);
             return signature.sign();
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return null;
+        }
+    }
+
+    /**
+     * 进行数字签名
+     *
+     * @param content
+     * @param privateKey
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static String sign(String content, String privateKey) {
+        try {
+            Signature signature = Signature.getInstance("SHA1withRSA");
+            signature.initSign(DigestUtil.loadPrivateKey(privateKey));
+            signature.update(content.getBytes());
+            return new String(DigestUtil.bytes2hex(signature.sign()));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return null;
@@ -435,12 +585,35 @@ public class DigestUtil {
      * @author penghuiping
      * @Time 2017-02-04
      */
-    public static boolean verify(byte[] content, byte[] sign, PublicKey publicKey) {
+    private static boolean verify(byte[] content, byte[] sign, PublicKey publicKey) {
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
             signature.initVerify(publicKey);
             signature.update(content);
             return signature.verify(sign);
+        } catch (Exception e) {
+            logger.error("出错啦!", e);
+            return false;
+        }
+    }
+
+    /**
+     * 校验签名
+     *
+     * @param content
+     * @param sign
+     * @param publicKey
+     * @return
+     * @throws Exception
+     * @author penghuiping
+     * @Time 2017-02-04
+     */
+    public static boolean verify(String content, String sign, String publicKey) {
+        try {
+            Signature signature = Signature.getInstance("SHA1withRSA");
+            signature.initVerify(DigestUtil.loadPublicKey(publicKey));
+            signature.update(content.getBytes());
+            return signature.verify(DigestUtil.hex2bytes(sign));
         } catch (Exception e) {
             logger.error("出错啦!", e);
             return false;
