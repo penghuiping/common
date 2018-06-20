@@ -58,7 +58,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public Optional<DTO> findOne(ID id) {
-        return findOne(id, (model, dto) -> BeanUtils.copyProperties(model, dto));
+        return findOne(id, BeanUtils::copyProperties);
     }
 
     @Override
@@ -78,7 +78,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public Optional<DTO> save(DTO obj) {
-        return save(obj, (dto, model) -> BeanUtils.copyProperties(dto, model), (model, dto) -> BeanUtils.copyProperties(model, dto));
+        return save(obj, BeanUtils::copyProperties, BeanUtils::copyProperties);
     }
 
     @Override
@@ -101,7 +101,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public void save(Iterable<DTO> objs) {
-        save(objs, (dto, model) -> BeanUtils.copyProperties(dto, model));
+        save(objs, BeanUtils::copyProperties);
     }
 
     @Override
@@ -154,8 +154,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, Sort.Direction direction, String property) {
-        return query(pageNum, pageSize, searchParams, (model, dto) -> BeanUtils.copyProperties(model, dto)
-                , direction, property);
+        return query(pageNum, pageSize, searchParams, BeanUtils::copyProperties, direction, property);
     }
 
 
@@ -284,7 +283,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public Optional<List<DTO>> findAll(Iterable<ID> ids) {
-        return findAll(ids, (model, dto) -> BeanUtils.copyProperties(model, dto));
+        return findAll(ids, BeanUtils::copyProperties);
     }
 
     @Override
@@ -307,7 +306,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
     @Override
     public Optional<List<DTO>> findAll() {
-        return findAll((model, dto) -> BeanUtils.copyProperties(model, dto));
+        return findAll((ModelToDtoTransferable<MODEL, DTO>) BeanUtils::copyProperties);
     }
 
     @Override
