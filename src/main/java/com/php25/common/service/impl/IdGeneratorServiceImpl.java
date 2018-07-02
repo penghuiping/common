@@ -9,6 +9,8 @@ import com.php25.common.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -25,7 +27,7 @@ public class IdGeneratorServiceImpl implements IdGeneratorService {
 
     @Override
     public String getVipOrderNumber() {
-        return TimeUtil.getNewTime() + RandomUtil.getRandomNumbers(6);
+        return TimeUtil.getTime(new Date(), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + RandomUtil.getRandomNumbers(6);
     }
 
     @Override
