@@ -3,13 +3,19 @@ package com.php25.common.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.php25.common.dto.RedisLockInfo;
 import com.php25.common.service.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +29,10 @@ public class RedisSpringBootServiceImpl implements RedisService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static final String LUA_SCRIPT_LOCK = "return redis.call('set',KEYS[1],ARGV[1],'NX','PX',ARGV[2])";
+    private static final RedisScript<String> SCRIPT_LOCK = new DefaultRedisScript<String>(LUA_SCRIPT_LOCK, String.class);
+    private static final String LUA_SCRIPT_UNLOCK = "if redis.call('get',KEYS[1]) == ARGV[1] then return tostring(redis.call('del', KEYS[1])) else return '0' end";
+    private static final RedisScript<String> SCRIPT_UNLOCK = new DefaultRedisScript<String>(LUA_SCRIPT_UNLOCK, String.class);
 
     public RedisSpringBootServiceImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -160,5 +170,51 @@ public class RedisSpringBootServiceImpl implements RedisService {
             return redisConnection.incr(key.getBytes());
         });
         return result;
+    }
+
+    @Override
+    public Boolean expire(String key, Long expireTime, TimeUnit timeUnit) {
+        return redisTemplate.expire(key, expireTime, timeUnit);
+    }
+
+    @Override
+    public RedisLockInfo tryLock(String redisKey, long expire, long tryTimeout) {
+        Assert.isTrue(tryTimeout > 0, "tryTimeout必须大于0");
+        long timestamp = System.currentTimeMillis();
+        int tryCount = 0;
+        String lockId = UUID.randomUUID().toString();
+        while ((System.currentTimeMillis() - timestamp) < tryTimeout) {
+            try {
+                Object lockResult = redisTemplate.execute(SCRIPT_LOCK,
+                        redisTemplate.getStringSerializer(),
+                        redisTemplate.getStringSerializer(),
+                        Collections.singletonList(redisKey),
+                        lockId, String.valueOf(expire));
+                tryCount++;
+                if (null != lockResult && "OK".equals(lockResult)) {
+                    return new RedisLockInfo(lockId, redisKey, expire, tryTimeout, tryCount);
+                } else {
+                    Thread.sleep(50);
+                }
+            } catch (Exception e) {
+                logger.error("尝试获取redis锁出错", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean releaseLock(RedisLockInfo redisLockInfo) {
+        Object releaseResult = null;
+        try {
+            releaseResult = redisTemplate.execute(SCRIPT_UNLOCK,
+                    redisTemplate.getStringSerializer(),
+                    redisTemplate.getStringSerializer(),
+                    Collections.singletonList(redisLockInfo.getRedisKey()),
+                    redisLockInfo.getLockId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null != releaseResult && releaseResult.equals(1);
     }
 }

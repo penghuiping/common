@@ -277,7 +277,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                 }
             } else {
                 pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-                adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
+                adminUserModelList = entityManager.createQuery(cq).setFirstResult(new Long(pageRequest.getOffset()).intValue()).setMaxResults(pageRequest.getPageSize()).getResultList();
             }
 
             if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
@@ -353,7 +353,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                 }
             } else {
                 pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-                adminUserModelList = entityManager.createQuery(cq).setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList();
+                adminUserModelList = entityManager.createQuery(cq).setFirstResult(new Long(pageRequest.getOffset()).intValue()).setMaxResults(pageRequest.getPageSize()).getResultList();
             }
 
             if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();

@@ -1,6 +1,7 @@
 package com.php25.common.service.impl;
 
 import com.php25.common.service.HtmlService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  */
 @Component("htmlService")
+@ConditionalOnClass(HttpServletRequest.class)
 public class HtmlServiceImpl implements HtmlService {
     public String getBasePath(HttpServletRequest request) {
         String path = request.getContextPath();

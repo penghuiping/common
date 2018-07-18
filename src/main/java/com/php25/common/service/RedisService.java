@@ -1,6 +1,9 @@
 package com.php25.common.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.php25.common.dto.RedisLockInfo;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * redis缓存帮助类
@@ -101,4 +104,33 @@ public interface RedisService {
      * @return
      */
     public Long incr(final String key);
+
+    /**
+     * 设置一个key的存活时间
+     *
+     * @param key
+     * @param expireTime
+     * @param timeUnit
+     * @return
+     */
+    public Boolean expire(final String key, Long expireTime, TimeUnit timeUnit);
+
+
+    /**
+     * 加锁
+     *
+     * @param redisKey   缓存KEY
+     * @param expire     到期时间 毫秒
+     * @param tryTimeout 尝试获取锁超时时间 毫秒
+     * @return
+     */
+    public RedisLockInfo tryLock(String redisKey, long expire, long tryTimeout);
+
+    /**
+     * 解锁
+     *
+     * @param redisLockInfo 获取锁返回的对象
+     * @return
+     */
+    public boolean releaseLock(RedisLockInfo redisLockInfo);
 }

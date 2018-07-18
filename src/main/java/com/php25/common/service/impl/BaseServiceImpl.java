@@ -66,8 +66,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         try {
             DTO dto = dtoClass.newInstance();
-            MODEL model = baseRepository.findOne(id);
-            modelToDtoTransferable.modelToDto(model, dto);
+            Optional<MODEL> model = baseRepository.findById(id);
+            modelToDtoTransferable.modelToDto(model.get(), dto);
             return Optional.ofNullable(dto);
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -116,7 +116,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        baseRepository.save(models);
+        baseRepository.saveAll(models);
     }
 
     @Override
@@ -143,7 +143,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 return null;
             }
         }).collect(Collectors.toList());
-        baseRepository.delete(models);
+        baseRepository.deleteAll(models);
     }
 
     @Override
@@ -258,7 +258,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
         Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        List<MODEL> result = Lists.newArrayList(baseRepository.findAll(ids));
+        List<MODEL> result = Lists.newArrayList(baseRepository.findAllById(ids));
         return Optional.ofNullable(result.stream()
                 .map(model -> {
                     try {
