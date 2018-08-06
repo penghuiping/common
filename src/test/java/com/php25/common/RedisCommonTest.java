@@ -53,7 +53,7 @@ public class RedisCommonTest {
     int count = 0;
 
     public void add() {
-        RedisLockInfo redisLockInfo = redisService.tryLock("testKey", 60 * 1000, 10 * 1000000);
+        RedisLockInfo redisLockInfo = redisService.tryLock("testKey", 60 * 1000, 30 * 1000);
         if (null != redisLockInfo) {
             count++;
             redisService.releaseLock(redisLockInfo);
