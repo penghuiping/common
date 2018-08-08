@@ -1,6 +1,7 @@
 package com.php25.common.specification;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.php25.common.util.JsonUtil;
 import com.php25.common.util.TimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanWrapperImpl;
@@ -68,7 +69,7 @@ public class BaseJpaSpecs extends BaseSpecs<Specification> {
             int errorCount = 0;
             //尝试是否可以转化为Long
             try {
-                List<Long> temp1 = objectMapper.readValue((String) value, new TypeReference<List<Long>>() {
+                List<Long> temp1 = JsonUtil.fromJson((String) value, new TypeReference<List<Long>>() {
                 });
                 objValue = temp1;
             } catch (Exception e) {
@@ -78,7 +79,7 @@ public class BaseJpaSpecs extends BaseSpecs<Specification> {
             if (errorCount > 0) {
                 //尝试是否可以转化成String
                 try {
-                    List<String> temp = objectMapper.readValue((String) value, new TypeReference<List<String>>() {
+                    List<String> temp = JsonUtil.fromJson((String) value, new TypeReference<List<String>>() {
                     });
                     objValue = temp;
                 } catch (Exception e) {

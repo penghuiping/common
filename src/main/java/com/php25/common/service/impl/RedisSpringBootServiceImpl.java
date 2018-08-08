@@ -1,13 +1,12 @@
 package com.php25.common.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.php25.common.dto.RedisLockInfo;
 import com.php25.common.service.RedisService;
+import com.php25.common.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -25,9 +24,6 @@ public class RedisSpringBootServiceImpl implements RedisService {
     private static Logger logger = LoggerFactory.getLogger(RedisSpringBootServiceImpl.class);
 
     private StringRedisTemplate redisTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private static final String LUA_SCRIPT_LOCK = "return redis.call('set',KEYS[1],ARGV[1],'NX','PX',ARGV[2])";
     private static final RedisScript<String> SCRIPT_LOCK = new DefaultRedisScript<String>(LUA_SCRIPT_LOCK, String.class);
@@ -82,7 +78,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
     public <T> T get(final String key, Class<T> cls) {
         try {
             String value = redisTemplate.boundValueOps(key).get();
-            return objectMapper.readValue(value, cls);
+            return JsonUtil.fromJson(value, cls);
         } catch (Exception e) {
             return null;
         }
@@ -99,7 +95,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
     public <T> T get(final String key, TypeReference<T> cls) {
         try {
             String value = redisTemplate.boundValueOps(key).get();
-            return objectMapper.readValue(value, cls);
+            return JsonUtil.fromJson(value, cls);
         } catch (Exception e) {
             return null;
         }
@@ -116,7 +112,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
     public boolean set(final String key, Object value) {
         boolean result = false;
         try {
-            redisTemplate.boundValueOps(key).set(objectMapper.writeValueAsString(value));
+            redisTemplate.boundValueOps(key).set(JsonUtil.toJson(value));
             result = true;
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -128,7 +124,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
     public boolean setNx(String key, Object value) {
         boolean result = false;
         try {
-            redisTemplate.boundValueOps(key).setIfAbsent(objectMapper.writeValueAsString(value));
+            redisTemplate.boundValueOps(key).setIfAbsent(JsonUtil.toJson(value));
             result = true;
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -147,7 +143,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
     public boolean set(final String key, Object value, Long expireTime) {
         boolean result = false;
         try {
-            redisTemplate.boundValueOps(key).set(objectMapper.writeValueAsString(value), expireTime, TimeUnit.SECONDS);
+            redisTemplate.boundValueOps(key).set(JsonUtil.toJson(value), expireTime, TimeUnit.SECONDS);
             result = true;
         } catch (Exception e) {
             logger.error("出错啦!", e);

@@ -1,8 +1,7 @@
 package com.php25.common.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.service.ResourceAwareService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.php25.common.util.JsonUtil;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -20,8 +19,6 @@ import java.util.Set;
 @Service("resourceAwareService")
 public class ResourceAwareServiceImpl implements ResourceAwareService {
 
-    @Autowired
-    ObjectMapper objectMapper;
 
     public String loadProperties(String fileName) throws IOException {
         Resource r = new ClassPathResource(fileName);
@@ -31,6 +28,6 @@ public class ResourceAwareServiceImpl implements ResourceAwareService {
         for (String name : propertyNames) {
             map.put(name, p.getProperty(name));
         }
-        return objectMapper.writeValueAsString(map);
+        return JsonUtil.toJson(map);
     }
 }

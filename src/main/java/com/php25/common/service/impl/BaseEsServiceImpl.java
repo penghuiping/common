@@ -160,7 +160,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
         Assert.notNull(direction, "direction不能为null");
         Assert.notNull(property, "property不能为null");
         Sort.Order order = new Sort.Order(direction, property);
-        Sort sort = new Sort(order);
+        Sort sort = Sort.by(order);
         return query(pageNum, pageSize, searchParams, modelToDtoTransferable, sort);
     }
 

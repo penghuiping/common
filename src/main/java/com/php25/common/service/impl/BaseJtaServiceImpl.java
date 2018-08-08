@@ -1,7 +1,5 @@
 package com.php25.common.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.php25.common.dto.DataGridPageDto;
 import com.php25.common.service.BaseService;
@@ -12,10 +10,10 @@ import com.php25.common.specification.BaseSpecsFactory;
 import com.php25.common.specification.Operator;
 import com.php25.common.specification.SearchParam;
 import com.php25.common.specification.SearchParamBuilder;
+import com.php25.common.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.Assert;
@@ -44,9 +42,6 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
     private Class<DTO> dtoClass;
 
     private Class<MODEL> modelClass;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     public BaseJtaServiceImpl(EntityManagerFactory entityManagerFactory) {
         Type genType = getClass().getGenericSuperclass();
@@ -228,7 +223,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         Assert.notNull(direction, "direction不能为null");
         Assert.notNull(property, "property不能为null");
         Sort.Order order = new Sort.Order(direction, property);
-        Sort sort = new Sort(order);
+        Sort sort = Sort.by(order);
         return query(pageNum, pageSize, searchParams, modelToDtoTransferable, sort);
     }
 
@@ -395,15 +390,11 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         List<ID> ids1 = Lists.newArrayList(ids);
         SearchParam searchParam = null;
-        try {
-            new SearchParam.Builder().fieldName("id").operator(Operator.IN).value(objectMapper.writeValueAsString(ids)).build();
-            String searchParams = objectMapper.writeValueAsString(Lists.newArrayList(searchParam));
-            Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
-            return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);
-        } catch (JsonProcessingException e) {
-            logger.error("出错啦!", e);
-            throw new RuntimeException(e);
-        }
+        new SearchParam.Builder().fieldName("id").operator(Operator.IN).value(JsonUtil.toJson(ids)).build();
+        String searchParams = JsonUtil.toJson(Lists.newArrayList(searchParam));
+        Optional<DataGridPageDto<DTO>> optionalDtoDataGridPageDto = this.query(-1, 1, searchParams, modelToDtoTransferable, Sort.Direction.DESC, "id");
+        return Optional.ofNullable(optionalDtoDataGridPageDto.isPresent() ? optionalDtoDataGridPageDto.get().getData() : null);
+
     }
 
     @Override

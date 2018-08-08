@@ -1,13 +1,11 @@
 package com.php25.common.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.constant.ApiErrorCode;
 import com.php25.common.dto.JSONResponse;
 import com.php25.common.exception.JsonException;
+import com.php25.common.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,8 +24,6 @@ public class JSONController {
 
     private static Logger logger = LoggerFactory.getLogger(JSONController.class);
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     /**
      * 用于处理异常的
@@ -49,11 +45,7 @@ public class JSONController {
             }).collect(Collectors.toList());
 
             String result = null;
-            try {
-                result = objectMapper.writeValueAsString(messages);
-            } catch (JsonProcessingException e1) {
-
-            }
+            result = JsonUtil.toJson(messages);
             pw.write(result);
             ret.setMessage(sw.toString());
             return ResponseEntity.ok(ret);

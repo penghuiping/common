@@ -1,10 +1,10 @@
 package com.php25.common.specification;
 
+import com.php25.common.util.JsonUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -42,8 +42,8 @@ public class BaseEsSpecs extends BaseSpecs<QueryBuilder> {
                 case "in":
                     List list = null;
                     try {
-                        list = objectMapper.readValue((String) s.getValue(), List.class);
-                    } catch (IOException e) {
+                        list = JsonUtil.fromJson((String) s.getValue(), List.class);
+                    } catch (Exception e) {
                         throw new RuntimeException("in操作的值必须是List json", e);
                     }
                     boolQueryBuilder.must(QueryBuilders.termsQuery(s.getFieldName(), list));
