@@ -16,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.Assert;
 
@@ -276,7 +273,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                     adminUserModelList = entityManager.createQuery("select a from " + modelClass.getName() + " a").getResultList();
                 }
             } else {
-                pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+                pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
                 adminUserModelList = entityManager.createQuery(cq).setFirstResult(new Long(pageRequest.getOffset()).intValue()).setMaxResults(pageRequest.getPageSize()).getResultList();
             }
 
@@ -294,9 +291,9 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
             PageImpl<DTO> dtoPage = null;
             if (-1 == pageNum) {
-                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, Pageable.unpaged(), adminUserModelList.size());
             } else {
-                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, pageRequest, adminUserModelList.size());
             }
 
             return Optional.ofNullable(toDataGridPageDto(dtoPage));
@@ -352,7 +349,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
                     adminUserModelList = entityManager.createQuery("select a from " + modelClass.getName() + " a").getResultList();
                 }
             } else {
-                pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+                pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
                 adminUserModelList = entityManager.createQuery(cq).setFirstResult(new Long(pageRequest.getOffset()).intValue()).setMaxResults(pageRequest.getPageSize()).getResultList();
             }
 
@@ -370,9 +367,9 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
             PageImpl<DTO> dtoPage = null;
             if (-1 == pageNum) {
-                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, Pageable.unpaged(), adminUserModelList.size());
             } else {
-                dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+                dtoPage = new PageImpl<DTO>(adminUserDtoList, pageRequest, adminUserModelList.size());
             }
 
             return Optional.ofNullable(toDataGridPageDto(dtoPage));

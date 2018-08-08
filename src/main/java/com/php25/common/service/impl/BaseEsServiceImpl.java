@@ -13,10 +13,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.util.Assert;
@@ -182,7 +179,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
         if (-1 == pageNum) {
             adminUserModelList = (List<MODEL>) baseRepository.search(BaseSpecsFactory.getEsInstance().getSpecs(searchParams));
         } else {
-            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+            pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
             NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
             searchQueryBuilder.withQuery(BaseSpecsFactory.getEsInstance().getSpecs(searchParams))
                     .withPageable(pageRequest)
@@ -206,9 +203,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
         PageImpl<DTO> dtoPage = null;
         if (-1 == pageNum) {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, Pageable.unpaged(), adminUserModelList.size());
         } else {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, pageRequest, modelPage.getTotalElements());
         }
 
         return Optional.ofNullable(toDataGridPageDto(dtoPage));
@@ -229,7 +226,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
         if (-1 == pageNum) {
             adminUserModelList = (List<MODEL>) baseRepository.search(BaseSpecsFactory.getEsInstance().getSpecs(searchParamBuilder));
         } else {
-            pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+            pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
             NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
             searchQueryBuilder.withQuery(BaseSpecsFactory.getEsInstance().getSpecs(searchParamBuilder))
                     .withPageable(pageRequest)
@@ -253,9 +250,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
 
         PageImpl<DTO> dtoPage = null;
         if (-1 == pageNum) {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, Pageable.unpaged(), adminUserModelList.size());
         } else {
-            dtoPage = new PageImpl<DTO>(adminUserDtoList, null, modelPage.getTotalElements());
+            dtoPage = new PageImpl<DTO>(adminUserDtoList, pageRequest, modelPage.getTotalElements());
         }
 
         return Optional.ofNullable(toDataGridPageDto(dtoPage));
@@ -277,7 +274,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
                 return null;
             }
         }).collect(Collectors.toList());
-        PageImpl<DTO> dtoPage = new PageImpl<DTO>(adminUserDtoList, null, adminUserModelList.size());
+        PageImpl<DTO> dtoPage = new PageImpl<DTO>(adminUserDtoList, Pageable.unpaged(), adminUserModelList.size());
         return Optional.ofNullable(toDataGridPageDto(dtoPage));
     }
 

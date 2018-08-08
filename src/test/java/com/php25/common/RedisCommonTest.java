@@ -6,6 +6,7 @@ import com.php25.common.repository.impl.BaseRepositoryImpl;
 import com.php25.common.service.ConsistentHashingService;
 import com.php25.common.service.IdGeneratorService;
 import com.php25.common.service.RedisService;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -52,6 +53,8 @@ public class RedisCommonTest {
 
     int count = 0;
 
+    Long result = 0l;
+
     public void add() {
         RedisLockInfo redisLockInfo = redisService.tryLock("testKey", 60 * 1000, 30 * 1000);
         if (null != redisLockInfo) {
@@ -62,22 +65,32 @@ public class RedisCommonTest {
 
     @Test
     public void test() throws Exception {
-//        redisService.remove("test");
-//        for (int i = 0; i < 100; i++) {
-//            Long result = redisService.incr("test");
-//            System.out.println(result);
-//        }
-//
         ExecutorService executorService = Executors.newFixedThreadPool(10);
-        CountDownLatch countDownLatch = new CountDownLatch(19000);
-        for (int i = 0; i < 19000; i++) {
+        CountDownLatch countDownLatch = new CountDownLatch(2000);
+        for (int i = 0; i < 2000; i++) {
             executorService.submit(() -> {
                 add();
                 countDownLatch.countDown();
             });
         }
         countDownLatch.await();
-        System.out.println(this.count);
+        Assert.assertEquals(this.count, 2000);
+    }
+
+    @Test
+    public void incr() throws Exception {
+        redisService.remove("test");
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch countDownLatch = new CountDownLatch(2000);
+        for (int i = 0; i < 2000; i++) {
+            executorService.submit(() -> {
+                redisService.incr("test");
+                countDownLatch.countDown();
+            });
+        }
+        countDownLatch.await();
+        result = redisService.incr("test");
+        Assert.assertEquals(result, new Long(2001));
     }
 
 
