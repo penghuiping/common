@@ -6,6 +6,6 @@ import com.php25.common.model.Customer;
 /**
  * Created by penghuiping on 2018/5/1.
  */
-public interface CustomerService extends BaseService<CustomerDto,Customer,Long> {
+public interface CustomerService extends BaseService<CustomerDto, Customer, Long>, SoftDeletable<CustomerDto> {
 
 }

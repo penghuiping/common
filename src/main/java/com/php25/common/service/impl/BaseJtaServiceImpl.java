@@ -11,6 +11,7 @@ import com.php25.common.specification.Operator;
 import com.php25.common.specification.SearchParam;
 import com.php25.common.specification.SearchParamBuilder;
 import com.php25.common.util.JsonUtil;
+import com.php25.common.util.ReflectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -24,7 +25,6 @@ import javax.persistence.SynchronizationType;
 import javax.persistence.criteria.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -416,8 +416,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
             Field field = obj.getClass().getDeclaredField("enable");
             if (null != field) {
                 //可以进行软删除
-                Method m = obj.getClass().getDeclaredMethod("setEnable", Integer.class);
-                m.invoke(obj, 2);
+                ReflectUtil.getMethod(obj.getClass(), "setEnable", new Class[]{Integer.class}).invoke(obj, 2);
                 this.save(obj);
             }
         } catch (Exception e) {
@@ -434,8 +433,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
             if (null != field) {
                 for (DTO obj : objs) {
                     //可以进行软删除
-                    Method m = obj.getClass().getDeclaredMethod("setEnable", Integer.class);
-                    m.invoke(obj, 2);
+                    ReflectUtil.getMethod(obj.getClass(), "setEnable", new Class[]{Integer.class}).invoke(obj, 2);
                 }
                 this.save(objs);
             }

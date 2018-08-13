@@ -1,10 +1,12 @@
 package com.php25.common.util;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -90,67 +92,6 @@ public class DigestUtil {
 
     }
 
-    /**
-     * 生成DES算法秘钥
-     *
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    public static String genKeyDES() {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
-            keyGenerator.init(56);
-            SecretKey key = keyGenerator.generateKey();
-            String base64Str = Base64.getEncoder().encodeToString(key.getEncoded());
-            return base64Str;
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
-
-    /**
-     * 加载DES秘钥
-     *
-     * @param base64Key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static SecretKey loadKeyDES(String base64Key) {
-        try {
-            byte[] bytes = Base64.getDecoder().decode(base64Key);
-            SecretKey key = new SecretKeySpec(bytes, "DES");
-            return key;
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
-
-    /**
-     * DES算法加密
-     *
-     * @param source
-     * @param key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static byte[] encryptDES(byte[] source, SecretKey key) {
-        try {
-            Cipher cipher = Cipher.getInstance("DES");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            return cipher.doFinal(source);
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
 
     /**
      * DES算法加密
@@ -164,8 +105,13 @@ public class DigestUtil {
      */
     public static String encryptDES(String source, String key) {
         try {
+            Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
+            DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+            SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
+
             Cipher cipher = Cipher.getInstance("DES");
-            cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadKeyDES(key));
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -173,27 +119,6 @@ public class DigestUtil {
         }
     }
 
-    /**
-     * DES算法解密
-     *
-     * @param source
-     * @param key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static byte[] decryptDES(byte[] source, SecretKey key) {
-        try {
-            Cipher cipher = Cipher.getInstance("DES");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            byte[] bytes = cipher.doFinal(source);
-            return bytes;
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
 
     /**
      * DES算法解密
@@ -207,8 +132,13 @@ public class DigestUtil {
      */
     public static String decryptDES(String source, String key) {
         try {
+            Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
+            DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+            SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
+
             Cipher cipher = Cipher.getInstance("DES");
-            cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadKeyDES(key));
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] bytes = cipher.doFinal(DigestUtil.hex2bytes(source));
             return new String(bytes);
         } catch (Exception e) {
@@ -217,68 +147,7 @@ public class DigestUtil {
         }
     }
 
-    /**
-     * 生成AES秘钥
-     *
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    public static String genKeyAES() {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-            keyGenerator.init(128);
-            SecretKey key = keyGenerator.generateKey();
-            String base64Str = Base64.getEncoder().encodeToString(key.getEncoded());
-            return base64Str;
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
 
-    /**
-     * 加载AES秘钥
-     *
-     * @param base64Key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static SecretKey loadKeyAES(String base64Key) {
-        try {
-            byte[] bytes = Base64.getDecoder().decode(base64Key);
-            SecretKey key = new SecretKeySpec(bytes, "AES");
-            return key;
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
-
-    /**
-     * AES加密
-     *
-     * @param source
-     * @param key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static byte[] encryptAES(byte[] source, SecretKey key) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            return cipher.doFinal(source);
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-
-    }
 
     /**
      * AES加密
@@ -292,8 +161,10 @@ public class DigestUtil {
      */
     public static String encryptAES(String source, String key) {
         try {
+            Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16 || key.length() == 24 || key.length() == 32, "key的长度需要16、24或者32");
+            SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadKeyAES(key));
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
         } catch (Exception e) {
             logger.error("出错啦!", e);
@@ -302,26 +173,6 @@ public class DigestUtil {
 
     }
 
-    /**
-     * AES解密
-     *
-     * @param source
-     * @param key
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @Time 2017-02-04
-     */
-    private static byte[] decryptAES(byte[] source, SecretKey key) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            return cipher.doFinal(source);
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return null;
-        }
-    }
 
     /**
      * AES解密
@@ -335,8 +186,10 @@ public class DigestUtil {
      */
     public static String decryptAES(String source, String key) {
         try {
+            Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16 || key.length() == 24 || key.length() == 32, "key的长度需要16、24或者32");
+            SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadKeyAES(key));
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
             return new String(cipher.doFinal(DigestUtil.hex2bytes(source)));
         } catch (Exception e) {
             logger.error("出错啦!", e);

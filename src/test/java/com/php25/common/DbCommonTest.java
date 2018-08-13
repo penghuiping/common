@@ -73,6 +73,7 @@ public class DbCommonTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
+            customer.setEnable(1);
             customers.add(customer);
         }
         customerService.save(customers);
@@ -102,6 +103,19 @@ public class DbCommonTest {
         customerDtos.ifPresent(a -> {
             print("<<<<<<<===========删除前===========>>>>>>", a);
             customerService.delete(a);
+        });
+        customerDtos = customerService.findAll();
+        customerDtos.ifPresent(a -> {
+            print("<<<<<<<===========删除后===========>>>>>>", a);
+        });
+    }
+
+    @Test
+    public void softDelete() throws Exception {
+        Optional<List<CustomerDto>> customerDtos = customerService.findAll();
+        customerDtos.ifPresent(a -> {
+            print("<<<<<<<===========删除前===========>>>>>>", a);
+            customerService.softDelete(a);
         });
         customerDtos = customerService.findAll();
         customerDtos.ifPresent(a -> {

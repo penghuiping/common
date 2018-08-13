@@ -1,6 +1,8 @@
 package com.php25.common.util;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.service.impl.SpringContextHolder;
@@ -16,6 +18,8 @@ import java.io.IOException;
  */
 public class JsonUtil {
     private static final Logger log = LoggerFactory.getLogger(JsonUtil.class);
+
+    private static final PrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 
     public static <T> T fromJson(String json, Class<T> cls) {
         if (StringUtil.isBlank(json)) {
@@ -78,6 +82,19 @@ public class JsonUtil {
         try {
             ObjectMapper objectMapper = SpringContextHolder.getBean0(ObjectMapper.class);
             return objectMapper.writeValueAsString(obj);
+        } catch (IOException e) {
+            log.error("json解析出错", e);
+            throw new RuntimeException("json解析出错", e);
+        }
+    }
+
+    public static String toPrettyJson(Object obj) {
+        if (null == obj) {
+            throw new IllegalArgumentException("obj不能为null");
+        }
+        try {
+            ObjectMapper objectMapper = SpringContextHolder.getBean0(ObjectMapper.class);
+            return objectMapper.writer(prettyPrinter).writeValueAsString(obj);
         } catch (IOException e) {
             log.error("json解析出错", e);
             throw new RuntimeException("json解析出错", e);

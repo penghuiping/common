@@ -29,6 +29,9 @@ public class Customer {
     private String username;
 
     @Column
+    private Integer age;
+
+    @Column
     private String password;
 
     @Column(name = "create_time")
@@ -78,5 +81,13 @@ public class Customer {
 
     public void setEnable(Integer enable) {
         this.enable = enable;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 }

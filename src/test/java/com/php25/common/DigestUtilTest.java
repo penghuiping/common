@@ -26,7 +26,7 @@ public class DigestUtilTest {
 
     @Test
     public void AES() {
-        String key = DigestUtil.genKeyAES();
+        String key = "1111111111111111";
         logger.info("key:" + key);
         String value = DigestUtil.encryptAES("hello world", key);
         logger.info("value:" + value);
@@ -37,7 +37,7 @@ public class DigestUtilTest {
 
     @Test
     public void DES() {
-        String key = DigestUtil.genKeyDES();
+        String key = "123456789";
         logger.info("key:" + key);
         String value = DigestUtil.encryptDES("hello world", key);
         logger.info("value:" + value);

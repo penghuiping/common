@@ -32,6 +32,7 @@ public class XmlTest {
         String xml = xStream.toXML(customerDto);
         logger.info("===========>xml:" + xml);
 
+
     }
 
     @Test

@@ -4,12 +4,11 @@ import com.php25.common.dto.CustomerDto;
 import com.php25.common.model.Customer;
 import com.php25.common.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManagerFactory;
 
 
-@Service
+//@Service
 public class CustomerJtaServiceImpl extends BaseJtaServiceImpl<CustomerDto, Customer, Long> implements CustomerService {
 
     @Autowired

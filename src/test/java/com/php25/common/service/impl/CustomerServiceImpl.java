@@ -4,6 +4,7 @@ import com.php25.common.dto.CustomerDto;
 import com.php25.common.model.Customer;
 import com.php25.common.repository.CustomerRepository;
 import com.php25.common.service.CustomerService;
+import com.php25.common.service.SoftDeletable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
  */
 @Primary
 @Service
-public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer,Long> implements CustomerService {
+public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer, Long> implements CustomerService, SoftDeletable<CustomerDto> {
 
     private CustomerRepository customerRepository;
 
