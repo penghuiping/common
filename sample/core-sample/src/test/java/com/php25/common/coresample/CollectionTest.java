@@ -22,9 +22,6 @@ public class CollectionTest {
         for (int i = 0; i < 10000; i++) {
             treeMap.put("key" + i, "hello" + i);
         }
-
-        logger.info(treeMap.toString());
-
         logger.info(treeMap.get("key15"));
         logger.info(treeMap.get("key16"));
         logger.info(treeMap.get("key12"));
