@@ -3,14 +3,14 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>common-spring-boot-starter</artifactId>
+    <artifactId>redis-sample</artifactId>
     <groupId>com.php25</groupId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
-        <artifactId>common</artifactId>
+        <artifactId>sample</artifactId>
         <groupId>com.php25</groupId>
-        <version>2.0.1-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -25,59 +25,30 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- 内存数据库h2-->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <artifactId>redis</artifactId>
+            <groupId>com.php25</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>cn.afterturn</groupId>
-            <artifactId>easypoi-base</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.afterturn</groupId>
-            <artifactId>easypoi-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.afterturn</groupId>
-            <artifactId>easypoi-annotation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-        </dependency>
-        <dependency>
-            <artifactId>core</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>es</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>jdbc</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>jpa</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>mvc</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>redis</artifactId>
-            <groupId>com.php25</groupId>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

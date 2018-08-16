@@ -6,18 +6,20 @@ import java.util.UUID;
 
 /**
  * 随机数帮助类
+ *
  * @author penghuiping
  * @Time 2014/8/13.
  */
 public class RandomUtil {
     public static final String NUMBERS_AND_LETTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String NUMBERS             = "0123456789";
-    public static final String LETTERS             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String CAPITAL_LETTERS     = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String LOWER_CASE_LETTERS  = "abcdefghijklmnopqrstuvwxyz";
+    public static final String NUMBERS = "0123456789";
+    public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
     /**
      * 随即获取给定长度的字符串，数字+字母形式+大小写敏感
+     *
      * @param length
      * @return
      */
@@ -27,6 +29,7 @@ public class RandomUtil {
 
     /**
      * 获取给定长度的随机数
+     *
      * @param length
      * @return
      */
@@ -36,6 +39,7 @@ public class RandomUtil {
 
     /**
      * 获取给定长度的随即字符串，字母形式+大小写敏感
+     *
      * @param length
      * @return
      */
@@ -45,6 +49,7 @@ public class RandomUtil {
 
     /**
      * 获取给定长度的大写字符
+     *
      * @param length
      * @return
      */
@@ -54,6 +59,7 @@ public class RandomUtil {
 
     /**
      * 获取给定长度的小写字符
+     *
      * @param length
      * @return
      */
@@ -63,9 +69,10 @@ public class RandomUtil {
 
     /**
      * 给定字符串数据源，从中生产随机字符串
+     *
      * @param source 字符串数据源
      * @param length 给定长度
-     * @return  如果数据源为null或者""，返回null
+     * @return 如果数据源为null或者""，返回null
      */
     public static String getRandom(String source, int length) {
         return StringUtil.isEmpty(source) ? null : getRandom(source.toCharArray(), length);
@@ -73,6 +80,7 @@ public class RandomUtil {
 
     /**
      * 给定字符串数据源，从中生产随机字符串
+     *
      * @param sourceChar
      * @param length
      * @return 如果数据源为null或者""，返回null
@@ -92,6 +100,7 @@ public class RandomUtil {
 
     /**
      * 随机返回0到max之间的数字
+     *
      * @param max
      * @return 如果max小于0 则返回0
      */
@@ -101,6 +110,7 @@ public class RandomUtil {
 
     /**
      * 随机返回min与max之间的数字
+     *
      * @param min
      * @param max
      * @return 如果min大于max返回0，如果min等于max返回min
@@ -117,6 +127,7 @@ public class RandomUtil {
 
     /**
      * 从obj[]数组中，随机获取大小不定的obj[]数组
+     *
      * @param objArray 源数组
      * @return 长度不定的obj数组，里面的元素是源数组的元素
      */
@@ -130,7 +141,8 @@ public class RandomUtil {
 
     /**
      * 从object[]数组中，随机获取指定大小的object[]数组
-     * @param objArray 源数组
+     *
+     * @param objArray     源数组
      * @param shuffleCount 指定生产的数组大小
      * @return 回object数组，大小为shuffleCount，里面的元素是源数组的元素.如果objArray是null或者shuffleCount大于objArray的长度返回null
      */
@@ -153,6 +165,7 @@ public class RandomUtil {
 
     /**
      * 从int[]数组中，随机获取大小不定的int[]数组
+     *
      * @param intArray 源数组
      * @return 长度不定的int数组，里面的元素是源数组的元素
      */
@@ -162,13 +175,14 @@ public class RandomUtil {
         }
 
         return shuffle(intArray, getRandom(intArray.length));
-     }
+    }
 
-     /**
+    /**
      * 从int[]数组中，随机获取指定大小的int[]数组
-     * @param intArray 源数组
+     *
+     * @param intArray     源数组
      * @param shuffleCount 指定生产的数组大小
-     * @return  返回int数组，大小为shuffleCount，里面的元素是源数组的元素.如果intArray是null或者shuffleCount大于intArray的长度返回null
+     * @return 返回int数组，大小为shuffleCount，里面的元素是源数组的元素.如果intArray是null或者shuffleCount大于intArray的长度返回null
      */
     public static int[] shuffle(int[] intArray, int shuffleCount) {
         int length;
@@ -189,6 +203,7 @@ public class RandomUtil {
 
     /**
      * 获取随机uuid
+     *
      * @return
      */
     public static String randomUUID() {

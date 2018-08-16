@@ -6,39 +6,44 @@ import com.php25.common.core.util.StringUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * 解析jpa注解与数据库model的对应关系帮助类
+ *
  * @Auther: penghuiping
  * @Date: 2018/8/9 18:11
  * @Description:
  */
-public class ModelManager {
+public class JpaModelManager {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelManager.class);
+    private static final Logger log = LoggerFactory.getLogger(JpaModelManager.class);
 
     /****
      * 根据实体class获取表名
-     * @param c
+     * @param cls
      * @return
      */
-    public static String getTableName(Class<?> c) {
-        Entity entity = c.getAnnotation(Entity.class);
-        if (null == entity) throw new IllegalArgumentException(c.getName() + ":没有javax.persistence.Entity注解");
+    public static String getTableName(Class<?> cls) {
+        Assert.notNull(cls, "class不能为null");
+        Entity entity = cls.getAnnotation(Entity.class);
+        if (null == entity) throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Entity注解");
 
-        Table table = c.getAnnotation(Table.class);
-        if (null == table) throw new IllegalArgumentException(c.getName() + ":没有javax.persistence.Table注解");
+        Table table = cls.getAnnotation(Table.class);
+        if (null == table) throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Table注解");
 
         //获取表名
         String tableName = table.name();
         if (StringUtil.isBlank(tableName)) {
-            return c.getSimpleName();
+            return cls.getSimpleName();
         } else {
             return tableName;
         }
@@ -47,11 +52,12 @@ public class ModelManager {
     /**
      * 获取model的主键名
      *
-     * @param t
+     * @param cls
      * @return
      */
-    public static <T> Field getPrimaryKeyColName(T t) {
-        Field[] fields = t.getClass().getDeclaredFields();
+    public static Field getPrimaryKeyColName(Class cls) {
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
         Field primaryKeyField = null;
         for (Field field : fields) {
             Id id = field.getAnnotation(Id.class);
@@ -65,6 +71,30 @@ public class ModelManager {
     }
 
     /**
+     * 根据类属性获取db属性
+     *
+     * @param cls
+     * @param name
+     * @return
+     */
+    public static String getDbColumnByClassColumn(Class cls, String name) {
+        Assert.notNull(cls, "class不能为null");
+        Assert.hasText(name, "name不能为空");
+        Field[] fields = cls.getDeclaredFields();
+        Optional<Field> fieldOptional = Lists.newArrayList(fields).stream().filter(field -> field.getName().equals(name)).findFirst();
+        if (!fieldOptional.isPresent()) {
+            throw new RuntimeException(String.format("%s类的%s属性不存在", cls.getSimpleName(), name));
+        }
+        Column column = fieldOptional.get().getAnnotation(Column.class);
+        String columnName = null;
+        if (null == column)
+            columnName = name;
+        else
+            columnName = StringUtil.isBlank(column.name()) ? name : column.name();
+        return columnName;
+    }
+
+    /**
      * 获取表属性列名与值
      *
      * @param t
@@ -73,6 +103,7 @@ public class ModelManager {
      * @return
      */
     public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndValue(T t, boolean ignoreNull) {
+        Assert.notNull(t, "t不能为null");
         Field[] fields = t.getClass().getDeclaredFields();
         Stream<ImmutablePair<String, Object>> stream = Lists.newArrayList(fields).stream().filter(field -> null == field.getAnnotation(Transient.class)).map(field1 -> {
             Column column = field1.getAnnotation(Column.class);

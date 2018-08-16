@@ -19,31 +19,47 @@ import java.util.Map;
  * @Date: 2018/8/12 22:57
  * @Description:
  */
-public class Cnd extends AbstractQuery implements Query {
+public abstract class Cnd extends AbstractQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(Cnd.class);
 
-    private JdbcOperations jdbcOperations = null;
+    protected JdbcOperations jdbcOperations = null;
 
-    private Class clazz;
+    protected Class clazz;
 
-    private Cnd() {
+    protected DbType dbType;
 
-    }
-
-    protected static Cnd of(Class cls, JdbcOperations jdbcOperations) {
-        Cnd dsl = new Cnd();
-        dsl.jdbcOperations = jdbcOperations;
-        dsl.clazz = cls;
+    protected static Cnd of(Class cls, DbType dbType, JdbcOperations jdbcOperations) {
+        Cnd dsl = null;
+        switch (dbType) {
+            case MYSQL:
+                dsl = new CndMysql(cls, jdbcOperations);
+                break;
+            case ORACLE:
+                dsl = new CndOracle(cls, jdbcOperations);
+                break;
+        }
         return dsl;
     }
 
     public Cnd condition() {
-        Cnd dsl = new Cnd();
-        dsl.jdbcOperations = this.jdbcOperations;
-        dsl.clazz = this.clazz;
+        Cnd dsl = null;
+        switch (dbType) {
+            case MYSQL:
+                dsl = new CndMysql(this.clazz, this.jdbcOperations);
+                break;
+            case ORACLE:
+                dsl = new CndOracle(this.clazz, this.jdbcOperations);
+                break;
+        }
         return dsl;
     }
+
+    @Override
+    public String getCol(String name) {
+        return " " + JpaModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
+    }
+
 
     @Override
     public <T> List<T> select(Class resultType, String... columns) {
@@ -57,7 +73,7 @@ public class Cnd extends AbstractQuery implements Query {
         } else {
             sb = new StringBuilder("SELECT *");
         }
-        sb.append(" FROM ").append(ModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(" FROM ").append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
@@ -137,7 +153,7 @@ public class Cnd extends AbstractQuery implements Query {
     @Override
     public int delete() {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(ModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -151,7 +167,7 @@ public class Cnd extends AbstractQuery implements Query {
     @Override
     public long count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) FROM ");
-        sb.append(ModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -231,21 +247,11 @@ public class Cnd extends AbstractQuery implements Query {
     }
 
 
-    /***
-     * 获取错误提示
-     *
-     * @return
-     */
-    private String getSqlErrorTip(String couse) {
-        return String.format("\n┏━━━━━ SQL语法错误:\n" + "┣SQL：%s\n" + "┣原因：%s\n" + "┣解决办法：您可能需要重新获取一个Query\n" + "┗━━━━━\n",
-                getSql().toString(), couse);
-    }
-
     private <T> int insert(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
         Field[] fields = t.getClass().getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + ModelManager.getTableName(t.getClass()) + "( ");
-        List<ImmutablePair<String, Object>> pairList = ModelManager.getTableColumnNameAndValue(t, ignoreNull);
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(t.getClass()) + "( ");
+        List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
             if (i == (pairList.size() - 1))
@@ -277,10 +283,10 @@ public class Cnd extends AbstractQuery implements Query {
     private <T> int update(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
         Field[] fields = t.getClass().getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("UPDATE " + ModelManager.getTableName(t.getClass()) + " SET ");
-        List<ImmutablePair<String, Object>> pairList = ModelManager.getTableColumnNameAndValue(t, ignoreNull);
+        StringBuilder stringBuilder = new StringBuilder("UPDATE " + JpaModelManager.getTableName(t.getClass()) + " SET ");
+        List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //获取主键id
-        Field pk = ModelManager.getPrimaryKeyColName(t);
+        Field pk = JpaModelManager.getPrimaryKeyColName(t.getClass());
         Assert.notNull(pk, "主键竟然为null?这不合理。");
         String pkName = pk.getName();
         Column column = pk.getAnnotation(Column.class);
@@ -315,20 +321,5 @@ public class Cnd extends AbstractQuery implements Query {
     /**
      * 增加分页，排序
      */
-    private void addAdditionalPartSql() {
-        StringBuilder sb = this.getSql();
-        if (this.orderBy != null) {
-            sb.append(orderBy.getOrderBy()).append(" ");
-        }
-
-        if (this.groupBy != null) {
-            sb.append(groupBy.getGroupBy()).append(" ");
-        }
-        // 增加翻页
-        if (this.startRow != -1) {
-            //setSql(new StringBuilder(sqlManager.getDbStyle().getPageSQLStatement(this.getSql().toString(), startRow, pageSize)));
-            //todo 只考虑了mysql
-            sb.append(String.format("limit %s,%s", startRow, pageSize)).append(" ");
-        }
-    }
+    protected abstract void addAdditionalPartSql();
 }

@@ -4,17 +4,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
 
-/**
- * @author GavinKing
- */
 public class Db {
 
     private Logger log = LoggerFactory.getLogger(Db.class);
 
     private JdbcOperations jdbcOperations;
 
-    public Db(JdbcOperations jdbcOperations) {
+    private DbType dbType;
+
+    public Db(JdbcOperations jdbcOperations, DbType dbType) {
         this.jdbcOperations = jdbcOperations;
+        this.dbType = dbType;
     }
 
     /**
@@ -23,7 +23,7 @@ public class Db {
      * @return
      */
     public Cnd cnd(Class cls) {
-        return Cnd.of(cls, this.jdbcOperations);
+        return Cnd.of(cls, dbType, this.jdbcOperations);
     }
 
 

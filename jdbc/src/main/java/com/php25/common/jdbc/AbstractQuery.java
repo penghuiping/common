@@ -419,5 +419,4 @@ public abstract class AbstractQuery implements Query {
     public List<Object> getParams() {
         return params;
     }
-
 }

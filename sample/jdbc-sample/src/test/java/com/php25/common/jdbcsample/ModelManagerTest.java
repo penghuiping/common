@@ -1,13 +1,17 @@
 package com.php25.common.jdbcsample;
 
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.core.util.TimeUtil;
-import com.php25.common.jdbc.ModelManager;
+import com.php25.common.core.util.JsonUtil;
+import com.php25.common.jdbc.JpaModelManager;
 import com.php25.common.jdbcsample.model.Customer;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: penghuiping
@@ -16,10 +20,9 @@ import java.util.Date;
  */
 public class ModelManagerTest {
 
+    private Logger logger = LoggerFactory.getLogger(ModelManagerTest.class);
 
     private Customer customer;
-
-    private Integer loopSize = 10;
 
     @Before
     public void before() {
@@ -31,12 +34,19 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void getTableColumnNameAndValue() {
+        List<ImmutablePair<String, Object>> immutablePairs = JpaModelManager.getTableColumnNameAndValue(customer, true);
+        logger.info(JsonUtil.toPrettyJson(immutablePairs));
+    }
+
+    @Test
+    public void getDbColumnByClassColumn() {
+        String value = JpaModelManager.getDbColumnByClassColumn(Customer.class, "createTime");
+        logger.info(value);
+    }
+
+    @Test
     public void test() {
-        Long start = TimeUtil.getCurrentTimeMillis();
-        for (int i = 0; i < loopSize; i++) {
-            ModelManager.getTableColumnNameAndValue(customer, true);
-        }
-        Long end = TimeUtil.getCurrentTimeMillis();
-        System.out.println("test耗时为:" + (end - start));
+        //logger.info();
     }
 }

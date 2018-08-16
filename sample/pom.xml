@@ -19,6 +19,7 @@
         <module>jdbc-sample</module>
         <module>jpa-sample</module>
         <module>core-sample</module>
+        <module>redis-sample</module>
     </modules>
 
     <properties>

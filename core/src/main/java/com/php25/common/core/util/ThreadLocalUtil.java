@@ -2,6 +2,7 @@ package com.php25.common.core.util;
 
 /**
  * ThreadLocal帮助类
+ *
  * @author penghuiping
  * @Timer 11/17/15.
  */

@@ -5,7 +5,10 @@ import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
+import com.php25.common.jdbc.DbType;
+import com.php25.common.jdbc.JpaModelManager;
 import com.php25.common.jdbcsample.model.Customer;
+import org.junit.Assert;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -34,6 +37,8 @@ public class JdbcJmhTest {
 
     private Db db;
 
+    private List<Customer> customers;
+
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(JdbcJmhTest.class.getSimpleName())
@@ -60,11 +65,11 @@ public class JdbcJmhTest {
 
         this.jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
         this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
-        this.db = new Db(this.jdbcTemplate);
+        this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 
         jdbcTemplate.update("drop table if exists t_customer;create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
         Cnd cnd = this.db.cnd(Customer.class);
-        List<Customer> customers = Lists.newArrayList();
+        this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
@@ -73,13 +78,36 @@ public class JdbcJmhTest {
             customer.setAge(i * 10);
             customer.setCreateTime(new Date());
             customer.setEnable(1);
-            customers.add(customer);
+            this.customers.add(customer);
             cnd.insert(customer);
         }
+
+    }
+
+    //@org.openjdk.jmh.annotations.Benchmark
+    public void queryByUsername() throws Exception {
+        Cnd cnd = this.db.cnd(Customer.class);
+        List<Customer> customers1 = cnd.whereEq("username", "jack0").limit(0, 1).asc("id").select();
+    }
+
+    //@org.openjdk.jmh.annotations.Benchmark
+    public void getTableColumnNameAndValue() throws Exception {
+        JpaModelManager.getTableColumnNameAndValue(customers.get(0), true);
+    }
+
+    //@org.openjdk.jmh.annotations.Benchmark
+    public void getPrimaryKeyColName() throws Exception {
+        JpaModelManager.getPrimaryKeyColName(Customer.class);
+    }
+
+    //@org.openjdk.jmh.annotations.Benchmark
+    public void getDbColumnByClassColumn() throws Exception {
+        JpaModelManager.getDbColumnByClassColumn(Customer.class, "id");
     }
 
     @org.openjdk.jmh.annotations.Benchmark
-    public void measureName() throws Exception {
-        List<Customer> customers1 = this.db.cnd(Customer.class).whereEq("username", "jack0").limit(0, 1).asc("id").select();
+    public void getIdValue() throws Exception {
+        Customer customer = this.db.cnd(Customer.class).whereEq("id", customers.get(0).getId()).single();
+        Assert.assertEquals(customer.getId(), customers.get(0).getId());
     }
 }

@@ -1,4 +1,4 @@
-package com.php25.common.config;
+package com.php25.common.redissample.config;
 
 import com.php25.common.core.service.ConsistentHashingService;
 import com.php25.common.core.service.ConsistentHashingServiceImpl;

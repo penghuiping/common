@@ -4,14 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- *
  * 字符串帮助类
+ *
  * @author penghuiping
  * @Timer 2017/2/4
  */
 public class StringUtil {
     /**
      * 如果字符串为null或者""或者"  "都返回true
+     *
      * @param str
      * @return
      */
@@ -21,6 +22,7 @@ public class StringUtil {
 
     /**
      * 如果字符串为null或者""返回true
+     *
      * @param str
      * @return
      */
@@ -30,6 +32,7 @@ public class StringUtil {
 
     /**
      * 判断两个字符串时候相等
+     *
      * @param actual
      * @param expected
      * @return
@@ -40,6 +43,7 @@ public class StringUtil {
 
     /**
      * 把null转换成空字符串
+     *
      * @param str
      * @return 如果参数str不是null，则直接返回str
      */
@@ -73,7 +77,7 @@ public class StringUtil {
     }
 
     /**
-     *URLEncode中文字符串，编码是utf-8
+     * URLEncode中文字符串，编码是utf-8
      *
      * <pre>
      * utf8Encode(null)        =   null

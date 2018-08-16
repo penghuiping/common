@@ -19,14 +19,12 @@ import java.util.concurrent.TimeUnit;
  * Created by penghuiping on 16/9/2.
  */
 public class RedisSpringBootServiceImpl implements RedisService {
-    private static Logger logger = LoggerFactory.getLogger(RedisSpringBootServiceImpl.class);
-
-    private StringRedisTemplate redisTemplate;
-
     private static final String LUA_SCRIPT_LOCK = "return redis.call('set',KEYS[1],ARGV[1],'NX','PX',ARGV[2])";
     private static final RedisScript<String> SCRIPT_LOCK = new DefaultRedisScript<String>(LUA_SCRIPT_LOCK, String.class);
     private static final String LUA_SCRIPT_UNLOCK = "if redis.call('get',KEYS[1]) == ARGV[1] then return tostring(redis.call('del', KEYS[1])) else return '0' end";
     private static final RedisScript<String> SCRIPT_UNLOCK = new DefaultRedisScript<String>(LUA_SCRIPT_UNLOCK, String.class);
+    private static Logger logger = LoggerFactory.getLogger(RedisSpringBootServiceImpl.class);
+    private StringRedisTemplate redisTemplate;
 
     public RedisSpringBootServiceImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
