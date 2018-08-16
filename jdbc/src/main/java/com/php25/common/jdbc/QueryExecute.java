@@ -80,6 +80,9 @@ public interface QueryExecute {
      */
     <M> int insert(M m);
 
+
+    <M> int[] insertBatch(List<M> list);
+
     /***
      * 插入，包括null值
      * @param m

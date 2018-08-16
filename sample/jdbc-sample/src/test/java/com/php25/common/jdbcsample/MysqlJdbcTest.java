@@ -5,11 +5,10 @@ import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.core.util.TimeUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
-import com.php25.common.jdbc.DbType;
 import com.php25.common.jdbcsample.model.Customer;
+import com.php25.common.jdbcsample.repository.CustomerRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +31,7 @@ import java.util.Map;
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class JdbcTest {
+public class MysqlJdbcTest {
 
     @Autowired
     IdGeneratorService idGeneratorService;
@@ -40,13 +39,19 @@ public class JdbcTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    private Logger log = LoggerFactory.getLogger(JdbcTest.class);
+    @Autowired
+    Db db;
+
+    @Autowired
+    CustomerRepository customerRepository;
+
+    private Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 
     @Before
     public void save() throws Exception {
-        Long start = TimeUtil.getCurrentTimeMillis();
         jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
-        Cnd cnd = new Db(jdbcTemplate, DbType.MYSQL).cnd(Customer.class);
+
+        Cnd cnd = db.cnd(Customer.class);
         List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -75,7 +80,7 @@ public class JdbcTest {
 
     @Test
     public void query() {
-        List<Customer> customers1 = new Db(jdbcTemplate, DbType.ORACLE).cnd(Customer.class)
+        List<Customer> customers1 = db.cnd(Customer.class)
                 .orEq("username", "jack1")
                 .limit(0, 1).asc("id").select();
         System.out.println(JsonUtil.toPrettyJson(customers1));
@@ -84,7 +89,6 @@ public class JdbcTest {
 
     @Test
     public void groupBy() {
-        Db db = new Db(jdbcTemplate, DbType.MYSQL);
         Cnd cnd = db.cnd(Customer.class);
         List<Map> customers1 = cnd.groupBy("enable").having(cnd.condition().andGreat("avg_age", 10)).mapSelect("avg(age) as avg_age", "enable");
         System.out.println(JsonUtil.toPrettyJson(customers1));
@@ -92,20 +96,19 @@ public class JdbcTest {
 
     @Test
     public void findOne() {
-        Customer customer = new Db(jdbcTemplate, DbType.MYSQL).cnd(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.cnd(Customer.class).whereEq("username", "jack0").single();
         System.out.println(JsonUtil.toPrettyJson(customer));
     }
 
     @Test
     public void count() {
-        Long count = new Db(jdbcTemplate, DbType.MYSQL).cnd(Customer.class).whereEq("username", "jack0").count();
+        Long count = db.cnd(Customer.class).whereEq("username", "jack0").count();
         System.out.println(count);
     }
 
 
     @Test
     public void update() {
-        Db db = new Db(jdbcTemplate, DbType.MYSQL);
         Customer customer = db.cnd(Customer.class).whereEq("username", "jack0").single();
         customer.setUsername("jack-0");
         db.cnd(Customer.class).update(customer);
@@ -118,12 +121,17 @@ public class JdbcTest {
 
     @Test
     public void delete() {
-        Db db = new Db(jdbcTemplate, DbType.MYSQL);
         List<Customer> customers1 = db.cnd(Customer.class).select();
         System.out.println(JsonUtil.toPrettyJson(customers1));
         db.cnd(Customer.class).andEq("username", "jack0").delete();
         customers1 = db.cnd(Customer.class).select();
         System.out.println(JsonUtil.toPrettyJson(customers1));
+    }
+
+    @Test
+    public void test() {
+        List<Customer> customers = customerRepository.findAllEnabled();
+        return;
     }
 
 }

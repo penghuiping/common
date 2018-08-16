@@ -1,16 +1,14 @@
 package com.php25.common.jdbc;
 
-import com.php25.common.core.util.StringUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.util.Assert;
 
-import javax.persistence.Column;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +55,13 @@ public abstract class Cnd extends AbstractQuery implements Query {
 
     @Override
     public String getCol(String name) {
-        return " " + JpaModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
+        try {
+            return " " + JpaModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
+        } catch (Exception e) {
+            //"无法通过jpa注解找到对应的column,直接调用父类的方法"
+            return super.getCol(name);
+        }
+
     }
 
 
@@ -143,6 +147,50 @@ public abstract class Cnd extends AbstractQuery implements Query {
     @Override
     public <T> int insert(T t) {
         return insert(t, true);
+    }
+
+    @Override
+    public <M> int[] insertBatch(List<M> list) {
+        //泛型获取类所有的属性
+        Field[] fields = clazz.getDeclaredFields();
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
+        List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(list.get(0), false);
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1))
+                stringBuilder.append(pairList.get(i).getLeft());
+            else
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
+        }
+        stringBuilder.append(" ) VALUES ( ");
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1))
+                stringBuilder.append("?");
+            else
+                stringBuilder.append("?,");
+        }
+        stringBuilder.append(" )");
+        log.info("sql语句为:" + stringBuilder.toString());
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JpaModelManager.getTableColumnNameAndValue(list.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+                params.add(tmp.get(i).getRight());
+            }
+            batchParams.add(params.toArray());
+        }
+
+        try {
+            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
+        } catch (Exception e) {
+            log.error("插入操作失败", e);
+            throw new RuntimeException("插入操作失败", e);
+        } finally {
+            clear();
+        }
     }
 
     @Override
@@ -249,8 +297,8 @@ public abstract class Cnd extends AbstractQuery implements Query {
 
     private <T> int insert(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
-        Field[] fields = t.getClass().getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(t.getClass()) + "( ");
+        Field[] fields = clazz.getDeclaredFields();
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
@@ -277,8 +325,8 @@ public abstract class Cnd extends AbstractQuery implements Query {
         } finally {
             clear();
         }
-
     }
+
 
     private <T> int update(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
@@ -286,11 +334,7 @@ public abstract class Cnd extends AbstractQuery implements Query {
         StringBuilder stringBuilder = new StringBuilder("UPDATE " + JpaModelManager.getTableName(t.getClass()) + " SET ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //获取主键id
-        Field pk = JpaModelManager.getPrimaryKeyColName(t.getClass());
-        Assert.notNull(pk, "主键竟然为null?这不合理。");
-        String pkName = pk.getName();
-        Column column = pk.getAnnotation(Column.class);
-        if (null != column && !StringUtil.isBlank(column.name())) pkName = column.name();
+        String pkName = JpaModelManager.getPrimaryKeyColName(t.getClass());
 
         Object pkValue = null;
         for (int i = 0; i < pairList.size(); i++) {

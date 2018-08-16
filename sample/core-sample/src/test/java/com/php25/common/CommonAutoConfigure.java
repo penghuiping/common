@@ -23,6 +23,4 @@ public class CommonAutoConfigure {
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 0);
         return snowflakeIdWorker;
     }
-
-
 }

@@ -59,7 +59,7 @@ public class JdbcJmhTest {
     public void init() {
 
         SpringBootTestContextBootstrapper bootstrapper = new SpringBootTestContextBootstrapper();
-        DefaultBootstrapContext defaultBootstrapContext = new DefaultBootstrapContext(JdbcTest.class, new DefaultCacheAwareContextLoaderDelegate());
+        DefaultBootstrapContext defaultBootstrapContext = new DefaultBootstrapContext(MysqlJdbcTest.class, new DefaultCacheAwareContextLoaderDelegate());
         bootstrapper.setBootstrapContext(defaultBootstrapContext);
         TestContext testContext = bootstrapper.buildTestContext();
 

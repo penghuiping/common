@@ -1,7 +1,6 @@
 package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
-import com.php25.common.core.service.ConsistentHashingService;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.redis.RedisLockInfo;
 import com.php25.common.redis.RedisService;
@@ -38,8 +37,6 @@ public class RedisCommonTest {
     @Autowired
     RedisService redisService;
 
-    @Autowired
-    ConsistentHashingService consistentHashingService;
 
     int count = 0;
 
@@ -81,19 +78,6 @@ public class RedisCommonTest {
         countDownLatch.await();
         result = redisService.incr("test");
         Assert.assertEquals(result, new Long(2001));
-    }
-
-
-    @Test
-    public void consistentHashing() throws Exception {
-        String serverIp = consistentHashingService.getServer("HELLOWORLD");
-        logger.info("serverIp:" + serverIp);
-    }
-
-    @Test
-    public void idGeneratorService() throws Exception {
-        logger.info("snowflake:" + idGeneratorService.getModelPrimaryKeyNumber());
-        logger.info("uuid:" + idGeneratorService.getModelPrimaryKey());
     }
 
 }

@@ -50,12 +50,12 @@ public class JpaModelManager {
     }
 
     /**
-     * 获取model的主键名
+     * 获取model表的主键字段名
      *
      * @param cls
      * @return
      */
-    public static Field getPrimaryKeyColName(Class cls) {
+    public static String getPrimaryKeyColName(Class cls) {
         Assert.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         Field primaryKeyField = null;
@@ -67,7 +67,33 @@ public class JpaModelManager {
             }
         }
         if (null == primaryKeyField) throw new RuntimeException("此类没有用@Id主键");
-        return primaryKeyField;
+
+        String pkName = primaryKeyField.getName();
+        Column column = primaryKeyField.getAnnotation(Column.class);
+        if (null != column && !StringUtil.isBlank(column.name())) pkName = column.name();
+
+        return pkName;
+    }
+
+    /**
+     * 获取model的主键类属性名
+     *
+     * @param cls
+     * @return
+     */
+    public static String getPrimaryKeyFieldName(Class cls) {
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        Field primaryKeyField = null;
+        for (Field field : fields) {
+            Id id = field.getAnnotation(Id.class);
+            if (id != null) {
+                primaryKeyField = field;
+                break;
+            }
+        }
+        if (null == primaryKeyField) throw new RuntimeException("此类没有用@Id主键");
+        return primaryKeyField.getName();
     }
 
     /**
