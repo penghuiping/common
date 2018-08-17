@@ -1,6 +1,7 @@
 package com.php25.common.jdbc.repository;
 
 import com.google.common.collect.Lists;
+import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.jdbc.Cnd;
@@ -157,5 +158,51 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
     @Override
     public void deleteAll() {
         db.cnd(model).delete();
+    }
+
+    @Override
+    public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
+        Cnd cnd = db.cnd(model).andSearchParamBuilder(searchParamBuilder);
+        return Optional.of(cnd.single());
+    }
+
+    @Override
+    public List<T> findAll(SearchParamBuilder searchParamBuilder) {
+        Cnd cnd = db.cnd(model).andSearchParamBuilder(searchParamBuilder);
+        return cnd.select();
+    }
+
+    @Override
+    public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
+        Cnd cnd = db.cnd(model).andSearchParamBuilder(searchParamBuilder);
+        Sort sort = pageable.getSort();
+        Iterator<Sort.Order> iterator = sort.iterator();
+        while (iterator.hasNext()) {
+            Sort.Order order = iterator.next();
+            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
+            else cnd.desc(order.getProperty());
+        }
+        int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
+        List<T> list = cnd.limit(page[0], page[1]).select();
+        long total = cnd.condition().count();
+        return new PageImpl<T>(list, pageable, total);
+    }
+
+    @Override
+    public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
+        Cnd cnd = db.cnd(model).andSearchParamBuilder(searchParamBuilder);
+        Iterator<Sort.Order> iterator = sort.iterator();
+        while (iterator.hasNext()) {
+            Sort.Order order = iterator.next();
+            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
+            else cnd.desc(order.getProperty());
+        }
+        return cnd.select();
+    }
+
+    @Override
+    public long count(SearchParamBuilder searchParamBuilder) {
+        Cnd cnd = db.cnd(model).andSearchParamBuilder(searchParamBuilder);
+        return cnd.count();
     }
 }

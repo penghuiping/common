@@ -1,25 +1,22 @@
-package com.php25.common.jpasample;
+package com.php25.common.jpasample.jmh;
 
 import com.google.common.collect.Lists;
-import com.php25.common.core.dto.DataGridPageDto;
 import com.php25.common.core.service.IdGeneratorService;
-import com.php25.common.core.specification.Operator;
-import com.php25.common.core.specification.SearchParam;
-import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.jpasample.dto.CustomerDto;
+import com.php25.common.jpasample.JpaTest;
 import com.php25.common.jpasample.model.Customer;
 import com.php25.common.jpasample.repository.CustomerRepository;
 import com.php25.common.jpasample.service.CustomerService;
-import org.junit.Assert;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate;
@@ -27,7 +24,7 @@ import org.springframework.test.context.support.DefaultBootstrapContext;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @Auther: penghuiping
@@ -83,14 +80,79 @@ public class JpaJmhTest {
         customerRepository.saveAll(customers);
     }
 
-    //@org.openjdk.jmh.annotations.Benchmark
-    public void measureName() throws Exception {
-        Optional<DataGridPageDto<CustomerDto>> customerDtos = customerService.query(1, 1, new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.EQ).value("jack0").build()), BeanUtils::copyProperties, Sort.by(Sort.Order.asc("id")));
+    @org.openjdk.jmh.annotations.Benchmark
+    public void findAllEnabled() {
+        List<Customer> customers = customerRepository.findAllEnabled();
     }
 
     @org.openjdk.jmh.annotations.Benchmark
-    public void findOne() throws Exception {
-        Optional<CustomerDto> customer = customerService.findOne(customers.get(0).getId());
-        Assert.assertEquals(customer.get().getId(), customers.get(0).getId());
+    public void findAllSort() {
+        Iterable<Customer> customers = customerRepository.findAll(Sort.by(Sort.Order.desc("id")));
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void findAllPage() {
+        Pageable page = PageRequest.of(1, 2, Sort.by(Sort.Order.desc("id")));
+        Page<Customer> customers = customerRepository.findAll(page);
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void save() {
+        Customer customer = new Customer();
+        customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        customer.setUsername("jack" + 4);
+        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setAge(4 * 10);
+        customerRepository.save(customer);
+    }
+
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void findById() {
+        Customer customer = customers.get(0);
+        customerRepository.findById(customer.getId());
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void existsById() {
+        Customer customer = customers.get(0);
+        Boolean result = customerRepository.existsById(customer.getId());
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void findAll() {
+        Iterable iterable = customerRepository.findAll();
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void findAllById() {
+        List<Long> ids = customers.stream().map(Customer::getId).collect(Collectors.toList());
+        Iterable iterable = customerRepository.findAllById(ids);
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void count() {
+        customerRepository.count();
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void deleteById() {
+        customerRepository.deleteById(customers.get(0).getId());
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void deleteByModel() {
+        customerRepository.delete(customers.get(1));
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void deleteAllByIds() {
+        Iterable<Customer> ids = customers.stream().filter(customer -> customer.getId() % 2 == 0).collect(Collectors.toList());
+        customerRepository.deleteAll(ids);
+    }
+
+    @org.openjdk.jmh.annotations.Benchmark
+    public void deleteAll() {
+        customerRepository.deleteAll();
     }
 }

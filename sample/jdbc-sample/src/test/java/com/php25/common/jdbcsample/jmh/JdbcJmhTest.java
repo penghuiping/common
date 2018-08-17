@@ -1,4 +1,4 @@
-package com.php25.common.jdbcsample;
+package com.php25.common.jdbcsample.jmh;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
@@ -7,6 +7,7 @@ import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.DbType;
 import com.php25.common.jdbc.JpaModelManager;
+import com.php25.common.jdbcsample.MysqlJdbcTest;
 import com.php25.common.jdbcsample.model.Customer;
 import org.junit.Assert;
 import org.openjdk.jmh.annotations.*;

@@ -15,6 +15,13 @@ public class SearchParamBuilder {
         return this;
     }
 
+    public SearchParamBuilder append(List<SearchParam> searchParams) {
+        for (SearchParam searchParam : searchParams) {
+            searchParamList.add(searchParam);
+        }
+        return this;
+    }
+
     public List<SearchParam> build() {
         return this.searchParamList;
     }

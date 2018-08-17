@@ -1,5 +1,7 @@
 package com.php25.common.jdbc;
 
+import com.php25.common.core.specification.SearchParam;
+import com.php25.common.core.specification.SearchParamBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -360,6 +363,44 @@ public abstract class Cnd extends AbstractQuery implements Query {
         } finally {
             clear();
         }
+    }
+
+    /**
+     * 通过searchParamBuilder来构造查询条件
+     *
+     * @param searchParamBuilder
+     * @return
+     */
+    public Cnd andSearchParamBuilder(SearchParamBuilder searchParamBuilder) {
+        List<SearchParam> searchParams = searchParamBuilder.build();
+        for (SearchParam searchParam : searchParams) {
+            searchParam.getFieldName();
+            String operator = searchParam.getOperator().name();
+            if (null != operator) {
+                if ("eq".equals(operator.toLowerCase())) {
+                    this.andEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("ne".equals(operator.toLowerCase())) {
+                    this.andNotEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("like".equals(operator.toLowerCase())) {
+                    this.andLike(searchParam.getFieldName(), (String) searchParam.getValue());
+                } else if ("gt".equals(operator.toLowerCase())) {
+                    this.andGreat(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("lt".equals(operator.toLowerCase())) {
+                    this.andLess(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("gte".equals(operator.toLowerCase())) {
+                    this.andGreatEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("lte".equals(operator.toLowerCase())) {
+                    this.andLessEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("in".equals(operator.toLowerCase())) {
+                    this.andIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
+                } else if ("nin".equals(operator.toLowerCase())) {
+                    this.andNotIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
+                } else {
+                    this.andEq(searchParam.getFieldName(), searchParam.getValue());
+                }
+            }
+        }
+        return this;
     }
 
     /**

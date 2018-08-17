@@ -1,12 +1,15 @@
 package com.php25.common.jdbc.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.php25.common.core.dto.DataGridPageDto;
 import com.php25.common.core.service.BaseService;
 import com.php25.common.core.service.DtoToModelTransferable;
 import com.php25.common.core.service.ModelToDtoTransferable;
 import com.php25.common.core.service.SoftDeletable;
+import com.php25.common.core.specification.SearchParam;
 import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.jdbc.repository.BaseRepository;
 import org.slf4j.Logger;
@@ -178,12 +181,15 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Page<MODEL> modelPage = null;
         List<MODEL> adminUserModelList = null;
 
+        List<SearchParam> searchParams1 = JsonUtil.fromJson(searchParams, new TypeReference<List<SearchParam>>() {
+        });
+        SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(searchParams1);
+
         if (-1 == pageNum) {
-            //todo
-            //  adminUserModelList = baseRepository.findAll();
+            adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
             pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
-            //modelPage = baseRepository.findAll(, pageRequest);
+            modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }
 
@@ -221,11 +227,10 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         List<MODEL> adminUserModelList = null;
 
         if (-1 == pageNum) {
-            //todo
-            // adminUserModelList = baseRepository.findAll();
+            adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
             pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
-            //modelPage = baseRepository.findAll(, pageRequest);
+            modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }
 
@@ -332,8 +337,12 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
     @Override
     public Long count(String searchParams) {
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        //todo
-        Long result = baseRepository.count();
+        List<SearchParam> searchParams1 = JsonUtil.fromJson(searchParams, new TypeReference<List<SearchParam>>() {
+        });
+        SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(searchParams1);
+        Long result = baseRepository.count(searchParamBuilder);
         return result;
     }
+
+
 }
