@@ -151,7 +151,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams) {
-        return query(pageNum, pageSize, searchParams, Sort.Direction.DESC, "createTime");
+        return query(pageNum, pageSize, searchParams, BeanUtils::copyProperties, null);
     }
 
     @Override
@@ -176,7 +176,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.notNull(pageSize, "pageSize不能为null");
         Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
         List<MODEL> adminUserModelList = null;
@@ -188,7 +187,11 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         if (-1 == pageNum) {
             adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
-            pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
+            if (null != sort)
+                pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
+            else
+                pageRequest = PageRequest.of(pageNum - 1, pageSize);
+
             modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }
@@ -220,7 +223,6 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         Assert.notNull(pageSize, "pageSize不能为null");
         Assert.notNull(searchParamBuilder, "searchParamBuilder不能为null");
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
 
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
@@ -229,7 +231,10 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         if (-1 == pageNum) {
             adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
-            pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
+            if (null != sort)
+                pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
+            else
+                pageRequest = PageRequest.of(pageNum - 1, pageSize);
             modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }

@@ -23,6 +23,8 @@ public class CustomerDto {
 
     private Integer enable;
 
+    private Integer age;
+
     public Long getId() {
         return id;
     }
@@ -69,5 +71,13 @@ public class CustomerDto {
 
     public void setEnable(Integer enable) {
         this.enable = enable;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 }
