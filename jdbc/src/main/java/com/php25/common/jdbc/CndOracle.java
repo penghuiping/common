@@ -1,14 +1,20 @@
 package com.php25.common.jdbc;
 
+import com.php25.common.core.util.ReflectUtil;
+import com.php25.common.core.util.StringUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.Assert;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,7 +106,7 @@ public class CndOracle extends Cnd {
             if (i == (pairList.size() - 1)) {
                 stringBuilder.append(pairList.get(i).getLeft());
             } else {
-                stringBuilder.append(pairList.get(i).getLeft() + ",");
+                stringBuilder.append(pairList.get(i).getLeft()).append(",");
             }
         }
         stringBuilder.append(" ) VALUES ( ");
@@ -117,7 +123,7 @@ public class CndOracle extends Cnd {
                     }
                 } else {
                     if (pairList.get(i).getLeft().equals(id)) {
-                        stringBuilder.append(pairList.get(i).getRight() + ",");
+                        stringBuilder.append(pairList.get(i).getRight()).append(",");
                     } else {
                         stringBuilder.append("?,");
                         params.add(pairList.get(i).getRight());
@@ -139,11 +145,41 @@ public class CndOracle extends Cnd {
             }
         }
 
-
         stringBuilder.append(" )");
         log.info("sql语句为:" + stringBuilder.toString());
         try {
-            return jdbcOperations.update(stringBuilder.toString(), params.toArray());
+            if (flag) {
+                //sequence情况
+                //获取id field名
+                String idField = JpaModelManager.getPrimaryKeyFieldName(clazz);
+
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+                int rows = jdbcOperations.update(con -> {
+                    PreparedStatement ps = con.prepareStatement(stringBuilder.toString(), Statement.RETURN_GENERATED_KEYS);
+                    int i = 1;
+                    for (Object obj : params.toArray()) {
+                        ps.setObject(i++, obj);
+                    }
+                    return ps;
+                }, keyHolder);
+                if (rows <= 0) {
+                    throw new RuntimeException("insert 操作失败");
+                }
+                Field field = JpaModelManager.getPrimaryKeyField(clazz);
+                if (!field.getType().isAssignableFrom(Long.class)) {
+                    throw new RuntimeException("主键必须是Long类型");
+                }
+                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());
+                return rows;
+            } else {
+                //非sequence情况
+                int rows = jdbcOperations.update(stringBuilder.toString(), params.toArray());
+                if (rows <= 0) {
+                    throw new RuntimeException("insert 操作失败");
+                }
+                return rows;
+            }
+
         } catch (Exception e) {
             log.error("插入操作失败", e);
             throw new RuntimeException("插入操作失败", e);

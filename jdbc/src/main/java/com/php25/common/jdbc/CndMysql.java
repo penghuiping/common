@@ -122,7 +122,10 @@ public class CndMysql extends Cnd {
                     throw new RuntimeException("insert 操作失败");
                 }
                 Field field = JpaModelManager.getPrimaryKeyField(clazz);
-                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey());
+                if (!field.getType().isAssignableFrom(Long.class)) {
+                    throw new RuntimeException("主键必须是Long类型");
+                }
+                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());
                 return rows;
             } else {
                 //非自增操作

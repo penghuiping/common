@@ -84,6 +84,7 @@ public class OracleJdbcTest {
             customer.setEnable(1);
             customers.add(customer);
             cnd.insert(customer);
+            Assert.assertNotNull(customer.getId());
         }
 
         for (int i = 0; i < 3; i++) {
@@ -98,6 +99,7 @@ public class OracleJdbcTest {
             customer.setEnable(0);
             customers.add(customer);
             cnd.insert(customer);
+            Assert.assertNotNull(customer.getId());
         }
     }
 
