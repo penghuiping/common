@@ -1,12 +1,18 @@
 package com.php25.common.jdbc;
 
+import com.php25.common.core.util.ReflectUtil;
+import com.php25.common.core.util.StringUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,6 +53,9 @@ public class CndMysql extends Cnd {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
 
+        //判断是否是auto_increment
+        boolean flag = false;
+
         //判断主键属性上是否有@GeneratedValue注解
         Optional<GeneratedValue> generatedValueOptional = JpaModelManager.getAnnotationGeneratedValue(clazz);
         if (generatedValueOptional.isPresent()) {
@@ -59,8 +68,11 @@ public class CndMysql extends Cnd {
                 case TABLE:
                     throw new RuntimeException("抱歉!mysql不支持这种模式");
                 case IDENTITY:
-                    //由于使用了mysql auto-increment 所以直接移除id
+                    flag = true;
+                    //获取id column名
                     String id = JpaModelManager.getPrimaryKeyColName(clazz);
+
+                    //由于使用了mysql auto-increment 所以直接移除id
                     pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(id)).collect(Collectors.toList());
                     break;
                 case SEQUENCE:
@@ -92,7 +104,34 @@ public class CndMysql extends Cnd {
         stringBuilder.append(" )");
         log.info("sql语句为:" + stringBuilder.toString());
         try {
-            return jdbcOperations.update(stringBuilder.toString(), params.toArray());
+            if (flag) {
+                //自增操作
+                //获取id field名
+                String idField = JpaModelManager.getPrimaryKeyFieldName(clazz);
+
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+                int rows = jdbcOperations.update(con -> {
+                    PreparedStatement ps = con.prepareStatement(stringBuilder.toString(), Statement.RETURN_GENERATED_KEYS);
+                    int i = 1;
+                    for (Object obj : params.toArray()) {
+                        ps.setObject(i++, obj);
+                    }
+                    return ps;
+                }, keyHolder);
+                if (rows <= 0) {
+                    throw new RuntimeException("insert 操作失败");
+                }
+                Field field = JpaModelManager.getPrimaryKeyField(clazz);
+                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey());
+                return rows;
+            } else {
+                //非自增操作
+                int rows = jdbcOperations.update(stringBuilder.toString(), params.toArray());
+                if (rows <= 0) {
+                    throw new RuntimeException("insert 操作失败");
+                }
+                return rows;
+            }
         } catch (Exception e) {
             log.error("插入操作失败", e);
             throw new RuntimeException("插入操作失败", e);

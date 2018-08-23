@@ -24,12 +24,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- *
  * database Repository层的基础实现类
  *
  * @author penghuiping
  * @date 2018-04-04
- *
  */
 @NoRepositoryBean
 public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepository<T, ID> {
@@ -90,12 +88,8 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
 
     @Override
     public <S extends T> S save(S s) {
-        int rows = db.cnd(model).insert(s);
-        if (rows > 0) {
-            return s;
-        } else {
-            throw new RuntimeException("保存数据库对象失败");
-        }
+        db.cnd(model).insert(s);
+        return s;
     }
 
     @Override

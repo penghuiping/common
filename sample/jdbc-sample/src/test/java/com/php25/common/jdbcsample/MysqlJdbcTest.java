@@ -81,6 +81,7 @@ public class MysqlJdbcTest {
             customer.setEnable(1);
             customers.add(customer);
             cnd.insert(customer);
+            Assert.assertNotNull(customer.getId());
         }
 
         for (int i = 0; i < 3; i++) {
@@ -95,6 +96,7 @@ public class MysqlJdbcTest {
             customer.setEnable(0);
             customers.add(customer);
             cnd.insert(customer);
+            Assert.assertNotNull(customer.getId());
         }
     }
 

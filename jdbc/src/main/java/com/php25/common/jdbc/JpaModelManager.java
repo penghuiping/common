@@ -59,6 +59,29 @@ public class JpaModelManager {
     }
 
     /**
+     * 获取model类的主键field
+     *
+     * @param cls
+     * @return
+     */
+    public static Field getPrimaryKeyField(Class cls) {
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        Field primaryKeyField = null;
+        for (Field field : fields) {
+            Id id = field.getAnnotation(Id.class);
+            if (id != null) {
+                primaryKeyField = field;
+                break;
+            }
+        }
+        if (null == primaryKeyField) {
+            throw new RuntimeException("此类没有用@Id主键");
+        }
+        return primaryKeyField;
+    }
+
+    /**
      * 获取model表的主键字段名
      *
      * @param cls
@@ -197,7 +220,7 @@ public class JpaModelManager {
             }
             Object value = null;
             try {
-                value = ReflectUtil.getMethod(t.getClass(), "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length())).invoke(t);
+                value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
