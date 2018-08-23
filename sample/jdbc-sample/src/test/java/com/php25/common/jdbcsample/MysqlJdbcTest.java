@@ -7,8 +7,8 @@ import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
+import com.php25.common.jdbc.DbType;
 import com.php25.common.jdbcsample.model.Customer;
-import com.php25.common.jdbcsample.repository.CustomerRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -39,23 +42,38 @@ public class MysqlJdbcTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Autowired
     Db db;
 
-    @Autowired
-    CustomerRepository customerRepository;
+    private boolean isAutoIncrement = true;
 
     private Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 
+    public void initMeta(boolean isAutoIncrement) throws Exception {
+        Class cls = Class.forName("org.h2.Driver");
+        Driver driver = (Driver) cls.newInstance();
+        Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL", null);
+        Statement statement = connection.createStatement();
+        statement.execute("drop table if exists t_customer");
+        if (isAutoIncrement) {
+            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        } else {
+            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        }
+        statement.closeOnCompletion();
+        connection.close();
+        this.db = new Db(jdbcTemplate, DbType.MYSQL);
+    }
+
     @Before
     public void save() throws Exception {
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
-
+        initMeta(isAutoIncrement);
         Cnd cnd = db.cnd(Customer.class);
         List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            if (!isAutoIncrement) {
+                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -67,7 +85,9 @@ public class MysqlJdbcTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            if (!isAutoIncrement) {
+                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
@@ -127,11 +147,4 @@ public class MysqlJdbcTest {
         customers1 = db.cnd(Customer.class).select();
         System.out.println(JsonUtil.toPrettyJson(customers1));
     }
-
-    @Test
-    public void test() {
-        List<Customer> customers = customerRepository.findAllEnabled();
-        return;
-    }
-
 }

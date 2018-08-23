@@ -304,40 +304,15 @@ public abstract class Cnd extends AbstractQuery implements Query {
         return this.groupBy;
     }
 
-
-    private <T> int insert(T t, boolean ignoreNull) {
-        //泛型获取类所有的属性
-        Field[] fields = clazz.getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
-        List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
-        //拼装sql语句
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append(pairList.get(i).getLeft());
-            } else {
-                stringBuilder.append(pairList.get(i).getLeft() + ",");
-            }
-        }
-        stringBuilder.append(" ) VALUES ( ");
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append("?");
-            } else {
-                stringBuilder.append("?,");
-            }
-            params.add(pairList.get(i).getRight());
-        }
-        stringBuilder.append(" )");
-        log.info("sql语句为:" + stringBuilder.toString());
-        try {
-            return jdbcOperations.update(stringBuilder.toString(), params.toArray());
-        } catch (Exception e) {
-            log.error("插入操作失败", e);
-            throw new RuntimeException("插入操作失败", e);
-        } finally {
-            clear();
-        }
-    }
+    /**
+     * 实现sql语句中的insert
+     *
+     * @param t
+     * @param ignoreNull 是否忽略 实体对象t中为null的属性项
+     * @param <T>
+     * @return
+     */
+    protected abstract <T> int insert(T t, boolean ignoreNull);
 
 
     private <T> int update(T t, boolean ignoreNull) {

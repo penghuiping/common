@@ -5,7 +5,6 @@ import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.core.util.TimeUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.DbType;
@@ -21,6 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,17 +46,37 @@ public class OracleJdbcTest {
 
     private Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
 
+    boolean isSequence = true;
+
+
+    public void initMeta(boolean isSequence) throws Exception {
+        Class cls = Class.forName("org.h2.Driver");
+        Driver driver = (Driver) cls.newInstance();
+        Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=ORACLE", null);
+        Statement statement = connection.createStatement();
+        statement.execute("drop table if exists t_customer");
+        statement.execute("create table t_customer (id number(64,0),username varchar2(20),password varchar2(50),age integer ,create_time date,update_time date,`enable` char)");
+        if (isSequence) {
+            statement.execute("drop SEQUENCE if exists SEQ_ID");
+            statement.execute("CREATE SEQUENCE SEQ_ID");
+        }
+        statement.closeOnCompletion();
+        connection.close();
+
+        this.db = new Db(jdbcTemplate, DbType.ORACLE);
+    }
+
     @Before
     public void save() throws Exception {
-        Long start = TimeUtil.getCurrentTimeMillis();
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
-        this.db = new Db(jdbcTemplate, DbType.ORACLE);
+        initMeta(isSequence);
 
         Cnd cnd = db.cnd(Customer.class);
         List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            if (!isSequence) {
+                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -66,7 +88,9 @@ public class OracleJdbcTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            if (!isSequence) {
+                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());

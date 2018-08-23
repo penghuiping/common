@@ -10,7 +10,9 @@ import org.springframework.util.Assert;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
@@ -25,7 +27,6 @@ import java.util.stream.Stream;
  *
  * @author: penghuiping
  * @date: 2018/8/9 18:11
- *
  */
 public class JpaModelManager {
 
@@ -85,6 +86,45 @@ public class JpaModelManager {
         }
 
         return pkName;
+    }
+
+    /**
+     * 获取model的@GeneratedValue注解
+     *
+     * @param cls
+     * @return
+     */
+    public static Optional<GeneratedValue> getAnnotationGeneratedValue(Class cls) {
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        GeneratedValue generatedValue = null;
+        for (Field field : fields) {
+            generatedValue = field.getAnnotation(GeneratedValue.class);
+            if (generatedValue != null) {
+                break;
+            }
+        }
+        return Optional.ofNullable(generatedValue);
+    }
+
+    /**
+     * 获取model的@SequenceGenerator注解
+     *
+     * @param cls
+     * @return
+     */
+    public static Optional<SequenceGenerator> getAnnotationSequenceGenerator(Class cls) {
+
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        SequenceGenerator generatedValue = null;
+        for (Field field : fields) {
+            generatedValue = field.getAnnotation(SequenceGenerator.class);
+            if (generatedValue != null) {
+                break;
+            }
+        }
+        return Optional.ofNullable(generatedValue);
     }
 
     /**
@@ -165,7 +205,8 @@ public class JpaModelManager {
         });
         List<ImmutablePair<String, Object>> pairList = null;
         if (ignoreNull) {
-            pairList = stream.filter(pair -> pair.right != null).collect(Collectors.toList());
+            String id = JpaModelManager.getPrimaryKeyColName(t.getClass());
+            pairList = stream.filter(pair -> (pair.getLeft().equals(id) || pair.right != null)).collect(Collectors.toList());
         } else {
             pairList = stream.collect(Collectors.toList());
         }

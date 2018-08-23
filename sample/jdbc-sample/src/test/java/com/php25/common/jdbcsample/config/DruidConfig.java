@@ -51,6 +51,6 @@ public class DruidConfig {
 
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
-        return new Db(jdbcTemplate, DbType.MYSQL);
+        return new Db(jdbcTemplate, DbType.ORACLE);
     }
 }
