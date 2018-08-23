@@ -1,7 +1,14 @@
 package com.php25.common.core.util;
 
 import com.google.common.collect.Maps;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -14,15 +21,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/6/6 09:58
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/6/6 09:58
  */
 public class HttpClientUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
 
-    private static final OkHttpClient client = new OkHttpClient.Builder()
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
             .connectTimeout(5, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
@@ -37,9 +43,10 @@ public class HttpClientUtil {
         logger.info(String.format("代理服务器用户名:%s,密码%s", username, password));
         SocketAddress sa = new InetSocketAddress(proxyHostOrIp, port);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
-        return client.newBuilder().proxy(proxy).proxyAuthenticator((route, response) -> {
+        return CLIENT.newBuilder().proxy(proxy).proxyAuthenticator((route, response) -> {
             if (response.request().header("Proxy-Authorization") != null) {
-                return null; // Give up, we've already failed to authenticate.
+                // Give up, we've already failed to authenticate.
+                return null;
             }
             String credential = Credentials.basic(username, password);
             return response.request().newBuilder()
@@ -52,11 +59,11 @@ public class HttpClientUtil {
         logger.info(String.format("代理服务器ip:%s,端口%d", proxyHostOrIp, port));
         SocketAddress sa = new InetSocketAddress(proxyHostOrIp, port);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
-        return client.newBuilder().proxy(proxy).build();
+        return CLIENT.newBuilder().proxy(proxy).build();
     }
 
     public static OkHttpClient getClient() {
-        return client;
+        return CLIENT;
     }
 
 
@@ -95,8 +102,9 @@ public class HttpClientUtil {
             params = Maps.newHashMap();
         }
 
-        if (headers == null)
+        if (headers == null) {
             headers = Maps.newHashMap();
+        }
 
         String urlNew = appendParams(url, params);
 
@@ -172,8 +180,9 @@ public class HttpClientUtil {
         Assert.hasText(url, "url不能为空");
         Assert.hasText(json, "json不能为空");
 
-        if (headers == null)
+        if (headers == null) {
             headers = Maps.newHashMap();
+        }
 
         //拼接headers
         Headers.Builder headersBuilder = new Headers.Builder();

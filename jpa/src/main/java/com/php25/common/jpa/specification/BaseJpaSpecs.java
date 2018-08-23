@@ -12,15 +12,22 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by penghuiping on 16/4/12.
+ * BaseSpecs的jpa实现，可以用来构建符合jpa语法的多条件查询语句
+ * @author penghuiping
+ * @date 2016-04-12
  */
 public class BaseJpaSpecs extends BaseSpecs<Specification> {
-    private final static BeanWrapperImpl convert = new BeanWrapperImpl();
+    private final static BeanWrapperImpl CONVERT = new BeanWrapperImpl();
 
     private static Predicate toPredicate(Root<?> root, CriteriaQuery<?> query,
                                          CriteriaBuilder builder, SearchParam searchParam) {
@@ -92,10 +99,11 @@ public class BaseJpaSpecs extends BaseSpecs<Specification> {
             }
         } else {
             if (expression.getJavaType().isInstance(new Date())) {
-                if (value instanceof String)
+                if (value instanceof String) {
                     objValue = TimeUtil.parseDate((String) value);
+                }
             } else {
-                objValue = convert.convertIfNecessary(value, expression.getJavaType());
+                objValue = CONVERT.convertIfNecessary(value, expression.getJavaType());
             }
         }
 
@@ -132,10 +140,11 @@ public class BaseJpaSpecs extends BaseSpecs<Specification> {
             Predicate p = null;
             for (SearchParam s : searchParams) {
                 try {
-                    if (null == p)
+                    if (null == p) {
                         p = BaseJpaSpecs.toPredicate(root, criteriaQuery, criteriaBuilder, s);
-                    else
+                    } else {
                         p = criteriaBuilder.and(p, BaseJpaSpecs.toPredicate(root, criteriaQuery, criteriaBuilder, s));
+                    }
                 } catch (Exception e) {
                     logger.error("查询出错", e);
                 }

@@ -6,7 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
- * Created by penghuiping on 2018/3/21.
+ * spring starter自动配置类
+ * @author penghuiping
+ * @date 2018/3/21
+ *
  */
 @ComponentScan
 public class CommonAutoConfigure {

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @author penghuiping
+ * @date 2018-08-23
+ */
 public abstract class AbstractQuery implements Query {
 
     public final String AND = "AND";

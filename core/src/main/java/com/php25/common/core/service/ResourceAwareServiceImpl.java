@@ -13,16 +13,19 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Created by penghuiping on 2016/12/18.
+ * 用于加载properties数据
+ * @author penghuiping
+ * @date 2016/12/18
  */
 @Service("resourceAwareService")
 public class ResourceAwareServiceImpl implements ResourceAwareService {
 
 
+    @Override
     public String loadProperties(String fileName) throws IOException {
         Resource r = new ClassPathResource(fileName);
         Properties p = PropertiesLoaderUtils.loadProperties(r);
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(16);
         Set<String> propertyNames = p.stringPropertyNames();
         for (String name : propertyNames) {
             map.put(name, p.getProperty(name));

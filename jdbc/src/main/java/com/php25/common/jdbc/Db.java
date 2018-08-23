@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
 
+/**
+ * @author penghuiping
+ * @date 2018-08-23
+ */
 public class Db {
 
     private Logger log = LoggerFactory.getLogger(Db.class);

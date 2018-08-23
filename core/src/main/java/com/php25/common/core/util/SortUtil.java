@@ -1,9 +1,8 @@
 package com.php25.common.core.util;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/5/31 15:37
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/5/31 15:37
  */
 public class SortUtil {
     /**
@@ -19,34 +18,44 @@ public class SortUtil {
      * @param start
      * @param end
      */
-    public static <T extends Comparable> void quickSort(T arr[], int start, int end) {
-        if (end <= start) return;
+    public static <T extends Comparable> void quickSort(T[] arr, int start, int end) {
+        if (end <= start) {
+            return;
+        }
         T base = arr[start];
-        int i = start, j = end;//初始化两个指针，分别指向数组的头与尾
+        //初始化两个指针，分别指向数组的头与尾
+        int i = start, j = end;
 
         while (true) {
             while (j != i) {
-                T right = arr[--j];//找到小于base的数
+                //找到小于base的数
+                T right = arr[--j];
                 if (right.compareTo(base) < 0) {
-                    arr[i] = right;//当遇到比基准数小的情况停下来,然后把头指针指向的位置赋值为尾指针指向的数字
+                    //当遇到比基准数小的情况停下来,然后把头指针指向的位置赋值为尾指针指向的数字
+                    arr[i] = right;
                     break;
                 }
             }
             while (i != j) {
-                T left = arr[++i];//找到大于base的数
+                //找到大于base的数
+                T left = arr[++i];
                 if (left.compareTo(base) > 0) {
-                    arr[j] = left;//当遇到比基准数大的情况停下来,然后把尾指针指向的位置赋值为头指针指向的数字
+                    //当遇到比基准数大的情况停下来,然后把尾指针指向的位置赋值为头指针指向的数字
+                    arr[j] = left;
                     break;
                 }
             }
 
             if (i == j) {
-                arr[i] = base;//如此反复，直到头指针与尾指针相遇,把头指针指向的位置赋值基准数字。
+                //如此反复，直到头指针与尾指针相遇,把头指针指向的位置赋值基准数字。
+                arr[i] = base;
                 break;
             }
         }
-        quickSort(arr, start, i);//分别在递归以相同的步骤处理左边与右边的数字。排序完成。
-        quickSort(arr, i + 1, end);//分别在递归以相同的步骤处理左边与右边的数字。排序完成。
+        //分别在递归以相同的步骤处理左边与右边的数字。排序完成。
+        quickSort(arr, start, i);
+        //分别在递归以相同的步骤处理左边与右边的数字。排序完成。
+        quickSort(arr, i + 1, end);
     }
 
 
@@ -56,15 +65,18 @@ public class SortUtil {
      * @param arr  需要排序的数组
      * @param temp 临时数组,存放归并排序中的临时数据，避免不停的创建数组
      */
-    public static <T extends Comparable> void mergeSort(T arr[], int start, int end, T temp[]) {
+    public static <T extends Comparable> void mergeSort(T[] arr, int start, int end, T[] temp) {
         if (end - start <= 1) {
             //一直以一分为二的方式分裂，直到数组中只有一个元素时候，天然有就序了，所以无需在进行下面的排序操作
             return;
         }
         int mid = start + (end - start) / 2;
-        mergeSort(arr, start, mid, temp);    //左边排序
-        mergeSort(arr, mid, end, temp); //右边排序
-        mergeArray(arr, start, mid, end, temp); //再将二个有序数列合并
+        //左边排序
+        mergeSort(arr, start, mid, temp);
+        //右边排序
+        mergeSort(arr, mid, end, temp);
+        //再将二个有序数列合并
+        mergeArray(arr, start, mid, end, temp);
     }
 
 
@@ -92,9 +104,13 @@ public class SortUtil {
         }
 
         //超出了5处理情况
-        while (i < srcArr0.length) distArr[z++] = srcArr0[i++];
+        while (i < srcArr0.length) {
+            distArr[z++] = srcArr0[i++];
+        }
 
-        while (j < srcArr1.length) distArr[z++] = srcArr1[j++];
+        while (j < srcArr1.length) {
+            distArr[z++] = srcArr1[j++];
+        }
 
     }
 
@@ -125,9 +141,13 @@ public class SortUtil {
         }
 
         //超出了5处理情况
-        while (i < mid) distArr[z++] = srcArr[i++];
+        while (i < mid) {
+            distArr[z++] = srcArr[i++];
+        }
 
-        while (j < end) distArr[z++] = srcArr[j++];
+        while (j < end) {
+            distArr[z++] = srcArr[j++];
+        }
 
         //将distArr中的元素全部拷贝到原数组中
         z = 0;
@@ -243,7 +263,8 @@ public class SortUtil {
      */
     public static <T extends Comparable> void heapCreation(T[] arr, boolean max) {
         int i = 0;
-        for (i = arr.length / 2 - 1; i >= 0; i--)//((n-1)*2)+1 =n/2-1:0~(n/2-1)为非叶子节点
+        //((n-1)*2)+1 =n/2-1:0~(n/2-1)为非叶子节点
+        for (i = arr.length / 2 - 1; i >= 0; i--)
         {
             heapElementDown(arr, arr.length, i, max);
         }

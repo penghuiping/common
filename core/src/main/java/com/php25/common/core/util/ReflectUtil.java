@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/10 16:04
- * @Description:
+ * 反射帮助类
+ * @author: penghuiping
+ * @date: 2018/8/10 16:04
  */
 public class ReflectUtil {
     private static ConcurrentReferenceHashMap<String, Field> fieldMap = new ConcurrentReferenceHashMap<>();

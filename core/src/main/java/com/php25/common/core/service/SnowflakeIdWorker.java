@@ -2,6 +2,10 @@ package com.php25.common.core.service;
 
 
 /**
+ *
+ * @author penghuiping
+ * @date 2018-05-12
+ *
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
  * 0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 <br>
@@ -89,7 +93,7 @@ public class SnowflakeIdWorker {
 
 
     public SnowflakeIdWorker() {
-        this(0l, 0l);
+        this(0L, 0L);
     }
 
     /**
@@ -143,9 +147,9 @@ public class SnowflakeIdWorker {
         lastTimestamp = timestamp;
 
         //移位并通过或运算拼到一起组成64位的ID
-        return ((timestamp - twepoch) << timestampLeftShift) //
-                | (datacenterId << datacenterIdShift) //
-                | (workerId << workerIdShift) //
+        return ((timestamp - twepoch) << timestampLeftShift)
+                | (datacenterId << datacenterIdShift)
+                | (workerId << workerIdShift)
                 | sequence;
     }
 

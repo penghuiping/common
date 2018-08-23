@@ -16,7 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -29,9 +33,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 22:46
- * @Description:
+ *  service层 实现类基实现类，所有的service层类都应该继承这个类
+ * @author: penghuiping
+ * @date: 2018/8/16 22:46
+ *
  */
 public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
     private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
@@ -187,16 +192,19 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         if (-1 == pageNum) {
             adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
-            if (null != sort)
+            if (null != sort) {
                 pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
-            else
+            } else {
                 pageRequest = PageRequest.of(pageNum - 1, pageSize);
+            }
 
             modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }
 
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        if (null == adminUserModelList) {
+            adminUserModelList = Lists.newArrayList();
+        }
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();
@@ -231,15 +239,18 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         if (-1 == pageNum) {
             adminUserModelList = baseRepository.findAll(searchParamBuilder);
         } else {
-            if (null != sort)
+            if (null != sort) {
                 pageRequest = PageRequest.of(pageNum - 1, pageSize, sort);
-            else
+            } else {
                 pageRequest = PageRequest.of(pageNum - 1, pageSize);
+            }
             modelPage = baseRepository.findAll(searchParamBuilder, pageRequest);
             adminUserModelList = modelPage.getContent();
         }
 
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        if (null == adminUserModelList) {
+            adminUserModelList = Lists.newArrayList();
+        }
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();

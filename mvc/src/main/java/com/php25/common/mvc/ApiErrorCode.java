@@ -1,11 +1,21 @@
 package com.php25.common.mvc;
 
 /**
- * Created by penghuiping on 9/24/15.
+ * @author penghuiping
+ * @date 2015-09-24
  */
 public enum ApiErrorCode {
-    ok(0),//
+    /**
+     * 正常返回数据
+     */
+    ok(0),
+    /**
+     * 服务器错误
+     */
     server_error(1001),
+    /**
+     * 业务逻辑错误
+     */
     business_error(1002);
 
     public int value;

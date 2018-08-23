@@ -9,7 +9,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by penghuiping on 16/4/4.
+ * database Repository层的基础实现类
+ *
+ * @author penghuiping
+ * @date 2016-04-04
+ *
  */
 @NoRepositoryBean
 public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
@@ -21,6 +25,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
         this.entityManager = em;
     }
 
+    @Override
     public List<T> findAllEnabled() {
         List<T> result = entityManager.createQuery("from " + getDomainClass().getName() + " where enable=1").getResultList();
         return result;

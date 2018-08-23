@@ -15,7 +15,11 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.util.Assert;
@@ -28,7 +32,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Created by penghuiping on 16/8/12.
+ *
+ * elasticsearch service层的基础接口,所有操作es的service层类都应该继承这个类
+ * @author penghuiping
+ * @date 2016-08-12
+ *
  */
 public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID> {
 
@@ -191,7 +199,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
             adminUserModelList = modelPage.getContent();
         }
 
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        if (null == adminUserModelList) {
+            adminUserModelList = Lists.newArrayList();
+        }
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();
@@ -238,7 +248,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
             adminUserModelList = modelPage.getContent();
         }
 
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        if (null == adminUserModelList) {
+            adminUserModelList = Lists.newArrayList();
+        }
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();
@@ -265,7 +277,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> imp
         Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         Page<MODEL> modelPage = baseRepository.search(searchQuery);
         List<MODEL> adminUserModelList = modelPage.getContent();
-        if (null == adminUserModelList) adminUserModelList = Lists.newArrayList();
+        if (null == adminUserModelList) {
+            adminUserModelList = Lists.newArrayList();
+        }
         List<DTO> adminUserDtoList = adminUserModelList.stream().map(model -> {
             try {
                 DTO dto = dtoClass.newInstance();

@@ -3,9 +3,9 @@ package com.php25.common.jdbc;
 import org.springframework.jdbc.core.JdbcOperations;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 10:32
- * @Description:
+ *
+ * @author: penghuiping
+ * @date: 2018/8/16 10:32
  */
 public class CndOracle extends Cnd {
 

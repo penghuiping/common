@@ -1,5 +1,11 @@
 package com.php25.common.jdbc;
 
+/**
+ * 对应sql语句中的 group by
+ *
+ * @author penghuiping
+ * @date 2018-08-23
+ */
 public class GroupBy {
     StringBuilder sb = new StringBuilder("GROUP BY ");
     boolean start = true;

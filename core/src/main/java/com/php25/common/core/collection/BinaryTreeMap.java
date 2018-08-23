@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/6/25 13:36
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/6/25 13:36
+ *
  */
 public class BinaryTreeMap<Key extends Comparable, Value> {
     private static final Logger logger = LoggerFactory.getLogger(BinaryTreeMap.class);
@@ -35,8 +35,9 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
         TreeNode treeNode = search(key);
         if (null != treeNode) {
             return treeNode.data;
-        } else
+        } else {
             return null;
+        }
     }
 
     public Value put(Key key, Value value) {
@@ -55,9 +56,9 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
             if (key.compareTo(treeNode.key) > 0) {
                 //比节点数值大，需要放入右子树比较
                 //右子树
-                if (treeNode.rightChild != null)
+                if (treeNode.rightChild != null) {
                     treeNode = treeNode.rightChild;
-                else {
+                } else {
                     //没有右子树,把新增的节点放入这个位置
                     TreeNode tmp1 = new TreeNode();
                     tmp1.setData(value);
@@ -137,8 +138,9 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
             TreeNode treeNode = deleteNode.rightChild;
 
             //2. 持续遍历右孩子的左子树的最左边，直到没有左孩子为止，找到后继节点
-            while (treeNode.leftChild != null)
+            while (treeNode.leftChild != null) {
                 treeNode = treeNode.leftChild;
+            }
 
 
             //3. 删除节点的父节点孩子指向后继节点
@@ -158,8 +160,9 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
                 //后继节点的父亲节点指向删除节点的父亲节点
                 //设置删除节点左孩子的父亲是后继节点
                 treeNode.setLeftChild(deleteNode.leftChild);
-                if (deleteNode.leftChild != null)
+                if (deleteNode.leftChild != null) {
                     deleteNode.leftChild.setParent(treeNode);
+                }
                 treeNode.setParent(deleteNode.parent);
             } else {
                 //1. 后继节点的右孩子的父亲设置为后继节点的父亲，后继节点父亲的左孩子设置为后继节点的右孩子
@@ -174,11 +177,13 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
                 treeNode.setLeftChild(deleteNode.leftChild);
                 treeNode.setRightChild(deleteNode.rightChild);
 
-                if (deleteNode.leftChild != null)
+                if (deleteNode.leftChild != null) {
                     deleteNode.leftChild.setParent(treeNode);
+                }
 
-                if (deleteNode.rightChild != null)
+                if (deleteNode.rightChild != null) {
                     deleteNode.rightChild.setParent(treeNode);
+                }
 
                 treeNode.setParent(deleteNode.parent);
             }
@@ -217,7 +222,9 @@ public class BinaryTreeMap<Key extends Comparable, Value> {
     }
 
     private void transTree(TreeNode treeNode, StringBuilder sb) {
-        if (treeNode == null) return;
+        if (treeNode == null) {
+            return;
+        }
 
         sb.append(treeNode.key).append(",");
 

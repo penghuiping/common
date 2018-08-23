@@ -46,13 +46,21 @@ public interface RedisService {
      * 读取缓存
      *
      * @param key
+     * @param cls
      * @return
      * @author penghuiping
      * @Timer 2016/12/17.
      */
     public <T> T get(final String key, Class<T> cls);
 
-
+    /**
+     * 读取缓存
+     *
+     * @param key
+     * @param cls
+     * @param <T>
+     * @return
+     */
     public <T> T get(final String key, TypeReference<T> cls);
 
     /**

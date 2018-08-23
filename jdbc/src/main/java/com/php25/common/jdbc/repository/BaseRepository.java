@@ -13,21 +13,61 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Created by penghuiping on 2016/4/3.
+ * database repository层的基础接口
+ *
+ * @author penghuiping
+ * @date 2016/4/3
  */
 @NoRepositoryBean
 public interface BaseRepository<T, ID extends Serializable> extends PagingAndSortingRepository<T, ID> {
 
-    public List<T> findAllEnabled();
+    /**
+     * 获取所有有效的数据项,在软删除的环境中,指的是没有软删除的数据
+     *
+     * @return
+     */
+    List<T> findAllEnabled();
 
-    Optional<T> findOne(@Nullable SearchParamBuilder var1);
+    /**
+     * 根据查询条件，查询符合条件的一条数据
+     *
+     * @param searchParamBuilder 查询条件
+     * @return
+     */
+    Optional<T> findOne(@Nullable SearchParamBuilder searchParamBuilder);
 
-    List<T> findAll(@Nullable SearchParamBuilder var1);
+    /**
+     * 根据查询条件，查询符合条件的一组数据
+     *
+     * @param searchParamBuilder 查询条件
+     * @return
+     */
+    List<T> findAll(@Nullable SearchParamBuilder searchParamBuilder);
 
-    Page<T> findAll(@Nullable SearchParamBuilder var1, Pageable var2);
+    /**
+     * 根据查询条件，用分页的方式，查询符合条件的一组数据
+     *
+     * @param searchParamBuilder 查询条件
+     * @param pageable           分页参数
+     * @return
+     */
+    Page<T> findAll(@Nullable SearchParamBuilder searchParamBuilder, Pageable pageable);
 
-    List<T> findAll(@Nullable SearchParamBuilder var1, Sort var2);
+    /**
+     * 根据查询条件，查询符合条件的一组数据，并且根据排序条件进行排序
+     *
+     * @param searchParamBuilder 查询条件
+     * @param sort               排序条件
+     * @return
+     */
+    List<T> findAll(@Nullable SearchParamBuilder searchParamBuilder, Sort sort);
 
-    long count(@Nullable SearchParamBuilder var1);
+    /**
+     * 根据查询条件，统计符合条件的记录数
+     *
+     * @param searchParamBuilder
+     * @return
+     */
+    long count(@Nullable SearchParamBuilder searchParamBuilder);
 
 }

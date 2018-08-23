@@ -9,7 +9,10 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 /**
- * Created by penghuiping on 16/4/12.
+ * BaseSpecs的基实现，所有的具体的BaseSpecs都应该继承这个类。
+ * @author penghuiping
+ * @date 2016-04-12
+ *
  */
 public abstract class BaseSpecs<T> {
     protected static Logger logger = LoggerFactory.getLogger(BaseSpecs.class);
@@ -27,5 +30,11 @@ public abstract class BaseSpecs<T> {
 
     }
 
+    /**
+     * 通过SearchParamBuilder构建查询条件
+     *
+     * @param searchParamBuilder
+     * @return
+     */
     public abstract T getSpecs(final SearchParamBuilder searchParamBuilder);
 }

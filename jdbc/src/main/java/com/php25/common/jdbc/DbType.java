@@ -1,10 +1,19 @@
 package com.php25.common.jdbc;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 10:25
- * @Description:
+ *
+ * 用于区分用的什么数据库
+ *
+ * @author: penghuiping
+ * @date: 2018/8/16 10:25
  */
 public enum DbType {
-    MYSQL, ORACLE
+    /**
+     * 表示mysql数据库
+     */
+    MYSQL,
+    /**
+     * 表示oracle数据库
+     */
+    ORACLE
 }

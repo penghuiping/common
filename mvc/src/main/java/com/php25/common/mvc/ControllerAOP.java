@@ -12,14 +12,19 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 /**
- * Created by penghuiping on 2016/12/23.
+ * 对controller层方法错误进行统一处理
+ * @author penghuiping
+ * @date 2016/12/23
+ *
  */
 @Aspect
 @Component
 public class ControllerAOP {
     private static Logger logger = LoggerFactory.getLogger(ControllerAOP.class);
 
-    //@Pointcut("execution(* com.joinsoft..*.*Controller.*(..))")
+    /**
+     * @Pointcut("execution(* com.joinsoft..*.*Controller.*(..))")
+     */
     @Pointcut("@within(org.springframework.stereotype.Controller)")
     private void anyMethod() {
     }//定义一个切入点
@@ -28,7 +33,8 @@ public class ControllerAOP {
     @Around("anyMethod()")
     public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
         try {
-            Object object = pjp.proceed();//执行该方法
+            //执行该方法
+            Object object = pjp.proceed();
             return object;
         } catch (Exception e) {
             logger.error("出错啦!!", e);

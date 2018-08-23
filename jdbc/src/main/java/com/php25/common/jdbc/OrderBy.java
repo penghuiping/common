@@ -1,5 +1,11 @@
 package com.php25.common.jdbc;
 
+/**
+ * 对应sql语句中的 order by
+ *
+ * @author penghuiping
+ * @date 2018-08-23
+ */
 public class OrderBy {
     StringBuilder sb = new StringBuilder("ORDER BY ");
 

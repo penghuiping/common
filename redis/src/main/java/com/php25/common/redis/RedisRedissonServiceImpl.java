@@ -12,7 +12,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by penghuiping on 16/9/2.
+ * redis服务 redisson实现
+ * @author penghuiping
+ * @date 2016-09-2
  */
 public class RedisRedissonServiceImpl implements RedisService {
     private static Logger logger = LoggerFactory.getLogger(RedisRedissonServiceImpl.class);
@@ -32,6 +34,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      *
      * @param keys
      */
+    @Override
     public void remove(final String... keys) {
         for (String key : keys) {
             redisson.getBucket(key).delete();
@@ -44,6 +47,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      *
      * @param key
      */
+    @Override
     public void remove(final String key) {
         if (exists(key)) {
             RBucket rBucket = redisson.getBucket(key);
@@ -57,6 +61,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      * @param key
      * @return
      */
+    @Override
     public boolean exists(final String key) {
         RBucket rBucket = redisson.getBucket(key);
         return (null != rBucket.get());
@@ -68,6 +73,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      * @param key
      * @return
      */
+    @Override
     public <T> T get(final String key, Class<T> cls) {
         String value = (String) redisson.getBucket(key).get();
         try {
@@ -85,6 +91,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      * @param <T>
      * @return
      */
+    @Override
     public <T> T get(final String key, TypeReference<T> cls) {
         String value = (String) redisson.getBucket(key).get();
         try {
@@ -102,6 +109,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      * @param value
      * @return
      */
+    @Override
     public boolean set(final String key, Object value) {
         boolean result = false;
         try {
@@ -134,6 +142,7 @@ public class RedisRedissonServiceImpl implements RedisService {
      * @param expireTime 单位秒
      * @return
      */
+    @Override
     public boolean set(final String key, Object value, Long expireTime) {
         boolean result = false;
         try {

@@ -5,13 +5,20 @@ import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 /**
- * Created by penghuiping on 16/4/4.
+ *
+ * orm数据库实体的基类，用于软删除
+ * @author penghuiping
+ * @date 2016-04-04
+ *
  */
 @MappedSuperclass
 public abstract class BaseSoftDeleteModel extends BaseModel implements Serializable {
 
+    /**
+     * 0.无效 1.有效 2.已删除
+     */
     @Column
-    private Integer enable;//0.无效 1.有效 2.已删除
+    private Integer enable;
 
     public Integer getEnable() {
         return enable;

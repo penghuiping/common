@@ -49,7 +49,7 @@ public class MysqlJdbcTest {
 
     @Before
     public void save() throws Exception {
-        jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
 
         Cnd cnd = db.cnd(Customer.class);
         List<Customer> customers = Lists.newArrayList();

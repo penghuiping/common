@@ -16,7 +16,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by penghuiping on 16/9/2.
+ * redis服务spring redis实现
+ * @author penghuiping
+ * @date 2016-09-02
  */
 public class RedisSpringBootServiceImpl implements RedisService {
     private static final String LUA_SCRIPT_LOCK = "return redis.call('set',KEYS[1],ARGV[1],'NX','PX',ARGV[2])";
@@ -39,6 +41,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      *
      * @param keys
      */
+    @Override
     public void remove(final String... keys) {
         redisTemplate.delete(Lists.newArrayList(keys));
     }
@@ -49,6 +52,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      *
      * @param key
      */
+    @Override
     public void remove(final String key) {
         if (exists(key)) {
             redisTemplate.delete(key);
@@ -61,6 +65,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      * @param key
      * @return
      */
+    @Override
     public boolean exists(final String key) {
         return redisTemplate.hasKey(key);
     }
@@ -71,6 +76,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      * @param key
      * @return
      */
+    @Override
     public <T> T get(final String key, Class<T> cls) {
         try {
             String value = redisTemplate.boundValueOps(key).get();
@@ -88,6 +94,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      * @param <T>
      * @return
      */
+    @Override
     public <T> T get(final String key, TypeReference<T> cls) {
         try {
             String value = redisTemplate.boundValueOps(key).get();
@@ -105,6 +112,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      * @param value
      * @return
      */
+    @Override
     public boolean set(final String key, Object value) {
         boolean result = false;
         try {
@@ -136,6 +144,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
      * @param expireTime 单位秒
      * @return
      */
+    @Override
     public boolean set(final String key, Object value, Long expireTime) {
         boolean result = false;
         try {
@@ -152,7 +161,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
         if (exists(key)) {
             return redisTemplate.boundValueOps(key).getExpire();
         } else {
-            return -1l;
+            return -1L;
         }
     }
 

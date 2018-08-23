@@ -8,7 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -19,9 +23,9 @@ import java.util.stream.Stream;
 /**
  * 解析jpa注解与数据库model的对应关系帮助类
  *
- * @Auther: penghuiping
- * @Date: 2018/8/9 18:11
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/9 18:11
+ *
  */
 public class JpaModelManager {
 
@@ -35,10 +39,14 @@ public class JpaModelManager {
     public static String getTableName(Class<?> cls) {
         Assert.notNull(cls, "class不能为null");
         Entity entity = cls.getAnnotation(Entity.class);
-        if (null == entity) throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Entity注解");
+        if (null == entity) {
+            throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Entity注解");
+        }
 
         Table table = cls.getAnnotation(Table.class);
-        if (null == table) throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Table注解");
+        if (null == table) {
+            throw new IllegalArgumentException(cls.getName() + ":没有javax.persistence.Table注解");
+        }
 
         //获取表名
         String tableName = table.name();
@@ -66,11 +74,15 @@ public class JpaModelManager {
                 break;
             }
         }
-        if (null == primaryKeyField) throw new RuntimeException("此类没有用@Id主键");
+        if (null == primaryKeyField) {
+            throw new RuntimeException("此类没有用@Id主键");
+        }
 
         String pkName = primaryKeyField.getName();
         Column column = primaryKeyField.getAnnotation(Column.class);
-        if (null != column && !StringUtil.isBlank(column.name())) pkName = column.name();
+        if (null != column && !StringUtil.isBlank(column.name())) {
+            pkName = column.name();
+        }
 
         return pkName;
     }
@@ -92,7 +104,9 @@ public class JpaModelManager {
                 break;
             }
         }
-        if (null == primaryKeyField) throw new RuntimeException("此类没有用@Id主键");
+        if (null == primaryKeyField) {
+            throw new RuntimeException("此类没有用@Id主键");
+        }
         return primaryKeyField.getName();
     }
 
@@ -113,10 +127,11 @@ public class JpaModelManager {
         }
         Column column = fieldOptional.get().getAnnotation(Column.class);
         String columnName = null;
-        if (null == column)
+        if (null == column) {
             columnName = name;
-        else
+        } else {
             columnName = StringUtil.isBlank(column.name()) ? name : column.name();
+        }
         return columnName;
     }
 
@@ -135,10 +150,11 @@ public class JpaModelManager {
             Column column = field1.getAnnotation(Column.class);
             String fieldName = field1.getName();
             String columnName = null;
-            if (null == column)
+            if (null == column) {
                 columnName = fieldName;
-            else
+            } else {
                 columnName = StringUtil.isBlank(column.name()) ? fieldName : column.name();
+            }
             Object value = null;
             try {
                 value = ReflectUtil.getMethod(t.getClass(), "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length())).invoke(t);

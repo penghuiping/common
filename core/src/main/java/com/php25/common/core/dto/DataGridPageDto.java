@@ -2,32 +2,44 @@ package com.php25.common.core.dto;
 
 import org.springframework.data.domain.Page;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by penghuiping on 2016/2/16.
- * datatable 所需要的数据结构类型
+ * @author penghuiping
+ * @date 2016/2/16.
+ * @description datatable 所需要的数据结构类型
  */
-public class DataGridPageDto<T> implements Serializable {
-    private Long recordsTotal;//总记录数
+public class DataGridPageDto<T> {
 
-    private Long recordsFiltered;//过滤后总记录数
+    /**
+     * 总记录数
+     */
+    private Long recordsTotal;
 
-    private Integer sEcho;  //操作次数
+    /**
+     * 过滤后总记录数
+     */
+    private Long recordsFiltered;
+
+    /**
+     * 操作次数
+     */
+    private Integer sEcho;
 
     private List<T> data;
 
     private String error;
 
-    private Integer draw;//透传数据
+    /**
+     * 透传数据
+     */
+    private Integer draw;
 
     public DataGridPageDto() {
-
         this.data = new ArrayList<>();
-        this.setRecordsTotal(0L);
-        this.setRecordsFiltered(0L);
+        this.recordsTotal = 0L;
+        this.recordsFiltered = 0L;
     }
 
     public DataGridPageDto(Page<T> page) {

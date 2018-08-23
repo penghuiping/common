@@ -3,9 +3,10 @@ package com.php25.common.jdbc;
 import org.springframework.jdbc.core.JdbcOperations;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 10:14
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/16 10:14
+ *
+ *
  */
 public class CndMysql extends Cnd {
 

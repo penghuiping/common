@@ -1,9 +1,10 @@
 package com.php25.common.core.service;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/5/30 09:55
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/5/30 09:55
+ *
+ * 一致性hash
  */
 public interface ConsistentHashingService {
 
@@ -13,5 +14,5 @@ public interface ConsistentHashingService {
      * @param key
      * @return
      */
-    public String getServer(String key);
+    String getServer(String key);
 }

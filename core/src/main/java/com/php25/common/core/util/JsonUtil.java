@@ -11,14 +11,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/8 17:05
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/8 17:05
  */
 public class JsonUtil {
     private static final Logger log = LoggerFactory.getLogger(JsonUtil.class);
 
-    private static final PrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+    private static final PrettyPrinter PRETTY_PRINTER = new DefaultPrettyPrinter();
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -90,7 +89,7 @@ public class JsonUtil {
             throw new IllegalArgumentException("obj不能为null");
         }
         try {
-            return objectMapper.writer(prettyPrinter).writeValueAsString(obj);
+            return objectMapper.writer(PRETTY_PRINTER).writeValueAsString(obj);
         } catch (IOException e) {
             log.error("json解析出错", e);
             throw new RuntimeException("json解析出错", e);

@@ -16,9 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/12 22:57
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/12 22:57
  */
 public abstract class Cnd extends AbstractQuery implements Query {
 
@@ -39,6 +38,9 @@ public abstract class Cnd extends AbstractQuery implements Query {
             case ORACLE:
                 dsl = new CndOracle(cls, jdbcOperations);
                 break;
+            default:
+                dsl = new CndMysql(cls, jdbcOperations);
+                break;
         }
         return dsl;
     }
@@ -51,6 +53,9 @@ public abstract class Cnd extends AbstractQuery implements Query {
                 break;
             case ORACLE:
                 dsl = new CndOracle(this.clazz, this.jdbcOperations);
+                break;
+            default:
+                dsl = new CndMysql(this.clazz, jdbcOperations);
                 break;
         }
         return dsl;
@@ -160,17 +165,19 @@ public abstract class Cnd extends AbstractQuery implements Query {
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(list.get(0), false);
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1))
+            if (i == (pairList.size() - 1)) {
                 stringBuilder.append(pairList.get(i).getLeft());
-            else
+            } else {
                 stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
         }
         stringBuilder.append(" ) VALUES ( ");
         for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1))
+            if (i == (pairList.size() - 1)) {
                 stringBuilder.append("?");
-            else
+            } else {
                 stringBuilder.append("?,");
+            }
         }
         stringBuilder.append(" )");
         log.info("sql语句为:" + stringBuilder.toString());
@@ -305,17 +312,19 @@ public abstract class Cnd extends AbstractQuery implements Query {
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1))
+            if (i == (pairList.size() - 1)) {
                 stringBuilder.append(pairList.get(i).getLeft());
-            else
+            } else {
                 stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
         }
         stringBuilder.append(" ) VALUES ( ");
         for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1))
+            if (i == (pairList.size() - 1)) {
                 stringBuilder.append("?");
-            else
+            } else {
                 stringBuilder.append("?,");
+            }
             params.add(pairList.get(i).getRight());
         }
         stringBuilder.append(" )");
@@ -343,10 +352,11 @@ public abstract class Cnd extends AbstractQuery implements Query {
         for (int i = 0; i < pairList.size(); i++) {
             //移除主键
             if (!pairList.get(i).getLeft().equals(pkName)) {
-                if (i == (pairList.size() - 1))
+                if (i == (pairList.size() - 1)) {
                     stringBuilder.append(pairList.get(i).getLeft()).append("=? ");
-                else
+                } else {
                     stringBuilder.append(pairList.get(i).getLeft()).append("=?,");
+                }
                 params.add(pairList.get(i).getRight());
             } else {
                 pkValue = pairList.get(i).getValue();

@@ -24,7 +24,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Created by penghuiping on 16/4/4.
+ *
+ * database Repository层的基础实现类
+ *
+ * @author penghuiping
+ * @date 2018-04-04
+ *
  */
 @NoRepositoryBean
 public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepository<T, ID> {
@@ -55,8 +60,11 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
-            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
-            else cnd.desc(order.getProperty());
+            if (order.getDirection().isAscending()) {
+                cnd.asc(order.getProperty());
+            } else {
+                cnd.desc(order.getProperty());
+            }
         }
         return cnd.select();
     }
@@ -68,8 +76,11 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
-            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
-            else cnd.desc(order.getProperty());
+            if (order.getDirection().isAscending()) {
+                cnd.asc(order.getProperty());
+            } else {
+                cnd.desc(order.getProperty());
+            }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
         List<T> list = cnd.limit(page[0], page[1]).select();
@@ -179,8 +190,11 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
-            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
-            else cnd.desc(order.getProperty());
+            if (order.getDirection().isAscending()) {
+                cnd.asc(order.getProperty());
+            } else {
+                cnd.desc(order.getProperty());
+            }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
         List<T> list = cnd.limit(page[0], page[1]).select();
@@ -194,8 +208,11 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
-            if (order.getDirection().isAscending()) cnd.asc(order.getProperty());
-            else cnd.desc(order.getProperty());
+            if (order.getDirection().isAscending()) {
+                cnd.asc(order.getProperty());
+            } else {
+                cnd.desc(order.getProperty());
+            }
         }
         return cnd.select();
     }

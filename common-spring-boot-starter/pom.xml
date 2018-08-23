@@ -67,10 +67,10 @@
             <artifactId>jdbc</artifactId>
             <groupId>com.php25</groupId>
         </dependency>
-        <dependency>
-            <artifactId>jpa</artifactId>
-            <groupId>com.php25</groupId>
-        </dependency>
+        <!--<dependency>-->
+        <!--<artifactId>jpa</artifactId>-->
+        <!--<groupId>com.php25</groupId>-->
+        <!--</dependency>-->
         <dependency>
             <artifactId>mvc</artifactId>
             <groupId>com.php25</groupId>

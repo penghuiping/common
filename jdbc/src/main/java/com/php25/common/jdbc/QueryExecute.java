@@ -4,11 +4,15 @@ package com.php25.common.jdbc;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author penghuiping
+ * @date 2018-08-23
+ **/
 public interface QueryExecute {
 
     /**
      * 查询，并映射到指定类上
-     *
+     * @param columns
      * @param resultType
      * @return
      */
@@ -32,7 +36,7 @@ public interface QueryExecute {
 
     /**
      * 查询结果集，结果集每一条并映射到map
-     *
+     * @param columns
      * @return
      */
     List<Map> mapSelect(String... columns);
@@ -80,7 +84,13 @@ public interface QueryExecute {
      */
     <M> int insert(M m);
 
-
+    /**
+     * 批量插入操作
+     *
+     * @param list
+     * @param <M>
+     * @return
+     */
     <M> int[] insertBatch(List<M> list);
 
     /***

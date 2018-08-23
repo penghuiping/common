@@ -1,7 +1,10 @@
 package com.php25.common.core.specification;
 
 /**
- * Created by penghuiping on 16/4/12.
+ * @author penghuiping
+ * @date 2016-04-12
+ *
+ * 查询条件
  */
 public class SearchParam {
     private String fieldName;

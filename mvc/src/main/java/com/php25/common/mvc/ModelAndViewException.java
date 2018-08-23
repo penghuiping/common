@@ -1,7 +1,10 @@
 package com.php25.common.mvc;
 
 /**
- * Created by penghuiping on 2016/12/23.
+ * @author penghuiping
+ * @date 2018/5/17 11:04
+ *
+ * 统一对ModelAndView异常的管理
  */
 public class ModelAndViewException extends Exception {
 

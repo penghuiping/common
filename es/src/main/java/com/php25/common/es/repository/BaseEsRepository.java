@@ -6,7 +6,11 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.io.Serializable;
 
 /**
- * Created by penghuiping on 16/10/13.
+ * elasticsearch Repository层的基础接口
+ *
+ * @author penghuiping
+ * @date 2016-10-13
+ *
  */
 @NoRepositoryBean
 public interface BaseEsRepository<T, ID extends Serializable> extends ElasticsearchRepository<T, ID> {

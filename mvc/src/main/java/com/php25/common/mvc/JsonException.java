@@ -1,7 +1,12 @@
 package com.php25.common.mvc;
 
 /**
- * Created by penghuiping on 2016/12/23.
+ *
+ * @author penghuiping
+ * @date 2016/12/23.
+ *
+ * json错误，一般用于controller返回json数据
+ *
  */
 public class JsonException extends Exception {
 

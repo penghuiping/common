@@ -15,6 +15,12 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author penghuiping
+ * @date 2018/6/25 11:04
+ * <p>
+ * controller层类一般都需要继承这个接口
+ */
 @Validated
 @CrossOrigin
 public class JSONController {
@@ -52,7 +58,6 @@ public class JSONController {
             ret.setErrorCode(ApiErrorCode.server_error.value);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            //e.printStackTrace(pw);
             pw.write("server_error");
             ret.setMessage(sw.toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ret);

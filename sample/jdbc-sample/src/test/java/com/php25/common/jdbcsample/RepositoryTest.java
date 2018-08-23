@@ -55,7 +55,7 @@ public class RepositoryTest {
 
     @Before
     public void before() {
-        jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {

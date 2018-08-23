@@ -6,28 +6,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/15 10:12
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/15 10:12
  */
 public class XmlUtil {
     private static final Logger log = LoggerFactory.getLogger(XmlUtil.class);
 
-    private static final XStream xstream = new XStream();
+    private static final XStream XSTREAM = new XStream();
 
     public static <T> T fromXml(String xml, Class<T> cls) {
-        xstream.processAnnotations(cls);
-        return (T) xstream.fromXML(xml);
+        XSTREAM.processAnnotations(cls);
+        return (T) XSTREAM.fromXML(xml);
     }
 
     public static String toXml(Object obj) {
-        xstream.processAnnotations(obj.getClass());
-        return xstream.toXML(obj);
+        XSTREAM.processAnnotations(obj.getClass());
+        return XSTREAM.toXML(obj);
     }
 
 
     public static <T> T fromXml(String xml, TypeReference<T> tTypeReference) {
-        xstream.processAnnotations(tTypeReference.getClass());
-        return (T) xstream.fromXML(xml);
+        XSTREAM.processAnnotations(tTypeReference.getClass());
+        return (T) XSTREAM.fromXML(xml);
     }
 }

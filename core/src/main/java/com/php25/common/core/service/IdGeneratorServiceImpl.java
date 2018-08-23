@@ -11,7 +11,9 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by penghuiping on 2017/9/18.
+ * id生成器
+ * @author penghuiping
+ * @date 2017/9/18
  */
 @Service("idGeneratorService")
 public class IdGeneratorServiceImpl implements IdGeneratorService {

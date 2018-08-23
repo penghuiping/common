@@ -6,6 +6,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author: penghuiping
+ * @date: 2018/6/4 11:04
+ * <p>
+ * BaseSpecs的工厂类，用于获取不同的BaseSpecs
+ * <p>
+ * 例子:
+ * <p>
+ * SearchParamBuilder builder = new SearchParamBuilder();
+ * builder.append(new SearchParam.Builder().fieldName("username").operator(Operator.EQ).fieldName("小明").build());
+ * BaseSpecsFactory.getInstance(BaseJpaSpecs.class).getSpecs(builder);
+ */
 public class BaseSpecsFactory {
 
     private static final Logger log = LoggerFactory.getLogger(BaseSpecsFactory.class);
@@ -23,6 +35,8 @@ public class BaseSpecsFactory {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("获取BaseSpecs实例失败", e);
         }
+
+
     }
 
 }

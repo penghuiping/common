@@ -1,7 +1,10 @@
 package com.php25.common.core.service;
 
 /**
- * Created by penghuiping on 2017/9/18.
+ * @author penghuiping
+ * @date 2017/9/18
+ *
+ * id生成器
  */
 public interface IdGeneratorService {
     /**

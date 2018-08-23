@@ -1,6 +1,11 @@
 package com.php25.common.jdbc;
 
-
+/**
+ * sql查询条件 group、having、order、limit
+ *
+ * @author penghuiping
+ * @date 2018-0-23
+ */
 public interface QueryOther {
 
     /**
@@ -26,8 +31,20 @@ public interface QueryOther {
      */
     Query orderBy(String orderBy);
 
+    /**
+     * order by {column} asc
+     *
+     * @param column
+     * @return
+     */
     Query asc(String column);
 
+    /**
+     * order by {column} desc
+     *
+     * @param column
+     * @return
+     */
     Query desc(String column);
 
     /***

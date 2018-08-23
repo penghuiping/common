@@ -15,9 +15,9 @@ public interface ResourceAwareService {
      *
      * @param fileName classpath中的properties配置文件名
      * @return string
-     * @Exception IOException
+     * @throws IOException
      * @author penghuiping
-     * @Time 2016-12-18
+     * @date 2016-12-18
      */
     public String loadProperties(String fileName) throws IOException;
 }

@@ -11,7 +11,12 @@ import org.elasticsearch.index.query.QueryBuilders;
 import java.util.List;
 
 /**
- * Created by penghuiping on 16/4/12.
+ *
+ * BaseSpecs的es实现，可以用来构建符合es语法的多条件查询语句
+ *
+ * @author penghuiping
+ * @date 2016-04-12
+ *
  */
 public class BaseEsSpecs extends BaseSpecs<QueryBuilder> {
 

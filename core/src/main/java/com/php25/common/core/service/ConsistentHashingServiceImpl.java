@@ -7,9 +7,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/5/30 09:56
- * @Description:
+ * 一致性hash实现
+ * @author penghuiping
+ * @date: 2018/5/30 09:56
  */
 public class ConsistentHashingServiceImpl implements ConsistentHashingService {
 
@@ -28,22 +28,23 @@ public class ConsistentHashingServiceImpl implements ConsistentHashingService {
     /**
      * 虚拟节点的数目，这里写死，为了演示需要，一个真实结点对应5个虚拟节点
      */
-    private int VIRTUAL_NODES = 100;
+    private int virtualNodesNumber = 100;
 
     public ConsistentHashingServiceImpl(String[] servers) {
         this(servers, 100);
     }
 
     public ConsistentHashingServiceImpl(String[] servers, Integer virtualNodeNum) {
-        this.VIRTUAL_NODES = virtualNodeNum;
+        this.virtualNodesNumber = virtualNodeNum;
 
         // 先把原始的服务器添加到真实结点列表中
-        for (int i = 0; i < servers.length; i++)
+        for (int i = 0; i < servers.length; i++) {
             realNodes.add(servers[i]);
+        }
 
         // 再添加虚拟节点，遍历LinkedList使用foreach循环效率会比较高
         for (String str : realNodes) {
-            for (int i = 0; i < VIRTUAL_NODES; i++) {
+            for (int i = 0; i < virtualNodesNumber; i++) {
                 String virtualNodeName = str + "&&VN" + String.valueOf(i);
                 int hash = getHash(virtualNodeName);
                 virtualNodes.put(hash, virtualNodeName);
@@ -57,8 +58,9 @@ public class ConsistentHashingServiceImpl implements ConsistentHashingService {
     private int getHash(String str) {
         final int p = 16777619;
         int hash = (int) 2166136261L;
-        for (int i = 0; i < str.length(); i++)
+        for (int i = 0; i < str.length(); i++) {
             hash = (hash ^ str.charAt(i)) * p;
+        }
         hash += hash << 13;
         hash ^= hash >> 7;
         hash += hash << 3;
@@ -66,14 +68,16 @@ public class ConsistentHashingServiceImpl implements ConsistentHashingService {
         hash += hash << 5;
 
         // 如果算出来的值为负数则取其绝对值
-        if (hash < 0)
+        if (hash < 0) {
             hash = Math.abs(hash);
+        }
         return hash;
     }
 
     /**
      * 得到应当路由到的结点
      */
+    @Override
     public String getServer(String key) {
         // 得到带路由的结点的Hash值
         int hash = getHash(key);

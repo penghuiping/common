@@ -10,9 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/8 16:46
- * @Description:
+ * @author: penghuiping
+ * @date: 2018/8/8 16:46
  */
 @Service
 @Lazy(false)
@@ -28,8 +27,9 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         return applicationContext;
     }
 
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+        SpringContextHolder.applicationContext = applicationContext;
     }
 
     public static <T> T getBean(String name) {
@@ -53,6 +53,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         Assert.isTrue(applicationContext != null, "applicaitonContext属性未注入, 请在applicationContext.xml中定义SpringContextHolder.");
     }
 
+    @Override
     public void destroy() throws Exception {
         clearHolder();
     }

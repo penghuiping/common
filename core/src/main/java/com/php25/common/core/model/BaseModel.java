@@ -5,7 +5,12 @@ import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 /**
- * Created by penghuiping on 16/4/3.
+ *
+ * orm 数据库实体的基类
+ *
+ * @author penghuiping
+ * @date 2016-04-03
+ *
  */
 @MappedSuperclass
 public abstract class BaseModel implements Serializable {
