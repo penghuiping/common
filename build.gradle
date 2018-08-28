@@ -1,7 +1,7 @@
 apply from: "config.gradle"
 
 allprojects {
-
+    apply plugin: 'idea'
 
 }
 
@@ -9,7 +9,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
-    apply plugin: 'idea'
+
 
     group = 'com.php25'
     version = '2.0.1-SNAPSHOT'

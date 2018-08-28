@@ -23,9 +23,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Auther: penghuiping
@@ -48,6 +53,7 @@ public class MysqlJdbcTest {
 
     private Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 
+
     public void initMeta(boolean isAutoIncrement) throws Exception {
         Class cls = Class.forName("org.h2.Driver");
         Driver driver = (Driver) cls.newInstance();
@@ -55,9 +61,9 @@ public class MysqlJdbcTest {
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
         if (isAutoIncrement) {
-            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
         } else {
-            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
         }
         statement.closeOnCompletion();
         connection.close();
@@ -130,6 +136,34 @@ public class MysqlJdbcTest {
 
 
     @Test
+    public void updateVersion() throws Exception {
+        CountDownLatch countDownLatch1 = new CountDownLatch(100);
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+        List<Callable<Object>> runnables = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            final int j = i;
+            runnables.add(() -> {
+                Customer customer = db.cnd(Customer.class).whereEq("username", "jack0").single();
+                customer.setAge(j);
+                int rows = db.cnd(Customer.class).update(customer);
+                if (rows > 0) {
+                    System.out.println("===========>更新成功"+j);
+                }
+                countDownLatch1.countDown();
+                return true;
+            });
+        }
+        executorService.invokeAll(runnables);
+
+        countDownLatch1.await();
+
+        Customer customer = db.cnd(Customer.class).whereEq("username", "jack0").single();
+        System.out.println(JsonUtil.toPrettyJson(customer));
+
+    }
+
+    @Test
     public void update() {
         Customer customer = db.cnd(Customer.class).whereEq("username", "jack0").single();
         customer.setUsername("jack-0");
@@ -140,6 +174,7 @@ public class MysqlJdbcTest {
         Assert.assertNotNull(customer);
 
     }
+
 
     @Test
     public void delete() {

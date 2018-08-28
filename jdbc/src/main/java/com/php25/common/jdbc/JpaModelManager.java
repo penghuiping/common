@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -61,8 +62,8 @@ public class JpaModelManager {
     /**
      * 获取model类的主键field
      *
-     * @param cls
-     * @return
+     * @param cls model类对的class
+     * @return model类反射对应的主键field
      */
     public static Field getPrimaryKeyField(Class cls) {
         Assert.notNull(cls, "class不能为null");
@@ -79,6 +80,26 @@ public class JpaModelManager {
             throw new RuntimeException("此类没有用@Id主键");
         }
         return primaryKeyField;
+    }
+
+    /**
+     * 获取model类,@version属性项
+     *
+     * @param cls model类对的class
+     * @return model类反射对应的 version field
+     */
+    public static Optional<Field> getVersionField(Class cls) {
+        Assert.notNull(cls, "class不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        Field versionField = null;
+        for (Field field : fields) {
+            Version version = field.getAnnotation(Version.class);
+            if (version != null) {
+                versionField = field;
+                break;
+            }
+        }
+        return Optional.ofNullable(versionField);
     }
 
     /**

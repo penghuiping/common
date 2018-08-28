@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.core.util.ReflectUtil;
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.JpaModelManager;
@@ -67,6 +68,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         return cnd.select();
     }
 
+
     @Override
     public Page<T> findAll(Pageable pageable) {
         Sort sort = pageable.getSort();
@@ -88,8 +90,21 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
 
     @Override
     public <S extends T> S save(S s) {
-        db.cnd(model).insert(s);
-        return s;
+        try {
+            ID id = (ID) ReflectUtil.getMethod(model, "get" + StringUtil.capitalizeFirstLetter(pkName)).invoke(s);
+            Optional<T> tmp = findById(id);
+            if (tmp.isPresent()) {
+                //update
+                db.cnd(model).update(s);
+                return s;
+            } else {
+                //insert
+                db.cnd(model).insert(s);
+                return s;
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("无法获取" + model.getSimpleName() + "主键id的值", e);
+        }
     }
 
     @Override
@@ -136,7 +151,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
     @Override
     public void delete(T t) {
         try {
-            ID id = (ID) ReflectUtil.getMethod(model, "get" + pkName.substring(0, 1).toUpperCase() + pkName.substring(1, pkName.length())).invoke(t);
+            ID id = (ID) ReflectUtil.getMethod(model, "get" + StringUtil.capitalizeFirstLetter(pkName)).invoke(t);
             db.cnd(model).whereEq(JpaModelManager.getPrimaryKeyFieldName(model), id).delete();
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("无法获取" + model.getSimpleName() + "主键id的值", e);

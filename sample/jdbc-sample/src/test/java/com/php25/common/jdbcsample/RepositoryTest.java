@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +56,7 @@ public class RepositoryTest {
 
     @Before
     public void before() {
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {
@@ -96,12 +97,23 @@ public class RepositoryTest {
 
     @Test
     public void save() {
+        //新增
         Customer customer = new Customer();
         customer.setId(new Long(4));
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setCreateTime(new Date());
         customer.setAge(4 * 10);
         customerRepository.save(customer);
+        log.info(JsonUtil.toPrettyJson(customerRepository.findAll()));
+
+        //更新
+        Optional<Customer> customerOptional = customerRepository.findById(4L);
+        customer = customerOptional.get();
+        customer.setUsername("jack" + 5);
+        customer.setUpdateTime(new Date());
+        customerRepository.save(customer);
+
         log.info(JsonUtil.toPrettyJson(customerRepository.findAll()));
     }
 

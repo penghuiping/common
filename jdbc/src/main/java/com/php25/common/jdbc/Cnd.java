@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author: penghuiping
@@ -163,6 +165,14 @@ public abstract class Cnd extends AbstractQuery implements Query {
         Field[] fields = clazz.getDeclaredFields();
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(list.get(0), false);
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JpaModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JpaModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
             if (i == (pairList.size() - 1)) {
@@ -188,7 +198,16 @@ public abstract class Cnd extends AbstractQuery implements Query {
             List<Object> params = new ArrayList<>();
             List<ImmutablePair<String, Object>> tmp = JpaModelManager.getTableColumnNameAndValue(list.get(j), false);
             for (int i = 0; i < tmp.size(); i++) {
-                params.add(tmp.get(i).getRight());
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(tmp.get(i).getRight());
+                    }
+                } else {
+                    params.add(tmp.get(i).getRight());
+                }
             }
             batchParams.add(params.toArray());
         }
@@ -323,6 +342,11 @@ public abstract class Cnd extends AbstractQuery implements Query {
         //获取主键id
         String pkName = JpaModelManager.getPrimaryKeyColName(t.getClass());
 
+        //判断是否有@version注解，如果有的话当然是进行乐观锁处理逻辑
+        Optional<Field> versionFieldOptional = JpaModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        Long versionValue = 0L;
+
         Object pkValue = null;
         for (int i = 0; i < pairList.size(); i++) {
             //移除主键
@@ -332,13 +356,35 @@ public abstract class Cnd extends AbstractQuery implements Query {
                 } else {
                     stringBuilder.append(pairList.get(i).getLeft()).append("=?,");
                 }
-                params.add(pairList.get(i).getRight());
+                if (versionFieldOptional.isPresent()) {
+                    //@version注解字段，那么每次更新的时候都应该自动+1
+                    //检查version属性是否是Long
+                    Assert.isTrue(versionFieldOptional.get().getType().isAssignableFrom(Long.class), "version字段必须是Long类型");
+                    versionColumnName = JpaModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+                    if (pairList.get(i).getLeft().equals(versionColumnName)) {
+                        versionValue = (Long) pairList.get(i).getRight();
+                        params.add(versionValue + 1L);
+                    } else {
+                        params.add(pairList.get(i).getRight());
+                    }
+                } else {
+                    params.add(pairList.get(i).getRight());
+                }
             } else {
                 pkValue = pairList.get(i).getValue();
             }
         }
+
+
         stringBuilder.append(String.format("WHERE %s=?", pkName));
         params.add(pkValue);
+
+        if (versionFieldOptional.isPresent()) {
+            //具有@version的情况
+            stringBuilder.append(String.format(" AND %s=?", versionColumnName));
+            params.add(versionValue);
+        }
+
         log.info("sql语句为:" + stringBuilder.toString());
         try {
             return jdbcOperations.update(stringBuilder.toString(), params.toArray());

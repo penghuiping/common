@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import java.util.Date;
 
 /**
@@ -31,6 +32,10 @@ public class Customer {
     private Date updateTime;
     @Column
     private Integer enable;
+
+    @Version
+    @Column
+    private Long version;
 
     public Long getId() {
         return id;
@@ -86,5 +91,13 @@ public class Customer {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

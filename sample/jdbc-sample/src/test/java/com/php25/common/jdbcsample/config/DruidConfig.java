@@ -36,6 +36,7 @@ public class DruidConfig {
         druidDataSource.setUrl(url);
         druidDataSource.setUsername(username);
         druidDataSource.setPassword(password);
+        druidDataSource.setMaxActive(15);
         try {
             druidDataSource.setFilters("stat, wall");
         } catch (SQLException e) {

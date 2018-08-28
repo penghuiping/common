@@ -83,6 +83,15 @@ public class CndMysql extends Cnd {
             }
         }
 
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JpaModelManager.getVersionField(clazz);
+        if (versionFieldOptional.isPresent()) {
+            String versionColumnName = JpaModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            //不管version有没有值,由于是insert version的值默认都从0开始
+            pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(versionColumnName)).collect(Collectors.toList());
+            pairList.add(new ImmutablePair<>(versionColumnName, 0));
+        }
+
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
             if (i == (pairList.size() - 1)) {
