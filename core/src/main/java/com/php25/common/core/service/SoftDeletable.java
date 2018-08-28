@@ -6,7 +6,7 @@ import java.util.List;
  * 软删除
  *
  * @author penghuiping
- * @Time 2016/11/25.
+ * @date 2016/11/25.
  */
 public interface SoftDeletable<T> {
 
@@ -15,7 +15,7 @@ public interface SoftDeletable<T> {
      *
      * @param obj
      * @author penghuiping
-     * @Time 2016/11/25.
+     * @date 2016/11/25.
      */
     void softDelete(T obj);
 
@@ -24,7 +24,7 @@ public interface SoftDeletable<T> {
      *
      * @param objs
      * @author penghuiping
-     * @Time 2016/11/25.
+     * @date 2016/11/25.
      */
     void softDelete(List<T> objs);
 }

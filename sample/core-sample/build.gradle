@@ -1,0 +1,14 @@
+def my_version = rootProject.ext.my_version
+
+dependencies {
+    compile project(':core')
+    compile group: 'org.slf4j', name: 'slf4j-api', version: my_version.slf4_api
+    compile group: 'com.alibaba', name: 'druid', version: my_version.druid
+    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
+    compile group: 'cn.afterturn', name: 'easypoi-base', version: my_version.easypoi
+    compile group: 'cn.afterturn', name: 'easypoi-web', version: my_version.easypoi
+    compile group: 'cn.afterturn', name: 'easypoi-annotation', version: my_version.easypoi
+    compile group: 'org.openjdk.jmh', name: 'jmh-core', version: my_version.jmh
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: my_version.spring_boot_starter
+    compileOnly group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: my_version.jmh
+}

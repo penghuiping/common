@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * redis缓存帮助类
  *
  * @author penghuiping
- * @Timer 2016/12/17.
+ * @date 2016/12/17.
  */
 public interface RedisService {
 
@@ -18,7 +18,7 @@ public interface RedisService {
      *
      * @param keys
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public void remove(final String... keys);
 
@@ -28,7 +28,7 @@ public interface RedisService {
      *
      * @param key
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public void remove(final String key);
 
@@ -38,7 +38,7 @@ public interface RedisService {
      * @param key
      * @return
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public boolean exists(final String key);
 
@@ -49,7 +49,7 @@ public interface RedisService {
      * @param cls
      * @return
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public <T> T get(final String key, Class<T> cls);
 
@@ -80,7 +80,7 @@ public interface RedisService {
      * @param value
      * @return
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public boolean set(final String key, Object value);
 
@@ -92,7 +92,7 @@ public interface RedisService {
      * @param expireTime 单位秒
      * @return
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public boolean set(final String key, Object value, Long expireTime);
 

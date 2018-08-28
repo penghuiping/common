@@ -1,0 +1,12 @@
+def my_version = rootProject.ext.my_version
+
+dependencies {
+    compile project(':redis')
+    compile group: 'org.slf4j', name: 'slf4j-api', version: my_version.slf4j
+    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: my_version.spring_boot_starter
+    compile group: 'org.redisson', name: 'redisson', version: my_version.redisson
+    testCompile group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: my_version.jmh
+    testCompile group: 'org.openjdk.jmh', name: 'jmh-core', version: my_version.jmh
+
+}

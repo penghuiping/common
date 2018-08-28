@@ -2,6 +2,7 @@ package com.php25.common.jdbcsample.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.persistence.Version;
 import java.util.Date;
 
 /**
@@ -24,6 +25,9 @@ public class CustomerDto {
     private Integer enable;
 
     private Integer age;
+
+    @Version
+    private Long version;
 
     public Long getId() {
         return id;

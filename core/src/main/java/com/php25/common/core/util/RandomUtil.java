@@ -9,7 +9,7 @@ import java.util.UUID;
  * 随机数帮助类
  *
  * @author penghuiping
- * @Time 2014/8/13.
+ * @date 2014/8/13.
  */
 public class RandomUtil {
     public static final String NUMBERS_AND_LETTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

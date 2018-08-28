@@ -46,7 +46,7 @@ public class OracleJdbcTest {
 
     private Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
 
-    boolean isSequence = true;
+    boolean isSequence = false;
 
 
     public void initMeta(boolean isSequence) throws Exception {

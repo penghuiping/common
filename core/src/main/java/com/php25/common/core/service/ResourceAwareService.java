@@ -6,7 +6,7 @@ import java.io.IOException;
  * classpath资源文件加载
  *
  * @author penghuiping
- * @Time 2016-12-18
+ * @date 2016-12-18
  */
 public interface ResourceAwareService {
 

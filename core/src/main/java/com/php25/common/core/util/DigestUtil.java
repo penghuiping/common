@@ -37,10 +37,8 @@ public class DigestUtil {
     /**
      * MD5加密
      *
-     * @param str
-     * @return String
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param str 需要加密的字符串
+     * @return byte[]  md5加密后的结果
      */
     private static byte[] MD5(String str) {
         Assert.hasText(str, "str不能为空");
@@ -55,7 +53,7 @@ public class DigestUtil {
     /**
      * MD5 加密
      *
-     * @param str  需要加密的字符串
+     * @param str 需要加密的字符串
      * @return string 直接返回32位的md5加密字符串
      */
     public static String MD5Str(String str) {
@@ -66,7 +64,7 @@ public class DigestUtil {
     /**
      * SHA1 加密
      *
-     * @param str
+     * @param str 需要加密的字符串
      * @return 直接返回32位的SHA1 加密字符串
      */
     public static String SHAStr(String str) {
@@ -76,8 +74,8 @@ public class DigestUtil {
     /**
      * SHA256 加密
      *
-     * @param str
-     * @return 直接返回32位的SHA256 加密字符串
+     * @param str 需要加密的字符串
+     * @return 直接返回SHA256 加密字符串
      */
     public static String SHA256Str(String str) {
         return new String(DigestUtil.bytes2hex(DigestUtil.SHA(str, "sha-256")));
@@ -86,10 +84,8 @@ public class DigestUtil {
     /**
      * sha1加密
      *
-     * @param str
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param str 需要加密的字符串
+     * @return 返回加密结果
      */
     private static byte[] SHA(String str, String shaAlgorithm) {
         Assert.hasText(str, "str不能为空");
@@ -107,11 +103,9 @@ public class DigestUtil {
     /**
      * DES算法加密
      *
-     * @param source
-     * @param key
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param source 需要加密的字符串
+     * @param key    需要用来des加密的秘钥
+     * @return 返回加密结果
      */
     public static String encryptDES(String source, String key) {
         Assert.hasText(source, "source不能为空");
@@ -132,11 +126,9 @@ public class DigestUtil {
     /**
      * DES算法解密
      *
-     * @param source
-     * @param key
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param source 需要解密的字符串
+     * @param key    需要用来des解密的秘钥
+     * @return 返回解密结果
      */
     public static String decryptDES(String source, String key) {
         Assert.hasText(source, "source不能为空");
@@ -158,11 +150,9 @@ public class DigestUtil {
     /**
      * AES加密
      *
-     * @param source
-     * @param key
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param source 需要加密的字符串
+     * @param key    需要加密的秘钥
+     * @return 返回加密结果
      */
     public static String encryptAES(String source, String key) {
         Assert.hasText(source, "source不能为空");
@@ -182,11 +172,9 @@ public class DigestUtil {
     /**
      * AES解密
      *
-     * @param source
-     * @param key
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param source 需要解密的字符串
+     * @param key    需要解密的秘钥
+     * @return 返回解密结果
      */
     public static String decryptAES(String source, String key) {
         Assert.hasText(source, "source不能为空");
@@ -204,10 +192,7 @@ public class DigestUtil {
     /**
      * 生成RSA算法密钥队
      *
-     * @return
-     * @throws Exception
-     * @author penghuiping
-     * @date 2017-02-04
+     * @return RSA秘钥对
      */
     public static KeyPair getKeyPair() {
         try {
@@ -223,10 +208,8 @@ public class DigestUtil {
     /**
      * 获得RSA算法公钥
      *
-     * @param keyPair
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param keyPair RSA秘钥对
+     * @return 返回RSA算法公钥字符串
      */
     public static String getPublicKey(KeyPair keyPair) {
         Assert.notNull(keyPair, "keyPair不能为null");
@@ -240,12 +223,10 @@ public class DigestUtil {
     }
 
     /**
-     * 获得RSA算法秘钥
+     * 获得RSA算法密钥
      *
-     * @param keyPair
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param keyPair RSA密钥对
+     * @return 返回RSA算法密钥字符串
      */
     public static String getPrivateKey(KeyPair keyPair) {
         Assert.notNull(keyPair, "keyPair不能为null");
@@ -261,10 +242,8 @@ public class DigestUtil {
     /**
      * 加载公钥
      *
-     * @param pubStr
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param pubStr 公钥字符串
+     * @return 公钥
      */
     private static PublicKey loadPublicKey(String pubStr) {
         Assert.hasText(pubStr, "pubStr不能为空");
@@ -272,8 +251,7 @@ public class DigestUtil {
             byte[] keyBytes = Base64.getDecoder().decode(pubStr);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = keyFactory.generatePublic(keySpec);
-            return publicKey;
+            return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
         }
@@ -282,10 +260,8 @@ public class DigestUtil {
     /**
      * 加载秘钥
      *
-     * @param priStr
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param priStr 密钥字符串
+     * @return 密钥
      */
     private static PrivateKey loadPrivateKey(String priStr) {
         Assert.hasText(priStr, "priStr不能为空");
@@ -293,42 +269,19 @@ public class DigestUtil {
             byte[] keyBytes = Base64.getDecoder().decode(priStr);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-            return privateKey;
+            return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
         }
     }
 
-    /**
-     * RSA算法加密
-     *
-     * @param content
-     * @param publicKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
-     */
-    private static byte[] publicEncrypt(byte[] content, PublicKey publicKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(publicKey, "publicKey不能为null");
-        try {
-            Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            return cipher.doFinal(content);
-        } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
-        }
-    }
 
     /**
      * RSA算法加密
      *
-     * @param content
-     * @param publicKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param content   需要加密的内容
+     * @param publicKey 公钥
+     * @return 加密后的内容
      */
     public static String publicEncrypt(String content, String publicKey) {
         Assert.notNull(content, "content不能为null");
@@ -342,35 +295,13 @@ public class DigestUtil {
         }
     }
 
-    /**
-     * RSA算法解密
-     *
-     * @param content
-     * @param privateKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
-     */
-    private static byte[] privateDecrypt(byte[] content, PrivateKey privateKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(privateKey, "privateKey不能为null");
-        try {
-            Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return cipher.doFinal(content);
-        } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
-        }
-    }
 
     /**
      * RSA算法解密
      *
-     * @param content
-     * @param privateKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param content    需要解密的内容
+     * @param privateKey 私钥
+     * @return 解密后的内容
      */
     public static String privateDecrypt(String content, String privateKey) {
         Assert.notNull(content, "content不能为null");
@@ -384,36 +315,13 @@ public class DigestUtil {
         }
     }
 
-    /**
-     * 进行数字签名
-     *
-     * @param content
-     * @param privateKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
-     */
-    private static byte[] sign(byte[] content, PrivateKey privateKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(privateKey, "privateKey不能为null");
-        try {
-            Signature signature = Signature.getInstance("SHA1withRSA");
-            signature.initSign(privateKey);
-            signature.update(content);
-            return signature.sign();
-        } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
-        }
-    }
 
     /**
      * 进行数字签名
      *
-     * @param content
-     * @param privateKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param content    需要签名的内容
+     * @param privateKey 私要
+     * @return 返回签名结果
      */
     public static String sign(String content, String privateKey) {
         Assert.notNull(content, "content不能为null");
@@ -431,36 +339,10 @@ public class DigestUtil {
     /**
      * 校验签名
      *
-     * @param content
-     * @param sign
-     * @param publicKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
-     */
-    private static boolean verify(byte[] content, byte[] sign, PublicKey publicKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(sign, "sign不能为null");
-        Assert.notNull(publicKey, "publicKey不能为null");
-        try {
-            Signature signature = Signature.getInstance("SHA1withRSA");
-            signature.initVerify(publicKey);
-            signature.update(content);
-            return signature.verify(sign);
-        } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
-        }
-    }
-
-    /**
-     * 校验签名
-     *
-     * @param content
-     * @param sign
-     * @param publicKey
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param content   需要签名的内容
+     * @param sign      签名
+     * @param publicKey 公钥
+     * @return true:签名合法;false:签名不合法
      */
     public static boolean verify(String content, String sign, String publicKey) {
         Assert.notNull(content, "content不能为null");
@@ -479,10 +361,8 @@ public class DigestUtil {
     /**
      * 2进制转16进制
      *
-     * @param data a byte[] to convert to Hex characters
-     * @return A char[] containing hexadecimal characters
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param data 把字节流转换成16进制的字符
+     * @return 16进制字符
      */
     public static char[] bytes2hex(final byte[] data) {
         Assert.notNull(data, "data不能为null");
@@ -499,10 +379,8 @@ public class DigestUtil {
     /**
      * 16进制转2进制
      *
-     * @param hexStr
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param hexStr 16进制字符串
+     * @return 2进制字节数组
      */
     public static byte[] hex2bytes(String hexStr) {
         Assert.hasText(hexStr, "hexStr不能为空");
@@ -518,10 +396,8 @@ public class DigestUtil {
     /**
      * base64 加密
      *
-     * @param data
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param data 需要加密的字节数据
+     * @return 加密后的字符串
      */
     public static String encodeBase64(byte[] data) {
         Assert.notNull(data, "data不能为null");
@@ -531,10 +407,8 @@ public class DigestUtil {
     /**
      * base64 解密
      *
-     * @param text
-     * @return
-     * @author penghuiping
-     * @date 2017-02-04
+     * @param text 需要解密的内容
+     * @return 解密后的字节数据
      */
     public static byte[] decodeBase64(String text) {
         Assert.hasText(text, "text不能为空");

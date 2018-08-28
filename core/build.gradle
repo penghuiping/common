@@ -1,0 +1,16 @@
+def my_version = rootProject.ext.my_version
+
+
+dependencies {
+    compile group: 'org.springframework.data', name: 'spring-data-commons', version: my_version.spring_data_commons
+    compile group: 'org.springframework', name: 'spring-context', version: my_version.spring_context
+    compile group: 'javax.persistence', name: 'javax.persistence-api', version: my_version.javax_persistence_api
+    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: my_version.jackson
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: my_version.jackson
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: my_version.jackson
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: my_version.okhttp
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: my_version.commons_lang3
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: my_version.rxjava
+    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: my_version.xstream
+}

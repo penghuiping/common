@@ -1,8 +1,10 @@
 package com.php25.common.core.util;
 
 /**
- * @author: penghuiping
- * @date: 2018/5/31 15:37
+ * 排序帮助类
+ *
+ * @author penghuiping
+ * @date 2018/5/31 15:37
  */
 public class SortUtil {
     /**
@@ -14,9 +16,9 @@ public class SortUtil {
      * 6. 这时候基准数字右边都比基准数字大，左边的都比基准数字小
      * 7. 分别在递归以相同的步骤处理左边与右边的数字。排序完成。
      *
-     * @param arr
-     * @param start
-     * @param end
+     * @param arr   需要排序的数组
+     * @param start 数组的起始位置
+     * @param end   数组的结束位置
      */
     public static <T extends Comparable> void quickSort(T[] arr, int start, int end) {
         if (end <= start) {
@@ -62,8 +64,10 @@ public class SortUtil {
     /**
      * 归并排序实现
      *
-     * @param arr  需要排序的数组
-     * @param temp 临时数组,存放归并排序中的临时数据，避免不停的创建数组
+     * @param arr   需要排序的数组
+     * @param start 需要排序数组的起始位置
+     * @param end   需要排序数组的结束位置
+     * @param temp  临时数组,存放归并排序中的临时数据，避免不停的创建数组
      */
     public static <T extends Comparable> void mergeSort(T[] arr, int start, int end, T[] temp) {
         if (end - start <= 1) {
@@ -81,13 +85,13 @@ public class SortUtil {
 
 
     /**
-     * 归并算法,把两个有序数组srcArr0,数组srcArr1,合并到数组distArr中
+     * 合并数组,把两个有序数组srcArr0,数组srcArr1,合并到数组distArr中
      *
-     * @param srcArr0
-     * @param srcArr1
-     * @param distArr
+     * @param srcArr0 原数组0
+     * @param srcArr1 原数组1
+     * @param distArr 目标数组
      */
-    public static <T extends Comparable> void mergeArray(T[] srcArr0, T[] srcArr1, T[] distArr) {
+    private static <T extends Comparable> void mergeArray(T[] srcArr0, T[] srcArr1, T[] distArr) {
         int i = 0, j = 0, z = 0;
         while (i < srcArr0.length && j < srcArr1.length) {
             //两个数组必然一长一短,比如一个数组长度7，一个数组长度5，那么归并阶段在5(包括5)以下处理情况
@@ -115,14 +119,13 @@ public class SortUtil {
     }
 
     /**
-     * 归并算法,把一个数组，逻辑上一分为二,并且让这两个子数组都是有序数组。(注意:物理结构上依旧是一个数组)
+     * 合并数组,把一个数组，逻辑上一分为二,并且让这两个子数组都是有序数组。(注意:物理结构上依旧是一个数组)
      *
-     * @param srcArr
-     * @param start
-     * @param mid
-     * @param end
-     * @param distArr
-     * @param <T>
+     * @param srcArr  原数组
+     * @param start   逻辑上一分为二，左边量
+     * @param mid     逻辑上一分为二，中间量
+     * @param end     逻辑上一分为二，右边量
+     * @param distArr 临时数组，用于存放临时copy量
      */
     private static <T extends Comparable> void mergeArray(T[] srcArr, int start, int mid, int end, T[] distArr) {
         int i = start, j = mid, z = 0;
@@ -159,7 +162,7 @@ public class SortUtil {
     /**
      * 堆排序，元素下沉算法
      *
-     * @param arr
+     * @param arr          需要排序的数组
      * @param elementIndex 元素的数组下标
      * @param length       元素的数组长度
      * @param max          true:最大堆，false最小堆
@@ -237,9 +240,8 @@ public class SortUtil {
     /**
      * 堆排序
      *
-     * @param arr
+     * @param arr 需要排序的数组
      * @param max true:最大堆;false:最小堆
-     * @param <T>
      */
     public static <T extends Comparable> void heapSort(T[] arr, boolean max) {
         heapCreation(arr, max);
@@ -257,15 +259,13 @@ public class SortUtil {
     /**
      * 把一个无序数组构建成一个最小/最大堆
      *
-     * @param arr
+     * @param arr 需要排序的数组
      * @param max true:最大堆;false:最小堆
-     * @param <T>
      */
-    public static <T extends Comparable> void heapCreation(T[] arr, boolean max) {
+    private static <T extends Comparable> void heapCreation(T[] arr, boolean max) {
         int i = 0;
         //((n-1)*2)+1 =n/2-1:0~(n/2-1)为非叶子节点
-        for (i = arr.length / 2 - 1; i >= 0; i--)
-        {
+        for (i = arr.length / 2 - 1; i >= 0; i--) {
             heapElementDown(arr, arr.length, i, max);
         }
     }
@@ -273,10 +273,9 @@ public class SortUtil {
     /**
      * 交换数组指定下标的两个值
      *
-     * @param arr
-     * @param a
-     * @param b
-     * @param <T>
+     * @param arr 目标数组
+     * @param a   目标数组，需要交换元素的下标
+     * @param b   目标数组，需要交换元素的下标
      */
     private static <T extends Comparable> void swap(T[] arr, int a, int b) {
         T tmp = arr[a];

@@ -10,97 +10,81 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * service层方法的通用接口方法
+ *
  * @author penghuiping
- * @Timer 16/8/12.
+ * @date 2016-08-12
  */
 public interface BaseService<DTO, MODEL, ID extends Serializable> {
     /**
      * 根据id查找
      *
-     * @param id
-     * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param id 实体类id主键
+     * @return 返回相关DTO
      */
     Optional<DTO> findOne(ID id);
 
     /**
      * 根据id查找
      *
-     * @param id
-     * @param modelToDtoTransferable
-     * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param id                     实体类id主键
+     * @param modelToDtoTransferable model转dto的处理函数
+     * @return 返回相关DTO
      */
     Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 保存或者更新
      *
-     * @param obj
-     * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param obj 需要保存/更新的对象
+     * @return 保存/更新成功的对象
      */
     Optional<DTO> save(DTO obj);
 
     /**
      * 保存或者更新
      *
-     * @param obj
-     * @param dtoToModelTransferable
-     * @param modelToDtoTransferable
-     * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param obj                    需要保存/更新的对象
+     * @param dtoToModelTransferable dto转model的处理函数
+     * @param modelToDtoTransferable model转dto的处理函数
+     * @return 保存/更新成功的对象
      */
     Optional<DTO> save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
     /**
      * 保存或者更新批量
      *
-     * @param objs
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param objs 需要批量保存/更新的对象
      */
     void save(Iterable<DTO> objs);
 
     /**
      * 保存或者更新批量
      *
-     * @param objs
-     * @param dtoToModelTransferable
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param objs                   需要批量保存/更新的对象
+     * @param dtoToModelTransferable dto转model的处理函数
      */
     void save(Iterable<DTO> objs, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable);
 
     /**
      * 物理删除
      *
-     * @param obj
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param obj 需要删除的dto对象
      */
     void delete(DTO obj);
 
     /**
      * 批量物理删除
      *
-     * @param objs
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param objs 需要批量删除的dto对象
      */
     void delete(List<DTO> objs);
 
     /**
-     * 根据id查找
+     * 根据ids查找
      *
-     * @param ids
-     * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
+     * @param ids 需要查询的ids
+     * @return 返回符合条件的结果
      */
     Optional<List<DTO>> findAll(Iterable<ID> ids);
 
@@ -110,8 +94,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @param modelToDtoTransferable
      * @param ids
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
@@ -119,8 +101,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * 查找所有的
      *
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Optional<List<DTO>> findAll();
 
@@ -130,8 +110,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      *
      * @param modelToDtoTransferable
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Optional<List<DTO>> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
@@ -142,8 +120,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @param pageSize
      * @param searchParams
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams);
 
@@ -169,8 +145,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @param direction
      * @param property
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property);
 
@@ -203,8 +177,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      *
      * @param searchParams
      * @return
-     * @author penghuiping
-     * @Timer 16/8/12.
      */
     Long count(String searchParams);
 

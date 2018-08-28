@@ -7,7 +7,7 @@ import java.net.URLEncoder;
  * 字符串帮助类
  *
  * @author penghuiping
- * @Timer 2017/2/4
+ * @date 2017/2/4
  */
 public class StringUtil {
     /**

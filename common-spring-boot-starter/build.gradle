@@ -1,0 +1,19 @@
+def my_version = rootProject.ext.my_version
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
+    compile group: 'com.alibaba', name: 'druid', version: my_version.druid
+    compile group: 'cn.afterturn', name: 'easypoi-base', version: my_version.easypoi
+    compile group: 'cn.afterturn', name: 'easypoi-web', version: my_version.easypoi
+    compile group: 'cn.afterturn', name: 'easypoi-annotation', version: my_version.easypoi
+    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: my_version.xstream
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: my_version.spring_boot_starter
+    testCompile group: 'com.h2database', name: 'h2', version: my_version.h2_db
+
+    compile project(':core')
+    compile project(':es')
+    //compile project(':jdbc')
+    compile project(':jpa')
+    compile project(':mvc')
+    compile project(':redis')
+}

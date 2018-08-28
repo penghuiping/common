@@ -82,7 +82,7 @@ public class ServiceTest {
      * @param id
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findOne() {
@@ -98,7 +98,7 @@ public class ServiceTest {
      * @param modelToDtoTransferable
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findOne1() {
@@ -112,7 +112,7 @@ public class ServiceTest {
      * @param obj
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void save() {
@@ -134,7 +134,7 @@ public class ServiceTest {
      * @param modelToDtoTransferable
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void save1() {
@@ -153,7 +153,7 @@ public class ServiceTest {
      *
      * @param objs
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void save2() {
@@ -182,7 +182,7 @@ public class ServiceTest {
      * @param objs
      * @param dtoToModelTransferable
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void save3() {
@@ -211,7 +211,7 @@ public class ServiceTest {
      *
      * @param obj
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void delete() {
@@ -225,7 +225,7 @@ public class ServiceTest {
      *
      * @param objs
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void delete1() {
@@ -243,7 +243,7 @@ public class ServiceTest {
      * @param ids
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findAll() {
@@ -258,7 +258,7 @@ public class ServiceTest {
      * @param ids
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findAll1() {
@@ -271,7 +271,7 @@ public class ServiceTest {
      *
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findAll2() {
@@ -286,7 +286,7 @@ public class ServiceTest {
      * @param modelToDtoTransferable
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void findAll3() {
@@ -302,7 +302,7 @@ public class ServiceTest {
      * @param searchParams
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void query() {
@@ -339,7 +339,7 @@ public class ServiceTest {
      * @param property
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     public void query2() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
@@ -387,7 +387,7 @@ public class ServiceTest {
      * @param searchParams
      * @return
      * @author penghuiping
-     * @Timer 16/8/12.
+     * @date 16/8/12.
      */
     @Test
     public void count() {

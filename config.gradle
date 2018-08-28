@@ -1,0 +1,34 @@
+ext {
+    my_version = [
+            guava                : '24.0-jre',
+            spring_boot_starter  : '2.0.2.RELEASE',
+            jackson              : '2.9.5',
+            okhttp               : '3.6.0',
+            spring_data_commons  : '2.0.7.RELEASE',
+            spring_context       : '5.0.6.RELEASE',
+            spring_jdbc          : '5.0.6.RELEASE',
+            javax_persistence_api: '2.2',
+            commons_lang3        : '3.7',
+            commons_io           : '2.4',
+            rxjava               : '2.1.13',
+            xstream              : '1.4.10',
+            slf4j_api            : '1.7.25',
+            jedis                : '2.9.0',
+            redisson             : '2.8.2',
+            druid                : '1.1.2',
+            easypoi              : '3.1.0',
+            jmh                  : '1.21',
+            h2_db                : '1.4.197',
+            commons_fileupload   : '1.3.1',
+            thumbnailator        : '0.4.8',
+            sharding_jdbc        : '2.0.3',
+            swaggerui            : '2.7.0',
+            quartz               : '2.2.1',
+            jjwt                 : '0.9.0',
+            javax_transaction_api: '1.2',
+            lombok               : '1.16.20',
+            beetl                : '2.8.5',
+            dubbo_starter        : '0.2.0'
+
+    ]
+}

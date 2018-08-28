@@ -5,7 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.time.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -15,7 +19,7 @@ import java.util.Date;
  * 时间处理帮助类
  *
  * @author penghuiping
- * @Time 2018/7/2.
+ * @date 2018/7/2.
  */
 public class TimeUtil {
     private static final Logger logger = LoggerFactory.getLogger(TimeUtil.class);
@@ -26,7 +30,7 @@ public class TimeUtil {
      * @param dateStr
      * @return
      * @author penghuiping
-     * @Time 2014/8/13.
+     * @date 2014/8/13.
      */
     public static Date parseDate(String dateStr) {
         try {
@@ -43,7 +47,7 @@ public class TimeUtil {
      * @param dateStr
      * @return
      * @author penghuiping
-     * @Time 2014/8/13.
+     * @date 2014/8/13.
      */
     public static Date parseDate(String dateStr, DateTimeFormatter dateTimeFormatter) {
         return Date.from(LocalDateTime.parse(dateStr, dateTimeFormatter).toInstant(ZoneOffset.ofHours(8)));

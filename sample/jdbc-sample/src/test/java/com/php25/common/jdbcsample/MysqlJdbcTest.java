@@ -44,7 +44,7 @@ public class MysqlJdbcTest {
 
     Db db;
 
-    private boolean isAutoIncrement = true;
+    private boolean isAutoIncrement = false;
 
     private Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 

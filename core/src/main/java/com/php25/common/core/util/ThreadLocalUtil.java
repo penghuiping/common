@@ -4,7 +4,7 @@ package com.php25.common.core.util;
  * ThreadLocal帮助类
  *
  * @author penghuiping
- * @Timer 11/17/15.
+ * @date 11/17/15.
  */
 public class ThreadLocalUtil {
     private static final ThreadLocal<Object> THREAD_LOCAL = new ThreadLocal<Object>();

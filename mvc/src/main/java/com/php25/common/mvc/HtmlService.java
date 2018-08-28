@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author penghuiping
- * @Timer 2016/12/17.
+ * @date 2016/12/17.
  */
 public interface HtmlService {
 
@@ -14,7 +14,7 @@ public interface HtmlService {
      * @param request
      * @return
      * @author penghuiping
-     * @Timer 2016/12/17.
+     * @date 2016/12/17.
      */
     public String getBasePath(HttpServletRequest request);
 }

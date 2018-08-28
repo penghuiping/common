@@ -1,0 +1,14 @@
+def my_version = rootProject.ext.my_version
+
+dependencies {
+    compile project(':core')
+    compile project(':jpa')
+    compile group: 'org.slf4j', name: 'slf4j-api', version: my_version.slf4j_api
+    compile group: 'com.alibaba', name: 'druid', version: my_version.druid
+    compile group: 'org.springframework', name: 'spring-jdbc', version: my_version.spring_jdbc
+    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
+    compile group: 'org.openjdk.jmh', name: 'jmh-core', version: my_version.jmh
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: my_version.spring_boot_starter
+    testCompile group: 'com.h2database', name: 'h2', version: my_version.h2_db
+    compileOnly group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: my_version.jmh
+}
