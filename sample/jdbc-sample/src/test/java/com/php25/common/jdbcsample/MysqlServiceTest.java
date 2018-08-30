@@ -36,7 +36,7 @@ import java.util.Optional;
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class ServiceTest {
+public class MysqlServiceTest {
 
     @Autowired
     IdGeneratorService idGeneratorService;
@@ -54,10 +54,20 @@ public class ServiceTest {
 
     List<CustomerDto> customers;
 
+    boolean isAutoIncrement = false;
 
     @Before
     public void before() {
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
+
+        jdbcTemplate.batchUpdate("drop table if exists t_customer");
+        jdbcTemplate.batchUpdate("drop table if exists t_company");
+        if (isAutoIncrement) {
+            jdbcTemplate.batchUpdate("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            jdbcTemplate.batchUpdate("create table t_company (id bigint auto_increment primary key,name varchar(20),create_time date,update_time date,`enable` int)");
+        } else {
+            jdbcTemplate.batchUpdate("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            jdbcTemplate.batchUpdate("create table t_company (id bigint primary key,name varchar(20),create_time date,update_time date,`enable` int)");
+        }
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {

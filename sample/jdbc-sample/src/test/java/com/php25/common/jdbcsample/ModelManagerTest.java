@@ -41,7 +41,7 @@ public class ModelManagerTest {
 
     @Test
     public void getDbColumnByClassColumn() {
-        String value = JpaModelManager.getDbColumnByClassColumn(Customer.class, "createTime");
+        String value = JpaModelManager.getDbColumnByClassColumn(Customer.class, "startTime");
         logger.info(value);
     }
 
