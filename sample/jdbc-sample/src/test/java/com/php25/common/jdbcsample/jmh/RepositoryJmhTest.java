@@ -78,7 +78,7 @@ public class RepositoryJmhTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             if (i % 2 == 0)
                 customer.setEnable(1);
             else

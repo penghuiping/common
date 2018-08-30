@@ -13,8 +13,10 @@ import org.springframework.util.Assert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -128,14 +130,14 @@ public class CndOracle extends Cnd {
                         stringBuilder.append(pairList.get(i).getRight());
                     } else {
                         stringBuilder.append("?");
-                        params.add(pairList.get(i).getRight());
+                        params.add(paramConvert(pairList.get(i).getRight()));
                     }
                 } else {
                     if (pairList.get(i).getLeft().equals(id)) {
                         stringBuilder.append(pairList.get(i).getRight()).append(",");
                     } else {
                         stringBuilder.append("?,");
-                        params.add(pairList.get(i).getRight());
+                        params.add(paramConvert(pairList.get(i).getRight()));
                     }
                 }
 
@@ -145,10 +147,10 @@ public class CndOracle extends Cnd {
             for (int i = 0; i < pairList.size(); i++) {
                 if (i == (pairList.size() - 1)) {
                     stringBuilder.append("?");
-                    params.add(pairList.get(i).getRight());
+                    params.add(paramConvert(pairList.get(i).getRight()));
                 } else {
                     stringBuilder.append("?,");
-                    params.add(pairList.get(i).getRight());
+                    params.add(paramConvert(pairList.get(i).getRight()));
                 }
 
             }

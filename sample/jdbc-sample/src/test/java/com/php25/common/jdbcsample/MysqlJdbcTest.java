@@ -8,6 +8,7 @@ import com.php25.common.core.util.JsonUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.DbType;
+import com.php25.common.jdbcsample.model.Company;
 import com.php25.common.jdbcsample.model.Customer;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,10 +61,13 @@ public class MysqlJdbcTest {
         Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL", null);
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
+        statement.execute("drop table if exists t_company");
         if (isAutoIncrement) {
-            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
+            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            statement.execute("create table t_company (id bigint auto_increment primary key,name varchar(20),create_time date,update_time date,`enable` int)");
         } else {
-            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
+            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time date,update_time date,`enable` int)");
         }
         statement.closeOnCompletion();
         connection.close();
@@ -74,6 +78,15 @@ public class MysqlJdbcTest {
     public void save() throws Exception {
         initMeta(isAutoIncrement);
         Cnd cnd = db.cnd(Customer.class);
+        Cnd cndCompany = db.cnd(Company.class);
+
+        Company company = new Company();
+        company.setName("test");
+        company.setId(1L);
+        company.setCreateTime(new Date());
+        company.setEnable(1);
+        cndCompany.insert(company);
+
         List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -83,8 +96,9 @@ public class MysqlJdbcTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             customer.setEnable(1);
+            customer.setCompany(company);
             customers.add(customer);
             cnd.insert(customer);
             Assert.assertNotNull(customer.getId());
@@ -97,9 +111,10 @@ public class MysqlJdbcTest {
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             customer.setAge(i * 20);
             customer.setEnable(0);
+            customer.setCompany(company);
             customers.add(customer);
             cnd.insert(customer);
             Assert.assertNotNull(customer.getId());
@@ -109,9 +124,12 @@ public class MysqlJdbcTest {
     @Test
     public void query() {
         List<Customer> customers1 = db.cnd(Customer.class)
-                .orEq("username", "jack1")
+                .whereEq("username", "jack1")
                 .limit(0, 1).asc("id").select();
         System.out.println(JsonUtil.toPrettyJson(customers1));
+
+        Company company = db.cnd(Company.class).whereEq("name", "test").single();
+        System.out.println(JsonUtil.toPrettyJson(company));
     }
 
 
@@ -148,7 +166,7 @@ public class MysqlJdbcTest {
                 customer.setAge(j);
                 int rows = db.cnd(Customer.class).update(customer);
                 if (rows > 0) {
-                    System.out.println("===========>更新成功"+j);
+                    System.out.println("===========>更新成功" + j);
                 }
                 countDownLatch1.countDown();
                 return true;

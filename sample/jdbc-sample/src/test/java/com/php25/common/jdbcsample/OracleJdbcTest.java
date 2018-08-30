@@ -8,6 +8,7 @@ import com.php25.common.core.util.JsonUtil;
 import com.php25.common.jdbc.Cnd;
 import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.DbType;
+import com.php25.common.jdbcsample.model.Company;
 import com.php25.common.jdbcsample.model.Customer;
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +56,9 @@ public class OracleJdbcTest {
         Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=ORACLE", null);
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
-        statement.execute("create table t_customer (id number(64,0),username varchar2(20),password varchar2(50),age integer ,create_time date,update_time date,`enable` char)");
+        statement.execute("drop table if exists t_company");
+        statement.execute("create table t_customer (id number(64,0),username varchar2(20),password varchar2(50),age integer ,create_time date,update_time date,version number(64,0),company_id number(64,0),`enable` number(1,0))");
+        statement.execute("create table t_company (id number(64,0) primary key,name varchar2(20),create_time date,update_time date,`enable` number(1,0))");
         if (isSequence) {
             statement.execute("drop SEQUENCE if exists SEQ_ID");
             statement.execute("CREATE SEQUENCE SEQ_ID");
@@ -70,6 +73,14 @@ public class OracleJdbcTest {
     public void save() throws Exception {
         initMeta(isSequence);
 
+        Cnd cndCompany = db.cnd(Company.class);
+        Company company = new Company();
+        company.setName("test");
+        company.setId(1L);
+        company.setCreateTime(new Date());
+        company.setEnable(1);
+        cndCompany.insert(company);
+
         Cnd cnd = db.cnd(Customer.class);
         List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
@@ -80,8 +91,9 @@ public class OracleJdbcTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             customer.setEnable(1);
+            customer.setCompany(company);
             customers.add(customer);
             cnd.insert(customer);
             Assert.assertNotNull(customer.getId());
@@ -94,9 +106,10 @@ public class OracleJdbcTest {
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             customer.setAge(i * 20);
             customer.setEnable(0);
+            customer.setCompany(company);
             customers.add(customer);
             cnd.insert(customer);
             Assert.assertNotNull(customer.getId());

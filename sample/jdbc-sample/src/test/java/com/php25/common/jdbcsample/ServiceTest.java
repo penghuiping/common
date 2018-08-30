@@ -50,14 +50,14 @@ public class ServiceTest {
     @Autowired
     Db db;
 
-    Logger log = LoggerFactory.getLogger(RepositoryTest.class);
+    Logger log = LoggerFactory.getLogger(MysqlRepositoryTest.class);
 
     List<CustomerDto> customers;
 
 
     @Before
     public void before() {
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {
@@ -76,14 +76,6 @@ public class ServiceTest {
         customerService.save(customers);
     }
 
-    /**
-     * 根据id查找
-     *
-     * @param id
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findOne() {
         Optional<CustomerDto> customerDto = customerService.findOne(customers.get(0).getId());
@@ -91,29 +83,12 @@ public class ServiceTest {
 
     }
 
-    /**
-     * 根据id查找
-     *
-     * @param id
-     * @param modelToDtoTransferable
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findOne1() {
         Optional<CustomerDto> customerDto = customerService.findOne(customers.get(0).getId(), BeanUtils::copyProperties);
         Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
     }
 
-    /**
-     * 保存或者更新
-     *
-     * @param obj
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void save() {
         CustomerDto customer = new CustomerDto();
@@ -126,16 +101,6 @@ public class ServiceTest {
         Assert.assertEquals(customerService.findOne(customer.getId()).get().getId(), customer.getId());
     }
 
-    /**
-     * 保存或者更新
-     *
-     * @param obj
-     * @param dtoToModelTransferable
-     * @param modelToDtoTransferable
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void save1() {
         CustomerDto customer = new CustomerDto();
@@ -148,13 +113,6 @@ public class ServiceTest {
         log.info(JsonUtil.toPrettyJson(customerService.findAll().get()));
     }
 
-    /**
-     * 保存或者更新批量
-     *
-     * @param objs
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void save2() {
         CustomerDto customer = new CustomerDto();
@@ -176,14 +134,6 @@ public class ServiceTest {
         Assert.assertEquals(customerService.findOne(customer1.getId()).get().getId(), customer1.getId());
     }
 
-    /**
-     * 保存或者更新批量
-     *
-     * @param objs
-     * @param dtoToModelTransferable
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void save3() {
         CustomerDto customer = new CustomerDto();
@@ -206,13 +156,6 @@ public class ServiceTest {
         Assert.assertEquals(customerService.findOne(customer1.getId()).get().getId(), customer1.getId());
     }
 
-    /**
-     * 物理删除
-     *
-     * @param obj
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void delete() {
         customerService.delete(customers.get(0));
@@ -220,13 +163,6 @@ public class ServiceTest {
         Assert.assertFalse(customerDtoOptional.isPresent());
     }
 
-    /**
-     * 批量物理删除
-     *
-     * @param objs
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void delete1() {
         customerService.delete(Lists.newArrayList(customers.get(0), customers.get(2)));
@@ -237,73 +173,30 @@ public class ServiceTest {
         Assert.assertFalse(customerDtoOptional1.isPresent());
     }
 
-    /**
-     * 根据id查找
-     *
-     * @param ids
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findAll() {
         Optional<List<CustomerDto>> customerDtoOptional = customerService.findAll(Lists.newArrayList(customers.get(0).getId(), customers.get(2).getId()));
         Assert.assertTrue(customerDtoOptional.isPresent() && customerDtoOptional.get().size() == 2);
     }
 
-    /**
-     * 根据id查找
-     *
-     * @param modelToDtoTransferable
-     * @param ids
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findAll1() {
         Optional<List<CustomerDto>> customerDtoOptional = customerService.findAll(Lists.newArrayList(customers.get(0).getId(), customers.get(2).getId()), BeanUtils::copyProperties);
         Assert.assertTrue(customerDtoOptional.isPresent() && customerDtoOptional.get().size() == 2);
     }
 
-    /**
-     * 查找所有的
-     *
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findAll2() {
         Optional<List<CustomerDto>> listOptional = customerService.findAll();
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().size() == customers.size());
     }
 
-
-    /**
-     * 查找所有的
-     *
-     * @param modelToDtoTransferable
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void findAll3() {
         Optional<List<CustomerDto>> listOptional = customerService.findAll((customer, customerDto) -> BeanUtils.copyProperties(customer, customerDto));
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().size() == customers.size());
     }
 
-    /**
-     * 分页条件筛选查找
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param searchParams
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void query() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
@@ -311,16 +204,6 @@ public class ServiceTest {
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().getData().size() == 2);
     }
 
-    /**
-     * 分页条件筛选查找
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param searchParams
-     * @param direction
-     * @param property
-     * @return
-     */
     @Test
     public void query1() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
@@ -328,35 +211,12 @@ public class ServiceTest {
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().getData().size() == 2);
     }
 
-    /**
-     * 分页条件筛选查找
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param searchParams
-     * @param modelToDtoTransferable
-     * @param direction
-     * @param property
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     public void query2() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
         Optional<DataGridPageDto<CustomerDto>> listOptional = customerService.query(1, 2, JsonUtil.toJson(searchParamBuilder.build()), BeanUtils::copyProperties, Sort.Direction.DESC, "id");
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().getData().size() == 2);
     }
 
-    /**
-     * 分页条件筛选查找
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param searchParams
-     * @param customerModelToDtoTransferable
-     * @param sort
-     * @return
-     */
     @Test
     public void query3() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
@@ -364,16 +224,6 @@ public class ServiceTest {
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().getData().size() == 2);
     }
 
-    /**
-     * 分页条件筛选查找
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param searchParamBuilder
-     * @param customerModelToDtoTransferable
-     * @param sort
-     * @return
-     */
     @Test
     public void query4() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.LIKE).value("jack%").build());
@@ -381,14 +231,6 @@ public class ServiceTest {
         Assert.assertTrue(listOptional.isPresent() && listOptional.get().getData().size() == 2);
     }
 
-    /**
-     * 筛选计算数量
-     *
-     * @param searchParams
-     * @return
-     * @author penghuiping
-     * @date 16/8/12.
-     */
     @Test
     public void count() {
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(new SearchParam.Builder().fieldName("username").operator(Operator.EQ).value("jack1").build());

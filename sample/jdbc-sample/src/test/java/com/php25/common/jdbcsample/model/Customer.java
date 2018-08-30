@@ -3,6 +3,7 @@ package com.php25.common.jdbcsample.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import java.util.Date;
@@ -20,22 +21,30 @@ public class Customer {
     //@GeneratedValue(strategy = GenerationType.SEQUENCE)
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column
     private String username;
+
     @Column
     private Integer age;
     @Column
     private String password;
+
     @Column(name = "create_time")
-    private Date createTime;
+    private Date startTime;
+
     @Column(name = "update_time")
     private Date updateTime;
+
     @Column
     private Integer enable;
 
     @Version
     @Column
     private Long version;
+
+    @Column(name = "company_id")
+    private Company company;
 
     public Long getId() {
         return id;
@@ -59,14 +68,6 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
     }
 
     public Date getUpdateTime() {
@@ -99,5 +100,21 @@ public class Customer {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }

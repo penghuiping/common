@@ -109,6 +109,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> iterable) {
+        //todo 没有实现批量更新
         int[] rows = db.cnd(model).insertBatch(Lists.newArrayList(iterable));
         for (int row : rows) {
             if (row <= 0) {
@@ -165,8 +166,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
         while (it.hasNext()) {
             try {
                 T t = it.next();
-                ID id = (ID) ReflectUtil.getMethod(model, "get" + pkName.substring(0, 1).toUpperCase()
-                        + pkName.substring(1, pkName.length())).invoke(t);
+                ID id = (ID) ReflectUtil.getMethod(model, "get" + StringUtil.capitalizeFirstLetter(pkName)).invoke(t);
                 list.add(id);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException("无法获取" + model.getSimpleName() + "主键id的值", e);

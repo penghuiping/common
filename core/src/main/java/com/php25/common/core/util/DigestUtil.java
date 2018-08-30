@@ -103,11 +103,12 @@ public class DigestUtil {
     /**
      * DES算法加密
      *
-     * @param source 需要加密的字符串
-     * @param key    需要用来des加密的秘钥
+     * @param source      需要加密的字符串
+     * @param key         需要用来des加密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
      * @return 返回加密结果
      */
-    public static String encryptDES(String source, String key) {
+    public static String encryptDES(String source, String key, boolean hexOrBase64) {
         Assert.hasText(source, "source不能为空");
         Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
         try {
@@ -116,7 +117,11 @@ public class DigestUtil {
             SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
             Cipher cipher = Cipher.getInstance("DES");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
+            if (hexOrBase64) {
+                return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
+            } else {
+                return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
+            }
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
         }
@@ -126,11 +131,12 @@ public class DigestUtil {
     /**
      * DES算法解密
      *
-     * @param source 需要解密的字符串
-     * @param key    需要用来des解密的秘钥
+     * @param source      需要解密的字符串
+     * @param key         需要用来des解密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
      * @return 返回解密结果
      */
-    public static String decryptDES(String source, String key) {
+    public static String decryptDES(String source, String key, boolean hexOrBase64) {
         Assert.hasText(source, "source不能为空");
         Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
         try {
@@ -139,7 +145,12 @@ public class DigestUtil {
             SecretKey secretKey = keyFactory.generateSecret(desKeySpec);
             Cipher cipher = Cipher.getInstance("DES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            byte[] bytes = cipher.doFinal(DigestUtil.hex2bytes(source));
+            byte[] bytes;
+            if (hexOrBase64) {
+                bytes = cipher.doFinal(DigestUtil.hex2bytes(source));
+            } else {
+                bytes = cipher.doFinal(DigestUtil.decodeBase64(source));
+            }
             return new String(bytes);
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
@@ -148,20 +159,25 @@ public class DigestUtil {
 
 
     /**
-     * AES加密
+     * AES加密 128bit AES/ECB/PKCS5Padding
      *
-     * @param source 需要加密的字符串
-     * @param key    需要加密的秘钥
+     * @param source      需要加密的字符串
+     * @param key         需要加密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
      * @return 返回加密结果
      */
-    public static String encryptAES(String source, String key) {
+    public static String encryptAES(String source, String key, boolean hexOrBase64) {
         Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16 || key.length() == 24 || key.length() == 32, "key的长度需要16、24或者32");
+        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
+            if (hexOrBase64) {
+                return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
+            } else {
+                return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
+            }
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
         }
@@ -170,20 +186,25 @@ public class DigestUtil {
 
 
     /**
-     * AES解密
+     * AES解密 128 AES/ECB/PKCS5Padding
      *
-     * @param source 需要解密的字符串
-     * @param key    需要解密的秘钥
+     * @param source      需要解密的字符串
+     * @param key         需要解密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
      * @return 返回解密结果
      */
-    public static String decryptAES(String source, String key) {
+    public static String decryptAES(String source, String key, boolean hexOrBase64) {
         Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16 || key.length() == 24 || key.length() == 32, "key的长度需要16、24或者32");
+        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return new String(cipher.doFinal(DigestUtil.hex2bytes(source)));
+            if (hexOrBase64) {
+                return new String(cipher.doFinal(DigestUtil.hex2bytes(source)));
+            } else {
+                return new String(cipher.doFinal(DigestUtil.decodeBase64(source)));
+            }
         } catch (Exception e) {
             throw new RuntimeException("出错啦!", e);
         }

@@ -8,9 +8,14 @@ import com.php25.common.jdbc.Db;
 import com.php25.common.jdbc.DbType;
 import com.php25.common.jdbc.JpaModelManager;
 import com.php25.common.jdbcsample.MysqlJdbcTest;
+import com.php25.common.jdbcsample.model.Company;
 import com.php25.common.jdbcsample.model.Customer;
 import org.junit.Assert;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -45,9 +50,9 @@ public class JdbcJmhTest {
                 .include(JdbcJmhTest.class.getSimpleName())
                 .mode(Mode.Throughput)
                 .timeout(TimeValue.valueOf("60s"))
-                .warmupIterations(1)
-                .warmupTime(TimeValue.valueOf("30s"))
-                .measurementIterations(1)
+                .warmupIterations(3)
+                .warmupTime(TimeValue.valueOf("10s"))
+                .measurementIterations(5)
                 .measurementTime(TimeValue.valueOf("30s"))
                 .threads(1)
                 .forks(1)
@@ -56,9 +61,9 @@ public class JdbcJmhTest {
         new Runner(opt).run();
     }
 
+
     @Setup(Level.Trial)
     public void init() {
-
         SpringBootTestContextBootstrapper bootstrapper = new SpringBootTestContextBootstrapper();
         DefaultBootstrapContext defaultBootstrapContext = new DefaultBootstrapContext(MysqlJdbcTest.class, new DefaultCacheAwareContextLoaderDelegate());
         bootstrapper.setBootstrapContext(defaultBootstrapContext);
@@ -68,8 +73,16 @@ public class JdbcJmhTest {
         this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
         this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 
-        jdbcTemplate.update("drop table if exists t_customer;create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
+        jdbcTemplate.update("drop table if exists t_customer;");
+        jdbcTemplate.update("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,company_id bigint,`enable` int);");
         Cnd cnd = this.db.cnd(Customer.class);
+
+        Company company = new Company();
+        company.setName("test");
+        company.setId(1L);
+        company.setCreateTime(new Date());
+        company.setEnable(1);
+
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -77,8 +90,9 @@ public class JdbcJmhTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             customer.setEnable(1);
+            customer.setCompany(company);
             this.customers.add(customer);
             cnd.insert(customer);
         }

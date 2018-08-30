@@ -30,7 +30,7 @@ public class ModelManagerTest {
         customer.setId(1000l);
         customer.setUsername("jack" + 0);
         customer.setPassword(DigestUtil.MD5Str("123456"));
-        customer.setCreateTime(new Date());
+        customer.setStartTime(new Date());
     }
 
     @Test

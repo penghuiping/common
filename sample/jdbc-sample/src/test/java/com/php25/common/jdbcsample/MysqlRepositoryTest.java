@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class RepositoryTest {
+public class MysqlRepositoryTest {
 
     @Autowired
     IdGeneratorService idGeneratorService;
@@ -49,14 +49,24 @@ public class RepositoryTest {
     @Autowired
     Db db;
 
-    Logger log = LoggerFactory.getLogger(RepositoryTest.class);
+    Logger log = LoggerFactory.getLogger(MysqlRepositoryTest.class);
 
     List<Customer> customers;
 
+    boolean isAutoIncrement = false;
 
     @Before
     public void before() {
-        jdbcTemplate.batchUpdate("drop table if exists t_customer", "create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` bit)");
+
+        jdbcTemplate.batchUpdate("drop table if exists t_customer");
+        jdbcTemplate.batchUpdate("drop table if exists t_company");
+        if (isAutoIncrement) {
+            jdbcTemplate.batchUpdate("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            jdbcTemplate.batchUpdate("create table t_company (id bigint auto_increment primary key,name varchar(20),create_time date,update_time date,`enable` int)");
+        } else {
+            jdbcTemplate.batchUpdate("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,company_id bigint)");
+            jdbcTemplate.batchUpdate("create table t_company (id bigint primary key,name varchar(20),create_time date,update_time date,`enable` int)");
+        }
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {
@@ -65,7 +75,7 @@ public class RepositoryTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setCreateTime(new Date());
+            customer.setStartTime(new Date());
             if (i % 2 == 0)
                 customer.setEnable(1);
             else
@@ -102,7 +112,7 @@ public class RepositoryTest {
         customer.setId(new Long(4));
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
-        customer.setCreateTime(new Date());
+        customer.setStartTime(new Date());
         customer.setAge(4 * 10);
         customerRepository.save(customer);
         log.info(JsonUtil.toPrettyJson(customerRepository.findAll()));

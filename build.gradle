@@ -2,7 +2,6 @@ apply from: "config.gradle"
 
 allprojects {
     apply plugin: 'idea'
-
 }
 
 
@@ -57,6 +56,10 @@ subprojects {
         }
     }
 
+    //gradle clean可以删除out folder
+    clean {
+        delete 'out'
+    }
 }
 
 

@@ -32,22 +32,23 @@ public class DigestUtilTest {
 
     @Test
     public void AES() {
-        String key = "1111111111111111";
+        String key = "1100000000000000";
         logger.info("key:" + key);
-        String value = DigestUtil.encryptAES("hello world", key);
+        String value = DigestUtil.encryptAES("hello world", key,false);
         logger.info("value:" + value);
-        String result = DigestUtil.decryptAES(value, key);
+        String result = DigestUtil.decryptAES(value, key,false);
         logger.info(result);
         Assert.assertEquals(result, "hello world");
     }
+
 
     @Test
     public void DES() {
         String key = "123456789";
         logger.info("key:" + key);
-        String value = DigestUtil.encryptDES("hello world", key);
+        String value = DigestUtil.encryptDES("hello world", key,true);
         logger.info("value:" + value);
-        String result = DigestUtil.decryptDES(value, key);
+        String result = DigestUtil.decryptDES(value, key,true);
         logger.info(result);
         Assert.assertEquals(result, "hello world");
     }

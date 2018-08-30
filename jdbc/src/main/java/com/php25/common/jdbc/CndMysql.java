@@ -11,8 +11,10 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -108,7 +110,8 @@ public class CndMysql extends Cnd {
             } else {
                 stringBuilder.append("?,");
             }
-            params.add(pairList.get(i).getRight());
+            //添加参数
+            params.add(paramConvert(pairList.get(i).getRight()));
         }
         stringBuilder.append(" )");
         log.info("sql语句为:" + stringBuilder.toString());

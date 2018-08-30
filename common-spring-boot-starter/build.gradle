@@ -12,8 +12,8 @@ dependencies {
 
     compile project(':core')
     compile project(':es')
-    //compile project(':jdbc')
-    compile project(':jpa')
+    compile project(':jdbc')
+    //compile project(':jpa')
     compile project(':mvc')
     compile project(':redis')
 }

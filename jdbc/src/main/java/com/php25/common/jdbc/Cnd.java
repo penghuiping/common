@@ -2,17 +2,20 @@ package com.php25.common.jdbc;
 
 import com.php25.common.core.specification.SearchParam;
 import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.core.util.ReflectUtil;
+import com.php25.common.core.util.StringUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,13 +28,13 @@ public abstract class Cnd extends AbstractQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(Cnd.class);
 
-    protected JdbcOperations jdbcOperations = null;
+    JdbcOperations jdbcOperations = null;
 
-    protected Class clazz;
+    Class clazz;
 
-    protected DbType dbType;
+    DbType dbType;
 
-    protected static Cnd of(Class cls, DbType dbType, JdbcOperations jdbcOperations) {
+    static Cnd of(Class cls, DbType dbType, JdbcOperations jdbcOperations) {
         Cnd dsl = null;
         switch (dbType) {
             case MYSQL:
@@ -99,7 +102,7 @@ public abstract class Cnd extends AbstractQuery implements Query {
         if (resultType.isAssignableFrom(Map.class)) {
             list = (List<T>) this.jdbcOperations.query(targetSql, paras, new ColumnMapRowMapper());
         } else {
-            list = this.jdbcOperations.query(targetSql, paras, new BeanPropertyRowMapper<T>(resultType));
+            list = this.jdbcOperations.query(targetSql, paras, new JpaRowMapper<T>(resultType));
         }
         return list;
     }
@@ -365,13 +368,14 @@ public abstract class Cnd extends AbstractQuery implements Query {
                         versionValue = (Long) pairList.get(i).getRight();
                         params.add(versionValue + 1L);
                     } else {
-                        params.add(pairList.get(i).getRight());
+
+                        params.add(paramConvert(pairList.get(i).getRight()));
                     }
                 } else {
-                    params.add(pairList.get(i).getRight());
+                    params.add(paramConvert(pairList.get(i).getRight()));
                 }
             } else {
-                pkValue = pairList.get(i).getValue();
+                pkValue = paramConvert(pairList.get(i).getRight());
             }
         }
 
@@ -432,6 +436,35 @@ public abstract class Cnd extends AbstractQuery implements Query {
             }
         }
         return this;
+    }
+
+    /**
+     * insert时候进行参数转化
+     * <p>
+     * 对于自定义类型class，需要获取这个class的primary key值
+     *
+     * @param paramValue 源参数值
+     * @return 最终参数值
+     */
+    Object paramConvert(Object paramValue) {
+        Class<?> paramValueType = paramValue.getClass();
+        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType) || Date.class.isAssignableFrom(paramValueType)) {
+            //基本类型,string,date直接加入参数列表
+            return paramValue;
+        } else {
+            if (!(Collection.class.isAssignableFrom(paramValueType))) {
+                //自定义class类，通过反射获取主键值，在加入参数列表
+                String subClassPk = JpaModelManager.getPrimaryKeyFieldName(paramValueType);
+                try {
+                    return ReflectUtil.getMethod(paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)).invoke(paramValue);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(String.format("%s没有%s方法", paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)), e);
+                }
+            } else {
+                //Collection类型不做任何处理
+                throw new RuntimeException("此orm框架中model中不支持Collection类型的属性");
+            }
+        }
     }
 
     /**
