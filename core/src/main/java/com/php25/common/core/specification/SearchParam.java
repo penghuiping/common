@@ -3,13 +3,17 @@ package com.php25.common.core.specification;
 /**
  * @author penghuiping
  * @date 2016-04-12
- *
+ * <p>
  * 查询条件
  */
 public class SearchParam {
     private String fieldName;
     private Object value;
     private Operator operator;
+
+    public static SearchParam of(String fieldName, Operator operator, Object value) {
+        return new SearchParam.Builder().fieldName(fieldName).operator(operator).value(value).build();
+    }
 
     private SearchParam() {
     }
@@ -27,7 +31,6 @@ public class SearchParam {
     public Operator getOperator() {
         return operator;
     }
-
 
     public static class Builder {
         private SearchParam target;

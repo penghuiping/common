@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -109,18 +110,41 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> iterable) {
-        //todo 没有实现批量更新
-        int[] rows = db.cnd(model).insertBatch(Lists.newArrayList(iterable));
-        for (int row : rows) {
-            if (row <= 0) {
-                throw new RuntimeException("批量保存数据库对象失败");
-            }
+        //判断是保存还是更新
+        List<S> lists = Lists.newArrayList(iterable);
+        S s = lists.get(0);
+        ID id = null;
+        try {
+            id = (ID) ReflectUtil.getMethod(model, "get" + StringUtil.capitalizeFirstLetter(pkName)).invoke(s);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("无法获取" + model.getSimpleName() + "主键id的值", e);
         }
-        return iterable;
+        Optional<T> tmp = findById(id);
+        if (tmp.isPresent()) {
+            //更新操作
+            int[] rows = db.cnd(model).updateBatch(lists);
+            for (int row : rows) {
+                if (row <= 0) {
+                    throw new RuntimeException("批量更新数据库对象失败");
+                }
+            }
+            return iterable;
+        } else {
+            int[] rows = db.cnd(model).insertBatch(lists);
+            for (int row : rows) {
+                if (row <= 0) {
+                    throw new RuntimeException("批量保存数据库对象失败");
+                }
+            }
+            return iterable;
+        }
     }
 
     @Override
     public Optional<T> findById(ID id) {
+        if (null == id) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(db.cnd(model).whereEq(pkName, id).single());
     }
 
@@ -146,6 +170,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> implements BaseRepos
 
     @Override
     public void deleteById(ID id) {
+        Assert.notNull(id, "id不能为null");
         db.cnd(model).whereEq(pkName, id).delete();
     }
 

@@ -11,4 +11,5 @@ dependencies {
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: my_version.spring_boot_starter
     testCompile group: 'com.h2database', name: 'h2', version: my_version.h2_db
     testCompile group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: my_version.jmh
+    testCompile group: 'io.codearte.jfairy', name: 'jfairy', version: '0.5.9'
 }

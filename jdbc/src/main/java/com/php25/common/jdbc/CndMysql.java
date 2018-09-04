@@ -11,10 +11,8 @@ import org.springframework.jdbc.support.KeyHolder;
 
 import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -135,7 +133,7 @@ public class CndMysql extends Cnd {
                 }
                 Field field = JpaModelManager.getPrimaryKeyField(clazz);
                 if (!field.getType().isAssignableFrom(Long.class)) {
-                    throw new RuntimeException("主键必须是Long类型");
+                    throw new RuntimeException("自增主键必须是Long类型");
                 }
                 ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());
                 return rows;

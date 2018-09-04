@@ -156,14 +156,13 @@ public class JpaModelManager {
         if (null != modelMeta) {
             List<String> classColumns = modelMeta.getClassColumns();
             List<String> dbColumns = modelMeta.getDbColumns();
-            String result = null;
             for (int i = 0; i < classColumns.size(); i++) {
                 if (classColumns.get(i).equals(name)) {
-                    result = dbColumns.get(i);
-                    break;
+                    return dbColumns.get(i);
+
                 }
             }
-            return result;
+            throw new RuntimeException("无法找到相对应的column");
         } else {
             return JpaModelManagerHelper.getDbColumnByClassColumn(cls, name);
         }

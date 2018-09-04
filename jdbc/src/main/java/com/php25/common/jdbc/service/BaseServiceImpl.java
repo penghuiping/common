@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -33,10 +34,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- *  service层 实现类基实现类，所有的service层类都应该继承这个类
+ * service层 实现类基实现类，所有的service层类都应该继承这个类
+ *
  * @author: penghuiping
  * @date: 2018/8/16 22:46
- *
  */
 public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
     private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
@@ -75,11 +76,14 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         try {
             DTO dto = dtoClass.newInstance();
             Optional<MODEL> model = baseRepository.findById(id);
-            modelToDtoTransferable.modelToDto(model.get(), dto);
-            return Optional.ofNullable(dto);
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return Optional.empty();
+            if (model.isPresent()) {
+                modelToDtoTransferable.modelToDto(model.get(), dto);
+                return Optional.ofNullable(dto);
+            } else {
+                return Optional.empty();
+            }
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("出错啦!", e);
         }
     }
 
@@ -100,9 +104,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             a = baseRepository.save(a);
             modelToDtoTransferable.modelToDto(a, dto);
             return Optional.ofNullable(dto);
-        } catch (Exception e) {
-            logger.error("出错啦!", e);
-            return Optional.empty();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("出错啦!", e);
         }
     }
 
@@ -120,8 +123,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 MODEL model = modelClass.newInstance();
                 dtoToModelTransferable.dtoToModel(dto, model);
                 return model;
-            } catch (Exception e) {
-                return null;
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("出错啦!", e);
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
         baseRepository.saveAll(models);
@@ -135,7 +138,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
             BeanUtils.copyProperties(obj, a);
             baseRepository.delete(a);
         } catch (Exception e) {
-            logger.error("出错啦!", e);
+            throw new RuntimeException("出错啦!", e);
         }
     }
 
@@ -147,8 +150,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 MODEL a = modelClass.newInstance();
                 BeanUtils.copyProperties(dto, a);
                 return a;
-            } catch (Exception e) {
-                return null;
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("出错啦!", e);
             }
         }).collect(Collectors.toList());
         baseRepository.deleteAll(models);
@@ -210,9 +213,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 DTO dto = dtoClass.newInstance();
                 modelToDtoTransferable.modelToDto(model, dto);
                 return dto;
-            } catch (Exception e) {
-                logger.error("出错啦!", e);
-                return null;
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("出错啦!", e);
             }
         }).collect(Collectors.toList());
 
@@ -256,9 +258,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 DTO dto = dtoClass.newInstance();
                 modelToDtoTransferable.modelToDto(model, dto);
                 return dto;
-            } catch (Exception e) {
-                logger.error("出错啦!", e);
-                return null;
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("出错啦!", e);
             }
         }).collect(Collectors.toList());
 
@@ -287,9 +288,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                         DTO dto = dtoClass.newInstance();
                         modelToDtoTransferable.modelToDto(model, dto);
                         return dto;
-                    } catch (Exception e) {
-                        logger.error("出错啦!", e);
-                        return null;
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new RuntimeException("出错啦!", e);
                     }
                 }).collect(Collectors.toList()));
     }
@@ -309,9 +309,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                         DTO dto = dtoClass.newInstance();
                         modelToDtoTransferable.modelToDto(model, dto);
                         return dto;
-                    } catch (Exception e) {
-                        logger.error("出错啦!", e);
-                        return null;
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new RuntimeException("出错啦!", e);
                     }
                 }).collect(Collectors.toList()));
     }
@@ -327,8 +326,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 ReflectUtil.getMethod(obj.getClass(), "setEnable", new Class[]{Integer.class}).invoke(obj, 2);
                 this.save(obj);
             }
-        } catch (Exception e) {
-            logger.error("此对象不支持软删除!", e);
+        } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("此对象不支持软删除!", e);
         }
     }
 
@@ -345,8 +344,8 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
                 }
                 this.save(objs);
             }
-        } catch (Exception e) {
-            logger.error("此对象不支持软删除!", e);
+        } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("此对象不支持软删除!", e);
         }
     }
 
@@ -356,8 +355,7 @@ public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> imple
         List<SearchParam> searchParams1 = JsonUtil.fromJson(searchParams, new TypeReference<List<SearchParam>>() {
         });
         SearchParamBuilder searchParamBuilder = new SearchParamBuilder().append(searchParams1);
-        Long result = baseRepository.count(searchParamBuilder);
-        return result;
+        return baseRepository.count(searchParamBuilder);
     }
 
 

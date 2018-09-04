@@ -12,6 +12,7 @@ public interface QueryExecute {
 
     /**
      * 查询，并映射到指定类上
+     *
      * @param columns
      * @param resultType
      * @return
@@ -36,6 +37,7 @@ public interface QueryExecute {
 
     /**
      * 查询结果集，结果集每一条并映射到map
+     *
      * @param columns
      * @return
      */
@@ -69,6 +71,15 @@ public interface QueryExecute {
      * @return 影响的行数
      */
     <M> int update(M t);
+
+    /**
+     * 批量更新操作
+     *
+     * @param lists
+     * @param <T>
+     * @return
+     */
+    public <T> int[] updateBatch(List<T> lists);
 
     /***
      * 更新，包括null值

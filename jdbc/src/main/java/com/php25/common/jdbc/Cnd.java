@@ -206,10 +206,10 @@ public abstract class Cnd extends AbstractQuery implements Query {
                     if (tmp.get(i).getLeft().equals(versionColumnName)) {
                         params.add(0);
                     } else {
-                        params.add(tmp.get(i).getRight());
+                        params.add(paramConvert(tmp.get(i).getRight()));
                     }
                 } else {
-                    params.add(tmp.get(i).getRight());
+                    params.add(paramConvert(tmp.get(i).getRight()));
                 }
             }
             batchParams.add(params.toArray());
@@ -218,7 +218,6 @@ public abstract class Cnd extends AbstractQuery implements Query {
         try {
             return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
         } catch (Exception e) {
-            log.error("插入操作失败", e);
             throw new RuntimeException("插入操作失败", e);
         } finally {
             clear();
@@ -393,12 +392,87 @@ public abstract class Cnd extends AbstractQuery implements Query {
         try {
             return jdbcOperations.update(stringBuilder.toString(), params.toArray());
         } catch (Exception e) {
-            log.error("更新操作失败", e);
             throw new RuntimeException("更新操作失败", e);
         } finally {
             clear();
         }
     }
+
+    @Override
+    public <T> int[] updateBatch(List<T> lists) {
+        T t = lists.get(0);
+        //泛型获取类所有的属性
+        Field[] fields = t.getClass().getDeclaredFields();
+        StringBuilder stringBuilder = new StringBuilder("UPDATE " + JpaModelManager.getTableName(t.getClass()) + " SET ");
+        List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, false);
+        //获取主键id
+        String pkName = JpaModelManager.getPrimaryKeyColName(t.getClass());
+
+        //判断是否有@version注解，如果有的话当然是进行乐观锁处理逻辑
+        Optional<Field> versionFieldOptional = JpaModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        Long versionValue = 0L;
+
+        //拼装sql
+        for (int i = 0; i < pairList.size(); i++) {
+            //移除主键
+            if (!pairList.get(i).getLeft().equals(pkName)) {
+                if (i == (pairList.size() - 1)) {
+                    stringBuilder.append(pairList.get(i).getLeft()).append("=? ");
+                } else {
+                    stringBuilder.append(pairList.get(i).getLeft()).append("=?,");
+                }
+            }
+        }
+
+        stringBuilder.append(String.format("WHERE %s=?", pkName));
+
+        if (versionFieldOptional.isPresent()) {
+            //具有@version的情况
+            //检查version属性是否是Long
+            Assert.isTrue(versionFieldOptional.get().getType().isAssignableFrom(Long.class), "version字段必须是Long类型");
+            versionColumnName = JpaModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            stringBuilder.append(String.format(" AND %s=?", versionColumnName));
+        }
+
+        log.info("sql语句为:" + stringBuilder.toString());
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < lists.size(); j++) {
+            Object pkValue = null;
+            List<Object> params1 = new ArrayList<>();
+            pairList = JpaModelManager.getTableColumnNameAndValue(lists.get(j), false);
+            for (int i = 0; i < pairList.size(); i++) {
+                if (!pairList.get(i).getLeft().equals(pkName)) {
+                    if (versionFieldOptional.isPresent()) {
+                        //@version注解字段，那么每次更新的时候都应该自动+1
+                        if (pairList.get(i).getLeft().equals(versionColumnName)) {
+                            versionValue = (Long) pairList.get(i).getRight();
+                            params1.add(versionValue + 1L);
+                        } else {
+                            params1.add(paramConvert(pairList.get(i).getRight()));
+                        }
+                    } else {
+                        params1.add(paramConvert(pairList.get(i).getRight()));
+                    }
+                } else {
+                    pkValue = paramConvert(pairList.get(i).getRight());
+                }
+            }
+            params1.add(pkValue);
+            params1.add(versionValue);
+            batchParams.add(params1.toArray());
+        }
+        try {
+            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
+        } catch (Exception e) {
+            throw new RuntimeException("批量更新操作失败", e);
+        } finally {
+            clear();
+        }
+    }
+
 
     /**
      * 通过searchParamBuilder来构造查询条件
@@ -447,6 +521,9 @@ public abstract class Cnd extends AbstractQuery implements Query {
      * @return 最终参数值
      */
     Object paramConvert(Object paramValue) {
+        if (null == paramValue) {
+            return null;
+        }
         Class<?> paramValueType = paramValue.getClass();
         if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType) || Date.class.isAssignableFrom(paramValueType)) {
             //基本类型,string,date直接加入参数列表
