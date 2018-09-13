@@ -13,10 +13,8 @@ import org.springframework.util.Assert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +29,7 @@ public class CndOracle extends Cnd {
     protected CndOracle(Class cls, JdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;
         this.clazz = cls;
-        this.dbType = DbType.MYSQL;
+        this.dbType = DbType.ORACLE;
     }
 
     @Override

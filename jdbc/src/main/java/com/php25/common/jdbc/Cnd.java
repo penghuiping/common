@@ -24,13 +24,11 @@ import java.util.Optional;
  * @author: penghuiping
  * @date: 2018/8/12 22:57
  */
-public abstract class Cnd extends AbstractQuery implements Query {
+public abstract class Cnd extends AbstractNewQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(Cnd.class);
 
     JdbcOperations jdbcOperations = null;
-
-    Class clazz;
 
     DbType dbType;
 
@@ -66,16 +64,6 @@ public abstract class Cnd extends AbstractQuery implements Query {
         return dsl;
     }
 
-    @Override
-    public String getCol(String name) {
-        try {
-            return " " + JpaModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
-        } catch (Exception e) {
-            //"无法通过jpa注解找到对应的column,直接调用父类的方法"
-            return super.getCol(name);
-        }
-
-    }
 
 
     @Override
@@ -88,9 +76,13 @@ public abstract class Cnd extends AbstractQuery implements Query {
             }
             sb.deleteCharAt(sb.length() - 1);
         } else {
-            sb = new StringBuilder("SELECT *");
+            if (resultType.equals(clazz)) {
+                sb = new StringBuilder("SELECT a.*");
+            } else {
+                sb = new StringBuilder("SELECT b.*");
+            }
         }
-        sb.append(" FROM ").append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(" FROM ").append(JpaModelManager.getTableName(clazz)).append(" a ").append(getSql());
         this.setSql(sb);
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
@@ -232,7 +224,7 @@ public abstract class Cnd extends AbstractQuery implements Query {
     @Override
     public int delete() {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(JpaModelManager.getTableName(clazz)).append(" a ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -246,7 +238,7 @@ public abstract class Cnd extends AbstractQuery implements Query {
     @Override
     public long count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) FROM ");
-        sb.append(JpaModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(JpaModelManager.getTableName(clazz)).append(" a ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -297,6 +289,19 @@ public abstract class Cnd extends AbstractQuery implements Query {
     public Cnd desc(String column) {
         OrderBy orderByInfo = this.getOrderBy();
         orderBy.add(column + " DESC");
+        return this;
+    }
+
+    @Override
+    public Cnd join(Class<?> model, String column) {
+        String tmp = getSql().toString();
+        if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
+            throw new RuntimeException("join只能使用一次");
+        }
+        String joinStatement = "a." + JpaModelManager.getDbColumnByClassColumn(clazz, column) + "=b." + JpaModelManager.getPrimaryKeyColName(model);
+        StringBuilder sb = new StringBuilder(String.format("JOIN %s b ON %s ", JpaModelManager.getTableName(model), joinStatement));
+        sb.append(getSql());
+        this.setSql(sb);
         return this;
     }
 

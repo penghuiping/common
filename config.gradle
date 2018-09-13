@@ -28,7 +28,6 @@ ext {
             javax_transaction_api: '1.2',
             lombok               : '1.16.20',
             beetl                : '2.8.5',
-            dubbo_starter        : '0.2.0'
-
+            dubbo_starter        : '0.2.0',
     ]
 }

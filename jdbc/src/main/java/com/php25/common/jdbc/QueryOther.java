@@ -55,4 +55,14 @@ public interface QueryOther {
      */
     Query limit(long startRow, long pageSize);
 
+
+    /**
+     * join 子句
+     *
+     * @param model  需要join的表实体类
+     * @param column 外键属性名
+     * @return
+     */
+    Query join(Class<?> model, String column);
+
 }

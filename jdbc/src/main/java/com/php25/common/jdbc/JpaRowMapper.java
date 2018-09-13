@@ -44,7 +44,7 @@ public class JpaRowMapper<T> implements RowMapper<T> {
                 Object value = rs.getObject(dbColumn);
                 Class<?> columnType = columnTypes.get(i);
 
-                if (columnType.isPrimitive() || Number.class.isAssignableFrom(columnType) || String.class.isAssignableFrom(columnType) || Date.class.isAssignableFrom(columnType)) {
+                if (columnType.isPrimitive() || Boolean.class.isAssignableFrom(columnType) || Number.class.isAssignableFrom(columnType) || String.class.isAssignableFrom(columnType) || Date.class.isAssignableFrom(columnType)) {
                     //基本类型 string,date 不需要处理
                     if (null != value) {
                         value = convertValueToRequiredType(value, columnType);
@@ -77,6 +77,14 @@ public class JpaRowMapper<T> implements RowMapper<T> {
     private Object convertValueToRequiredType(Object value, Class<?> requiredType) {
         if (String.class == requiredType) {
             return value.toString();
+        } else if (Boolean.class.isAssignableFrom(requiredType)) {
+            if (Number.class.isAssignableFrom(value.getClass())) {
+                return ((Number) value).intValue() == 1;
+            } else {
+                throw new IllegalArgumentException(
+                        "Value [" + value + "] is of type [" + value.getClass().getName() +
+                                "] and cannot be converted to required type [" + requiredType.getName() + "]");
+            }
         } else if (Number.class.isAssignableFrom(requiredType)) {
             if (value instanceof Number) {
                 // Convert original Number to target Number class.

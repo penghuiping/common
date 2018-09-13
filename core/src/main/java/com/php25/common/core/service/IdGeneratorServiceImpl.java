@@ -12,6 +12,7 @@ import java.util.UUID;
 
 /**
  * id生成器
+ *
  * @author penghuiping
  * @date 2017/9/18
  */

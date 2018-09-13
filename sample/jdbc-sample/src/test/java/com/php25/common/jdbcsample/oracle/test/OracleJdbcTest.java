@@ -110,6 +110,12 @@ public class OracleJdbcTest extends DbTest {
         customers = db.cnd(Customer.class).whereIsNotNull("updateTime").select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
+        //join
+        customers = db.cnd(Customer.class).join(Company.class, "company").select(Customer.class);
+        System.out.println(JsonUtil.toPrettyJson(customers));
+
+        List<Company> companies = db.cnd(Customer.class).join(Company.class, "company").whereEq(Customer.class, "id", 1).select(Company.class);
+        System.out.println(JsonUtil.toPrettyJson(companies));
     }
 
 

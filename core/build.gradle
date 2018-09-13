@@ -11,6 +11,5 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: my_version.jackson
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: my_version.okhttp
     compile group: 'org.apache.commons', name: 'commons-lang3', version: my_version.commons_lang3
-    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: my_version.rxjava
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version: my_version.xstream
 }

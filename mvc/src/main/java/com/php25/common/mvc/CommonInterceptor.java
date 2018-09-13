@@ -3,18 +3,19 @@ package com.php25.common.mvc;
 import com.php25.common.core.util.ThreadLocalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * 所有功能的共用拦截器，主要是向modelandview中加入一些常用的基路径
+ *
  * @author penghuiping
  * @date 2015-03-17
  */
@@ -23,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 public class CommonInterceptor extends HandlerInterceptorAdapter {
     private static Logger logger = LoggerFactory.getLogger(CommonInterceptor.class);
 
-    @Resource
+    @Autowired
     HtmlServiceImpl htmlService;
 
     @Value("${base_assets_url:null}")
