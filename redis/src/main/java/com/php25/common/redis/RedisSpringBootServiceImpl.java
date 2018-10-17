@@ -12,11 +12,13 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * redis服务spring redis实现
+ *
  * @author penghuiping
  * @date 2016-09-02
  */
@@ -176,6 +178,11 @@ public class RedisSpringBootServiceImpl implements RedisService {
     @Override
     public Boolean expire(String key, Long expireTime, TimeUnit timeUnit) {
         return redisTemplate.expire(key, expireTime, timeUnit);
+    }
+
+    @Override
+    public Boolean expireAt(String key, Date date) {
+        return redisTemplate.expireAt(key, date);
     }
 
     @Override

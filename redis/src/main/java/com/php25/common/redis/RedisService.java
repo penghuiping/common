@@ -2,6 +2,7 @@ package com.php25.common.redis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -121,6 +122,15 @@ public interface RedisService {
      * @return
      */
     public Boolean expire(final String key, Long expireTime, TimeUnit timeUnit);
+
+    /**
+     * 设置一个key在指定日期时间上过期
+     *
+     * @param key
+     * @param date
+     * @return
+     */
+    public Boolean expireAt(final String key, Date date);
 
 
     /**

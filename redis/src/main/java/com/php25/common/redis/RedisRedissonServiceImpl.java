@@ -8,11 +8,13 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * redis服务 redisson实现
+ *
  * @author penghuiping
  * @date 2016-09-2
  */
@@ -170,6 +172,12 @@ public class RedisRedissonServiceImpl implements RedisService {
     public Boolean expire(String key, Long expireTime, TimeUnit timeUnit) {
         RBucket rBucket = redisson.getBucket(key);
         return rBucket.expire(expireTime, timeUnit);
+    }
+
+    @Override
+    public Boolean expireAt(String key, Date date) {
+        RBucket rBucket = redisson.getBucket(key);
+        return rBucket.expireAt(date);
     }
 
     @Override

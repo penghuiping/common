@@ -11,7 +11,7 @@ subprojects {
 
 
     group = 'com.php25'
-    version = '2.0.1-SNAPSHOT'
+    version = '2.0.2-SNAPSHOT'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8

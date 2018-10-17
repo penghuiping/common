@@ -1,7 +1,7 @@
 ext {
     my_version = [
             guava                : '24.0-jre',
-            spring_boot_starter  : '2.0.2.RELEASE',
+            spring_boot_starter  : '2.0.3.RELEASE',
             jackson              : '2.9.5',
             okhttp               : '3.6.0',
             spring_data_commons  : '2.0.7.RELEASE',
