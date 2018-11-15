@@ -15,7 +15,6 @@ import com.php25.common.jdbc.repository.BaseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -42,8 +41,7 @@ import java.util.stream.Collectors;
 public abstract class BaseServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
     private static Logger logger = LoggerFactory.getLogger(BaseServiceImpl.class);
 
-    @Autowired
-    private BaseRepository<MODEL, ID> baseRepository;
+    protected BaseRepository<MODEL, ID> baseRepository;
 
     private Class<DTO> dtoClass;
 
