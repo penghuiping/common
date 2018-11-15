@@ -8,6 +8,7 @@ include 'redis'
 include 'common-spring-boot-starter'
 include 'sample:jdbc-sample'
 include 'sample:jpa-sample'
+include 'sample:spring-mybatis-sample'
 include 'sample:core-sample'
 include 'sample:redis-sample'
 

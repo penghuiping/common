@@ -73,8 +73,8 @@ public class RepositoryJmhTest {
         idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorServiceImpl.class);
         jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
-        jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
-
+        jdbcTemplate.execute("drop table if exists t_customer");
+        jdbcTemplate.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,score bigint,company_id bigint)");
 
         customers = Lists.newArrayList();
         for (int i = 0; i <= 3; i++) {

@@ -73,8 +73,9 @@ public class JdbcJmhTest {
         this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
         this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 
-        jdbcTemplate.update("drop table if exists t_customer;");
-        jdbcTemplate.update("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,company_id bigint,`enable` int);");
+        jdbcTemplate.execute("drop table if exists t_customer");
+        jdbcTemplate.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,score bigint,company_id bigint)");
+
         Cnd cnd = this.db.cnd(Customer.class);
 
         Company company = new Company();

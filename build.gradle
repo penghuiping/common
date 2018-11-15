@@ -4,6 +4,15 @@ allprojects {
     apply plugin: 'idea'
 }
 
+idea {
+    module {
+        //if you love browsing Javadoc
+        downloadJavadoc = false
+
+        //if you love reading sources :)
+        downloadSources = true
+    }
+}
 
 subprojects {
     apply plugin: 'java'

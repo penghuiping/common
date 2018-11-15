@@ -184,6 +184,31 @@ public class DigestUtil {
 
     }
 
+    /**
+     * AES加密 128 AES/ECB/PKCS5Padding
+     *
+     * @param source      需要加密的字符串
+     * @param key         需要加密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
+     * @return 返回加密结果
+     */
+    public static String encryptAES(String source, byte[] key, boolean hexOrBase64) {
+        Assert.hasText(source, "source不能为空");
+        Assert.isTrue(null != key && key.length == 16, "key的长度需要16");
+        try {
+            SecretKey secretKey = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            if (hexOrBase64) {
+                return new String(DigestUtil.bytes2hex(cipher.doFinal(source.getBytes())));
+            } else {
+                return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("出错啦!", e);
+        }
+    }
+
 
     /**
      * AES解密 128 AES/ECB/PKCS5Padding
@@ -198,6 +223,31 @@ public class DigestUtil {
         Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            if (hexOrBase64) {
+                return new String(cipher.doFinal(DigestUtil.hex2bytes(source)));
+            } else {
+                return new String(cipher.doFinal(DigestUtil.decodeBase64(source)));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("出错啦!", e);
+        }
+    }
+
+    /**
+     * AES解密 128 AES/ECB/PKCS5Padding
+     *
+     * @param source      需要解密的字符串
+     * @param key         需要解密的秘钥
+     * @param hexOrBase64 true:hex,false:base64
+     * @return 返回解密结果
+     */
+    public static String decryptAES(String source, byte[] key, boolean hexOrBase64) {
+        Assert.hasText(source, "source不能为空");
+        Assert.isTrue(null != key && key.length == 16, "key的长度需要16");
+        try {
+            SecretKey secretKey = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             if (hexOrBase64) {
