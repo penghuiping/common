@@ -1,7 +1,0 @@
-def my_version = rootProject.ext.my_version
-
-
-dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: my_version.spring_boot_starter
-    compile project(':core')
-}

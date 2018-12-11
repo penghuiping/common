@@ -53,7 +53,7 @@ public class CndOracle extends Cnd {
     protected <T> int insert(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
         Field[] fields = clazz.getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JpaModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(t, ignoreNull);
 
         //获取主键名

@@ -1,9 +1,0 @@
-def my_version = rootProject.ext.my_version
-
-dependencies {
-    compile project(':core')
-    compile group: 'org.slf4j', name: 'slf4j-api', version: my_version.slf4j_api
-    compile group: 'javax.persistence', name: 'javax.persistence-api', version: my_version.javax_persistence_api
-    compile group: 'org.springframework', name: 'spring-jdbc', version: my_version.spring_jdbc
-    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
-}

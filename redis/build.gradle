@@ -1,9 +1,0 @@
-def my_version = rootProject.ext.my_version
-
-dependencies {
-    compile project(':core')
-    compile group: 'redis.clients', name: 'jedis', version: my_version.jedis
-    compile group: 'com.google.guava', name: 'guava', version: my_version.guava
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: my_version.spring_boot_starter
-    compile group: 'org.redisson', name: 'redisson', version: my_version.redisson
-}

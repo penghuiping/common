@@ -16,7 +16,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer, Long> implements CustomerService, SoftDeletable<CustomerDto> {
 
-    @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    public void setCustomerRepository(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+        this.baseRepository = customerRepository;
+    }
 }

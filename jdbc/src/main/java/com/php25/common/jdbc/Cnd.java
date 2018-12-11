@@ -158,7 +158,7 @@ public abstract class Cnd extends AbstractNewQuery implements Query {
     public <M> int[] insertBatch(List<M> list) {
         //泛型获取类所有的属性
         Field[] fields = clazz.getDeclaredFields();
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO " + JpaModelManager.getTableName(clazz) + "( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JpaModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JpaModelManager.getTableColumnNameAndValue(list.get(0), false);
 
         //判断是否有@version注解
