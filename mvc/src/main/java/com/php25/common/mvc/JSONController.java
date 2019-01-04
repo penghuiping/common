@@ -65,6 +65,13 @@ public class JSONController {
 
     }
 
+    protected JSONResponse failed(ReturnStatus returnStatus) {
+        JSONResponse ret = new JSONResponse();
+        ret.setErrorCode(ApiErrorCode.business_error.value);
+        ret.setMessage(returnStatus.toString2());
+        return ret;
+    }
+
     protected JSONResponse succeed(Object obj) {
         JSONResponse ret = new JSONResponse();
         ret.setErrorCode(ApiErrorCode.ok.value);
