@@ -97,7 +97,7 @@ public class HttpClientUtil {
     }
 
     public static String httpGet(OkHttpClient client, final String url, Map<String, String> params, Map<String, String> headers, String charset) {
-        Assert.hasText(url, "url不能为空");
+        AssertUtil.hasText(url, "url不能为空");
         if (params == null) {
             params = Maps.newHashMap();
         }
@@ -135,7 +135,7 @@ public class HttpClientUtil {
     }
 
     public static String httpPost(OkHttpClient client, String url, Map<String, String> params, Map<String, String> headers, String charset) {
-        Assert.hasText(url, "url不能为空");
+        AssertUtil.hasText(url, "url不能为空");
         if (null == params) {
             params = Maps.newHashMap();
         }
@@ -176,9 +176,9 @@ public class HttpClientUtil {
     }
 
     public static String httpPost(OkHttpClient client, String url, String json, Map<String, String> headers, String charset) {
-        Assert.notNull(client, "okHttpClient不能为null");
-        Assert.hasText(url, "url不能为空");
-        Assert.hasText(json, "json不能为空");
+        AssertUtil.notNull(client, "okHttpClient不能为null");
+        AssertUtil.hasText(url, "url不能为空");
+        AssertUtil.hasText(json, "json不能为空");
 
         if (headers == null) {
             headers = Maps.newHashMap();

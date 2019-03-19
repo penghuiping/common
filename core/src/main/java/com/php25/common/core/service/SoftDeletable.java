@@ -1,5 +1,7 @@
 package com.php25.common.core.service;
 
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 
 /**
@@ -20,6 +22,15 @@ public interface SoftDeletable<T> {
     void softDelete(T obj);
 
     /**
+     * 软删除-异步调用
+     *
+     * @param obj
+     * @author penghuiping
+     * @date 2019/3/19.
+     */
+    Mono<Boolean> softDeleteAsync(T obj);
+
+    /**
      * 批量软删除
      *
      * @param objs
@@ -27,4 +38,13 @@ public interface SoftDeletable<T> {
      * @date 2016/11/25.
      */
     void softDelete(List<T> objs);
+
+    /**
+     * 批量软删除-异步调用
+     *
+     * @param objs
+     * @author penghuiping
+     * @date 2019/3/19.
+     */
+    Mono<Boolean> softDeleteAsync(List<T> objs);
 }

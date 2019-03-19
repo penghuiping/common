@@ -41,7 +41,7 @@ public class DigestUtil {
      * @return byte[]  md5加密后的结果
      */
     private static byte[] MD5(String str) {
-        Assert.hasText(str, "str不能为空");
+        AssertUtil.hasText(str, "str不能为空");
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             return messageDigest.digest(str.getBytes("utf8"));
@@ -88,8 +88,8 @@ public class DigestUtil {
      * @return 返回加密结果
      */
     private static byte[] SHA(String str, String shaAlgorithm) {
-        Assert.hasText(str, "str不能为空");
-        Assert.hasText(shaAlgorithm, "shaAlgorithm不能为空");
+        AssertUtil.hasText(str, "str不能为空");
+        AssertUtil.hasText(shaAlgorithm, "shaAlgorithm不能为空");
         try {
             MessageDigest md = MessageDigest.getInstance(shaAlgorithm);
             return md.digest(str.getBytes("utf8"));
@@ -109,8 +109,8 @@ public class DigestUtil {
      * @return 返回加密结果
      */
     public static String encryptDES(String source, String key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
         try {
             DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
@@ -137,8 +137,8 @@ public class DigestUtil {
      * @return 返回解密结果
      */
     public static String decryptDES(String source, String key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(!StringUtil.isBlank(key) && key.trim().length() >= 8, "key的长度至少是8");
         try {
             DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
@@ -167,8 +167,8 @@ public class DigestUtil {
      * @return 返回加密结果
      */
     public static String encryptAES(String source, String key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -193,8 +193,8 @@ public class DigestUtil {
      * @return 返回加密结果
      */
     public static String encryptAES(String source, byte[] key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(null != key && key.length == 16, "key的长度需要16");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(null != key && key.length == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -219,8 +219,8 @@ public class DigestUtil {
      * @return 返回解密结果
      */
     public static String decryptAES(String source, String key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(!StringUtil.isBlank(key) && key.length() == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -244,8 +244,8 @@ public class DigestUtil {
      * @return 返回解密结果
      */
     public static String decryptAES(String source, byte[] key, boolean hexOrBase64) {
-        Assert.hasText(source, "source不能为空");
-        Assert.isTrue(null != key && key.length == 16, "key的长度需要16");
+        AssertUtil.hasText(source, "source不能为空");
+        AssertUtil.isTrue(null != key && key.length == 16, "key的长度需要16");
         try {
             SecretKey secretKey = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -283,7 +283,7 @@ public class DigestUtil {
      * @return 返回RSA算法公钥字符串
      */
     public static String getPublicKey(KeyPair keyPair) {
-        Assert.notNull(keyPair, "keyPair不能为null");
+        AssertUtil.notNull(keyPair, "keyPair不能为null");
         try {
             PublicKey publicKey = keyPair.getPublic();
             byte[] bytes = publicKey.getEncoded();
@@ -300,7 +300,7 @@ public class DigestUtil {
      * @return 返回RSA算法密钥字符串
      */
     public static String getPrivateKey(KeyPair keyPair) {
-        Assert.notNull(keyPair, "keyPair不能为null");
+        AssertUtil.notNull(keyPair, "keyPair不能为null");
         try {
             PrivateKey privateKey = keyPair.getPrivate();
             byte[] bytes = privateKey.getEncoded();
@@ -317,7 +317,7 @@ public class DigestUtil {
      * @return 公钥
      */
     private static PublicKey loadPublicKey(String pubStr) {
-        Assert.hasText(pubStr, "pubStr不能为空");
+        AssertUtil.hasText(pubStr, "pubStr不能为空");
         try {
             byte[] keyBytes = Base64.getDecoder().decode(pubStr);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
@@ -335,7 +335,7 @@ public class DigestUtil {
      * @return 密钥
      */
     private static PrivateKey loadPrivateKey(String priStr) {
-        Assert.hasText(priStr, "priStr不能为空");
+        AssertUtil.hasText(priStr, "priStr不能为空");
         try {
             byte[] keyBytes = Base64.getDecoder().decode(priStr);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
@@ -355,8 +355,8 @@ public class DigestUtil {
      * @return 加密后的内容
      */
     public static String publicEncrypt(String content, String publicKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(publicKey, "publicKey不能为null");
+        AssertUtil.notNull(content, "content不能为null");
+        AssertUtil.notNull(publicKey, "publicKey不能为null");
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadPublicKey(publicKey));
@@ -375,8 +375,8 @@ public class DigestUtil {
      * @return 解密后的内容
      */
     public static String privateDecrypt(String content, String privateKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(privateKey, "privateKey不能为null");
+        AssertUtil.notNull(content, "content不能为null");
+        AssertUtil.notNull(privateKey, "privateKey不能为null");
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadPrivateKey(privateKey));
@@ -395,8 +395,8 @@ public class DigestUtil {
      * @return 返回签名结果
      */
     public static String sign(String content, String privateKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(privateKey, "privateKey不能为null");
+        AssertUtil.notNull(content, "content不能为null");
+        AssertUtil.notNull(privateKey, "privateKey不能为null");
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
             signature.initSign(DigestUtil.loadPrivateKey(privateKey));
@@ -416,9 +416,9 @@ public class DigestUtil {
      * @return true:签名合法;false:签名不合法
      */
     public static boolean verify(String content, String sign, String publicKey) {
-        Assert.notNull(content, "content不能为null");
-        Assert.notNull(sign, "sign不能为null");
-        Assert.notNull(publicKey, "publicKey不能为null");
+        AssertUtil.notNull(content, "content不能为null");
+        AssertUtil.notNull(sign, "sign不能为null");
+        AssertUtil.notNull(publicKey, "publicKey不能为null");
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
             signature.initVerify(DigestUtil.loadPublicKey(publicKey));
@@ -436,7 +436,7 @@ public class DigestUtil {
      * @return 16进制字符
      */
     public static char[] bytes2hex(final byte[] data) {
-        Assert.notNull(data, "data不能为null");
+        AssertUtil.notNull(data, "data不能为null");
         final int l = data.length;
         final char[] out = new char[l << 1];
         // two characters form the hex value.
@@ -454,7 +454,7 @@ public class DigestUtil {
      * @return 2进制字节数组
      */
     public static byte[] hex2bytes(String hexStr) {
-        Assert.hasText(hexStr, "hexStr不能为空");
+        AssertUtil.hasText(hexStr, "hexStr不能为空");
         byte[] result = new byte[hexStr.length() / 2];
         for (int i = 0; i < hexStr.length() / 2; i++) {
             int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
@@ -471,7 +471,7 @@ public class DigestUtil {
      * @return 加密后的字符串
      */
     public static String encodeBase64(byte[] data) {
-        Assert.notNull(data, "data不能为null");
+        AssertUtil.notNull(data, "data不能为null");
         return Base64.getEncoder().encodeToString(data);
     }
 
@@ -482,7 +482,7 @@ public class DigestUtil {
      * @return 解密后的字节数据
      */
     public static byte[] decodeBase64(String text) {
-        Assert.hasText(text, "text不能为空");
+        AssertUtil.hasText(text, "text不能为空");
         return Base64.getDecoder().decode(text);
     }
 }

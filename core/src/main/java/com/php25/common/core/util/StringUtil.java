@@ -1,5 +1,7 @@
 package com.php25.common.core.util;
 
+import org.springframework.lang.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -28,6 +30,36 @@ public class StringUtil {
      */
     public static boolean isEmpty(String str) {
         return (str == null || str.length() == 0);
+    }
+
+
+    /**
+     * 判断字符串是否具有长度
+     * @param str
+     * @return
+     */
+    public static boolean hasLength(String str) {
+        return (str != null && !str.isEmpty());
+    }
+
+
+    /**
+     * 判断字符串中是否有文字，空格不算文字
+     * @param str
+     * @return
+     */
+    public static boolean hasText(String str) {
+        return (str != null && !str.isEmpty() && containsText(str));
+    }
+
+    private static boolean containsText(CharSequence str) {
+        int strLen = str.length();
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

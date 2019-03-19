@@ -2,14 +2,14 @@ package com.php25.common.jpa.service;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.dto.DataGridPageDto;
-import com.php25.common.core.service.BaseService;
+import com.php25.common.core.service.BaseAsyncServiceImpl;
 import com.php25.common.core.service.DtoToModelTransferable;
 import com.php25.common.core.service.ModelToDtoTransferable;
-import com.php25.common.core.service.SoftDeletable;
 import com.php25.common.core.specification.BaseSpecsFactory;
 import com.php25.common.core.specification.Operator;
 import com.php25.common.core.specification.SearchParam;
 import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.jpa.specification.BaseJpaSpecs;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,11 +41,11 @@ import java.util.stream.Collectors;
 
 /**
  * service层 jta方式的基础实现，如果是用jta方式操作数据库，所有
+ *
  * @author penghuiping
  * @date 2016-08-12
- *
  */
-public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, SoftDeletable<DTO> {
+public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> extends BaseAsyncServiceImpl<DTO, MODEL, ID> {
     private static Logger logger = LoggerFactory.getLogger(BaseJtaServiceImpl.class);
 
     protected EntityManagerFactory entityManagerFactory;
@@ -78,8 +77,8 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(id, "id不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(id, "id不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
@@ -105,9 +104,9 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<DTO> save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(obj, "dto不能为null");
-        Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(obj, "dto不能为null");
+        AssertUtil.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
@@ -135,8 +134,8 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public void save(Iterable<DTO> objs, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable) {
-        Assert.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
-        Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
+        AssertUtil.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
+        AssertUtil.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
@@ -167,7 +166,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public void delete(DTO obj) {
-        Assert.notNull(obj, "dto不能为null");
+        AssertUtil.notNull(obj, "dto不能为null");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
@@ -190,7 +189,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public void delete(List<DTO> objs) {
-        Assert.notEmpty(objs, "dtos至少需要包含一个元素");
+        AssertUtil.notEmpty(objs, "dtos至少需要包含一个元素");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);
@@ -234,8 +233,8 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property) {
-        Assert.notNull(direction, "direction不能为null");
-        Assert.notNull(property, "property不能为null");
+        AssertUtil.notNull(direction, "direction不能为null");
+        AssertUtil.notNull(property, "property不能为null");
         Sort.Order order = new Sort.Order(direction, property);
         Sort sort = Sort.by(order);
         return query(pageNum, pageSize, searchParams, modelToDtoTransferable, sort);
@@ -243,11 +242,11 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
+        AssertUtil.notNull(pageNum, "pageNum不能为null");
+        AssertUtil.notNull(pageSize, "pageSize不能为null");
+        AssertUtil.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(sort, "sort不能为null");
         EntityManager entityManager = null;
         PageRequest pageRequest = null;
         List<MODEL> adminUserModelList = null;
@@ -323,11 +322,11 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.notNull(searchParamBuilder, "searchParamBuilder不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
+        AssertUtil.notNull(pageNum, "pageNum不能为null");
+        AssertUtil.notNull(pageSize, "pageSize不能为null");
+        AssertUtil.notNull(searchParamBuilder, "searchParamBuilder不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(sort, "sort不能为null");
         EntityManager entityManager = null;
         PageRequest pageRequest = null;
         List<MODEL> adminUserModelList = null;
@@ -408,8 +407,8 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         List<ID> ids1 = Lists.newArrayList(ids);
         SearchParam searchParam = null;
         new SearchParam.Builder().fieldName("id").operator(Operator.IN).value(JsonUtil.toJson(ids)).build();
@@ -432,7 +431,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public void softDelete(DTO obj) {
-        Assert.notNull(obj, "dto不能为null");
+        AssertUtil.notNull(obj, "dto不能为null");
         try {
             //判断是否可以进行软删除
             Field field = obj.getClass().getDeclaredField("enable");
@@ -448,7 +447,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public void softDelete(List<DTO> objs) {
-        Assert.notEmpty(objs, "dtos集合至少需要包含一个元素");
+        AssertUtil.notEmpty(objs, "dtos集合至少需要包含一个元素");
         try {
             //判断是否可以进行软删除
             Field field = objs.get(0).getClass().getDeclaredField("enable");
@@ -466,7 +465,7 @@ public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> im
 
     @Override
     public Long count(String searchParams) {
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
+        AssertUtil.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerFactory.createEntityManager(SynchronizationType.SYNCHRONIZED);

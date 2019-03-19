@@ -31,11 +31,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +53,7 @@ import java.util.stream.Collectors;
 @DataJpaTest(showSql = false)
 @EntityScan(basePackages = {"com.php25"})
 @EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class JpaTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JpaTest.class);
@@ -87,13 +92,43 @@ public class JpaTest {
 
     @Test
     public void findAll() throws Exception {
-        Optional<List<CustomerDto>> customerDtos = customerService.findAll();
-        customerDtos.ifPresent(a -> {
-            print("<<<<<<<===========findAll===========>>>>>>", a);
+        long startTime = System.currentTimeMillis();
+        for(int i=0;i<150000;i++) {
+            Optional<List<CustomerDto>> customerDtos = customerService.findAll();
+            if (customerDtos.isPresent()) {
+                List<CustomerDto> a = customerDtos.get();
+                print("<<<<<<<===========findAll===========>>>>>>", a);
 
-            CustomerDto customerDto = a.get(RandomUtil.getRandom(0, a.size()));
-            print("<<<<<<<===========findOne===========>>>>>>", customerDto);
-        });
+                CustomerDto customerDto = a.get(RandomUtil.getRandom(0, a.size()));
+                print("<<<<<<<===========findOne===========>>>>>>", customerDto);
+            }
+        }
+        logger.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+    }
+
+    @Test
+    public void findAllAsync() throws Exception {
+        long startTime = System.currentTimeMillis();
+        CountDownLatch countDownLatch = new CountDownLatch(150000);
+        for(int i=0;i<150000;i++) {
+            Mono<Optional<List<CustomerDto>>> mono = customerService.findAllAsync();
+            mono.subscribe(customerDtos1 -> {
+                if (customerDtos1.isPresent() && !customerDtos1.get().isEmpty()) {
+                    List<CustomerDto> a = customerDtos1.get();
+                    print("<<<<<<<===========findAll===========>>>>>>", a);
+
+                    CustomerDto customerDto = a.get(RandomUtil.getRandom(0, a.size()));
+                    print("<<<<<<<===========findOne===========>>>>>>", customerDto);
+                }
+            }, throwable -> {
+                logger.error("出错啦", throwable);
+            }, () -> {
+                countDownLatch.countDown();
+            });
+        }
+        countDownLatch.await();
+        logger.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+
     }
 
     @Test

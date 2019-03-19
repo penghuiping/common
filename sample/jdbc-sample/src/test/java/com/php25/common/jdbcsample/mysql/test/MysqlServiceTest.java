@@ -24,10 +24,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @Auther: penghuiping
@@ -57,9 +59,39 @@ public class MysqlServiceTest extends DbTest {
     }
 
     @Test
+    public void findOneAsync() throws Exception {
+        long startTime = System.currentTimeMillis();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        for (int i = 0; i < 1; i++) {
+            Mono<Optional<CustomerDto>> mono = customerService.findOneAsync(customerDtos.get(0).getId());
+            mono.subscribe(customerDto -> {
+                if (customerDto.isPresent()) {
+                    Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
+        log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
+    }
+
+    @Test
     public void findOne1() {
         Optional<CustomerDto> customerDto = customerService.findOne(customers.get(0).getId(), BeanUtils::copyProperties);
         Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
+    }
+
+    @Test
+    public void findOne1Async() throws Exception{
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Mono<Optional<CustomerDto>> mono = customerService.findOneAsync(customers.get(0).getId(),BeanUtils::copyProperties);
+        mono.subscribe(customerDto -> {
+            if(customerDto.isPresent()) {
+                Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
+                countDownLatch.countDown();
+            }
+        });
+        countDownLatch.await();
     }
 
     @Test
@@ -160,6 +192,19 @@ public class MysqlServiceTest extends DbTest {
     public void findAll() {
         Optional<List<CustomerDto>> customerDtoOptional = customerService.findAll(Lists.newArrayList(customers.get(0).getId(), customers.get(2).getId()));
         Assert.assertTrue(customerDtoOptional.isPresent() && customerDtoOptional.get().size() == 2);
+    }
+
+
+    @Test
+    public void findAllAsync() throws Exception{
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Mono<Optional<List<CustomerDto>>> mono = customerService.findAllAsync();
+        mono.subscribe(o -> {
+            System.out.println(JsonUtil.toJson(o.get()));
+        },throwable -> {},() -> {
+            countDownLatch.countDown();
+        });
+        countDownLatch.await();
     }
 
     @Test

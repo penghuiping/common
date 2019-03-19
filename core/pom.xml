@@ -63,5 +63,9 @@
       <artifactId>xstream</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>io.projectreactor</groupId>
+      <artifactId>reactor-core</artifactId>
+    </dependency>
   </dependencies>
 </project>
