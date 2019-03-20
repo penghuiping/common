@@ -7,6 +7,7 @@ import com.php25.common.core.service.DtoToModelTransferable;
 import com.php25.common.core.service.ModelToDtoTransferable;
 import com.php25.common.core.specification.BaseSpecsFactory;
 import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.es.repository.BaseEsRepository;
 import com.php25.common.es.specification.BaseEsSpecs;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -70,8 +71,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(id, "id不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(id, "id不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         try {
             DTO dto = dtoClass.newInstance();
             Optional<MODEL> model = baseRepository.findById(id);
@@ -90,9 +91,9 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<DTO> save(DTO obj, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(obj, "dto不能为null");
-        Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(obj, "dto不能为null");
+        AssertUtil.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         try {
             MODEL a = modelClass.newInstance();
             dtoToModelTransferable.dtoToModel(obj, a);
@@ -113,8 +114,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public void save(Iterable<DTO> objs, DtoToModelTransferable<MODEL, DTO> dtoToModelTransferable) {
-        Assert.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
-        Assert.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
+        AssertUtil.notEmpty((List<DTO>) objs, "dtos至少需要包含一个元素");
+        AssertUtil.notNull(dtoToModelTransferable, "dtoToModelTransferable不能为null");
         List<MODEL> models = (Lists.newArrayList(objs)).stream().map(dto -> {
             try {
                 MODEL model = modelClass.newInstance();
@@ -129,7 +130,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public void delete(DTO obj) {
-        Assert.notNull(obj, "dto不能为null");
+        AssertUtil.notNull(obj, "dto不能为null");
         try {
             MODEL a = modelClass.newInstance();
             BeanUtils.copyProperties(obj, a);
@@ -141,7 +142,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public void delete(List<DTO> objs) {
-        Assert.notEmpty(objs, "dtos至少需要包含一个元素");
+        AssertUtil.notEmpty(objs, "dtos至少需要包含一个元素");
         List<MODEL> models = objs.stream().map(dto -> {
             try {
                 MODEL a = modelClass.newInstance();
@@ -167,8 +168,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort.Direction direction, String property) {
-        Assert.notNull(direction, "direction不能为null");
-        Assert.notNull(property, "property不能为null");
+        AssertUtil.notNull(direction, "direction不能为null");
+        AssertUtil.notNull(property, "property不能为null");
         Sort.Order order = new Sort.Order(direction, property);
         Sort sort = Sort.by(order);
         return query(pageNum, pageSize, searchParams, modelToDtoTransferable, sort);
@@ -176,11 +177,11 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
+        AssertUtil.notNull(pageNum, "pageNum不能为null");
+        AssertUtil.notNull(pageSize, "pageSize不能为null");
+        AssertUtil.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(sort, "sort不能为null");
 
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
@@ -225,11 +226,11 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, SearchParamBuilder searchParamBuilder, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable, Sort sort) {
-        Assert.notNull(pageNum, "pageNum不能为null");
-        Assert.notNull(pageSize, "pageSize不能为null");
-        Assert.notNull(searchParamBuilder, "SearchParamBuilder不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
-        Assert.notNull(sort, "sort不能为null");
+        AssertUtil.notNull(pageNum, "pageNum不能为null");
+        AssertUtil.notNull(pageSize, "pageSize不能为null");
+        AssertUtil.notNull(searchParamBuilder, "SearchParamBuilder不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(sort, "sort不能为null");
 
         PageRequest pageRequest = null;
         Page<MODEL> modelPage = null;
@@ -273,8 +274,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
     }
 
     public Optional<DataGridPageDto<DTO>> query(SearchQuery searchQuery, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(searchQuery, "searchQuery不能为null");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(searchQuery, "searchQuery不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         Page<MODEL> modelPage = baseRepository.search(searchQuery);
         List<MODEL> adminUserModelList = modelPage.getContent();
         if (null == adminUserModelList) {
@@ -301,8 +302,8 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<List<DTO>> findAll(Iterable<ID> ids, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notEmpty((List<ID>) ids, "ids集合至少需要包含一个元素");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         List<MODEL> result = Lists.newArrayList(baseRepository.findAllById(ids));
         return Optional.ofNullable(result.stream()
                 .map(model -> {
@@ -324,7 +325,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Optional<List<DTO>> findAll(ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable) {
-        Assert.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
+        AssertUtil.notNull(modelToDtoTransferable, "modelToDtoTransferable不能为null");
         List<MODEL> result = Lists.newArrayList(baseRepository.findAll());
         return Optional.ofNullable(result.stream()
                 .map(model -> {
@@ -342,7 +343,7 @@ public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> ext
 
     @Override
     public Long count(String searchParams) {
-        Assert.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
+        AssertUtil.hasText(searchParams, "searchParams不能为空,如没有搜索条件请使用[]");
         return new Long(Lists.newArrayList(baseRepository.search(BaseSpecsFactory.<QueryBuilder>getInstance(BaseEsSpecs.class).getSpecs(searchParams))).size());
     }
 
