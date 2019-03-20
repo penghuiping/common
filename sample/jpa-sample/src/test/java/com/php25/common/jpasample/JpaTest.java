@@ -93,7 +93,7 @@ public class JpaTest {
     @Test
     public void findAll() throws Exception {
         long startTime = System.currentTimeMillis();
-        for(int i=0;i<150000;i++) {
+        for(int i=0;i<1;i++) {
             Optional<List<CustomerDto>> customerDtos = customerService.findAll();
             if (customerDtos.isPresent()) {
                 List<CustomerDto> a = customerDtos.get();
@@ -109,8 +109,8 @@ public class JpaTest {
     @Test
     public void findAllAsync() throws Exception {
         long startTime = System.currentTimeMillis();
-        CountDownLatch countDownLatch = new CountDownLatch(150000);
-        for(int i=0;i<150000;i++) {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        for(int i=0;i<1;i++) {
             Mono<Optional<List<CustomerDto>>> mono = customerService.findAllAsync();
             mono.subscribe(customerDtos1 -> {
                 if (customerDtos1.isPresent() && !customerDtos1.get().isEmpty()) {
