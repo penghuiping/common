@@ -2,6 +2,7 @@ package com.php25.common.redis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +188,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
 
     @Override
     public RedisLockInfo tryLock(String redisKey, long expire, long tryTimeout) {
-        Assert.isTrue(tryTimeout > 0, "tryTimeout必须大于0");
+        AssertUtil.isTrue(tryTimeout > 0, "tryTimeout必须大于0");
         long timestamp = System.currentTimeMillis();
         int tryCount = 0;
         String lockId = UUID.randomUUID().toString();

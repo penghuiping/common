@@ -2,7 +2,7 @@ package com.php25.common.jpa.service;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.dto.DataGridPageDto;
-import com.php25.common.core.service.BaseAsyncServiceImpl;
+import com.php25.common.core.service.AbstractBaseAsyncServiceImpl;
 import com.php25.common.core.service.DtoToModelTransferable;
 import com.php25.common.core.service.ModelToDtoTransferable;
 import com.php25.common.core.specification.BaseSpecsFactory;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * @author penghuiping
  * @date 2016-08-12
  */
-public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> extends BaseAsyncServiceImpl<DTO, MODEL, ID> {
+public abstract class BaseJtaServiceImpl<DTO, MODEL, ID extends Serializable> extends AbstractBaseAsyncServiceImpl<DTO, MODEL, ID> {
     private static Logger logger = LoggerFactory.getLogger(BaseJtaServiceImpl.class);
 
     protected EntityManagerFactory entityManagerFactory;

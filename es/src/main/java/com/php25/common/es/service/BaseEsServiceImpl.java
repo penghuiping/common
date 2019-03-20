@@ -2,8 +2,7 @@ package com.php25.common.es.service;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.dto.DataGridPageDto;
-import com.php25.common.core.service.BaseAsyncServiceImpl;
-import com.php25.common.core.service.BaseService;
+import com.php25.common.core.service.AbstractBaseAsyncServiceImpl;
 import com.php25.common.core.service.DtoToModelTransferable;
 import com.php25.common.core.service.ModelToDtoTransferable;
 import com.php25.common.core.specification.BaseSpecsFactory;
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
  * @date 2016-08-12
  *
  */
-public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> extends BaseAsyncServiceImpl<DTO,MODEL,ID> {
+public abstract class BaseEsServiceImpl<DTO, MODEL, ID extends Serializable> extends AbstractBaseAsyncServiceImpl<DTO,MODEL,ID> {
 
     private static Logger logger = LoggerFactory.getLogger(BaseEsServiceImpl.class);
 
