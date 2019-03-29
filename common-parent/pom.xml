@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <spring.boot.version>2.0.3.RELEASE</spring.boot.version>
+        <spring.boot.version>2.1.3.RELEASE</spring.boot.version>
         <javax.persistence-api.version>2.2</javax.persistence-api.version>
         <guava.version>24.0-jre</guava.version>
         <jackson.version>2.9.6</jackson.version>
@@ -29,12 +29,12 @@
         <jmh.version>1.21</jmh.version>
         <mybatis-plus.version>3.0.5</mybatis-plus.version>
         <jfairy.version>0.5.9</jfairy.version>
-        <php-common.es>2.0.3-SNAPSHOT</php-common.es>
-        <php-common.jdbc>2.0.3-SNAPSHOT</php-common.jdbc>
-        <php-common.jpa>2.0.3-SNAPSHOT</php-common.jpa>
-        <php-common.core>2.0.3-SNAPSHOT</php-common.core>
-        <php-common.mvc>2.0.3-SNAPSHOT</php-common.mvc>
-        <php-common.redis>2.0.3-SNAPSHOT</php-common.redis>
+        <php-common.es>2.1.3-SNAPSHOT</php-common.es>
+        <php-common.jdbc>2.1.3-SNAPSHOT</php-common.jdbc>
+        <php-common.jpa>2.1.3-SNAPSHOT</php-common.jpa>
+        <php-common.core>2.1.3-SNAPSHOT</php-common.core>
+        <php-common.mvc>2.1.3-SNAPSHOT</php-common.mvc>
+        <php-common.redis>2.1.3-SNAPSHOT</php-common.redis>
     </properties>
 
     <dependencyManagement>

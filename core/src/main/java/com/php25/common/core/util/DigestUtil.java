@@ -398,7 +398,7 @@ public class DigestUtil {
         AssertUtil.notNull(content, "content不能为null");
         AssertUtil.notNull(privateKey, "privateKey不能为null");
         try {
-            Signature signature = Signature.getInstance("SHA1withRSA");
+            Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initSign(DigestUtil.loadPrivateKey(privateKey));
             signature.update(content.getBytes());
             return new String(DigestUtil.bytes2hex(signature.sign()));
@@ -420,7 +420,7 @@ public class DigestUtil {
         AssertUtil.notNull(sign, "sign不能为null");
         AssertUtil.notNull(publicKey, "publicKey不能为null");
         try {
-            Signature signature = Signature.getInstance("SHA1withRSA");
+            Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initVerify(DigestUtil.loadPublicKey(publicKey));
             signature.update(content.getBytes());
             return signature.verify(DigestUtil.hex2bytes(sign));

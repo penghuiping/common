@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,7 +46,6 @@ import java.util.stream.Collectors;
  * @Date: 2018/8/9 13:20
  * @Description:
  */
-@SpringBootTest
 @ContextConfiguration(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = false)
@@ -93,7 +91,7 @@ public class JpaTest {
     @Test
     public void findAll() throws Exception {
         long startTime = System.currentTimeMillis();
-        for(int i=0;i<1;i++) {
+        for (int i = 0; i < 1; i++) {
             Optional<List<CustomerDto>> customerDtos = customerService.findAll();
             if (customerDtos.isPresent()) {
                 List<CustomerDto> a = customerDtos.get();
@@ -103,14 +101,14 @@ public class JpaTest {
                 print("<<<<<<<===========findOne===========>>>>>>", customerDto);
             }
         }
-        logger.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+        logger.info("耗时:{}ms", System.currentTimeMillis() - startTime);
     }
 
     @Test
     public void findAllAsync() throws Exception {
         long startTime = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        for(int i=0;i<1;i++) {
+        for (int i = 0; i < 1; i++) {
             Mono<Optional<List<CustomerDto>>> mono = customerService.findAllAsync();
             mono.subscribe(customerDtos1 -> {
                 if (customerDtos1.isPresent() && !customerDtos1.get().isEmpty()) {
@@ -127,7 +125,7 @@ public class JpaTest {
             });
         }
         countDownLatch.await();
-        logger.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+        logger.info("耗时:{}ms", System.currentTimeMillis() - startTime);
 
     }
 

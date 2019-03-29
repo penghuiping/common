@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @Auther: penghuiping
@@ -28,19 +29,20 @@ public class RedisConfig {
         config.useSingleServer().setAddress("localhost:6379");
         config.useSingleServer().setConnectionMinimumIdleSize(1);
         config.useSingleServer().setConnectionPoolSize(5);
+        config.useSingleServer().setTimeout(5);
         config.useSingleServer().setDatabase(0);
         RedissonClient redisson = Redisson.create(config);
         return redisson;
     }
 
     @Bean("redisServiceRedisson")
-    @Primary
     public RedisService redisService(@Autowired RedissonClient redissonClient) {
         RedisService redisService = new RedisRedissonServiceImpl(redissonClient);
         return redisService;
     }
 
     @Bean("redisServiceSpring")
+    @Primary
     public RedisService redisServiceSpring(@Autowired StringRedisTemplate stringRedisTemplate) {
         return new RedisSpringBootServiceImpl(stringRedisTemplate);
     }
@@ -48,7 +50,12 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new JedisConnectionFactory();
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setMaxWaitMillis(3000);
+        config.setMaxIdle(1);
+        config.setMaxTotal(100);
+        config.setMinIdle(0);
+        return new JedisConnectionFactory(config);
     }
 
     @Bean
