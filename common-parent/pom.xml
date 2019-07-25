@@ -29,8 +29,9 @@
         <jmh.version>1.21</jmh.version>
         <mybatis-plus.version>3.0.5</mybatis-plus.version>
         <jfairy.version>0.5.9</jfairy.version>
+        <gson.version>2.8.5</gson.version>
         <php-common.es>2.1.3-SNAPSHOT</php-common.es>
-        <php-common.jdbc>2.1.3-SNAPSHOT</php-common.jdbc>
+        <php-common.db>2.1.3-SNAPSHOT</php-common.db>
         <php-common.jpa>2.1.3-SNAPSHOT</php-common.jpa>
         <php-common.core>2.1.3-SNAPSHOT</php-common.core>
         <php-common.mvc>2.1.3-SNAPSHOT</php-common.mvc>
@@ -151,8 +152,8 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
-                <artifactId>jdbc</artifactId>
-                <version>${php-common.jdbc}</version>
+                <artifactId>db</artifactId>
+                <version>${php-common.db}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
@@ -196,6 +197,16 @@
                 <artifactId>jfairy</artifactId>
                 <version>${jfairy.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-jdbc</artifactId>
+                <version>1.0.9.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

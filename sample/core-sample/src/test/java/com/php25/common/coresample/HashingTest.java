@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.List;
 
 /**
@@ -59,4 +60,5 @@ public class HashingTest {
         logger.info("snowflake:" + idGeneratorService.getModelPrimaryKeyNumber());
         logger.info("uuid:" + idGeneratorService.getModelPrimaryKey());
     }
+
 }

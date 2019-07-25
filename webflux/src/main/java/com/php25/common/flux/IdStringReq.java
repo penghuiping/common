@@ -1,0 +1,22 @@
+package com.php25.common.flux;
+
+import javax.validation.constraints.NotBlank;
+
+/**
+ * @author: penghuiping
+ * @date: 2019/7/19 14:01
+ * @description:
+ */
+public class IdStringReq {
+
+    @NotBlank
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+}

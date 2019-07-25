@@ -12,12 +12,13 @@
         <module>common-spring-boot-starter</module>
         <module>core</module>
         <module>es</module>
-        <module>jdbc</module>
+        <module>db</module>
         <module>jpa</module>
         <module>mvc</module>
+        <module>webflux</module>
         <module>redis</module>
         <module>sample/core-sample</module>
-        <module>sample/jdbc-sample</module>
+        <module>sample/db-sample</module>
         <module>sample/jpa-sample</module>
         <module>sample/redis-sample</module>
         <module>sample/spring-mybatis-sample</module>
