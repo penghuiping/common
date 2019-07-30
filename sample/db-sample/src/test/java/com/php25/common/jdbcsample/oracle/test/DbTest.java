@@ -73,7 +73,7 @@ public class DbTest {
 
         Company company = new Company();
         company.setName("Google");
-        company.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        company.setId(idGeneratorService.getSnowflakeId().longValue());
         company.setCreateTime(new Date());
         company.setEnable(1);
         cndJpaCompany.insert(company);
@@ -82,7 +82,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isSequence) {
-                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+                customer.setId(idGeneratorService.getSnowflakeId().longValue());
             }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
@@ -100,7 +100,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isSequence) {
-                customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+                customer.setId(idGeneratorService.getSnowflakeId().longValue());
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));

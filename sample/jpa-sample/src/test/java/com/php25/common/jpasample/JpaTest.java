@@ -71,7 +71,7 @@ public class JpaTest {
         List<CustomerDto> customers = Lists.newArrayList();
         for (int i = 0; i < 10; i++) {
             CustomerDto customer = new CustomerDto();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer.setId(idGeneratorService.getSnowflakeId().longValue());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
@@ -84,8 +84,8 @@ public class JpaTest {
 
     @Test
     public void idGeneratorService() throws Exception {
-        logger.info("snowflake:" + idGeneratorService.getModelPrimaryKeyNumber());
-        logger.info("uuid:" + idGeneratorService.getModelPrimaryKey());
+        logger.info("snowflake:" + idGeneratorService.getSnowflakeId());
+        logger.info("uuid:" + idGeneratorService.getUUID());
     }
 
     @Test

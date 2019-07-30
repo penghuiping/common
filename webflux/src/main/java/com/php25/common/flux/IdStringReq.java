@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
  * @date: 2019/7/19 14:01
  * @description:
  */
-public class IdStringReq {
+public class IdStringReq extends BaseDto {
 
     @NotBlank
     private String id;

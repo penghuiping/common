@@ -1,13 +1,11 @@
 package com.php25.common.core.service;
 
 
-import com.php25.common.core.util.RandomUtil;
-import com.php25.common.core.util.TimeUtil;
+import com.fasterxml.uuid.EthernetAddress;
+import com.fasterxml.uuid.Generators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -24,17 +22,17 @@ public class IdGeneratorServiceImpl implements IdGeneratorService {
 
 
     @Override
-    public String getVipOrderNumber() {
-        return TimeUtil.getTime(new Date(), DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + RandomUtil.getRandomNumbers(6);
-    }
-
-    @Override
-    public String getModelPrimaryKey() {
+    public String getUUID() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
     @Override
-    public Number getModelPrimaryKeyNumber() {
+    public String getJUID() {
+        return Generators.timeBasedGenerator(EthernetAddress.fromInterface()).generate().toString().replaceAll("-", "");
+    }
+
+    @Override
+    public Number getSnowflakeId() {
         return snowflakeIdWorker.nextId();
     }
 }

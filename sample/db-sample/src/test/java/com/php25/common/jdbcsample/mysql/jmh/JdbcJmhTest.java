@@ -87,7 +87,7 @@ public class JdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer.setId(idGeneratorService.getSnowflakeId().longValue());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);

@@ -112,7 +112,7 @@ public class RepositoryJmhTest {
     @Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        customer.setId(idGeneratorService.getSnowflakeId().longValue());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);

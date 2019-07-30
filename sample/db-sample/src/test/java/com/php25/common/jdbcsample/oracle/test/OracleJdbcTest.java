@@ -169,14 +169,14 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        company.setId(idGeneratorService.getSnowflakeId().longValue());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
 
         Customer customer = new Customer();
         if (!isSequence)
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer.setId(idGeneratorService.getSnowflakeId().longValue());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -188,7 +188,7 @@ public class OracleJdbcTest extends DbTest {
 
         Customer customer1 = new Customer();
         if (!isSequence)
-            customer1.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer1.setId(idGeneratorService.getSnowflakeId().longValue());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
@@ -211,13 +211,13 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        company.setId(idGeneratorService.getSnowflakeId().longValue());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
         Customer customer = new Customer();
         if (!isSequence)
-            customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer.setId(idGeneratorService.getSnowflakeId().longValue());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -228,7 +228,7 @@ public class OracleJdbcTest extends DbTest {
 
         Customer customer1 = new Customer();
         if (!isSequence)
-            customer1.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer1.setId(idGeneratorService.getSnowflakeId().longValue());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);

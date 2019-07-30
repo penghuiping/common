@@ -9,7 +9,7 @@ import java.util.List;
  * @date: 2019/7/19 14:05
  * @description:
  */
-public class IdsLongReq {
+public class IdsLongReq extends BaseDto {
 
     @NotNull
     @Size(min = 1)

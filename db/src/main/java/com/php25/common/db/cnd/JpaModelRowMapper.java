@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -47,7 +48,12 @@ public class JpaModelRowMapper<T> implements RowMapper<T> {
                 Object value = rs.getObject(dbColumn);
                 Class<?> columnType = columnTypes.get(i);
 
-                if (columnType.isPrimitive() || Boolean.class.isAssignableFrom(columnType) || Number.class.isAssignableFrom(columnType) || String.class.isAssignableFrom(columnType) || Date.class.isAssignableFrom(columnType)) {
+                if (columnType.isPrimitive() ||
+                        Boolean.class.isAssignableFrom(columnType) ||
+                        Number.class.isAssignableFrom(columnType) ||
+                        String.class.isAssignableFrom(columnType) ||
+                        Date.class.isAssignableFrom(columnType) ||
+                        LocalDateTime.class.isAssignableFrom(columnType)) {
                     //基本类型 string,date 不需要处理
                     if (null != value) {
                         value = convertValueToRequiredType(value, columnType);

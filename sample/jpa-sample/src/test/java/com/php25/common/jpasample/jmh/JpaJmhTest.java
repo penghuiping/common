@@ -70,7 +70,7 @@ public class JpaJmhTest {
         customers = Lists.newArrayList();
         for (int i = 0; i < 10; i++) {
             Customer customer = new Customer();
-            customer.setId(this.idGeneratorService.getModelPrimaryKeyNumber().longValue());
+            customer.setId(this.idGeneratorService.getSnowflakeId().longValue());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
@@ -99,7 +99,7 @@ public class JpaJmhTest {
     @org.openjdk.jmh.annotations.Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getModelPrimaryKeyNumber().longValue());
+        customer.setId(idGeneratorService.getSnowflakeId().longValue());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);
