@@ -1,5 +1,6 @@
 package com.php25.common.core.util;
 
+import com.php25.common.core.exception.Exceptions;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
@@ -46,7 +47,7 @@ public class DigestUtil {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             return messageDigest.digest(str.getBytes("utf8"));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -94,7 +95,7 @@ public class DigestUtil {
             MessageDigest md = MessageDigest.getInstance(shaAlgorithm);
             return md.digest(str.getBytes("utf8"));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
 
     }
@@ -123,7 +124,7 @@ public class DigestUtil {
                 return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
             }
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -153,7 +154,7 @@ public class DigestUtil {
             }
             return new String(bytes);
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -179,7 +180,7 @@ public class DigestUtil {
                 return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
             }
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
 
     }
@@ -205,7 +206,7 @@ public class DigestUtil {
                 return DigestUtil.encodeBase64(cipher.doFinal(source.getBytes()));
             }
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -231,7 +232,7 @@ public class DigestUtil {
                 return new String(cipher.doFinal(DigestUtil.decodeBase64(source)));
             }
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -256,7 +257,7 @@ public class DigestUtil {
                 return new String(cipher.doFinal(DigestUtil.decodeBase64(source)));
             }
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -271,7 +272,7 @@ public class DigestUtil {
             keyPairGenerator.initialize(512);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
 
     }
@@ -289,7 +290,7 @@ public class DigestUtil {
             byte[] bytes = publicKey.getEncoded();
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -306,7 +307,7 @@ public class DigestUtil {
             byte[] bytes = privateKey.getEncoded();
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -324,7 +325,7 @@ public class DigestUtil {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -342,7 +343,7 @@ public class DigestUtil {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePrivate(keySpec);
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -362,7 +363,7 @@ public class DigestUtil {
             cipher.init(Cipher.ENCRYPT_MODE, DigestUtil.loadPublicKey(publicKey));
             return new String(DigestUtil.bytes2hex(cipher.doFinal(content.getBytes())));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -382,7 +383,7 @@ public class DigestUtil {
             cipher.init(Cipher.DECRYPT_MODE, DigestUtil.loadPrivateKey(privateKey));
             return new String(cipher.doFinal(DigestUtil.hex2bytes(content)));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -403,7 +404,7 @@ public class DigestUtil {
             signature.update(content.getBytes());
             return new String(DigestUtil.bytes2hex(signature.sign()));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 
@@ -425,7 +426,7 @@ public class DigestUtil {
             signature.update(content.getBytes());
             return signature.verify(DigestUtil.hex2bytes(sign));
         } catch (Exception e) {
-            throw new RuntimeException("出错啦!", e);
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
     }
 

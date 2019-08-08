@@ -1,5 +1,6 @@
 package com.php25.common.core.util;
 
+import com.php25.common.core.exception.Exceptions;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
@@ -28,7 +29,7 @@ public class ReflectUtil {
                 method = cls.getDeclaredMethod(name, parameterTypes);
                 methodMap.putIfAbsent(key, method);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException("NoSuchMethodException", e);
+                throw Exceptions.throwIllegalStateException("NoSuchMethodException", e);
             }
         }
         return method;
@@ -43,7 +44,7 @@ public class ReflectUtil {
                 field = cls.getDeclaredField(name);
                 fieldMap.putIfAbsent(name, field);
             } catch (NoSuchFieldException e) {
-                throw new RuntimeException("NoSuchFieldException", e);
+                throw Exceptions.throwIllegalStateException("NoSuchFieldException", e);
             }
         }
         return field;

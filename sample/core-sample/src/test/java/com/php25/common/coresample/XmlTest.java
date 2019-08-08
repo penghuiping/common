@@ -1,6 +1,7 @@
 package com.php25.common.coresample;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.XmlUtil;
 import com.php25.common.coresample.dto.CustomerDto;
@@ -22,8 +23,9 @@ public class XmlTest {
     private Logger logger = LoggerFactory.getLogger(XmlTest.class);
 
 
+
     @Test
-    public void objToXml() {
+    public void objToXml() throws Exception {
         CustomerDto customerDto = new CustomerDto();
         customerDto.setUsername("test");
         customerDto.setCreateTime(new Date());
@@ -33,8 +35,6 @@ public class XmlTest {
         customerDto.setUpdateTime(new Date());
         String xml = XmlUtil.toXml(customerDto);
         logger.info("===========>xml:" + xml);
-
-
     }
 
     @Test
@@ -57,9 +57,11 @@ public class XmlTest {
 
         String xml = XmlUtil.toXml(Lists.newArrayList(customerDto, customerDto1));
         logger.info(xml);
+
         List<CustomerDto> tmp = XmlUtil.fromXml(xml, new TypeReference<List<CustomerDto>>() {
         });
-        logger.info(JsonUtil.toPrettyJson(tmp));
-        return;
+
+        xml = XmlUtil.toPrettyXml(tmp);
+        logger.info(xml);
     }
 }

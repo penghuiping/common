@@ -2,6 +2,9 @@ package com.php25.common.coresample.dto;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlCData;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import java.util.Date;
@@ -9,28 +12,34 @@ import java.util.Date;
 /**
  * Created by penghuiping on 2018/5/1.
  */
-@XStreamAlias("customer")
+@JacksonXmlRootElement(namespace = "customer",localName ="customer")
 public class CustomerDto {
 
+    @JacksonXmlCData(value =true)
     @Excel(name = "编号", height = 5, width = 10, isImportField = "true_st")
     private Long id;
 
+    @JacksonXmlCData(value =true)
     @Excel(name = "姓名", height = 5, width = 20, isImportField = "true_st")
     private String username;
 
+    @JacksonXmlCData(value =true)
     @Excel(name = "密码", height = 5, width = 20, isImportField = "true_st")
     private String password;
 
-    @XStreamAlias("create_time")
+    @JacksonXmlCData(value =true)
+    @JacksonXmlProperty(localName ="create_time")
     @Excel(name = "创建日期", databaseFormat = "yyyyMMddHHmmss", format = "yyyy-MM-dd HH:mm:ss", isImportField = "true_st", width = 20)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
     private Date createTime;
 
-    @XStreamAlias("update_time")
+    @JacksonXmlCData(value =true)
+    @JacksonXmlProperty(localName ="update_time")
     @Excel(name = "更新日期", databaseFormat = "yyyyMMddHHmmss", format = "yyyy-MM-dd HH:mm:ss", isImportField = "true_st", width = 20)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
     private Date updateTime;
 
+    @JacksonXmlCData(value =true)
     @Excel(name = "是否有效", height = 5, width = 10, isImportField = "true_st")
     private Integer enable;
 

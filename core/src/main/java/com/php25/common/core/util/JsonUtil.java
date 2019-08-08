@@ -3,12 +3,17 @@ package com.php25.common.core.util;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.php25.common.core.exception.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * @author: penghuiping
@@ -19,7 +24,15 @@ public class JsonUtil {
 
     private static final PrettyPrinter PRETTY_PRINTER = new DefaultPrettyPrinter();
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+    }
+
 
     public static <T> T fromJson(String json, Class<T> cls) {
         if (StringUtil.isBlank(json)) {
@@ -33,8 +46,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, cls);
         } catch (IOException e) {
-            log.error("json解析出错", e);
-            throw new RuntimeException("json解析出错", e);
+            throw Exceptions.throwIllegalStateException("json解析出错", e);
         }
     }
 
@@ -50,8 +62,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, typeReference);
         } catch (IOException e) {
-            log.error("json解析出错", e);
-            throw new RuntimeException("json解析出错", e);
+            throw Exceptions.throwIllegalStateException("json解析出错", e);
         }
     }
 
@@ -67,8 +78,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, javaType);
         } catch (IOException e) {
-            log.error("json解析出错", e);
-            throw new RuntimeException("json解析出错", e);
+            throw Exceptions.throwIllegalStateException("json解析出错", e);
         }
     }
 
@@ -79,8 +89,7 @@ public class JsonUtil {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (IOException e) {
-            log.error("json解析出错", e);
-            throw new RuntimeException("json解析出错", e);
+            throw Exceptions.throwIllegalStateException("json解析出错", e);
         }
     }
 
@@ -91,8 +100,7 @@ public class JsonUtil {
         try {
             return objectMapper.writer(PRETTY_PRINTER).writeValueAsString(obj);
         } catch (IOException e) {
-            log.error("json解析出错", e);
-            throw new RuntimeException("json解析出错", e);
+            throw Exceptions.throwIllegalStateException("json解析出错", e);
         }
     }
 }

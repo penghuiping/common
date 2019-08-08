@@ -1,6 +1,7 @@
 package com.php25.common.core.specification;
 
 
+import com.php25.common.core.exception.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class BaseSpecsFactory {
             }
             return (BaseSpecs<T>) result;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("获取BaseSpecs实例失败", e);
+            throw Exceptions.throwIllegalStateException("获取BaseSpecs实例失败", e);
         }
 
 

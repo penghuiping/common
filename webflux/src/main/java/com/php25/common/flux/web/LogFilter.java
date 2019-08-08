@@ -1,4 +1,4 @@
-package com.php25.common.flux;
+package com.php25.common.flux.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,6 @@ import reactor.core.publisher.Mono;
  * @date: 2019/7/24 17:21
  * @description:
  */
-@Order(-1)
-@Component
 public class LogFilter implements WebFilter {
 
     private static final Logger log = LoggerFactory.getLogger(LogFilter.class);

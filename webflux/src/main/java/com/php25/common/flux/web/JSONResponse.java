@@ -1,4 +1,4 @@
-package com.php25.common.flux;
+package com.php25.common.flux.web;
 
 /**
  * @author penghuiping

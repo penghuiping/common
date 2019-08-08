@@ -1,4 +1,4 @@
-package com.php25.common.flux;
+package com.php25.common.flux.web;
 
 /**
  * @author: penghuiping
@@ -7,10 +7,8 @@ package com.php25.common.flux;
  */
 public abstract class BaseResponse<T> {
 
-    /**
-     * 0:没有错误一些正常  1001:服务器错误 1002: 业务逻辑错误
-     */
-    private int errorCode;
+
+    private String errorCode;
 
     private T returnObject;
 
@@ -19,11 +17,11 @@ public abstract class BaseResponse<T> {
      */
     private String message;
 
-    public int getErrorCode() {
+    public String getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(int errorCode) {
+    public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
     }
 

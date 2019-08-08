@@ -1,4 +1,4 @@
-package com.php25.common.flux;
+package com.php25.common.flux.web;
 
 import com.php25.common.core.exception.BusinessException;
 import org.slf4j.Logger;
@@ -25,19 +25,19 @@ public class CommonExceptionHandler {
         log.error("出错啦!!", e);
         if (e instanceof ServerWebInputException || e instanceof ConstraintViolationException) {
             JSONResponse jsonResponse = new JSONResponse();
-            jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+            jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value+"");
             jsonResponse.setMessage(e.getMessage());
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof BusinessException) {
             BusinessException businessException = (BusinessException) e;
             JSONResponse jsonResponse = new JSONResponse();
-            jsonResponse.setErrorCode(ApiErrorCode.business_error.value);
-            jsonResponse.setMessage(businessException.getBusinessErrorStatus().toString2());
+            jsonResponse.setErrorCode(businessException.getCode());
+            jsonResponse.setMessage(businessException.getMessage());
             return ResponseEntity.ok(jsonResponse);
         } else {
             JSONResponse jsonResponse = new JSONResponse();
-            jsonResponse.setErrorCode(ApiErrorCode.server_error.value);
-            jsonResponse.setMessage("server error");
+            jsonResponse.setErrorCode(ApiErrorCode.unknown_error.value+"");
+            jsonResponse.setMessage("unknown_error");
             return ResponseEntity.ok(jsonResponse);
         }
     }

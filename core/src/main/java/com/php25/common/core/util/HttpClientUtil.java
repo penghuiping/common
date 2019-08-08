@@ -1,6 +1,7 @@
 package com.php25.common.core.util;
 
 import com.google.common.collect.Maps;
+import com.php25.common.core.exception.Exceptions;
 import okhttp3.Credentials;
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -120,7 +121,7 @@ public class HttpClientUtil {
             response = client.newCall(request).execute();
             return new String(response.body().bytes(), charset);
         } catch (IOException e) {
-            throw new RuntimeException("HttpClientUtil类中的httpGet方法调用地址url:" + url + "失败", e);
+            throw Exceptions.throwIllegalStateException("HttpClientUtil类中的httpGet方法调用地址url:" + url + "失败", e);
         }
     }
 
@@ -163,7 +164,7 @@ public class HttpClientUtil {
             response = client.newCall(request).execute();
             return new String(response.body().bytes(), charset);
         } catch (IOException e) {
-            throw new RuntimeException("HttpClientUtil类中的httpPost方法调用地址url:" + url + "失败", e);
+            throw Exceptions.throwIllegalStateException("HttpClientUtil类中的httpPost方法调用地址url:" + url + "失败", e);
         }
     }
 
@@ -197,7 +198,7 @@ public class HttpClientUtil {
             response = client.newCall(request).execute();
             return new String(response.body().bytes(), charset);
         } catch (IOException e) {
-            throw new RuntimeException("HttpClientUtil类中的httpPost方法调用地址url:" + url + "失败", e);
+            throw Exceptions.throwIllegalStateException("HttpClientUtil类中的httpPost方法调用地址url:" + url + "失败", e);
         }
     }
 }
