@@ -24,7 +24,6 @@
         <commons-lang3.version>3.7</commons-lang3.version>
         <druid.version>1.1.2</druid.version>
         <easypoi.version>3.1.0</easypoi.version>
-        <redisson.version>2.8.2</redisson.version>
         <jmh.version>1.21</jmh.version>
         <mybatis-plus.version>3.0.5</mybatis-plus.version>
         <jfairy.version>0.5.9</jfairy.version>
@@ -172,12 +171,6 @@
                 <groupId>com.php25</groupId>
                 <artifactId>redis</artifactId>
                 <version>${php-common.redis}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson</artifactId>
-                <version>${redisson.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>

@@ -21,7 +21,6 @@
         <module>sample/db-sample</module>
         <module>sample/jpa-sample</module>
         <module>sample/redis-sample</module>
-        <module>sample/spring-mybatis-sample</module>
     </modules>
 
     <packaging>pom</packaging>
