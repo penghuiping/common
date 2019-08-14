@@ -1,18 +1,17 @@
 package com.php25.common.redissample.config;
 
-import com.php25.common.redis.RedisRedissonServiceImpl;
 import com.php25.common.redis.RedisService;
 import com.php25.common.redis.RedisSpringBootServiceImpl;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -23,23 +22,6 @@ import redis.clients.jedis.JedisPoolConfig;
 @Configuration
 public class RedisConfig {
 
-    @Bean
-    public RedissonClient redissonClient() {
-        Config config = new Config();
-        config.useSingleServer().setAddress("localhost:6379");
-        config.useSingleServer().setConnectionMinimumIdleSize(1);
-        config.useSingleServer().setConnectionPoolSize(5);
-        config.useSingleServer().setTimeout(5);
-        config.useSingleServer().setDatabase(0);
-        RedissonClient redisson = Redisson.create(config);
-        return redisson;
-    }
-
-    @Bean("redisServiceRedisson")
-    public RedisService redisService(@Autowired RedissonClient redissonClient) {
-        RedisService redisService = new RedisRedissonServiceImpl(redissonClient);
-        return redisService;
-    }
 
     @Bean("redisServiceSpring")
     @Primary
@@ -47,20 +29,23 @@ public class RedisConfig {
         return new RedisSpringBootServiceImpl(stringRedisTemplate);
     }
 
-
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxWaitMillis(3000);
-        config.setMaxIdle(1);
-        config.setMaxTotal(100);
-        config.setMinIdle(0);
-        return new JedisConnectionFactory(config);
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setDatabase(0);
+        redisConfiguration.setHostName("localhost");
+        redisConfiguration.setPort(36379);
+        return new JedisConnectionFactory(redisConfiguration);
     }
 
     @Bean
     public StringRedisTemplate stringRedisTemplate(@Autowired RedisConnectionFactory redisConnectionFactory) {
         return new StringRedisTemplate(redisConnectionFactory);
+    }
+
+    @Bean
+    public RedisLockRegistry redisLockRegistry(RedisConnectionFactory redisConnectionFactory) {
+        return new RedisLockRegistry(redisConnectionFactory,"redisRegisterKey");
     }
 
 }

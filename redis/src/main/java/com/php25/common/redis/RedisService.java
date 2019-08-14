@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 /**
  * redis缓存帮助类
@@ -134,20 +135,11 @@ public interface RedisService {
 
 
     /**
-     * 加锁
+     * 获取分布锁
      *
-     * @param redisKey   缓存KEY
-     * @param expire     到期时间 毫秒
-     * @param tryTimeout 尝试获取锁超时时间 毫秒
+     * @param lockKey 锁名
      * @return
      */
-    public RedisLockInfo tryLock(String redisKey, long expire, long tryTimeout);
+    public Lock obtainDistributeLock(String lockKey);
 
-    /**
-     * 解锁
-     *
-     * @param redisLockInfo 获取锁返回的对象
-     * @return
-     */
-    public boolean releaseLock(RedisLockInfo redisLockInfo);
 }

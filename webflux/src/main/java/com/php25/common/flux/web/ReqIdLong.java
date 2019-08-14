@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
  * @date: 2019/7/19 14:04
  * @description:
  */
-public class IdLongReq extends BaseDto {
+public class ReqIdLong extends BaseDto {
 
     @Min(value = 0L)
     private Long id;
