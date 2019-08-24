@@ -5,7 +5,7 @@ import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.CndJpa;
+import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,68 +45,68 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void query() {
         //like
-        List<Customer> customers = db.cndJpa(Customer.class)
+        List<Customer> customers = db.cndJdbc(Customer.class)
                 .whereLike("username", "jack%").asc("id").select();
         Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
 
         //not like
-        customers = db.cndJpa(Customer.class)
+        customers = db.cndJdbc(Customer.class)
                 .whereNotLike("username", "jack%").asc("id").select();
         Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
 
         //eq
-        Company company = db.cndJpa(Company.class).whereEq("name", "Google").single();
+        Company company = db.cndJdbc(Company.class).whereEq("name", "Google").single();
         Assert.assertNotNull(company);
 
         //not eq
-        company = db.cndJpa(Company.class).whereNotEq("name", "Google").single();
+        company = db.cndJdbc(Company.class).whereNotEq("name", "Google").single();
         Assert.assertNull(company);
 
         //between...and..
-        customers = db.cndJpa(Customer.class).whereBetween("age", 20, 50).select();
+        customers = db.cndJdbc(Customer.class).whereBetween("age", 20, 50).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
 
         //not between...and..
-        customers = db.cndJpa(Customer.class).whereNotBetween("age", 20, 50).select();
+        customers = db.cndJdbc(Customer.class).whereNotBetween("age", 20, 50).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
 
         //in
-        customers = db.cndJpa(Customer.class).whereIn("age", Lists.newArrayList(20, 40)).select();
+        customers = db.cndJdbc(Customer.class).whereIn("age", Lists.newArrayList(20, 40)).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
 
         //not in
-        customers = db.cndJpa(Customer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select();
+        customers = db.cndJdbc(Customer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
 
         //great
-        customers = db.cndJpa(Customer.class).whereGreat("age", 40).select();
+        customers = db.cndJdbc(Customer.class).whereGreat("age", 40).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() > 40).count());
 
         //great equal
-        customers = db.cndJpa(Customer.class).whereGreatEq("age", 40).select();
+        customers = db.cndJdbc(Customer.class).whereGreatEq("age", 40).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() >= 40).count());
 
         //less
-        customers = db.cndJpa(Customer.class).whereLess("age", 0).select();
+        customers = db.cndJdbc(Customer.class).whereLess("age", 0).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() < 0).count());
 
         //less equal
-        customers = db.cndJpa(Customer.class).whereLessEq("age", 0).select();
+        customers = db.cndJdbc(Customer.class).whereLessEq("age", 0).select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() <= 0).count());
 
         //is null
-        customers = db.cndJpa(Customer.class).whereIsNull("updateTime").select();
+        customers = db.cndJdbc(Customer.class).whereIsNull("updateTime").select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //is not null
-        customers = db.cndJpa(Customer.class).whereIsNotNull("updateTime").select();
+        customers = db.cndJdbc(Customer.class).whereIsNotNull("updateTime").select();
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        customers = db.cndJpa(Customer.class).join(Company.class, "company").select(Customer.class);
+        customers = db.cndJdbc(Customer.class).join(Company.class, "companyId").select(Customer.class);
         System.out.println(JsonUtil.toPrettyJson(customers));
 
-        List<Company> companies = db.cndJpa(Customer.class).join(Company.class, "company").whereEq(Company.class, "id", 1).select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "companyId").whereEq(Company.class, "id", 1).select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
 
     }
@@ -113,8 +114,8 @@ public class MysqlJdbcTest extends DbTest {
 
     @Test
     public void orderBy() {
-        List<Customer> customers = db.cndJpa(Customer.class).orderBy("age asc").select();
-        List<Customer> customers1 = db.cndJpa(Customer.class).asc("age").select();
+        List<Customer> customers = db.cndJdbc(Customer.class).orderBy("age asc").select();
+        List<Customer> customers1 = db.cndJdbc(Customer.class).asc("age").select();
         Assert.assertEquals(customers.size(), customers1.size());
         for (int i = 0; i < customers.size(); i++) {
             Assert.assertEquals(customers.get(i).getAge(), customers1.get(i).getAge());
@@ -123,8 +124,8 @@ public class MysqlJdbcTest extends DbTest {
 
     @Test
     public void groupBy() {
-        CndJpa cndJpa = db.cndJpa(Customer.class);
-        List<Map> customers1 = cndJpa.groupBy("enable").mapSelect("avg(age) as avg_age", "enable");
+        CndJdbc cndJdbc = db.cndJdbc(Customer.class);
+        List<Map> customers1 = cndJdbc.groupBy("enable").mapSelect("avg(age) as avg_age", "enable");
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assert.assertTrue(null != customers1 && customers1.size() > 0);
@@ -135,27 +136,27 @@ public class MysqlJdbcTest extends DbTest {
 
     @Test
     public void findAll() {
-        List<Customer> customers = db.cndJpa(Customer.class).select();
+        List<Customer> customers = db.cndJdbc(Customer.class).select();
         Assert.assertNotNull(customers);
         Assert.assertEquals(customers.size(), this.customers.size());
     }
 
     @Test
     public void findOne() {
-        Customer customer = db.cndJpa(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
         Assert.assertTrue(null != customer && "jack0".equals(customer.getUsername()));
     }
 
     @Test
     public void count() {
-        Long count = db.cndJpa(Customer.class).whereEq("enable", "1").count();
+        Long count = db.cndJdbc(Customer.class).whereEq("enable", "1").count();
         Assert.assertEquals(this.customers.stream().filter(a -> a.getEnable() == 1).count(), (long) count);
     }
 
     @Test
     public void insert() throws Exception {
-        db.cndJpa(Company.class).delete();
-        db.cndJpa(Customer.class).delete();
+        db.cndJdbc(Company.class).delete();
+        db.cndJdbc(Customer.class).delete();
 
         Company company = new Company();
         company.setName("test");
@@ -170,11 +171,11 @@ public class MysqlJdbcTest extends DbTest {
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
-        customer.setStartTime(new Date());
+        customer.setStartTime(LocalDateTime.now());
         customer.setScore(BigDecimal.valueOf(1000L));
         customer.setEnable(1);
-        customer.setCompany(company);
-        db.cndJpa(Customer.class).insert(customer);
+        customer.setCompanyId(company.getId());
+        db.cndJdbc(Customer.class).insert(customer);
 
         Customer customer1 = new Customer();
         if (!isAutoIncrement)
@@ -182,22 +183,22 @@ public class MysqlJdbcTest extends DbTest {
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
-        customer1.setStartTime(new Date());
+        customer1.setStartTime(LocalDateTime.now());
         customer1.setScore(BigDecimal.valueOf(1000L));
         customer1.setEnable(1);
-        customer1.setCompany(company);
-        db.cndJpa(Customer.class).insert(customer1);
+        customer1.setCompanyId(company.getId());
+        db.cndJdbc(Customer.class).insert(customer1);
 
         company.setCustomers(Lists.newArrayList(customer, customer1));
-        db.cndJpa(Company.class).insert(company);
-        Assert.assertEquals(2, db.cndJpa(Customer.class).count());
-        Assert.assertEquals(1, db.cndJpa(Company.class).count());
+        db.cndJdbc(Company.class).insert(company);
+        Assert.assertEquals(2, db.cndJdbc(Customer.class).count());
+        Assert.assertEquals(1, db.cndJdbc(Company.class).count());
     }
 
     @Test
     public void batchInsert() throws Exception {
-        db.cndJpa(Company.class).delete();
-        db.cndJpa(Customer.class).delete();
+        db.cndJdbc(Company.class).delete();
+        db.cndJdbc(Customer.class).delete();
 
         Company company = new Company();
         company.setName("test");
@@ -212,9 +213,9 @@ public class MysqlJdbcTest extends DbTest {
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
         customer.setScore(BigDecimal.valueOf(1000L));
-        customer.setStartTime(new Date());
+        customer.setStartTime(LocalDateTime.now());
         customer.setEnable(1);
-        customer.setCompany(company);
+        customer.setCompanyId(company.getId());
 
         Customer customer1 = new Customer();
         if (!isAutoIncrement)
@@ -223,36 +224,36 @@ public class MysqlJdbcTest extends DbTest {
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
         customer1.setScore(BigDecimal.valueOf(1000L));
-        customer1.setStartTime(new Date());
+        customer1.setStartTime(LocalDateTime.now());
         customer1.setEnable(1);
-        customer1.setCompany(company);
+        customer1.setCompanyId(company.getId());
 
-        db.cndJpa(Company.class).insertBatch(Lists.newArrayList(company));
-        db.cndJpa(Customer.class).insertBatch(Lists.newArrayList(customer, customer1));
+        db.cndJdbc(Company.class).insertBatch(Lists.newArrayList(company));
+        db.cndJdbc(Customer.class).insertBatch(Lists.newArrayList(customer, customer1));
 
-        Assert.assertEquals(2, db.cndJpa(Customer.class).count());
-        Assert.assertEquals(1, db.cndJpa(Company.class).count());
+        Assert.assertEquals(2, db.cndJdbc(Customer.class).count());
+        Assert.assertEquals(1, db.cndJdbc(Company.class).count());
     }
 
     @Test
     public void update() {
-        Customer customer = db.cndJpa(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
         customer.setUsername("jack-0");
-        db.cndJpa(Customer.class).update(customer);
-        customer = db.cndJpa(Customer.class).whereEq("username", "jack0").single();
+        db.cndJdbc(Customer.class).update(customer);
+        customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
         Assert.assertNull(customer);
-        customer = db.cndJpa(Customer.class).whereEq("username", "jack-0").single();
+        customer = db.cndJdbc(Customer.class).whereEq("username", "jack-0").single();
         Assert.assertNotNull(customer);
     }
 
     @Test
     public void batchUpdate() {
-        List<Customer> customers = db.cndJpa(Customer.class).select();
+        List<Customer> customers = db.cndJdbc(Customer.class).select();
         customers = customers.stream().map(a -> {
             a.setUsername(a.getUsername().replace("jack", "tom"));
             return a;
         }).collect(Collectors.toList());
-        int[] arr = db.cndJpa(Customer.class).updateBatch(customers);
+        int[] arr = db.cndJdbc(Customer.class).updateBatch(customers);
         for (int e : arr) {
             Assert.assertEquals(e, 1);
         }
@@ -268,9 +269,9 @@ public class MysqlJdbcTest extends DbTest {
         List<Callable<Object>> runnables = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             runnables.add(() -> {
-                Customer customer = db.cndJpa(Customer.class).whereEq("username", "jack0").single();
+                Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
                 customer.setScore(customer.getScore().subtract(BigDecimal.valueOf(1)));
-                int rows = db.cndJpa(Customer.class).update(customer);
+                int rows = db.cndJdbc(Customer.class).update(customer);
                 if (rows > 0) {
                     atomicInteger.addAndGet(1);
                 }
@@ -282,15 +283,15 @@ public class MysqlJdbcTest extends DbTest {
 
         countDownLatch1.await();
         System.out.println("===========>更新成功的数量:" + atomicInteger.get());
-        Customer customer = db.cndJpa(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
         Assert.assertTrue(1000L - customer.getScore().longValue() == atomicInteger.get() && atomicInteger.get() == customer.getVersion());
     }
 
 
     @Test
     public void delete() {
-        db.cndJpa(Customer.class).whereLike("username", "jack%").delete();
-        List<Customer> customers = db.cndJpa(Customer.class).select();
+        db.cndJdbc(Customer.class).whereLike("username", "jack%").delete();
+        List<Customer> customers = db.cndJdbc(Customer.class).select();
         Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
 }

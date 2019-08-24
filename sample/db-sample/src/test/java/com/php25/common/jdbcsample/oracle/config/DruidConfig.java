@@ -2,11 +2,17 @@ package com.php25.common.jdbcsample.oracle.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
+import com.php25.common.jdbcsample.oracle.model.Company;
+import com.php25.common.jdbcsample.oracle.model.Customer;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.relational.core.mapping.event.BeforeSaveEvent;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -36,7 +42,7 @@ public class DruidConfig {
         try {
             druidDataSource.setFilters("stat, wall");
         } catch (SQLException e) {
-            LoggerFactory.getLogger(com.php25.common.jdbcsample.mysql.config.DruidConfig.class).error("出错啦！", e);
+            LoggerFactory.getLogger(com.php25.common.jdbcsample.mysql.config.DbConfig.class).error("出错啦！", e);
         }
         return druidDataSource;
     }
@@ -49,5 +55,24 @@ public class DruidConfig {
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
         return new Db(jdbcTemplate, DbType.ORACLE);
+    }
+
+    @Bean
+    public ApplicationListener<BeforeSaveEvent> timeStampingSaveTime(@Autowired IdGeneratorService idGeneratorService) {
+
+        return event -> {
+            Object entity = event.getEntity();
+            if (entity instanceof Customer) {
+                if (null == ((Customer) entity).getId()) {
+                    Customer customer = (Customer) entity;
+                    customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                }
+            } else if (entity instanceof Company) {
+                if (null == ((Company) entity).getId()) {
+                    Company company = (Company) entity;
+                    company.setId(idGeneratorService.getSnowflakeId().longValue());
+                }
+            }
+        };
     }
 }

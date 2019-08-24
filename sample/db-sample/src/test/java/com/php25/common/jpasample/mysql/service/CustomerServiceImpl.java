@@ -1,10 +1,10 @@
-package com.php25.common.jdbcsample.oracle.service;
+package com.php25.common.jpasample.mysql.service;
 
 import com.php25.common.core.service.SoftDeletable;
 import com.php25.common.db.service.BaseServiceImpl;
-import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
-import com.php25.common.jdbcsample.oracle.model.Customer;
-import com.php25.common.jdbcsample.oracle.repository.CustomerRepository;
+import com.php25.common.jpasample.mysql.dto.CustomerDto;
+import com.php25.common.jpasample.mysql.model.Customer;
+import com.php25.common.jpasample.mysql.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 @Primary
 @Service
 public class CustomerServiceImpl extends BaseServiceImpl<CustomerDto, Customer, Long> implements CustomerService, SoftDeletable<CustomerDto> {
-
 
     private CustomerRepository customerRepository;
 

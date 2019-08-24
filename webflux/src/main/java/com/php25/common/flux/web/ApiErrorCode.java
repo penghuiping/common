@@ -18,7 +18,13 @@ public enum ApiErrorCode {
     /**
      * 服务器错误
      */
-    unknown_error("2");
+    unknown_error("2"),
+
+    /**
+     * 非法状态
+     */
+    illegal_state("3");
+
 
     public String value;
 

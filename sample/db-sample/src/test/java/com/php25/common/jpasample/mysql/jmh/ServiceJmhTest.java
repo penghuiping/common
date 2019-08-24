@@ -1,14 +1,13 @@
-package com.php25.common.jdbcsample.mysql.jmh;
+package com.php25.common.jpasample.mysql.jmh;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.service.IdGeneratorServiceImpl;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.core.util.JsonUtil;
-import com.php25.common.jdbcsample.mysql.dto.CustomerDto;
-import com.php25.common.jdbcsample.mysql.service.CustomerService;
-import com.php25.common.jdbcsample.mysql.service.CustomerServiceImpl;
-import com.php25.common.jdbcsample.mysql.test.MysqlJdbcTest;
+import com.php25.common.jpasample.mysql.dto.CustomerDto;
+import com.php25.common.jpasample.mysql.service.CustomerService;
+import com.php25.common.jpasample.mysql.service.CustomerServiceImpl;
+import com.php25.common.jpasample.mysql.test.MysqlJdbcTest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;

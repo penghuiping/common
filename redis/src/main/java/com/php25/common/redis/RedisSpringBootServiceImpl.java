@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
 import java.util.Date;
@@ -28,7 +27,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
 
     public RedisSpringBootServiceImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.lockRegistry = new RedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
+        this.lockRegistry = new RRedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
     }
 
     public StringRedisTemplate getRedisTemplate() {
@@ -166,10 +165,7 @@ public class RedisSpringBootServiceImpl implements RedisService {
 
     @Override
     public Long incr(String key) {
-        Long result = redisTemplate.execute((RedisCallback<Long>) redisConnection -> {
-            return redisConnection.incr(key.getBytes());
-        });
-        return result;
+        return redisTemplate.execute((RedisCallback<Long>) redisConnection -> redisConnection.incr(key.getBytes()));
     }
 
     @Override

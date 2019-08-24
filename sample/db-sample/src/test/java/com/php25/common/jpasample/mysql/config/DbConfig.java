@@ -1,4 +1,4 @@
-package com.php25.common.jdbcsample.mysql.config;
+package com.php25.common.jpasample.mysql.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * Created by penghuiping on 2018/5/1.
  */
 @Configuration
-public class DruidConfig {
+public class DbConfig {
 
 
     @Bean
@@ -36,7 +36,7 @@ public class DruidConfig {
         try {
             druidDataSource.setFilters("stat, wall");
         } catch (SQLException e) {
-            LoggerFactory.getLogger(DruidConfig.class).error("出错啦！", e);
+            LoggerFactory.getLogger(DbConfig.class).error("出错啦！", e);
         }
         return druidDataSource;
     }

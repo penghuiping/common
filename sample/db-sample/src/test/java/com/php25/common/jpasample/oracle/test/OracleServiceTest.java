@@ -1,4 +1,4 @@
-package com.php25.common.jdbcsample.mysql.test;
+package com.php25.common.jpasample.oracle.test;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.dto.DataGridPageDto;
@@ -9,10 +9,10 @@ import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
-import com.php25.common.jdbcsample.mysql.dto.CustomerDto;
-import com.php25.common.jdbcsample.mysql.model.Customer;
-import com.php25.common.jdbcsample.mysql.service.CustomerService;
+import com.php25.common.jpasample.oracle.CommonAutoConfigure;
+import com.php25.common.jpasample.oracle.dto.CustomerDto;
+import com.php25.common.jpasample.oracle.model.Customer;
+import com.php25.common.jpasample.oracle.service.CustomerService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @Auther: penghuiping
@@ -38,9 +36,9 @@ import java.util.concurrent.CountDownLatch;
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class MysqlServiceTest extends DbTest {
+public class OracleServiceTest extends DbTest {
 
-    private static final Logger log = LoggerFactory.getLogger(MysqlRepositoryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(OracleServiceTest.class);
     @Autowired
     CustomerService customerService;
     @Autowired
@@ -48,7 +46,7 @@ public class MysqlServiceTest extends DbTest {
 
     @Override
     protected void initDb() {
-        this.db = new Db(jdbcTemplate, DbType.MYSQL);
+        this.db = new Db(jdbcTemplate, DbType.ORACLE);
     }
 
 
@@ -59,71 +57,43 @@ public class MysqlServiceTest extends DbTest {
     }
 
     @Test
-    public void findOneAsync() throws Exception {
-        long startTime = System.currentTimeMillis();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        for (int i = 0; i < 1; i++) {
-            Mono<Optional<CustomerDto>> mono = customerService.findOneAsync(customerDtos.get(0).getId());
-            mono.subscribe(customerDto -> {
-                if (customerDto.isPresent()) {
-                    Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
-                    countDownLatch.countDown();
-                }
-            });
-        }
-        countDownLatch.await();
-        log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
-    }
-
-    @Test
     public void findOne1() {
         Optional<CustomerDto> customerDto = customerService.findOne(customers.get(0).getId(), BeanUtils::copyProperties);
         Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
     }
 
     @Test
-    public void findOne1Async() throws Exception {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        Mono<Optional<CustomerDto>> mono = customerService.findOneAsync(customers.get(0).getId(), BeanUtils::copyProperties);
-        mono.subscribe(customerDto -> {
-            if (customerDto.isPresent()) {
-                Assert.assertEquals(customerDto.get().getId(), customers.get(0).getId());
-                countDownLatch.countDown();
-            }
-        });
-        countDownLatch.await();
-    }
-
-    @Test
     public void save() {
         CustomerDto customer = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer.setId(10L);
         customer.setUsername("jack" + 10);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10 * 10);
         customer.setCreateTime(new Date());
-        Optional<CustomerDto> customerDto = customerService.save(customer);
-        Assert.assertEquals(customerService.findOne(customerDto.get().getId()).get().getId(), customerDto.get().getId());
+        customerService.save(customer);
+        Customer tmp = db.cndJpa(Customer.class).andEq("username", "jack10").single();
+        Assert.assertEquals(tmp.getUsername(), customer.getUsername());
     }
 
     @Test
     public void save1() {
         CustomerDto customer = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer.setId(10L);
         customer.setUsername("jack" + 10);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10 * 10);
         customer.setCreateTime(new Date());
         customerService.save(customer, BeanUtils::copyProperties, BeanUtils::copyProperties);
-        log.info(JsonUtil.toPrettyJson(customerService.findAll().get()));
+        Customer tmp = db.cndJpa(Customer.class).andEq("username", "jack10").single();
+        Assert.assertEquals(tmp.getUsername(), customer.getUsername());
     }
 
     @Test
     public void save2() {
         CustomerDto customer = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer.setId(10L);
         customer.setUsername("jack" + 10);
         customer.setPassword(DigestUtil.MD5Str("123456"));
@@ -131,7 +101,7 @@ public class MysqlServiceTest extends DbTest {
         customer.setCreateTime(new Date());
 
         CustomerDto customer1 = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer1.setId(11L);
         customer1.setUsername("jack" + 11);
         customer1.setPassword(DigestUtil.MD5Str("123456"));
@@ -143,12 +113,13 @@ public class MysqlServiceTest extends DbTest {
         Customer tmp1 = db.cndJpa(Customer.class).andEq("username", "jack11").single();
         Assert.assertEquals(tmp.getUsername(), customer.getUsername());
         Assert.assertEquals(tmp1.getUsername(), customer1.getUsername());
+
     }
 
     @Test
     public void save3() {
         CustomerDto customer = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer.setId(10L);
         customer.setUsername("jack" + 10);
         customer.setPassword(DigestUtil.MD5Str("123456"));
@@ -156,7 +127,7 @@ public class MysqlServiceTest extends DbTest {
         customer.setCreateTime(new Date());
 
         CustomerDto customer1 = new CustomerDto();
-        if (!isAutoIncrement)
+        if (!isSequence)
             customer1.setId(11L);
         customer1.setUsername("jack" + 11);
         customer1.setPassword(DigestUtil.MD5Str("123456"));
@@ -192,20 +163,6 @@ public class MysqlServiceTest extends DbTest {
     public void findAll() {
         Optional<List<CustomerDto>> customerDtoOptional = customerService.findAll(Lists.newArrayList(customers.get(0).getId(), customers.get(2).getId()));
         Assert.assertTrue(customerDtoOptional.isPresent() && customerDtoOptional.get().size() == 2);
-    }
-
-
-    @Test
-    public void findAllAsync() throws Exception {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        Mono<Optional<List<CustomerDto>>> mono = customerService.findAllAsync();
-        mono.subscribe(o -> {
-            System.out.println(JsonUtil.toJson(o.get()));
-        }, throwable -> {
-        }, () -> {
-            countDownLatch.countDown();
-        });
-        countDownLatch.await();
     }
 
     @Test

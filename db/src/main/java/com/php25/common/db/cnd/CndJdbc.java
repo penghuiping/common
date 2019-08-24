@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -533,7 +534,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             return null;
         }
         Class<?> paramValueType = paramValue.getClass();
-        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType) || Date.class.isAssignableFrom(paramValueType)) {
+        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType) || Date.class.isAssignableFrom(paramValueType) || LocalDateTime.class.isAssignableFrom(paramValueType)) {
             //基本类型,string,date直接加入参数列表
             return paramValue;
         } else {

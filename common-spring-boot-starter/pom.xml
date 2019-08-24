@@ -40,34 +40,24 @@
       <artifactId>easypoi-annotation</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>com.php25</groupId>
       <artifactId>core</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.php25</groupId>
       <artifactId>es</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.php25</groupId>
       <artifactId>db</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.php25</groupId>
       <artifactId>mvc</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.php25</groupId>
       <artifactId>redis</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

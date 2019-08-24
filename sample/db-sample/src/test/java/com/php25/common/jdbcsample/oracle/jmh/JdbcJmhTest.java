@@ -27,6 +27,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate;
 import org.springframework.test.context.support.DefaultBootstrapContext;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -90,9 +91,9 @@ public class JdbcJmhTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setStartTime(new Date());
+            customer.setStartTime(LocalDateTime.now());
             customer.setEnable(1);
-            customer.setCompany(company);
+            customer.setCompanyId(company.getId());
             this.customers.add(customer);
             cndJpa.insert(customer);
         }

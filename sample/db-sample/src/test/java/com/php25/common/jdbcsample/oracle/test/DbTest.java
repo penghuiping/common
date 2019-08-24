@@ -3,8 +3,8 @@ package com.php25.common.jdbcsample.oracle.test;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.db.cnd.CndJpa;
 import com.php25.common.db.Db;
+import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,15 +69,15 @@ public class DbTest {
     public void before() throws Exception {
         initMeta(isSequence);
         this.initDb();
-        CndJpa cndJpa = db.cndJpa(Customer.class);
-        CndJpa cndJpaCompany = db.cndJpa(Company.class);
+        CndJdbc cndJdbc = db.cndJdbc(Customer.class);
+        CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
 
         Company company = new Company();
         company.setName("Google");
         company.setId(idGeneratorService.getSnowflakeId().longValue());
         company.setCreateTime(new Date());
         company.setEnable(1);
-        cndJpaCompany.insert(company);
+        cndJdbcCompany.insert(company);
 
 
         for (int i = 0; i < 3; i++) {
@@ -87,13 +88,13 @@ public class DbTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setStartTime(new Date());
+            customer.setStartTime(LocalDateTime.now());
             customer.setEnable(1);
-            customer.setCompany(company);
-            customer.setUpdateTime(new Date());
+            customer.setCompanyId(company.getId());
+            customer.setUpdateTime(LocalDateTime.now());
             customer.setScore(BigDecimal.valueOf(1000L));
             customers.add(customer);
-            cndJpa.insert(customer);
+            cndJdbc.insert(customer);
             Assert.assertNotNull(customer.getId());
         }
 
@@ -104,13 +105,13 @@ public class DbTest {
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
-            customer.setStartTime(new Date());
+            customer.setStartTime(LocalDateTime.now());
             customer.setAge(i * 20);
             customer.setEnable(0);
-            customer.setCompany(company);
+            customer.setCompanyId(company.getId());
             customer.setScore(BigDecimal.valueOf(1000L));
             customers.add(customer);
-            cndJpa.insert(customer);
+            cndJdbc.insert(customer);
             Assert.assertNotNull(customer.getId());
         }
 

@@ -155,4 +155,6 @@ public class CndMysqlJpa extends CndJpa {
             clear();
         }
     }
+
+
 }

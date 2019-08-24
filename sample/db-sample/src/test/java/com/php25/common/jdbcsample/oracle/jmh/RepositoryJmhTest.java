@@ -28,6 +28,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate;
 import org.springframework.test.context.support.DefaultBootstrapContext;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public class RepositoryJmhTest {
         bootstrapper.setBootstrapContext(defaultBootstrapContext);
         TestContext testContext = bootstrapper.buildTestContext();
 
-        customerRepository = testContext.getApplicationContext().getBean(CustomerRepositoryImpl.class);
+        customerRepository = testContext.getApplicationContext().getBean("CustomerRepository",CustomerRepository.class);
         idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorServiceImpl.class);
         jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
@@ -82,7 +83,7 @@ public class RepositoryJmhTest {
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
-            customer.setStartTime(new Date());
+            customer.setStartTime(LocalDateTime.now());
             if (i % 2 == 0)
                 customer.setEnable(1);
             else

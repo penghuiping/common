@@ -1,9 +1,11 @@
 package com.php25.common.jdbcsample.mysql.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 import java.util.Date;
 import java.util.List;
 
@@ -12,23 +14,23 @@ import java.util.List;
  * @date: 2018/8/30 09:33
  * @description:
  */
-@Entity
-@Table(name = "t_company")
-public class Company {
+@Table("t_company")
+public class Company implements Persistable<Long> {
 
     @Id
     private Long id;
 
     private String name;
 
+    @Transient
     private List<Customer> customers;
 
     private Integer enable;
 
-    @Column(name = "create_time")
+    @Column("create_time")
     private Date createTime;
 
-    @Column(name = "update_time")
+    @Column("update_time")
     private Date updateTime;
 
     public Long getId() {
@@ -77,5 +79,10 @@ public class Company {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public boolean isNew() {
+        return null == id;
     }
 }

@@ -1,22 +1,22 @@
 package com.php25.common.jdbcsample.oracle.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Version;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by penghuiping on 2018/5/1.
  */
-@Entity
-@Table(name = "t_customer")
-public class Customer {
+@Table("t_customer")
+public class Customer implements Persistable<Long> {
 
     @Id
     @SequenceGenerator(name = "SEQ_ID", sequenceName = "SEQ_ID")
@@ -31,11 +31,11 @@ public class Customer {
     @Column
     private String password;
 
-    @Column(name = "create_time")
-    private Date startTime;
+    @Column(value = "create_time")
+    private LocalDateTime startTime;
 
-    @Column(name = "update_time")
-    private Date updateTime;
+    @Column(value = "update_time")
+    private LocalDateTime updateTime;
 
     @Column
     private Integer enable;
@@ -44,8 +44,8 @@ public class Customer {
     @Column
     private Long version;
 
-    @Column(name = "company_id")
-    private Company company;
+    @Column("company_id")
+    private Long companyId;
 
     @Column
     private BigDecimal score;
@@ -74,11 +74,11 @@ public class Customer {
         this.password = password;
     }
 
-    public Date getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Date updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -106,20 +106,20 @@ public class Customer {
         this.version = version;
     }
 
-    public Date getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public Company getCompany() {
-        return company;
+    public Long getCompanyId() {
+        return companyId;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public BigDecimal getScore() {
@@ -128,5 +128,10 @@ public class Customer {
 
     public void setScore(BigDecimal score) {
         this.score = score;
+    }
+
+    @Override
+    public boolean isNew() {
+        return null == id;
     }
 }

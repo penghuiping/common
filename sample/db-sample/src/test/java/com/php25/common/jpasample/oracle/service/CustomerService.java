@@ -1,9 +1,9 @@
-package com.php25.common.jdbcsample.oracle.service;
+package com.php25.common.jpasample.oracle.service;
 
 import com.php25.common.core.service.BaseService;
 import com.php25.common.core.service.SoftDeletable;
-import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
-import com.php25.common.jdbcsample.oracle.model.Customer;
+import com.php25.common.jpasample.oracle.dto.CustomerDto;
+import com.php25.common.jpasample.oracle.model.Customer;
 
 /**
  * Created by penghuiping on 2018/5/1.

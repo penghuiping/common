@@ -9,13 +9,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.Assert;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Version;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ class JdbcModelManagerHelper {
         List<Class> columnsType = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            if (!Collection.class.isAssignableFrom(field.getType())) {
+            Transient tmp = field.getAnnotation(Transient.class);
+            if (null == tmp && !Collection.class.isAssignableFrom(field.getType())) {
                 classColumns.add(field.getName());
                 Column column = field.getAnnotation(Column.class);
                 String columnName = null;

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +63,7 @@ public class OracleRepositoryTest extends DbTest {
 
     @Test
     public void findAllSort() {
-        Iterable<Customer> customers = customerRepository.findAll(Sort.by(Sort.Order.desc("id")));
+        Iterable<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),Sort.by(Sort.Order.desc("id")));
         Assert.assertEquals(Lists.newArrayList(customers).size(), this.customers.size());
         Assert.assertEquals(Lists.newArrayList(customers).get(0).getId(), this.customers.get(this.customers.size() - 1).getId());
     }
@@ -70,7 +71,7 @@ public class OracleRepositoryTest extends DbTest {
     @Test
     public void findAllPage() {
         Pageable page = PageRequest.of(1, 2, Sort.by(Sort.Order.desc("id")));
-        Page<Customer> customers = customerRepository.findAll(page);
+        Page<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),page);
         Assert.assertEquals(customers.getContent().size(), 2);
     }
 
@@ -78,7 +79,7 @@ public class OracleRepositoryTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        //company.setId(idGeneratorService.getSnowflakeId().longValue());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
@@ -91,9 +92,9 @@ public class OracleRepositoryTest extends DbTest {
             customer.setId(idGeneratorService.getSnowflakeId().longValue());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
-        customer.setStartTime(new Date());
+        customer.setStartTime(LocalDateTime.now());
         customer.setAge(4 * 10);
-        customer.setCompany(company);
+        customer.setCompanyId(company.getId());
         customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack4"));
         Assert.assertEquals(customerRepository.findOne(builder).get().getUsername(), "jack4");
@@ -103,7 +104,7 @@ public class OracleRepositoryTest extends DbTest {
         Optional<Customer> customerOptional = customerRepository.findOne(builder);
         customer = customerOptional.get();
         customer.setUsername("jack" + 5);
-        customer.setUpdateTime(new Date());
+        customer.setUpdateTime(LocalDateTime.now());
         customerRepository.save(customer);
 
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack5"));
@@ -122,7 +123,7 @@ public class OracleRepositoryTest extends DbTest {
                 customer.setId(idGeneratorService.getSnowflakeId().longValue());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
-            customer.setStartTime(new Date());
+            customer.setStartTime(LocalDateTime.now());
             customer.setAge((i + 1) * 10);
             customers.add(customer);
         }

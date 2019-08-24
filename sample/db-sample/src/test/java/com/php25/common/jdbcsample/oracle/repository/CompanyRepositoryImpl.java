@@ -1,6 +1,6 @@
 package com.php25.common.jdbcsample.oracle.repository;
 
-import com.php25.common.db.repository.BaseJpaRepositoryImpl;
+import com.php25.common.db.repository.JdbcDbRepositoryImpl;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
  * @description:
  */
 @Repository
-public class CompanyRepositoryImpl extends BaseJpaRepositoryImpl<Company, Long> implements CompanyRepository {
+public class CompanyRepositoryImpl extends JdbcDbRepositoryImpl<Company, Long> implements CompanyExRepository {
 }
