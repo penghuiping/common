@@ -1,8 +1,16 @@
 package com.php25.common.jdbcsample.mysql.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.baidu.fsg.uid.UidGenerator;
+import com.baidu.fsg.uid.exception.UidGenerateException;
+import com.baidu.fsg.uid.impl.DefaultUidGenerator;
+import com.baidu.fsg.uid.worker.DisposableWorkerIdAssigner;
+import com.baidu.fsg.uid.worker.WorkerIdAssigner;
+import com.baidu.fsg.uid.worker.dao.WorkerNodeDAO;
+import com.baidu.fsg.uid.worker.dao.WorkerNodeDaoImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.jdbcsample.mysql.model.Company;
@@ -60,19 +68,40 @@ public class DbConfig {
     }
 
     @Bean
-    public ApplicationListener<BeforeSaveEvent> timeStampingSaveTime(@Autowired IdGeneratorService idGeneratorService) {
+    SnowflakeIdWorker snowflakeIdWorker() {
+        return new SnowflakeIdWorker(1, 1);
+    }
+
+    @Bean
+    UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
+        return new UidGenerator() {
+            @Override
+            public long getUID() throws UidGenerateException {
+                return snowflakeIdWorker.nextId();
+            }
+
+            @Override
+            public String parseUID(long uid) {
+                return uid + "";
+            }
+        };
+    }
+
+
+    @Bean
+    public ApplicationListener<BeforeSaveEvent> timeStampingSaveTime(@Autowired UidGenerator uidGenerator) {
 
         return event -> {
             Object entity = event.getEntity();
             if (entity instanceof Customer) {
                 if (null == ((Customer) entity).getId()) {
                     Customer customer = (Customer) entity;
-                    customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                    customer.setId(uidGenerator.getUID());
                 }
             } else if (entity instanceof Company) {
                 if (null == ((Company) entity).getId()) {
                     Company company = (Company) entity;
-                    company.setId(idGeneratorService.getSnowflakeId().longValue());
+                    company.setId(uidGenerator.getUID());
                 }
             }
         };

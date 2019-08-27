@@ -1,7 +1,5 @@
 package com.php25.common.core.util;
 
-import org.springframework.lang.Nullable;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -11,7 +9,7 @@ import java.net.URLEncoder;
  * @author penghuiping
  * @date 2017/2/4
  */
-public class StringUtil {
+public abstract class StringUtil {
     /**
      * 如果字符串为null或者""或者"  "都返回true
      *
@@ -35,6 +33,7 @@ public class StringUtil {
 
     /**
      * 判断字符串是否具有长度
+     *
      * @param str
      * @return
      */
@@ -45,6 +44,7 @@ public class StringUtil {
 
     /**
      * 判断字符串中是否有文字，空格不算文字
+     *
      * @param str
      * @return
      */

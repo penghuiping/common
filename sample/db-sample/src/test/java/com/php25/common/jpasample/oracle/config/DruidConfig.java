@@ -1,7 +1,10 @@
 package com.php25.common.jpasample.oracle.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.baidu.fsg.uid.UidGenerator;
+import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.jpasample.mysql.config.DbConfig;
@@ -18,7 +21,6 @@ import java.sql.SQLException;
  */
 @Configuration
 public class DruidConfig {
-
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -50,5 +52,26 @@ public class DruidConfig {
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
         return new Db(jdbcTemplate, DbType.ORACLE);
+    }
+
+
+    @Bean
+    SnowflakeIdWorker snowflakeIdWorker() {
+        return new SnowflakeIdWorker(1, 1);
+    }
+
+    @Bean
+    UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
+        return new UidGenerator() {
+            @Override
+            public long getUID() throws UidGenerateException {
+                return snowflakeIdWorker.nextId();
+            }
+
+            @Override
+            public String parseUID(long uid) {
+                return uid + "";
+            }
+        };
     }
 }

@@ -17,10 +17,6 @@ import java.util.UUID;
 @Service("idGeneratorService")
 public class IdGeneratorServiceImpl implements IdGeneratorService {
 
-    @Autowired
-    private SnowflakeIdWorker snowflakeIdWorker;
-
-
     @Override
     public String getUUID() {
         return UUID.randomUUID().toString().replace("-", "");
@@ -31,8 +27,4 @@ public class IdGeneratorServiceImpl implements IdGeneratorService {
         return Generators.timeBasedGenerator(EthernetAddress.fromInterface()).generate().toString().replaceAll("-", "");
     }
 
-    @Override
-    public Number getSnowflakeId() {
-        return snowflakeIdWorker.nextId();
-    }
 }

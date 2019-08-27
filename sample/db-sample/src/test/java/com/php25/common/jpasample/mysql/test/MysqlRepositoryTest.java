@@ -81,7 +81,7 @@ public class MysqlRepositoryTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
@@ -91,7 +91,7 @@ public class MysqlRepositoryTest extends DbTest {
 
         Customer customer = new Customer();
         if (!isAutoIncrement)
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setStartTime(new Date());
@@ -122,7 +122,7 @@ public class MysqlRepositoryTest extends DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isAutoIncrement)
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(new Date());

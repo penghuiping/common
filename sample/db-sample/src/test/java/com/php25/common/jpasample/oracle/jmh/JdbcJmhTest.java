@@ -1,5 +1,6 @@
 package com.php25.common.jpasample.oracle.jmh;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
@@ -41,6 +42,8 @@ public class JdbcJmhTest {
 
     private IdGeneratorService idGeneratorService;
 
+    private UidGenerator uidGenerator;
+
     private Db db;
 
     private List<Customer> customers;
@@ -71,6 +74,7 @@ public class JdbcJmhTest {
 
         this.jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
         this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
+        this.uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 
         jdbcTemplate.update("drop table if exists t_customer;");
@@ -86,7 +90,7 @@ public class JdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);

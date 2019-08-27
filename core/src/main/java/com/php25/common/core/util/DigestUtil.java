@@ -26,7 +26,7 @@ import java.util.Base64;
  * @author penghuiping
  * @date 2017-02-04
  */
-public class DigestUtil {
+public abstract class DigestUtil {
 
     /**
      * Used to build output as Hex

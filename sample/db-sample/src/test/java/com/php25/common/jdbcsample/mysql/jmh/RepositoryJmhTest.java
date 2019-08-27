@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.mysql.jmh;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.service.IdGeneratorServiceImpl;
@@ -45,6 +46,7 @@ public class RepositoryJmhTest {
     List<Customer> customers;
     private CustomerRepository customerRepository;
     private IdGeneratorService idGeneratorService;
+    private UidGenerator uidGenerator;
     private JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) throws RunnerException {
@@ -70,8 +72,9 @@ public class RepositoryJmhTest {
         bootstrapper.setBootstrapContext(defaultBootstrapContext);
         TestContext testContext = bootstrapper.buildTestContext();
 
-        customerRepository = testContext.getApplicationContext().getBean("CustomerRepository",CustomerRepository.class);
+        customerRepository = testContext.getApplicationContext().getBean(CustomerRepository.class);
         idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorServiceImpl.class);
+        uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
         jdbcTemplate.execute("drop table if exists t_customer");
@@ -115,7 +118,7 @@ public class RepositoryJmhTest {
     @Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getSnowflakeId().longValue());
+        customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);

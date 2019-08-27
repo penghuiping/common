@@ -57,7 +57,6 @@ public class HashingTest {
 
     @Test
     public void idGeneratorService() throws Exception {
-        logger.info("snowflake:" + idGeneratorService.getSnowflakeId());
         logger.info("uuid:" + idGeneratorService.getUUID());
         logger.info("juid:"+idGeneratorService.getJUID());
     }

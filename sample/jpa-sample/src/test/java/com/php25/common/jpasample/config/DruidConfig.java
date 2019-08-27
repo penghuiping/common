@@ -2,7 +2,9 @@ package com.php25.common.jpasample.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +43,10 @@ public class DruidConfig {
             LoggerFactory.getLogger(DruidConfig.class).error("出错啦！", e);
         }
         return druidDataSource;
+    }
+
+    @Autowired
+    public SnowflakeIdWorker snowflakeIdWorker() {
+        return new SnowflakeIdWorker(1,1);
     }
 }

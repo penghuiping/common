@@ -17,10 +17,12 @@
         <module>mvc</module>
         <module>webflux</module>
         <module>redis</module>
+        <module>uid-generator</module>
         <module>sample/core-sample</module>
         <module>sample/db-sample</module>
         <module>sample/jpa-sample</module>
         <module>sample/redis-sample</module>
+        <module>sample/uid-sample</module>
     </modules>
 
     <packaging>pom</packaging>

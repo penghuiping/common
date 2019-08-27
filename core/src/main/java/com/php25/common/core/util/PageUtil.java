@@ -6,7 +6,7 @@ package com.php25.common.core.util;
  * @author penghuiping
  * @date 14-8-16
  */
-public class PageUtil {
+public abstract class PageUtil {
     /**
      * 将页数和每页条目数转换为开始位置和结束位置<br>
      * 此方法用于不包括结束位置的分页方法<br>

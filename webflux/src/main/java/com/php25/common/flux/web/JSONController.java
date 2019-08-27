@@ -30,6 +30,7 @@ public class JSONController {
         JSONResponse ret = new JSONResponse();
         ret.setErrorCode(ApiErrorCode.ok.value);
         ret.setReturnObject(obj);
+        ret.setMessage("success");
         return ret;
     }
 

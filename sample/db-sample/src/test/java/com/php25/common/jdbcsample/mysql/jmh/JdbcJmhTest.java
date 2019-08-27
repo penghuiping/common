@@ -1,11 +1,12 @@
 package com.php25.common.jdbcsample.mysql.jmh;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.CndJpa;
+import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.manager.JpaModelManager;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
@@ -42,6 +43,8 @@ public class JdbcJmhTest {
 
     private IdGeneratorService idGeneratorService;
 
+    private UidGenerator uidGenerator;
+
     private Db db;
 
     private List<Customer> customers;
@@ -72,12 +75,13 @@ public class JdbcJmhTest {
 
         this.jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
         this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
+        this.uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 
         jdbcTemplate.execute("drop table if exists t_customer");
         jdbcTemplate.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,`enable` int,score bigint,company_id bigint)");
 
-        CndJpa cndJpa = this.db.cndJpa(Customer.class);
+        CndJdbc cndJdbc = this.db.cndJdbc(Customer.class);
 
         Company company = new Company();
         company.setName("test");
@@ -89,7 +93,7 @@ public class JdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -97,15 +101,15 @@ public class JdbcJmhTest {
             customer.setEnable(1);
             customer.setCompanyId(company.getId());
             this.customers.add(customer);
-            cndJpa.insert(customer);
+            cndJdbc.insert(customer);
         }
 
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        CndJpa cndJpa = this.db.cndJpa(Customer.class);
-        List<Customer> customers1 = cndJpa.whereEq("username", "jack0").limit(0, 1).asc("id").select();
+        CndJdbc cndJdbc = this.db.cndJdbc(Customer.class);
+        List<Customer> customers1 = cndJdbc.whereEq("username", "jack0").limit(0, 1).asc("id").select();
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
@@ -125,7 +129,7 @@ public class JdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void getIdValue() throws Exception {
-        Customer customer = this.db.cndJpa(Customer.class).whereEq("id", customers.get(0).getId()).single();
+        Customer customer = this.db.cndJdbc(Customer.class).whereEq("id", customers.get(0).getId()).single();
         Assert.assertEquals(customer.getId(), customers.get(0).getId());
     }
 }

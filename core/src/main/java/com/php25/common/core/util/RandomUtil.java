@@ -11,7 +11,7 @@ import java.util.UUID;
  * @author penghuiping
  * @date 2014/8/13.
  */
-public class RandomUtil {
+public abstract class RandomUtil {
     public static final String NUMBERS_AND_LETTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final String NUMBERS = "0123456789";
     public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

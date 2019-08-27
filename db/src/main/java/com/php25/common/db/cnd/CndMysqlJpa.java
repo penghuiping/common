@@ -135,7 +135,7 @@ public class CndMysqlJpa extends CndJpa {
                     throw Exceptions.throwIllegalStateException("insert 操作失败");
                 }
                 Field field = JpaModelManager.getPrimaryKeyField(clazz);
-                if (!field.getType().isAssignableFrom(Long.class)) {
+                if (!field.getType().isAssignableFrom(Long.class) && !field.getType().isAssignableFrom(long.class)) {
                     throw Exceptions.throwIllegalStateException("自增主键必须是Long类型");
                 }
                 ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());

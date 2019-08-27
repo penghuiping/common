@@ -1,12 +1,10 @@
 package com.php25.common.jdbcsample.oracle.jmh;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
-import com.php25.common.core.service.IdGeneratorService;
-import com.php25.common.core.service.IdGeneratorServiceImpl;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 import com.php25.common.jdbcsample.oracle.repository.CustomerRepository;
-import com.php25.common.jdbcsample.oracle.repository.CustomerRepositoryImpl;
 import com.php25.common.jdbcsample.oracle.test.OracleJdbcTest;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -29,7 +27,6 @@ import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDele
 import org.springframework.test.context.support.DefaultBootstrapContext;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +40,7 @@ public class RepositoryJmhTest {
 
     List<Customer> customers;
     private CustomerRepository customerRepository;
-    private IdGeneratorService idGeneratorService;
+    private UidGenerator uidGenerator;
     private JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) throws RunnerException {
@@ -69,8 +66,8 @@ public class RepositoryJmhTest {
         bootstrapper.setBootstrapContext(defaultBootstrapContext);
         TestContext testContext = bootstrapper.buildTestContext();
 
-        customerRepository = testContext.getApplicationContext().getBean("CustomerRepository",CustomerRepository.class);
-        idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorServiceImpl.class);
+        customerRepository = testContext.getApplicationContext().getBean("CustomerRepository", CustomerRepository.class);
+        uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
         jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
@@ -112,7 +109,7 @@ public class RepositoryJmhTest {
     @org.openjdk.jmh.annotations.Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getSnowflakeId().longValue());
+        customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);

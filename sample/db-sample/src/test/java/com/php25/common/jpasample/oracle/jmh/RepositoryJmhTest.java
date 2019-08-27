@@ -1,5 +1,6 @@
 package com.php25.common.jpasample.oracle.jmh;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.service.IdGeneratorServiceImpl;
@@ -44,6 +45,7 @@ public class RepositoryJmhTest {
     private CustomerRepository customerRepository;
     private IdGeneratorService idGeneratorService;
     private JdbcTemplate jdbcTemplate;
+    private UidGenerator uidGenerator;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
@@ -70,6 +72,7 @@ public class RepositoryJmhTest {
 
         customerRepository = testContext.getApplicationContext().getBean(CustomerRepositoryImpl.class);
         idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorServiceImpl.class);
+        uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
         jdbcTemplate.update("create table t_customer (id bigint,username varchar(20),password varchar(50),age int,create_time date,update_time date,`enable` bit)");
@@ -111,7 +114,7 @@ public class RepositoryJmhTest {
     @org.openjdk.jmh.annotations.Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getSnowflakeId().longValue());
+        customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);

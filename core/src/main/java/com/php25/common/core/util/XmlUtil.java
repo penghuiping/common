@@ -17,7 +17,7 @@ import java.util.TimeZone;
  * @author: penghuiping
  * @date: 2018/8/15 10:12
  */
-public class XmlUtil {
+public abstract class XmlUtil {
     private static final Logger log = LoggerFactory.getLogger(XmlUtil.class);
 
     private static final XmlMapper xmlMapper = new XmlMapper();

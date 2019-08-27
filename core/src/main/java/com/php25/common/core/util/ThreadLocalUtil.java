@@ -6,7 +6,7 @@ package com.php25.common.core.util;
  * @author penghuiping
  * @date 11/17/15.
  */
-public class ThreadLocalUtil {
+public abstract class ThreadLocalUtil {
     private static final ThreadLocal<Object> THREAD_LOCAL = new ThreadLocal<Object>();
 
     public static void set(Object object) {

@@ -2,6 +2,7 @@ package com.php25.common.jpasample.jmh;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.jpasample.JpaTest;
 import com.php25.common.jpasample.model.Customer;
@@ -34,13 +35,17 @@ import java.util.stream.Collectors;
 @State(Scope.Benchmark)
 public class JpaJmhTest {
 
-
     List<Customer> customers;
     private CustomerService customerService;
     private CustomerRepository customerRepository;
     private IdGeneratorService idGeneratorService;
 
+    SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(1,1);
+
     public static void main(String[] args) throws RunnerException {
+
+
+
         Options opt = new OptionsBuilder()
                 .include(JpaJmhTest.class.getSimpleName())
                 .mode(Mode.Throughput)
@@ -70,7 +75,7 @@ public class JpaJmhTest {
         customers = Lists.newArrayList();
         for (int i = 0; i < 10; i++) {
             Customer customer = new Customer();
-            customer.setId(this.idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(this.snowflakeIdWorker.nextId());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
@@ -99,7 +104,7 @@ public class JpaJmhTest {
     @org.openjdk.jmh.annotations.Benchmark
     public void save() {
         Customer customer = new Customer();
-        customer.setId(idGeneratorService.getSnowflakeId().longValue());
+        customer.setId(this.snowflakeIdWorker.nextId());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(4 * 10);

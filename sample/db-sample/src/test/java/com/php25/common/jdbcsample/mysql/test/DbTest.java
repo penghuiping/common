@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.mysql.test;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
@@ -35,6 +36,9 @@ public class DbTest {
     IdGeneratorService idGeneratorService;
 
     @Autowired
+    UidGenerator uidGenerator;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     Db db;
@@ -56,6 +60,7 @@ public class DbTest {
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
         statement.execute("drop table if exists t_company");
+        statement.execute("drop table if exists t_company");
         if (isAutoIncrement) {
             statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
             statement.execute("create table t_company (id bigint auto_increment primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
@@ -74,9 +79,10 @@ public class DbTest {
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
 
+
         Company company = new Company();
         company.setName("Google");
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setCreateTime(new Date());
         company.setEnable(1);
         cndJdbcCompany.insert(company);
@@ -85,7 +91,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isAutoIncrement) {
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
@@ -103,7 +109,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isAutoIncrement) {
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));

@@ -6,7 +6,7 @@ package com.php25.common.core.util;
  * @author penghuiping
  * @date 2018/5/31 15:37
  */
-public class SortUtil {
+public abstract class SortUtil {
     /**
      * 1. 选取数组最左边的一个数做为基准
      * 2. 初始化两个指针，分别指向数组的头(最左边)与尾(最右边)

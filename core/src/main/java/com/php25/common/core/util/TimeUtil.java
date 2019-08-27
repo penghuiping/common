@@ -21,7 +21,7 @@ import java.util.Date;
  * @author penghuiping
  * @date 2018/7/2.
  */
-public class TimeUtil {
+public abstract class TimeUtil {
     private static final Logger logger = LoggerFactory.getLogger(TimeUtil.class);
 
     /**

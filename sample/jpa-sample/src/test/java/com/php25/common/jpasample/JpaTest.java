@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.dto.DataGridPageDto;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import com.php25.common.core.specification.Operator;
 import com.php25.common.core.specification.SearchParam;
 import com.php25.common.core.specification.SearchParamBuilder;
@@ -66,12 +67,15 @@ public class JpaTest {
     @Autowired
     private TestEntityManager entityManager;
 
+    @Autowired
+    private SnowflakeIdWorker snowflakeIdWorker;
+
     @Before
     public void save() throws Exception {
         List<CustomerDto> customers = Lists.newArrayList();
         for (int i = 0; i < 10; i++) {
             CustomerDto customer = new CustomerDto();
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(snowflakeIdWorker.nextId());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setCreateTime(new Date());
@@ -81,12 +85,6 @@ public class JpaTest {
         customerService.save(customers);
     }
 
-
-    @Test
-    public void idGeneratorService() throws Exception {
-        logger.info("snowflake:" + idGeneratorService.getSnowflakeId());
-        logger.info("uuid:" + idGeneratorService.getUUID());
-    }
 
     @Test
     public void findAll() throws Exception {

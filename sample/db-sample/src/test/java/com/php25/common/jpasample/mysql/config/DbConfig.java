@@ -1,7 +1,15 @@
 package com.php25.common.jpasample.mysql.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.baidu.fsg.uid.UidGenerator;
+import com.baidu.fsg.uid.exception.UidGenerateException;
+import com.baidu.fsg.uid.impl.DefaultUidGenerator;
+import com.baidu.fsg.uid.worker.DisposableWorkerIdAssigner;
+import com.baidu.fsg.uid.worker.WorkerIdAssigner;
+import com.baidu.fsg.uid.worker.dao.WorkerNodeDAO;
+import com.baidu.fsg.uid.worker.dao.WorkerNodeDaoImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.php25.common.core.service.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import org.slf4j.LoggerFactory;
@@ -49,5 +57,25 @@ public class DbConfig {
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
         return new Db(jdbcTemplate, DbType.MYSQL);
+    }
+
+    @Bean
+    SnowflakeIdWorker snowflakeIdWorker() {
+        return new SnowflakeIdWorker(1, 1);
+    }
+
+    @Bean
+    UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
+        return new UidGenerator() {
+            @Override
+            public long getUID() throws UidGenerateException {
+                return snowflakeIdWorker.nextId();
+            }
+
+            @Override
+            public String parseUID(long uid) {
+                return uid + "";
+            }
+        };
     }
 }

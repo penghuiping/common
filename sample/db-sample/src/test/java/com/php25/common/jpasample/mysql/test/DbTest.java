@@ -1,5 +1,6 @@
 package com.php25.common.jpasample.mysql.test;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.core.util.DigestUtil;
@@ -31,6 +32,9 @@ public class DbTest {
 
     @Autowired
     IdGeneratorService idGeneratorService;
+
+    @Autowired
+    UidGenerator uidGenerator;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -74,7 +78,7 @@ public class DbTest {
 
         Company company = new Company();
         company.setName("Google");
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setCreateTime(new Date());
         company.setEnable(1);
         cndJpaCompany.insert(company);
@@ -83,7 +87,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isAutoIncrement) {
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
@@ -101,7 +105,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isAutoIncrement) {
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));

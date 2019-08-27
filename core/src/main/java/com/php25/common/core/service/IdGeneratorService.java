@@ -16,11 +16,4 @@ public interface IdGeneratorService {
 
     public String getJUID();
 
-    /**
-     * 实体类主键生产器 生成整数主键
-     *
-     * @return
-     */
-    public Number getSnowflakeId();
-
 }

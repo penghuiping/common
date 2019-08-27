@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.oracle.test;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
@@ -45,6 +46,9 @@ public class OracleJdbcTest extends DbTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private UidGenerator uidGenerator;
 
     @Override
     protected void initDb() {
@@ -170,14 +174,14 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
 
         Customer customer = new Customer();
         if (!isSequence)
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -189,7 +193,7 @@ public class OracleJdbcTest extends DbTest {
 
         Customer customer1 = new Customer();
         if (!isSequence)
-            customer1.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer1.setId(uidGenerator.getUID());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
@@ -212,13 +216,13 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
         Customer customer = new Customer();
         if (!isSequence)
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -229,7 +233,7 @@ public class OracleJdbcTest extends DbTest {
 
         Customer customer1 = new Customer();
         if (!isSequence)
-            customer1.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer1.setId(uidGenerator.getUID());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);

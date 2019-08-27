@@ -19,7 +19,7 @@ import java.util.TimeZone;
  * @author: penghuiping
  * @date: 2018/8/8 17:05
  */
-public class JsonUtil {
+public abstract class JsonUtil {
     private static final Logger log = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final PrettyPrinter PRETTY_PRINTER = new DefaultPrettyPrinter();

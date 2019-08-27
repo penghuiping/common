@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.oracle.test;
 
+import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.specification.Operator;
 import com.php25.common.core.specification.SearchParam;
@@ -48,6 +49,9 @@ public class OracleRepositoryTest extends DbTest {
     private CompanyRepository companyRepository;
 
     @Autowired
+    private UidGenerator uidGenerator;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override
@@ -63,7 +67,7 @@ public class OracleRepositoryTest extends DbTest {
 
     @Test
     public void findAllSort() {
-        Iterable<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),Sort.by(Sort.Order.desc("id")));
+        Iterable<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(), Sort.by(Sort.Order.desc("id")));
         Assert.assertEquals(Lists.newArrayList(customers).size(), this.customers.size());
         Assert.assertEquals(Lists.newArrayList(customers).get(0).getId(), this.customers.get(this.customers.size() - 1).getId());
     }
@@ -71,7 +75,7 @@ public class OracleRepositoryTest extends DbTest {
     @Test
     public void findAllPage() {
         Pageable page = PageRequest.of(1, 2, Sort.by(Sort.Order.desc("id")));
-        Page<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),page);
+        Page<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(), page);
         Assert.assertEquals(customers.getContent().size(), 2);
     }
 
@@ -89,7 +93,7 @@ public class OracleRepositoryTest extends DbTest {
 
         Customer customer = new Customer();
         if (!isSequence)
-            customer.setId(idGeneratorService.getSnowflakeId().longValue());
+            customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setStartTime(LocalDateTime.now());
@@ -120,7 +124,7 @@ public class OracleRepositoryTest extends DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             if (!isSequence)
-                customer.setId(idGeneratorService.getSnowflakeId().longValue());
+                customer.setId(uidGenerator.getUID());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());

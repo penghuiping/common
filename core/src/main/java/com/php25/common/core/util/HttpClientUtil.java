@@ -12,7 +12,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @author: penghuiping
  * @date: 2018/6/6 09:58
  */
-public class HttpClientUtil {
+public abstract class HttpClientUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
 
