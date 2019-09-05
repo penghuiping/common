@@ -1,9 +1,13 @@
 package com.php25.common.core.util;
 
 
+import com.php25.common.core.exception.Exceptions;
+
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 随机数帮助类
@@ -92,12 +96,38 @@ public abstract class RandomUtil {
         }
 
         StringBuilder str = new StringBuilder(length);
-        Random random = new SecureRandom();
+        Random random = getRandom();
         for (int i = 0; i < length; i++) {
             str.append(sourceChar[random.nextInt(sourceChar.length)]);
         }
         return str.toString();
     }
+
+    /**
+     * 获取随机数生成器对象<br>
+     * ThreadLocalRandom是JDK 7之后提供并发产生随机数，能够解决多个线程发生的竞争争夺。
+     *
+     * @return {@link ThreadLocalRandom}
+     * @since 3.1.2
+     */
+    public static ThreadLocalRandom getRandom() {
+        return ThreadLocalRandom.current();
+    }
+
+    /**
+     * 获取{@link SecureRandom}，类提供加密的强随机数生成器 (RNG)
+     *
+     * @return {@link SecureRandom}
+     * @since 3.1.2
+     */
+    public static SecureRandom getSecureRandom() {
+        try {
+            return SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException e) {
+            throw Exceptions.throwIllegalStateException("没有此随机算法", e);
+        }
+    }
+
 
     /**
      * 随机返回0到max之间的数字
@@ -123,7 +153,7 @@ public abstract class RandomUtil {
         if (min == max) {
             return min;
         }
-        return min + new SecureRandom().nextInt(max - min);
+        return min + getRandom().nextInt(max - min);
     }
 
     /**
@@ -209,5 +239,17 @@ public abstract class RandomUtil {
      */
     public static String randomUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * 随机bytes
+     *
+     * @param length 长度
+     * @return bytes
+     */
+    public static byte[] randomBytes(int length) {
+        byte[] bytes = new byte[length];
+        getRandom().nextBytes(bytes);
+        return bytes;
     }
 }

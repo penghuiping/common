@@ -2,10 +2,9 @@ package com.php25.common.core.service;
 
 
 /**
- *
  * @author penghuiping
  * @date 2018-05-12
- *
+ * <p>
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
  * 0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 <br>

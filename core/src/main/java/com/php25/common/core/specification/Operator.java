@@ -3,7 +3,6 @@ package com.php25.common.core.specification;
 /**
  * @author penghuiping
  * @date 2016-04-12
- *
  */
 public enum Operator {
     /**

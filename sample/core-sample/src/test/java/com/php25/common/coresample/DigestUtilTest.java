@@ -30,57 +30,6 @@ public class DigestUtilTest {
         logger.info(Hashing.sha256().hashString("123123123", Charset.forName("utf-8")).toString());
     }
 
-    @Test
-    public void AES() {
-        String key = "1100000000000000";
-        logger.info("key:" + key);
-        String value = DigestUtil.encryptAES("hello world", key,false);
-        logger.info("value:" + value);
-        String result = DigestUtil.decryptAES(value, key,false);
-        logger.info(result);
-        Assert.assertEquals(result, "hello world");
-    }
 
 
-    @Test
-    public void DES() {
-        String key = "123456789";
-        logger.info("key:" + key);
-        String value = DigestUtil.encryptDES("hello world", key,true);
-        logger.info("value:" + value);
-        String result = DigestUtil.decryptDES(value, key,true);
-        logger.info(result);
-        Assert.assertEquals(result, "hello world");
-    }
-
-    @Test
-    public void RSA() {
-        KeyPair keyPair = DigestUtil.getKeyPair();
-        String privateKey = DigestUtil.getPrivateKey(keyPair);
-        String publicKey = DigestUtil.getPublicKey(keyPair);
-
-        logger.info("privateKey:" + privateKey);
-        logger.info("publicKey:" + publicKey);
-
-        String encryptContent = DigestUtil.publicEncrypt("hello world", publicKey);
-        String content = DigestUtil.privateDecrypt(encryptContent, privateKey);
-        logger.info("content:" + content);
-        Assert.assertEquals(content, "hello world");
-    }
-
-
-    @Test
-    public void sign() {
-        KeyPair keyPair = DigestUtil.getKeyPair();
-        String privateKey = DigestUtil.getPrivateKey(keyPair);
-        String publicKey = DigestUtil.getPublicKey(keyPair);
-
-        logger.info("privateKey:" + privateKey);
-        logger.info("publicKey:" + publicKey);
-
-        String sign = DigestUtil.sign("hello world", privateKey);
-        logger.info("sign:" + sign);
-        Boolean result = DigestUtil.verify("hello world", sign, publicKey);
-        Assert.assertEquals(result, true);
-    }
 }

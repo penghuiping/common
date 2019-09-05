@@ -16,12 +16,12 @@ import java.util.List;
 public class SearchParamBuilder {
     private List<SearchParam> searchParamList;
 
-    public static SearchParamBuilder builder() {
-        return new SearchParamBuilder();
-    }
-
     public SearchParamBuilder() {
         this.searchParamList = new ArrayList<>();
+    }
+
+    public static SearchParamBuilder builder() {
+        return new SearchParamBuilder();
     }
 
     public SearchParamBuilder append(SearchParam searchParam) {

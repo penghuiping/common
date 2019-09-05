@@ -10,9 +10,9 @@ import java.util.List;
 
 /**
  * BaseSpecs的基实现，所有的具体的BaseSpecs都应该继承这个类。
+ *
  * @author penghuiping
  * @date 2016-04-12
- *
  */
 public abstract class BaseSpecs<T> {
     protected static Logger logger = LoggerFactory.getLogger(BaseSpecs.class);

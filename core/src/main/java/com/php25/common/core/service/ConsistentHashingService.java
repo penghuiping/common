@@ -3,7 +3,7 @@ package com.php25.common.core.service;
 /**
  * @author: penghuiping
  * @date: 2018/5/30 09:55
- *
+ * <p>
  * 一致性hash
  */
 public interface ConsistentHashingService {

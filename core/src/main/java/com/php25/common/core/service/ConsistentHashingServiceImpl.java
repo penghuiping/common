@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 /**
  * 一致性hash实现
+ *
  * @author penghuiping
  * @date: 2018/5/30 09:56
  */

@@ -4,7 +4,6 @@ package com.php25.common.core.service;
 import com.php25.common.core.dto.DataGridPageDto;
 import com.php25.common.core.specification.SearchParamBuilder;
 import org.springframework.data.domain.Sort;
-import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,7 +25,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
     Optional<DTO> findOne(ID id);
 
 
-
     /**
      * 根据id查找
      *
@@ -37,8 +35,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
     Optional<DTO> findOne(ID id, ModelToDtoTransferable<MODEL, DTO> modelToDtoTransferable);
 
 
-
-
     /**
      * 保存或者更新
      *
@@ -46,7 +42,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @return 保存/更新成功的对象
      */
     Optional<DTO> save(DTO obj);
-
 
 
     /**
@@ -68,7 +63,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
     void save(Iterable<DTO> objs);
 
 
-
     /**
      * 保存或者更新批量
      *
@@ -84,7 +78,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @param obj 需要删除的dto对象
      */
     void delete(DTO obj);
-
 
 
     /**
@@ -137,7 +130,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @return
      */
     Optional<DataGridPageDto<DTO>> query(Integer pageNum, Integer pageSize, String searchParams);
-
 
 
     /**
@@ -200,8 +192,6 @@ public interface BaseService<DTO, MODEL, ID extends Serializable> {
      * @return
      */
     Long count(String searchParams);
-
-
 
 
 }

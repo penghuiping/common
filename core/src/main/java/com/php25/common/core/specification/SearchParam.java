@@ -11,11 +11,11 @@ public class SearchParam {
     private Object value;
     private Operator operator;
 
-    public static SearchParam of(String fieldName, Operator operator, Object value) {
-        return new SearchParam.Builder().fieldName(fieldName).operator(operator).value(value).build();
+    private SearchParam() {
     }
 
-    private SearchParam() {
+    public static SearchParam of(String fieldName, Operator operator, Object value) {
+        return new SearchParam.Builder().fieldName(fieldName).operator(operator).value(value).build();
     }
 
     public String getFieldName() {

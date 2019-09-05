@@ -15,7 +15,7 @@ import java.util.Optional;
  * @date: 2019/3/19 14:37
  * @description:
  */
-public abstract class AbstractBaseAsyncServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>,BaseAsyncService<DTO, MODEL, ID>, SoftDeletable<DTO> {
+public abstract class AbstractBaseAsyncServiceImpl<DTO, MODEL, ID extends Serializable> implements BaseService<DTO, MODEL, ID>, BaseAsyncService<DTO, MODEL, ID>, SoftDeletable<DTO> {
 
     @Override
     public Mono<Optional<DTO>> findOneAsync(ID id) {
