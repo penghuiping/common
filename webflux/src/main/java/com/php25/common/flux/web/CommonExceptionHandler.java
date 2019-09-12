@@ -1,13 +1,13 @@
 package com.php25.common.flux.web;
 
 import com.php25.common.core.exception.BusinessException;
-import com.php25.common.core.exception.IllegalStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.bind.support.WebExchangeBindException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -24,7 +24,18 @@ public class CommonExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<JSONResponse> handleCustomException(Exception e) {
         log.error("出错啦!!", e);
-        if (e instanceof ServerWebInputException || e instanceof ConstraintViolationException) {
+        if (e instanceof WebExchangeBindException) {
+            WebExchangeBindException e1 = (WebExchangeBindException) e;
+            JSONResponse jsonResponse = new JSONResponse();
+            jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+            FieldError fieldError = e1.getFieldError();
+            if (fieldError == null) {
+                jsonResponse.setMessage("input_params_error");
+            } else {
+                jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
+            }
+            return ResponseEntity.ok(jsonResponse);
+        } else if (e instanceof ConstraintViolationException) {
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage(e.getMessage());
@@ -34,12 +45,6 @@ public class CommonExceptionHandler {
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(businessException.getCode());
             jsonResponse.setMessage(businessException.getMessage());
-            return ResponseEntity.ok(jsonResponse);
-        } else if (e instanceof IllegalStateException) {
-            IllegalStateException illegalStateException = (IllegalStateException) e;
-            JSONResponse jsonResponse = new JSONResponse();
-            jsonResponse.setErrorCode(ApiErrorCode.illegal_state.value);
-            jsonResponse.setMessage(illegalStateException.getMessage());
             return ResponseEntity.ok(jsonResponse);
         } else {
             JSONResponse jsonResponse = new JSONResponse();

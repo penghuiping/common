@@ -31,6 +31,17 @@ public abstract class StringUtil {
         return (str == null || str.length() == 0);
     }
 
+    /**
+     * 字符串是否为空，空的定义如下:<br>
+     * 1、为null <br>
+     * 2、为""<br>
+     *
+     * @param str 被检测的字符串
+     * @return 是否为空
+     */
+    public static boolean isEmpty(CharSequence str) {
+        return str == null || str.length() == 0;
+    }
 
     /**
      * 判断字符串是否具有长度
@@ -164,5 +175,63 @@ public abstract class StringUtil {
     public static byte[] bytes(CharSequence str, Charset charset) {
         AssertUtil.notNull(str, "str不能为null");
         return str.toString().getBytes(charset);
+    }
+
+    /**
+     * 替换指定字符串的指定区间内字符为"*"
+     *
+     * @param str          字符串
+     * @param startInclude 开始位置（包含）
+     * @param endExclude   结束位置（不包含）
+     * @return 替换后的字符串
+     */
+    public static String hide(CharSequence str, int startInclude, int endExclude) {
+        return replace(str, startInclude, endExclude, '*');
+    }
+
+    /**
+     * {@link CharSequence} 转为字符串，null安全
+     *
+     * @param cs {@link CharSequence}
+     * @return 字符串
+     */
+    public static String str(CharSequence cs) {
+        return null == cs ? null : cs.toString();
+    }
+
+    /**
+     * 替换指定字符串的指定区间内字符为固定字符
+     *
+     * @param str          字符串
+     * @param startInclude 开始位置（包含）
+     * @param endExclude   结束位置（不包含）
+     * @param replacedChar 被替换的字符
+     * @return 替换后的字符串
+     */
+    public static String replace(CharSequence str, int startInclude, int endExclude, char replacedChar) {
+        if (isEmpty(str)) {
+            return str(str);
+        }
+        final int strLength = str.length();
+        if (startInclude > strLength) {
+            return str(str);
+        }
+        if (endExclude > strLength) {
+            endExclude = strLength;
+        }
+        if (startInclude > endExclude) {
+            // 如果起始位置大于结束位置，不替换
+            return str(str);
+        }
+
+        final char[] chars = new char[strLength];
+        for (int i = 0; i < strLength; i++) {
+            if (i >= startInclude && i < endExclude) {
+                chars[i] = replacedChar;
+            } else {
+                chars[i] = str.charAt(i);
+            }
+        }
+        return new String(chars);
     }
 }

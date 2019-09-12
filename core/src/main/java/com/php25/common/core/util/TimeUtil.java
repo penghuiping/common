@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * 修改使用jdk1.8中的TimeApi
@@ -157,5 +158,37 @@ public abstract class TimeUtil {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         localDateTime = localDateTime.plus(offset, chronoUnit);
         return Date.from(localDateTime.toInstant(ZoneOffset.ofHours(8)));
+    }
+
+
+    /**
+     * Date 转 LocalDateTime
+     *
+     * @param date
+     * @return
+     */
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    /**
+     * Date 转 LocalDateTime
+     *
+     * @param date   日期时间
+     * @param zoneId 时区
+     * @return
+     */
+    public static LocalDateTime toLocalDateTime(Date date, ZoneId zoneId) {
+        return date.toInstant().atZone(zoneId).toLocalDateTime();
+    }
+
+    /**
+     * 是否闰年
+     *
+     * @param year 年
+     * @return 是否闰年
+     */
+    public static boolean isLeapYear(int year) {
+        return new GregorianCalendar().isLeapYear(year);
     }
 }

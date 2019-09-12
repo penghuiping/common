@@ -18,26 +18,14 @@
         <module>webflux</module>
         <module>redis</module>
         <module>uid-generator</module>
+        <module>validation</module>
         <module>sample/core-sample</module>
         <module>sample/db-sample</module>
         <module>sample/jpa-sample</module>
         <module>sample/redis-sample</module>
         <module>sample/uid-sample</module>
+        <module>sample/validation-sample</module>
     </modules>
 
     <packaging>pom</packaging>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
