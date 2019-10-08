@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -181,5 +182,24 @@ public class RedisSpringBootServiceImpl implements RedisService {
     @Override
     public Lock obtainDistributeLock(String lockKey) {
         return lockRegistry.obtain(lockKey);
+    }
+
+    @Override
+    public Boolean setIntoMap(String mapKey, String key, Object value) {
+        BoundHashOperations<String, String, String> boundHashOperations = redisTemplate.boundHashOps(mapKey);
+        boundHashOperations.put(key, JsonUtil.toJson(value));
+        return true;
+    }
+
+    @Override
+    public <T> T getFromMap(String mapKey, String key, Class<T> cls) {
+        BoundHashOperations<String, String, String> boundHashOperations = redisTemplate.boundHashOps(mapKey);
+        return JsonUtil.fromJson(boundHashOperations.get(key), cls);
+    }
+
+    @Override
+    public <T> T getFromMap(String mapKey, String key, TypeReference<T> cls) {
+        BoundHashOperations<String, String, String> boundHashOperations = redisTemplate.boundHashOps(mapKey);
+        return JsonUtil.fromJson(boundHashOperations.get(key), cls);
     }
 }

@@ -1,6 +1,8 @@
 package com.php25.common.redis;
 
 import com.google.common.collect.Lists;
+import io.lettuce.core.RedisAsyncCommandsImpl;
+import io.lettuce.core.api.async.RedisAsyncCommands;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -287,6 +289,7 @@ public final class RRedisLockRegistry implements ExpirableLockRegistry, Disposab
                                 Long result = (Long) ((Jedis) nativeConnection).eval(LUA, keys, args);
                                 return result > 0;
                             }
+
                             return null;
                         }
                     });

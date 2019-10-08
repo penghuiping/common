@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.server.ServerWebInputException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -35,10 +36,15 @@ public class CommonExceptionHandler {
                 jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
             }
             return ResponseEntity.ok(jsonResponse);
-        } else if (e instanceof ConstraintViolationException) {
+        } else if (e instanceof ConstraintViolationException || e instanceof javax.validation.ConstraintDeclarationException) {
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage(e.getMessage());
+            return ResponseEntity.ok(jsonResponse);
+        } else if (e instanceof ServerWebInputException) {
+            JSONResponse jsonResponse = new JSONResponse();
+            jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+            jsonResponse.setMessage("input_params_error");
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof BusinessException) {
             BusinessException businessException = (BusinessException) e;

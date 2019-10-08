@@ -142,4 +142,10 @@ public interface RedisService {
      */
     public Lock obtainDistributeLock(String lockKey);
 
+    public Boolean setIntoMap(final String mapKey, String key, Object value);
+
+    public <T> T getFromMap(final String mapKey, String key, Class<T> cls);
+
+    public <T> T getFromMap(final String mapKey, String key, TypeReference<T> cls);
+
 }
