@@ -10,7 +10,6 @@
 
     <modules>
         <module>common-parent</module>
-        <module>common-spring-boot-starter</module>
         <module>core</module>
         <module>es</module>
         <module>db</module>
