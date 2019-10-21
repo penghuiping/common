@@ -46,6 +46,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             case ORACLE:
                 dsl = new CndOracleJdbc(cls, jdbcOperations);
                 break;
+            case POSTGRES:
+                dsl = new CndPostgresJdbc(cls, jdbcOperations);
+                break;
             default:
                 dsl = new CndMysqlJdbc(cls, jdbcOperations);
                 break;
@@ -61,6 +64,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 break;
             case ORACLE:
                 dsl = new CndOracleJdbc(this.clazz, this.jdbcOperations);
+                break;
+            case POSTGRES:
+                dsl = new CndPostgresJdbc(this.clazz, jdbcOperations);
                 break;
             default:
                 dsl = new CndMysqlJdbc(this.clazz, jdbcOperations);

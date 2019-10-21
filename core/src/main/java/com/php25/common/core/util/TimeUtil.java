@@ -35,7 +35,7 @@ public abstract class TimeUtil {
      */
     public static Date parseDate(String dateStr) {
         try {
-            return DateUtils.parseDate(dateStr, new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "yyyyMMddHHmmss"});
+            return DateUtils.parseDate(dateStr, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "yyyyMMddHHmmss");
         } catch (ParseException e) {
             logger.error("出错啦!", e);
             return null;

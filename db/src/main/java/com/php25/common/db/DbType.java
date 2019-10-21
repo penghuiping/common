@@ -1,7 +1,6 @@
 package com.php25.common.db;
 
 /**
- *
  * 用于区分用的什么数据库
  *
  * @author: penghuiping
@@ -15,5 +14,10 @@ public enum DbType {
     /**
      * 表示oracle数据库
      */
-    ORACLE
+    ORACLE,
+
+    /**
+     * 表示postgres数据库
+     */
+    POSTGRES,
 }
