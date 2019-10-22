@@ -1,6 +1,5 @@
 package com.baidu.fsg.uid.worker.entity;
 
-import com.php25.common.db.cnd.DbSchema;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;

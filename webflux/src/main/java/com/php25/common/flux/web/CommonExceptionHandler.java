@@ -25,8 +25,8 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<JSONResponse> handleCustomException(Exception e) {
-        log.error("出错啦!!", e);
         if (e instanceof WebExchangeBindException) {
+            log.warn("请求访问参数错误!!", e);
             WebExchangeBindException e1 = (WebExchangeBindException) e;
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
@@ -38,27 +38,32 @@ public class CommonExceptionHandler {
             }
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof ConstraintViolationException || e instanceof javax.validation.ConstraintDeclarationException) {
+            log.warn("请求访问参数错误!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage(e.getMessage());
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof ServerWebInputException) {
+            log.warn("请求访问参数错误!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage("input_params_error");
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
+            log.warn("请求访问方法错误!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.http_request_method_not_supported.value);
             jsonResponse.setMessage("http_request_method_not_supported");
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof BusinessException) {
+            log.warn("出现业务错误!!", e);
             BusinessException businessException = (BusinessException) e;
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(businessException.getCode());
             jsonResponse.setMessage(businessException.getMessage());
             return ResponseEntity.ok(jsonResponse);
         } else {
+            log.error("出错啦!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.unknown_error.value);
             jsonResponse.setMessage("unknown_error");
