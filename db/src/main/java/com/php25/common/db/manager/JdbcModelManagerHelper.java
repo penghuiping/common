@@ -5,6 +5,7 @@ import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.cnd.DbSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,18 +102,23 @@ class JdbcModelManagerHelper {
      */
     protected static String getTableName(Class<?> cls) {
         Assert.notNull(cls, "class不能为null");
-        Table entity = cls.getAnnotation(Table.class);
-        if (null == entity) {
-            throw new IllegalArgumentException(cls.getName() + ":没有org.springframework.data.relational.core.mapping.Table注解");
-        }
 
         Table table = cls.getAnnotation(Table.class);
         if (null == table) {
             throw new IllegalArgumentException(cls.getName() + ":没有org.springframework.data.relational.core.mapping.Table注解");
         }
 
+        DbSchema schema = cls.getAnnotation(DbSchema.class);
+
         //获取表名
         String tableName = table.value();
+
+        if (schema != null && !StringUtil.isBlank(schema.value())) {
+            String schemaString = schema.value();
+            tableName = schemaString + "." + tableName;
+        }
+
+
         if (StringUtil.isBlank(tableName)) {
             return cls.getSimpleName();
         } else {

@@ -23,7 +23,12 @@ public enum ApiErrorCode {
     /**
      * 非法状态
      */
-    illegal_state("3");
+    illegal_state("3"),
+
+    /**
+     * http方法不支持
+     */
+    http_request_method_not_supported("4");
 
 
     public String value;

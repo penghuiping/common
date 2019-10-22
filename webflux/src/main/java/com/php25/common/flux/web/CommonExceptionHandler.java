@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -45,6 +46,11 @@ public class CommonExceptionHandler {
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage("input_params_error");
+            return ResponseEntity.ok(jsonResponse);
+        } else if (e instanceof HttpRequestMethodNotSupportedException) {
+            JSONResponse jsonResponse = new JSONResponse();
+            jsonResponse.setErrorCode(ApiErrorCode.http_request_method_not_supported.value);
+            jsonResponse.setMessage("http_request_method_not_supported");
             return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof BusinessException) {
             BusinessException businessException = (BusinessException) e;

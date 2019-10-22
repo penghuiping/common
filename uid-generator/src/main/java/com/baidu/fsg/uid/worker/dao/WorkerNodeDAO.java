@@ -16,14 +16,12 @@
 package com.baidu.fsg.uid.worker.dao;
 
 import com.baidu.fsg.uid.worker.entity.WorkerNodeEntity;
-import org.springframework.stereotype.Repository;
 
 /**
  * DAO for M_WORKER_NODE
  *
  * @author yutianbao
  */
-@Repository
 public interface WorkerNodeDAO {
 
     /**

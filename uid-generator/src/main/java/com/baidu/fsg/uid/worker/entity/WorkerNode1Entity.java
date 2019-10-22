@@ -1,21 +1,5 @@
-/*
- * Copyright (c) 2017 Baidu, Inc. All Rights Reserve.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.baidu.fsg.uid.worker.entity;
 
-import com.baidu.fsg.uid.worker.WorkerNodeType;
 import com.php25.common.db.cnd.DbSchema;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
@@ -23,21 +7,21 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.SequenceGenerator;
 import java.time.LocalDateTime;
 
 /**
- * Entity for M_WORKER_NODE
- *
- * @author yutianbao
+ * @author penghuiping
+ * @date 2019/10/21 14:07
  */
 @Table("worker_node")
-public class WorkerNodeEntity {
-
+public class WorkerNode1Entity {
     /**
      * Entity unique id (table unique)
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "seq_worker_node_id", sequenceName = "seq_worker_node_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     /**
@@ -52,9 +36,7 @@ public class WorkerNodeEntity {
     @Column("port")
     private String port;
 
-    /**
-     * type of {@link WorkerNodeType}
-     */
+
     @Column("type")
     private int type;
 
@@ -76,14 +58,9 @@ public class WorkerNodeEntity {
     @Column("modified")
     private LocalDateTime modified;
 
-
-    /**
-     * Getters & Setters
-     */
     public Long getId() {
         return id;
     }
-
 
     public void setId(Long id) {
         this.id = id;

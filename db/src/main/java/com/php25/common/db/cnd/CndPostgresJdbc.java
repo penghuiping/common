@@ -90,7 +90,7 @@ public class CndPostgresJdbc extends CndJdbc {
                         pairList = pairList.stream().map(pair -> {
                             if (pair.getLeft().equals(id)) {
                                 //替换id的值为
-                                return new ImmutablePair<String, Object>(pair.getLeft(), sequenceName + ".nextval");
+                                return new ImmutablePair<String, Object>(pair.getLeft(), String.format("nextval('%s')", sequenceName));
                             } else {
                                 return pair;
                             }
@@ -180,7 +180,8 @@ public class CndPostgresJdbc extends CndJdbc {
                 if (!field.getType().isAssignableFrom(Long.class)) {
                     throw Exceptions.throwIllegalStateException("主键必须是Long类型");
                 }
-                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());
+                Long id1 = (Long)keyHolder.getKeys().get(field.getName());
+                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, id1);
                 return rows;
             } else {
                 //非sequence情况

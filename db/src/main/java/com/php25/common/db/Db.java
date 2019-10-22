@@ -18,6 +18,10 @@ public class Db {
 
     private DbType dbType;
 
+    public DbType getDbType() {
+        return dbType;
+    }
+
     public Db(JdbcOperations jdbcOperations, DbType dbType) {
         this.jdbcOperations = jdbcOperations;
         this.dbType = dbType;
