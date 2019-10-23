@@ -49,12 +49,12 @@ public class CommonExceptionHandler {
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage("input_params_error");
             return ResponseEntity.ok(jsonResponse);
-        } else if (e instanceof HttpRequestMethodNotSupportedException) {
-            log.warn("请求访问方法错误!!", e);
-            JSONResponse jsonResponse = new JSONResponse();
-            jsonResponse.setErrorCode(ApiErrorCode.http_request_method_not_supported.value);
-            jsonResponse.setMessage("http_request_method_not_supported");
-            return ResponseEntity.ok(jsonResponse);
+//        } else if (e instanceof HttpRequestMethodNotSupportedException) {
+//            log.warn("请求访问方法错误!!", e);
+//            JSONResponse jsonResponse = new JSONResponse();
+//            jsonResponse.setErrorCode(ApiErrorCode.http_request_method_not_supported.value);
+//            jsonResponse.setMessage("http_request_method_not_supported");
+//            return ResponseEntity.ok(jsonResponse);
         } else if (e instanceof BusinessException) {
             log.warn("出现业务错误!!", e);
             BusinessException businessException = (BusinessException) e;

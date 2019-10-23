@@ -3,20 +3,24 @@ package com.php25.common.redissample;
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
 import com.php25.common.redis.RedisService;
+import com.php25.common.redis.RedisSpringBootServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
-import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -41,10 +45,32 @@ public class RedisCommonTest {
     @Autowired
     IdGeneratorService idGeneratorService;
 
-    @Qualifier("redisServiceSpring")
-    @Autowired
+
     RedisService redisService;
 
+    StringRedisTemplate redisTemplate;
+
+    RedisConnectionFactory redisConnectionFactory;
+
+    @Rule
+    public GenericContainer redis = new GenericContainer<>("redis:5.0.3-alpine").withExposedPorts(6379);
+
+    @Before
+    public void setUp() {
+        String address = redis.getContainerIpAddress();
+        Integer port = redis.getFirstMappedPort();
+
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setDatabase(0);
+        redisConfiguration.setHostName(address);
+        redisConfiguration.setPort(port);
+        this.redisConnectionFactory = new JedisConnectionFactory(redisConfiguration);
+
+        this.redisTemplate = new StringRedisTemplate(redisConnectionFactory);
+
+        this.redisService = new RedisSpringBootServiceImpl(redisTemplate);
+
+    }
 
     int count = 0;
 
@@ -67,7 +93,7 @@ public class RedisCommonTest {
                 } finally {
                     lock.unlock();
                     countDownLatch.countDown();
-                    logger.info("count:{},耗时:{},countDown:{}", count, System.currentTimeMillis() - start,countDownLatch.getCount());
+                    logger.info("count:{},耗时:{},countDown:{}", count, System.currentTimeMillis() - start, countDownLatch.getCount());
                 }
             });
         }
@@ -86,7 +112,7 @@ public class RedisCommonTest {
             list.add(() -> {
                 redisService.incr("test");
                 countDownLatch.countDown();
-                logger.info("countdown"+countDownLatch.getCount());
+                logger.info("countdown" + countDownLatch.getCount());
                 return 1;
             });
         }
