@@ -33,6 +33,9 @@ public class Company implements Persistable<Long> {
     @Column("update_time")
     private Date updateTime;
 
+    @Transient
+    private Boolean isNew;
+
     public Long getId() {
         return id;
     }
@@ -81,8 +84,16 @@ public class Company implements Persistable<Long> {
         this.updateTime = updateTime;
     }
 
+    public Boolean getNew() {
+        return isNew;
+    }
+
+    public void setNew(Boolean aNew) {
+        isNew = aNew;
+    }
+
     @Override
     public boolean isNew() {
-        return null == id;
+        return isNew;
     }
 }

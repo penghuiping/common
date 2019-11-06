@@ -89,6 +89,7 @@ public class MysqlRepositoryTest extends DbTest {
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
+        company.setNew(true);
         companyRepository.save(company);
         SearchParamBuilder builder = SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "baidu"));
         Assert.assertEquals(companyRepository.findOne(builder).get().getName(), "baidu");
@@ -101,6 +102,7 @@ public class MysqlRepositoryTest extends DbTest {
         customer.setStartTime(LocalDateTime.now());
         customer.setAge(4 * 10);
         customer.setCompanyId(company.getId());
+        customer.setNew(true);
         customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack4"));
         Assert.assertEquals(customerRepository.findOne(builder).get().getUsername(), "jack4");
@@ -111,6 +113,7 @@ public class MysqlRepositoryTest extends DbTest {
         customer = customerOptional.get();
         customer.setUsername("jack" + 5);
         customer.setUpdateTime(LocalDateTime.now());
+        customer.setNew(false);
 
         customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack5"));
@@ -131,6 +134,7 @@ public class MysqlRepositoryTest extends DbTest {
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
             customer.setAge((i + 1) * 10);
+            customer.setNew(true);
             customers.add(customer);
         }
         customerRepository.saveAll(customers);
@@ -140,6 +144,7 @@ public class MysqlRepositoryTest extends DbTest {
         customers = Lists.newArrayList(customerRepository.findAll());
         for (int i = 0; i < 3; i++) {
             customers.get(i).setUsername("mary" + i);
+            customers.get(i).setNew(false);
         }
         customerRepository.saveAll(customers);
 

@@ -1,6 +1,7 @@
 package com.php25.common.jdbcsample.oracle.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
@@ -49,6 +50,17 @@ public class Customer implements Persistable<Long> {
 
     @Column
     private BigDecimal score;
+
+    @Transient
+    private Boolean isNew;
+
+    public Boolean getNew() {
+        return isNew;
+    }
+
+    public void setNew(Boolean aNew) {
+        isNew = aNew;
+    }
 
     public Long getId() {
         return id;
@@ -132,6 +144,6 @@ public class Customer implements Persistable<Long> {
 
     @Override
     public boolean isNew() {
-        return null == id;
+        return this.isNew;
     }
 }

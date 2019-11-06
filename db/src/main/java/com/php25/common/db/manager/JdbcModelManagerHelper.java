@@ -304,7 +304,7 @@ class JdbcModelManagerHelper {
         AssertUtil.notNull(t, "t不能为null");
         Field[] fields = t.getClass().getDeclaredFields();
         Stream<ImmutablePair<String, Object>> stream = Lists.newArrayList(fields).stream()
-                .filter(field -> !Collection.class.isAssignableFrom(field.getType()))
+                .filter(field -> (null == field.getAnnotation(Transient.class)) && (!Collection.class.isAssignableFrom(field.getType())))
                 .map(field1 -> {
                     Column column = field1.getAnnotation(Column.class);
                     String fieldName = field1.getName();

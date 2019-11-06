@@ -1,6 +1,7 @@
 package com.php25.common.jdbcsample.postgres.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
@@ -49,6 +50,9 @@ public class Customer implements Persistable<Long> {
 
     @Column
     private BigDecimal score;
+
+    @Transient
+    private Boolean isNew;
 
     public Long getId() {
         return id;
@@ -130,8 +134,16 @@ public class Customer implements Persistable<Long> {
         this.score = score;
     }
 
+    public Boolean getNew() {
+        return isNew;
+    }
+
+    public void setNew(Boolean aNew) {
+        isNew = aNew;
+    }
+
     @Override
     public boolean isNew() {
-        return null == id;
+        return isNew;
     }
 }

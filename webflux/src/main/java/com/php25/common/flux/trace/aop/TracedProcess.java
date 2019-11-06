@@ -35,7 +35,7 @@ public class TracedProcess {
         ScopedSpan span = null;
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
         Traced traced = method.getDeclaredAnnotation(Traced.class);
-        if (StringUtil.isBlank(traced.spanName())) {
+        if (null == traced || StringUtil.isBlank(traced.spanName())) {
             span = tracer.startScopedSpan(method.getName());
         } else {
             span = tracer.startScopedSpan(traced.spanName());
