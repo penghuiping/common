@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -48,24 +49,38 @@ public class DbTest {
 
     List<CustomerDto> customerDtos = Lists.newArrayList();
 
+    private static boolean isFirst = true;
+
     protected void initDb() {
 
     }
 
     private void initMeta(boolean isSequence) throws Exception {
-        Class cls = Class.forName("org.h2.Driver");
+        Class cls = Class.forName("oracle.jdbc.driver.OracleDriver");
         Driver driver = (Driver) cls.newInstance();
-        Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=ORACLE", null);
+        Properties properties = new Properties();
+        properties.setProperty("user","system");
+        properties.setProperty("password","oracle");
+        Connection connection = driver.connect("jdbc:oracle:thin:@localhost:49161:xe", properties);
         Statement statement = connection.createStatement();
-        statement.execute("drop table if exists t_customer");
-        statement.execute("drop table if exists t_company");
-        statement.execute("create table t_customer (id number(64,0),username varchar2(20),password varchar2(50),age integer ,create_time date,update_time date,version number(64,0),company_id number(64,0),score number(32,0),`enable` number(1,0))");
-        statement.execute("create table t_company (id number(64,0) primary key,name varchar2(20),create_time date,update_time date,`enable` number(1,0))");
-        if (isSequence) {
-            statement.execute("drop SEQUENCE if exists SEQ_ID");
-            statement.execute("CREATE SEQUENCE SEQ_ID");
+        if(isFirst) {
+            isFirst = false;
+            statement.execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
+            statement.execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
+            if (isSequence) {
+                statement.execute("CREATE SEQUENCE SEQ_ID");
+            }
+        }else {
+            statement.execute("drop table t_customer");
+            statement.execute("drop table t_company");
+            statement.execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
+            statement.execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
+            if (isSequence) {
+                statement.execute("drop SEQUENCE SEQ_ID");
+                statement.execute("CREATE SEQUENCE SEQ_ID");
+            }
         }
-        statement.closeOnCompletion();
+        statement.close();
         connection.close();
     }
 

@@ -11,6 +11,7 @@ import com.php25.common.jdbcsample.oracle.CommonAutoConfigure;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,6 +46,16 @@ public class OracleJdbcTest extends DbTest {
 
     private Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
 
+    @ClassRule
+    public static GenericContainer oracle = new GenericContainer<>("wnameless/oracle-xe-11g-r2").withExposedPorts(1521);
+
+    static {
+        oracle.setPortBindings(Lists.newArrayList("49161:1521"));
+        oracle.withEnv("ORACLE_ALLOW_REMOTE", "true");
+        oracle.withEnv("ORACLE_DISABLE_ASYNCH_IO", "true");
+    }
+
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -54,6 +66,7 @@ public class OracleJdbcTest extends DbTest {
     protected void initDb() {
         this.db = new Db(jdbcTemplate, DbType.ORACLE);
     }
+
 
     @Test
     public void query() {
@@ -163,7 +176,7 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void count() {
-        Long count = db.cndJdbc(Customer.class).whereEq("enable", "1").count();
+        Long count = db.cndJdbc(Customer.class).whereEq("enable", 1).count();
         Assert.assertEquals(this.customers.stream().filter(a -> a.getEnable() == 1).count(), (long) count);
     }
 
@@ -247,6 +260,9 @@ public class OracleJdbcTest extends DbTest {
 
         Assert.assertEquals(2, db.cndJdbc(Customer.class).count());
         Assert.assertEquals(1, db.cndJdbc(Company.class).count());
+
+        log.info("customers:{}", JsonUtil.toPrettyJson(db.cndJdbc(Customer.class).select()));
+        log.info("companys:{}", JsonUtil.toPrettyJson(db.cndJdbc(Company.class).select()));
     }
 
     @Test
@@ -268,13 +284,13 @@ public class OracleJdbcTest extends DbTest {
             return a;
         }).collect(Collectors.toList());
         int[] arr = db.cndJdbc(Customer.class).updateBatch(customers);
-        for (int e : arr) {
-            Assert.assertEquals(e, 1);
-        }
+        customers = db.cndJdbc(Customer.class).select();
+        List<Customer> customers1 = customers.stream().filter(customer -> customer.getUsername().startsWith("tom")).collect(Collectors.toList());
+        Assert.assertTrue(customers1.size()==3);
     }
 
 
-   // @Test
+    @Test
     public void updateVersion() throws Exception {
         CountDownLatch countDownLatch1 = new CountDownLatch(100);
         ExecutorService executorService = Executors.newFixedThreadPool(5);

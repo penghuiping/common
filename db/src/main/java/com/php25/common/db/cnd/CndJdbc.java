@@ -362,7 +362,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     private <T> int update(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
-        Field[] fields = t.getClass().getDeclaredFields();
         StringBuilder stringBuilder = new StringBuilder("UPDATE " + JdbcModelManager.getTableName(t.getClass()) + " SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //获取主键id
@@ -426,7 +425,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     public <T> int[] updateBatch(List<T> lists) {
         T t = lists.get(0);
         //泛型获取类所有的属性
-        Field[] fields = t.getClass().getDeclaredFields();
         StringBuilder stringBuilder = new StringBuilder("UPDATE " + JdbcModelManager.getTableName(t.getClass()) + " SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, false);
         //获取主键id

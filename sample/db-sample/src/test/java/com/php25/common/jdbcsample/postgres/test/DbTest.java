@@ -63,7 +63,7 @@ public class DbTest {
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
         statement.execute("drop table if exists t_company");
-        statement.execute("create table t_customer (id bigint,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
+        statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
         statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
         if (isSequence) {
             statement.execute("drop SEQUENCE if exists SEQ_ID");
