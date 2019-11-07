@@ -30,6 +30,7 @@
         <hikari.version>3.3.1</hikari.version>
         <bouncycastle.version>1.60</bouncycastle.version>
         <hibernate-validator>6.0.17.Final</hibernate-validator>
+        <oracle>11.2.0.3</oracle>
         <spring.data.jdbc.version>1.0.9.RELEASE</spring.data.jdbc.version>
         <php-common.es>2.1.8-SNAPSHOT</php-common.es>
         <php-common.db>2.1.8-SNAPSHOT</php-common.db>
@@ -251,6 +252,11 @@
                 <artifactId>testcontainers</artifactId>
                 <version>1.12.2</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${oracle}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

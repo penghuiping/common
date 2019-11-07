@@ -10,10 +10,12 @@ import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,6 +38,17 @@ import java.util.stream.Collectors;
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
 public class MysqlJdbcTest extends DbTest {
+
+    @ClassRule
+    public static GenericContainer mysql = new GenericContainer<>("mysql:5.7").withExposedPorts(3306);
+
+
+    static {
+        mysql.setPortBindings(Lists.newArrayList("3306:3306"));
+        mysql.withEnv("MYSQL_USER", "root");
+        mysql.withEnv("MYSQL_ROOT_PASSWORD", "root");
+        mysql.withEnv("MYSQL_DATABASE", "test");
+    }
 
     @Override
     protected void initDb() {
@@ -130,7 +143,7 @@ public class MysqlJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(result));
         Assert.assertTrue(null != customers1 && customers1.size() > 0);
         for (Map map : customers1) {
-            Assert.assertTrue(BigDecimal.valueOf(result.get(map.get("enable"))).intValue() == BigDecimal.valueOf((Integer) map.get("avg_age")).intValue());
+            Assert.assertTrue(BigDecimal.valueOf(result.get(map.get("enable"))).intValue()== ((BigDecimal) map.get("avg_age")).intValue());
         }
     }
 

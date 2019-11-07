@@ -35,10 +35,10 @@ public class DbConfig {
     @Bean
     public DataSource druidDataSource() {
         DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("org.h2.Driver");
-        druidDataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
-        druidDataSource.setUsername("");
-        druidDataSource.setPassword("");
+        druidDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        druidDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false");
+        druidDataSource.setUsername("root");
+        druidDataSource.setPassword("root");
         druidDataSource.setMaxActive(15);
         druidDataSource.setTestWhileIdle(false);
         try {

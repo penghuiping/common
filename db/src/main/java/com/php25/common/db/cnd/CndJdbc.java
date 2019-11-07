@@ -14,15 +14,21 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.Assert;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author: penghuiping
@@ -163,6 +169,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     public <T> int insert(T t) {
         return insert(t, true);
     }
+
+
+
 
     @Override
     public <M> int[] insertBatch(List<M> list) {
@@ -540,9 +549,15 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             return null;
         }
         Class<?> paramValueType = paramValue.getClass();
-        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType) || Date.class.isAssignableFrom(paramValueType) || LocalDateTime.class.isAssignableFrom(paramValueType)) {
+        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType)) {
             //基本类型,string,date直接加入参数列表
             return paramValue;
+        }else if(Date.class.isAssignableFrom(paramValueType)) {
+            Date tmp = (Date)paramValue;
+            return new Timestamp(tmp.getTime());
+        }else if(LocalDateTime.class.isAssignableFrom(paramValueType)) {
+            LocalDateTime tmp = (LocalDateTime)paramValue;
+            return new Timestamp(Date.from(tmp.toInstant(ZoneOffset.ofHours(8))).getTime());
         } else {
             if (!(Collection.class.isAssignableFrom(paramValueType))) {
                 //自定义class类，通过反射获取主键值，在加入参数列表

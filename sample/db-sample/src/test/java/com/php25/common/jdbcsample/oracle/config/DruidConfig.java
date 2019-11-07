@@ -32,20 +32,38 @@ public class DruidConfig {
         return new ObjectMapper();
     }
 
+//    @Bean
+//    public DataSource druidDataSource() {
+//        DruidDataSource druidDataSource = new DruidDataSource();
+//        druidDataSource.setDriverClassName("org.h2.Driver");
+//        druidDataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=ORACLE;");
+//        druidDataSource.setUsername("");
+//        druidDataSource.setPassword("");
+//        druidDataSource.setMaxActive(15);
+//        druidDataSource.setTestWhileIdle(false);
+//        try {
+//            druidDataSource.setFilters("stat, wall");
+//        } catch (SQLException e) {
+//            LoggerFactory.getLogger(com.php25.common.jdbcsample.mysql.config.DbConfig.class).error("出错啦！", e);
+//        }
+//        return druidDataSource;
+//    }
+
     @Bean
     public DataSource druidDataSource() {
         DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("org.h2.Driver");
-        druidDataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=ORACLE;");
-        druidDataSource.setUsername("");
-        druidDataSource.setPassword("");
+        druidDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        druidDataSource.setUrl("jdbc:oracle:thin:@//121.36.159.211:1521/helowin");
+        druidDataSource.setUsername("root");
+        druidDataSource.setPassword("root");
         druidDataSource.setMaxActive(15);
+        druidDataSource.setMinIdle(1);
         druidDataSource.setTestWhileIdle(false);
-        try {
-            druidDataSource.setFilters("stat, wall");
-        } catch (SQLException e) {
-            LoggerFactory.getLogger(com.php25.common.jdbcsample.mysql.config.DbConfig.class).error("出错啦！", e);
-        }
+//        try {
+//            druidDataSource.setFilters("stat, wall");
+//        } catch (SQLException e) {
+//            LoggerFactory.getLogger(com.php25.common.jdbcsample.mysql.config.DbConfig.class).error("出错啦！", e);
+//        }
         return druidDataSource;
     }
 

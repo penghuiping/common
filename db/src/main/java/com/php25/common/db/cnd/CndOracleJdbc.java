@@ -17,7 +17,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
  * @date: 2019/7/25 15:14
  * @description:
  */
-public class CndOracleJdbc extends CndJdbc{
+public class CndOracleJdbc extends CndJdbc {
 
     private static final Logger log = LoggerFactory.getLogger(CndOracleJdbc.class);
 
@@ -54,10 +53,7 @@ public class CndOracleJdbc extends CndJdbc{
         }
     }
 
-    @Override
-    protected <T> int insert(T t, boolean ignoreNull) {
-        //泛型获取类所有的属性
-        Field[] fields = clazz.getDeclaredFields();
+    private <T> ImmutablePair<StringBuilder, Boolean> getInsertSQL(T t, Boolean ignoreNull) {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
 
@@ -161,15 +157,23 @@ public class CndOracleJdbc extends CndJdbc{
 
         stringBuilder.append(" )");
         log.info("sql语句为:" + stringBuilder.toString());
+
+        return new ImmutablePair<>(stringBuilder, flag);
+    }
+
+
+    @Override
+    protected <T> int insert(T t, boolean ignoreNull) {
+        ImmutablePair<StringBuilder, Boolean> pair = getInsertSQL(t, ignoreNull);
         try {
-            if (flag) {
+            if (pair.right) {
                 //sequence情况
                 //获取id field名
                 String idField = JdbcModelManager.getPrimaryKeyFieldName(clazz);
 
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 int rows = jdbcOperations.update(con -> {
-                    PreparedStatement ps = con.prepareStatement(stringBuilder.toString(), Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement(pair.left.toString(), new String[]{idField});
                     int i = 1;
                     for (Object obj : params.toArray()) {
                         ps.setObject(i++, obj);
@@ -187,7 +191,7 @@ public class CndOracleJdbc extends CndJdbc{
                 return rows;
             } else {
                 //非sequence情况
-                int rows = jdbcOperations.update(stringBuilder.toString(), params.toArray());
+                int rows = jdbcOperations.update(pair.left.toString(), params.toArray());
                 if (rows <= 0) {
                     throw Exceptions.throwIllegalStateException("insert 操作失败");
                 }

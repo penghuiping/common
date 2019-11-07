@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -54,9 +55,12 @@ public class DbTest {
     }
 
     private void initMeta(boolean isAutoIncrement) throws Exception {
-        Class cls = Class.forName("org.h2.Driver");
+        Class cls = Class.forName("com.mysql.cj.jdbc.Driver");
         Driver driver = (Driver) cls.newInstance();
-        Connection connection = driver.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL", null);
+        Properties properties = new Properties();
+        properties.setProperty("user","root");
+        properties.setProperty("password","root");
+        Connection connection = driver.connect("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false", properties);
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
         statement.execute("drop table if exists t_company");

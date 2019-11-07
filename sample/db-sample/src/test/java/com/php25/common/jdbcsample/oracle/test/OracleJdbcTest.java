@@ -274,7 +274,7 @@ public class OracleJdbcTest extends DbTest {
     }
 
 
-    @Test
+   // @Test
     public void updateVersion() throws Exception {
         CountDownLatch countDownLatch1 = new CountDownLatch(100);
         ExecutorService executorService = Executors.newFixedThreadPool(5);
