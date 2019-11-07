@@ -15,6 +15,7 @@ import com.php25.common.jdbcsample.postgres.model.Customer;
 import com.php25.common.jdbcsample.postgres.repository.CompanyRepository;
 import com.php25.common.jdbcsample.postgres.repository.CustomerRepository;
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +55,17 @@ public class PostgresRepositoryTest extends DbTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @ClassRule
+    public static GenericContainer postgres = new GenericContainer<>("postgres:12.0-alpine")
+            .withExposedPorts(5432)
+            .withEnv("POSTGRES_USER", "root")
+            .withEnv("POSTGRES_PASSWORD", "root")
+            .withEnv("POSTGRES_DB", "test");
+
+    static {
+        postgres.setPortBindings(org.assertj.core.util.Lists.newArrayList("5432:5432"));
+    }
 
     @Override
     protected void initDb() {

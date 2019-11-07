@@ -11,6 +11,7 @@ import com.php25.common.jdbcsample.postgres.CommonAutoConfigure;
 import com.php25.common.jdbcsample.postgres.model.Company;
 import com.php25.common.jdbcsample.postgres.model.Customer;
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,6 +45,17 @@ import java.util.stream.Collectors;
 public class PostgresJdbcTest extends DbTest {
 
     private Logger log = LoggerFactory.getLogger(PostgresJdbcTest.class);
+
+    @ClassRule
+    public static GenericContainer postgres = new GenericContainer<>("postgres:12.0-alpine")
+            .withExposedPorts(5432)
+            .withEnv("POSTGRES_USER", "root")
+            .withEnv("POSTGRES_PASSWORD", "root")
+            .withEnv("POSTGRES_DB", "test");
+
+    static {
+        postgres.setPortBindings(org.assertj.core.util.Lists.newArrayList("5432:5432"));
+    }
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -143,7 +156,7 @@ public class PostgresJdbcTest extends DbTest {
         Assert.assertTrue(null != customers1 && customers1.size() > 0);
         for (Map map : customers1) {
             Integer key1 = Integer.parseInt(map.get("enable".toUpperCase()).toString());
-            Integer key2 = Integer.parseInt(map.get("avg_age".toUpperCase()).toString());
+            Double key2 = Double.parseDouble(map.get("avg_age".toUpperCase()).toString());
             Assert.assertTrue(BigDecimal.valueOf(result.get(key1)).intValue() == BigDecimal.valueOf(key2).intValue());
         }
     }
@@ -163,7 +176,7 @@ public class PostgresJdbcTest extends DbTest {
 
     @Test
     public void count() {
-        Long count = db.cndJdbc(Customer.class).whereEq("enable", "1").count();
+        Long count = db.cndJdbc(Customer.class).whereEq("enable", 1).count();
         Assert.assertEquals(this.customers.stream().filter(a -> a.getEnable() == 1).count(), (long) count);
     }
 

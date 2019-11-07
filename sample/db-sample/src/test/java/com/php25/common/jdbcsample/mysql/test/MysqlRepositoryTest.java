@@ -14,6 +14,7 @@ import com.php25.common.jdbcsample.mysql.model.Customer;
 import com.php25.common.jdbcsample.mysql.repository.CompanyRepository;
 import com.php25.common.jdbcsample.mysql.repository.CustomerRepository;
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,6 +46,16 @@ import java.util.stream.Collectors;
 @RunWith(SpringRunner.class)
 public class MysqlRepositoryTest extends DbTest {
     private static final Logger log = LoggerFactory.getLogger(MysqlRepositoryTest.class);
+
+    @ClassRule
+    public static GenericContainer mysql = new GenericContainer<>("mysql:5.7").withExposedPorts(3306);
+
+    static {
+        mysql.setPortBindings(Lists.newArrayList("3306:3306"));
+        mysql.withEnv("MYSQL_USER", "root");
+        mysql.withEnv("MYSQL_ROOT_PASSWORD", "root");
+        mysql.withEnv("MYSQL_DATABASE", "test");
+    }
 
     @Autowired
     private CustomerRepository customerRepository;

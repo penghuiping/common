@@ -35,10 +35,10 @@ public class DruidConfig {
     @Bean
     public DataSource druidDataSource() {
         DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("org.h2.Driver");
-        druidDataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;");
-        druidDataSource.setUsername("");
-        druidDataSource.setPassword("");
+        druidDataSource.setDriverClassName("org.postgresql.Driver");
+        druidDataSource.setUrl("jdbc:postgresql://127.0.0.1:5432/test?currentSchema=public");
+        druidDataSource.setUsername("root");
+        druidDataSource.setPassword("root");
         druidDataSource.setMaxActive(15);
         druidDataSource.setTestWhileIdle(false);
         try {
