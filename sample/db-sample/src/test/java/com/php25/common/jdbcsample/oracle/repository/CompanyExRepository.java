@@ -8,5 +8,7 @@ import com.php25.common.jdbcsample.oracle.model.Company;
  * @date: 2019/8/24 15:38
  * @description:
  */
-public interface CompanyExRepository extends JdbcDbRepository<Company,Long> {
+public interface CompanyExRepository extends JdbcDbRepository<Company, Long> {
+
+    Company save0(Company entity);
 }
