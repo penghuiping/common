@@ -50,7 +50,7 @@ public abstract class JsonUtil {
         }
     }
 
-    public static <T> T fromJson(String json, TypeReference typeReference) {
+    public static <T> T fromJson(String json, TypeReference<T> typeReference) {
         if (StringUtil.isBlank(json)) {
             throw new IllegalArgumentException("json不能为空");
         }

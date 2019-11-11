@@ -46,7 +46,7 @@ public class SymmetricCryptoTest {
     public void AesTest1() {
         SecretKey secretKey = SecretKeyUtil.getAesKey("123123");
         IvParameterSpec ivParameterSpec = new IvParameterSpec(RandomUtil.randomBytes(16));
-        AES aes = new AES(Mode.CBC, Padding.PKCS5Padding, secretKey, ivParameterSpec);
+        AES aes = new AES(Mode.CBC, Padding.PKCS7Padding, secretKey, ivParameterSpec);
         String result = aes.encryptBase64("hello world".getBytes());
         System.out.println(result);
         String data = aes.decryptBase64Str(result);
