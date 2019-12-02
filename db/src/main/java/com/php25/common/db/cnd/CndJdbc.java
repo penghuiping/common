@@ -256,7 +256,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public long count() {
-        StringBuilder sb = new StringBuilder("SELECT COUNT(1) FROM ");
+        StringBuilder sb = new StringBuilder("SELECT COUNT(1) as a_count FROM ");
         sb.append(JdbcModelManager.getTableName(clazz)).append(" a ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());

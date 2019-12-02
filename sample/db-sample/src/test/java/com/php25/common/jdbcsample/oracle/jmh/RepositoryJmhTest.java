@@ -2,6 +2,7 @@ package com.php25.common.jdbcsample.oracle.jmh;
 
 import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
+import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 import com.php25.common.jdbcsample.oracle.repository.CustomerRepository;
@@ -97,13 +98,13 @@ public class RepositoryJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void findAllSort() {
-        Iterable<Customer> customers = customerRepository.findAll(Sort.by(Sort.Order.desc("id")));
+        Iterable<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),Sort.by(Sort.Order.desc("id")));
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void findAllPage() {
         Pageable page = PageRequest.of(1, 2, Sort.by(Sort.Order.desc("id")));
-        Page<Customer> customers = customerRepository.findAll(page);
+        Page<Customer> customers = customerRepository.findAll(SearchParamBuilder.builder(),page);
     }
 
     @org.openjdk.jmh.annotations.Benchmark

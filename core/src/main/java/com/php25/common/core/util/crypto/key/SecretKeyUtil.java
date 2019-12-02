@@ -84,13 +84,23 @@ public abstract class SecretKeyUtil {
     }
 
     /**
-     * 生成RSA加密秘钥 128位秘钥
+     * 生成RSA加密秘钥 128字节位秘钥
      *
      * @param seed 随机种子
      * @return
      */
     public static KeyPair getRsaKey(RsaAlgorithm rsaAlgorithm, final String seed) {
-        return getPairKey(rsaAlgorithm.getValue(), seed);
+        return getPairKey(rsaAlgorithm.getValue(), seed,1024);
+    }
+
+    /**
+     * 生成RSA加密秘钥
+     *
+     * @param seed 随机种子
+     * @return
+     */
+    public static KeyPair getRsaKey(RsaAlgorithm rsaAlgorithm, final String seed,int keySize) {
+        return getPairKey(rsaAlgorithm.getValue(), seed,keySize);
     }
 
 
@@ -110,7 +120,16 @@ public abstract class SecretKeyUtil {
      * @return
      */
     public static KeyPair getSignKey(SignAlgorithm signAlgorithm, final String seed) {
-        return getPairKey(signAlgorithm.getValue(), seed);
+        return getPairKey(signAlgorithm.getValue(), seed,1024);
+    }
+
+    /**
+     * 生成sign加密秘钥
+     *
+     * @return
+     */
+    public static KeyPair getSignKey(SignAlgorithm signAlgorithm, final String seed,int keySize) {
+        return getPairKey(signAlgorithm.getValue(), seed,keySize);
     }
 
 
@@ -190,12 +209,13 @@ public abstract class SecretKeyUtil {
         }
     }
 
+
     /**
-     * 生成sign加密秘钥 128位秘钥
+     * 生成sign加密秘钥
      *
      * @return
      */
-    private static KeyPair getPairKey(String algorithmName, final String seed) {
+    private static KeyPair getPairKey(String algorithmName, final String seed,int keySize) {
         AssertUtil.notNull(algorithmName, "algorithmName must be not null !");
         try {
             String algorithm = getAlgorithmAfterWith(algorithmName);
@@ -208,7 +228,7 @@ public abstract class SecretKeyUtil {
                 // 对于EC算法，密钥长度有限制，在此使用默认256
                 keyPairGen.initialize(256, secureRandom);
             } else {
-                keyPairGen.initialize(1024, secureRandom);
+                keyPairGen.initialize(keySize, secureRandom);
             }
             return keyPairGen.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {

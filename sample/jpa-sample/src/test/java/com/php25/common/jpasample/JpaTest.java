@@ -188,7 +188,7 @@ public class JpaTest {
             SearchParamBuilder searchParamBuilder = new SearchParamBuilder();
             searchParamBuilder.append(searchParam);
 
-            Sort sort = new Sort(Sort.Direction.DESC, "id");
+            Sort sort = Sort.by(Sort.Direction.DESC, "id");
 
             customerService.query(1, 10, searchParamBuilder, (customer, customerDto) -> BeanUtils.copyProperties(customer, customerDto), sort).ifPresent(c -> {
                 print("<<<<<<<===========分页查询in===========>>>>>>", c.getData());
