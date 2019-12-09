@@ -2,8 +2,8 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
-import com.php25.common.redis.RedisService;
-import com.php25.common.redis.RedisSpringBootServiceImpl;
+import com.php25.common.redis.RedisManager;
+import com.php25.common.redis.RedisSpringBootManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
@@ -46,7 +46,7 @@ public class RedisCommonTest {
     IdGeneratorService idGeneratorService;
 
 
-    RedisService redisService;
+    RedisManager redisManager;
 
     StringRedisTemplate redisTemplate;
 
@@ -68,7 +68,7 @@ public class RedisCommonTest {
 
         this.redisTemplate = new StringRedisTemplate(redisConnectionFactory);
 
-        this.redisService = new RedisSpringBootServiceImpl(redisTemplate);
+        this.redisManager = new RedisSpringBootManagerImpl(redisTemplate);
 
     }
 
@@ -81,7 +81,7 @@ public class RedisCommonTest {
     public void distributeLock() throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         CountDownLatch countDownLatch = new CountDownLatch(1000);
-        Lock lock = redisService.obtainDistributeLock("test12333");
+        Lock lock = redisManager.obtainDistributeLock("test12333");
         for (int i = 0; i < 1000; i++) {
             executorService.submit(() -> {
                 long start = System.currentTimeMillis();
@@ -103,14 +103,14 @@ public class RedisCommonTest {
 
     @Test
     public void incr() throws Exception {
-        redisService.remove("test");
+        redisManager.remove("test");
         CountDownLatch countDownLatch = new CountDownLatch(200);
         ExecutorService executorService = new ThreadPoolExecutor(20, 20,
                 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2048));
         List<Callable<Integer>> list = Lists.newArrayList();
         for (int i = 0; i < 200; i++) {
             list.add(() -> {
-                redisService.incr("test");
+                redisManager.incr("test");
                 countDownLatch.countDown();
                 logger.info("countdown" + countDownLatch.getCount());
                 return 1;
@@ -118,7 +118,7 @@ public class RedisCommonTest {
         }
         executorService.invokeAll(list);
         countDownLatch.await(10L, TimeUnit.SECONDS);
-        result = redisService.incr("test");
+        result = redisManager.incr("test");
         Assertions.assertThat(result).isEqualTo(201);
     }
 

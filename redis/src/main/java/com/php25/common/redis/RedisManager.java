@@ -1,10 +1,10 @@
 package com.php25.common.redis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 /**
  * redis缓存帮助类
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * @author penghuiping
  * @date 2016/12/17.
  */
-public interface RedisAsyncService {
+public interface RedisManager {
 
 
     /**
@@ -22,7 +22,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public Mono<Long> remove(final String... keys);
+    public void remove(final String... keys);
 
 
     /**
@@ -32,7 +32,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public Mono<Long> remove(final String key);
+    public void remove(final String key);
 
     /**
      * 判断缓存中是否有对应的value
@@ -42,7 +42,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public Mono<Boolean> exists(final String key);
+    public boolean exists(final String key);
 
     /**
      * 读取缓存
@@ -53,7 +53,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public <T> Mono<T> get(final String key, Class<T> cls);
+    public <T> T get(final String key, Class<T> cls);
 
     /**
      * 读取缓存
@@ -63,7 +63,7 @@ public interface RedisAsyncService {
      * @param <T>
      * @return
      */
-    public <T> Mono<T> get(final String key, TypeReference<T> cls);
+    public <T> T get(final String key, TypeReference<T> cls);
 
     /**
      * 在key不存在的情况下写入缓存
@@ -72,7 +72,7 @@ public interface RedisAsyncService {
      * @param value
      * @return
      */
-    public Mono<Boolean> setNx(final String key, Object value);
+    public boolean setNx(final String key, Object value);
 
 
     /**
@@ -84,7 +84,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public Mono<Boolean> set(final String key, Object value);
+    public boolean set(final String key, Object value);
 
     /**
      * 写入缓存
@@ -96,7 +96,7 @@ public interface RedisAsyncService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public Mono<Boolean> set(final String key, Object value, Long expireTime);
+    public boolean set(final String key, Object value, Long expireTime);
 
     /**
      * 根据key获取存活时间
@@ -104,7 +104,7 @@ public interface RedisAsyncService {
      * @param key
      * @return
      */
-    public Mono<Long> remainTimeToLive(final String key);
+    public Long remainTimeToLive(final String key);
 
     /**
      * 根据指定key获取自增的id
@@ -112,7 +112,7 @@ public interface RedisAsyncService {
      * @param key
      * @return
      */
-    public Mono<Long> incr(final String key);
+    public Long incr(final String key);
 
     /**
      * 设置一个key的存活时间
@@ -122,7 +122,7 @@ public interface RedisAsyncService {
      * @param timeUnit
      * @return
      */
-    public Mono<Boolean> expire(final String key, Long expireTime, TimeUnit timeUnit);
+    public Boolean expire(final String key, Long expireTime, TimeUnit timeUnit);
 
     /**
      * 设置一个key在指定日期时间上过期
@@ -131,5 +131,47 @@ public interface RedisAsyncService {
      * @param date
      * @return
      */
-    public Mono<Boolean> expireAt(final String key, Date date);
+    public Boolean expireAt(final String key, Date date);
+
+
+    /**
+     * 获取分布锁
+     *
+     * @param lockKey 锁名
+     * @return
+     */
+    public Lock obtainDistributeLock(String lockKey);
+
+    /**
+     * 往map结构中设置数据
+     *
+     * @param mapKey map结构的key
+     * @param key    map中的一个元素的键
+     * @param value  map中一个元素的值
+     * @return
+     */
+    public Boolean setIntoMap(final String mapKey, String key, Object value);
+
+    /**
+     * 根据key获取map值
+     *
+     * @param mapKey
+     * @param key
+     * @param cls
+     * @param <T>
+     * @return
+     */
+    public <T> T getFromMap(final String mapKey, String key, Class<T> cls);
+
+    /**
+     * 根据key获取map值
+     *
+     * @param mapKey
+     * @param key
+     * @param cls
+     * @param <T>
+     * @return
+     */
+    public <T> T getFromMap(final String mapKey, String key, TypeReference<T> cls);
+
 }

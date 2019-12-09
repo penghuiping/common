@@ -1,10 +1,10 @@
 package com.php25.common.redis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 /**
  * redis缓存帮助类
@@ -12,7 +12,7 @@ import java.util.concurrent.locks.Lock;
  * @author penghuiping
  * @date 2016/12/17.
  */
-public interface RedisService {
+public interface RedisAsyncManager {
 
 
     /**
@@ -22,7 +22,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public void remove(final String... keys);
+    public Mono<Long> remove(final String... keys);
 
 
     /**
@@ -32,7 +32,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public void remove(final String key);
+    public Mono<Long> remove(final String key);
 
     /**
      * 判断缓存中是否有对应的value
@@ -42,7 +42,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public boolean exists(final String key);
+    public Mono<Boolean> exists(final String key);
 
     /**
      * 读取缓存
@@ -53,7 +53,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public <T> T get(final String key, Class<T> cls);
+    public <T> Mono<T> get(final String key, Class<T> cls);
 
     /**
      * 读取缓存
@@ -63,7 +63,7 @@ public interface RedisService {
      * @param <T>
      * @return
      */
-    public <T> T get(final String key, TypeReference<T> cls);
+    public <T> Mono<T> get(final String key, TypeReference<T> cls);
 
     /**
      * 在key不存在的情况下写入缓存
@@ -72,7 +72,7 @@ public interface RedisService {
      * @param value
      * @return
      */
-    public boolean setNx(final String key, Object value);
+    public Mono<Boolean> setNx(final String key, Object value);
 
 
     /**
@@ -84,7 +84,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public boolean set(final String key, Object value);
+    public Mono<Boolean> set(final String key, Object value);
 
     /**
      * 写入缓存
@@ -96,7 +96,7 @@ public interface RedisService {
      * @author penghuiping
      * @date 2016/12/17.
      */
-    public boolean set(final String key, Object value, Long expireTime);
+    public Mono<Boolean> set(final String key, Object value, Long expireTime);
 
     /**
      * 根据key获取存活时间
@@ -104,7 +104,7 @@ public interface RedisService {
      * @param key
      * @return
      */
-    public Long remainTimeToLive(final String key);
+    public Mono<Long> remainTimeToLive(final String key);
 
     /**
      * 根据指定key获取自增的id
@@ -112,7 +112,7 @@ public interface RedisService {
      * @param key
      * @return
      */
-    public Long incr(final String key);
+    public Mono<Long> incr(final String key);
 
     /**
      * 设置一个key的存活时间
@@ -122,7 +122,7 @@ public interface RedisService {
      * @param timeUnit
      * @return
      */
-    public Boolean expire(final String key, Long expireTime, TimeUnit timeUnit);
+    public Mono<Boolean> expire(final String key, Long expireTime, TimeUnit timeUnit);
 
     /**
      * 设置一个key在指定日期时间上过期
@@ -131,21 +131,5 @@ public interface RedisService {
      * @param date
      * @return
      */
-    public Boolean expireAt(final String key, Date date);
-
-
-    /**
-     * 获取分布锁
-     *
-     * @param lockKey 锁名
-     * @return
-     */
-    public Lock obtainDistributeLock(String lockKey);
-
-    public Boolean setIntoMap(final String mapKey, String key, Object value);
-
-    public <T> T getFromMap(final String mapKey, String key, Class<T> cls);
-
-    public <T> T getFromMap(final String mapKey, String key, TypeReference<T> cls);
-
+    public Mono<Boolean> expireAt(final String key, Date date);
 }

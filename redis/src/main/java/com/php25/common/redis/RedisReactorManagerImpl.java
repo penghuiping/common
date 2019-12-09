@@ -17,11 +17,11 @@ import java.util.concurrent.TimeUnit;
  * @date: 2019/3/19 22:32
  * @description:
  */
-public class RedisReactorServiceImpl implements RedisAsyncService {
+public class RedisReactorManagerImpl implements RedisAsyncManager {
 
     ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
 
-    public RedisReactorServiceImpl(ReactiveRedisTemplate<String, String> reactiveRedisTemplate) {
+    public RedisReactorManagerImpl(ReactiveRedisTemplate<String, String> reactiveRedisTemplate) {
         this.reactiveRedisTemplate = reactiveRedisTemplate;
     }
 

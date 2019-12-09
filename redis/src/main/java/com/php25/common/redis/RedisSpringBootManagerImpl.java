@@ -20,13 +20,13 @@ import java.util.concurrent.locks.Lock;
  * @author penghuiping
  * @date 2016-09-02
  */
-public class RedisSpringBootServiceImpl implements RedisService {
-    private static Logger logger = LoggerFactory.getLogger(RedisSpringBootServiceImpl.class);
+public class RedisSpringBootManagerImpl implements RedisManager {
+    private static Logger logger = LoggerFactory.getLogger(RedisSpringBootManagerImpl.class);
     private StringRedisTemplate redisTemplate;
 
     private LockRegistry lockRegistry;
 
-    public RedisSpringBootServiceImpl(StringRedisTemplate redisTemplate) {
+    public RedisSpringBootManagerImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
         this.lockRegistry = new RRedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
     }
