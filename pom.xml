@@ -26,6 +26,7 @@
         <module>sample/uid-sample</module>
         <module>sample/validation-sample</module>
         <module>sample/mongo-sample</module>
+        <module>sample/workflow-sample</module>
     </modules>
 
     <packaging>pom</packaging>
