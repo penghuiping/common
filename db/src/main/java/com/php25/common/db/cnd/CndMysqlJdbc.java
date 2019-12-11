@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
  * @description:
  */
 public class CndMysqlJdbc extends CndJdbc {
-    private static final Logger log = LoggerFactory.getLogger(CndMysqlJpa.class);
+    private static final Logger log = LoggerFactory.getLogger(CndMysqlJdbc.class);
 
     protected CndMysqlJdbc(Class cls, JdbcOperations jdbcOperations) {
         this.jdbcOperations = jdbcOperations;

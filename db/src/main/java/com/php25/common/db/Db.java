@@ -1,7 +1,6 @@
 package com.php25.common.db;
 
 import com.php25.common.db.cnd.CndJdbc;
-import com.php25.common.db.cnd.CndJpa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -25,15 +24,6 @@ public class Db {
     public Db(JdbcOperations jdbcOperations, DbType dbType) {
         this.jdbcOperations = jdbcOperations;
         this.dbType = dbType;
-    }
-
-    /**
-     * 获取一个新条件
-     *
-     * @return
-     */
-    public CndJpa cndJpa(Class cls) {
-        return CndJpa.of(cls, dbType, this.jdbcOperations);
     }
 
 

@@ -1,7 +1,6 @@
 package com.php25.common.db.cnd;
 
 import com.php25.common.db.manager.JdbcModelManager;
-import com.php25.common.db.manager.JpaModelManager;
 
 import java.util.Collection;
 
@@ -20,18 +19,10 @@ public abstract class AbstractNewQuery extends AbstractQuery {
 
     protected String getCol(Class<?> modelClass, String name) {
         try {
-            if(this instanceof CndJpa) {
-                if (!clazz.equals(modelClass)) {
-                    return " b." + JpaModelManager.getDbColumnByClassColumn(modelClass, name) + " ";
-                } else {
-                    return " a." + JpaModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
-                }
-            }else {
-                if (!clazz.equals(modelClass)) {
-                    return " b." + JdbcModelManager.getDbColumnByClassColumn(modelClass, name) + " ";
-                } else {
-                    return " a." + JdbcModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
-                }
+            if (!clazz.equals(modelClass)) {
+                return " b." + JdbcModelManager.getDbColumnByClassColumn(modelClass, name) + " ";
+            } else {
+                return " a." + JdbcModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
             }
         } catch (Exception e) {
             //"无法通过jpa注解找到对应的column,直接调用父类的方法"

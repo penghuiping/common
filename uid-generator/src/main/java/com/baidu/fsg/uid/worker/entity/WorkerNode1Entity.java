@@ -1,12 +1,12 @@
 package com.baidu.fsg.uid.worker.entity;
 
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.GenerationType;
+import com.php25.common.db.cnd.SequenceGenerator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
 import java.time.LocalDateTime;
 
 /**
@@ -19,7 +19,7 @@ public class WorkerNode1Entity {
      * Entity unique id (table unique)
      */
     @Id
-    @SequenceGenerator(name = "seq_worker_node_id", sequenceName = "seq_worker_node_id")
+    @SequenceGenerator(sequenceName = "seq_worker_node_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 

@@ -5,8 +5,8 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.CndJpa;
-import com.php25.common.db.manager.JpaModelManager;
+import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 import com.php25.common.jdbcsample.oracle.test.OracleJdbcTest;
@@ -76,7 +76,7 @@ public class JdbcJmhTest {
 
         jdbcTemplate.update("drop table if exists t_customer;");
         jdbcTemplate.update("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time date,update_time date,version bigint,company_id bigint,`enable` int);");
-        CndJpa cndJpa = this.db.cndJpa(Customer.class);
+        CndJdbc cndJpa = this.db.cndJdbc(Customer.class);
 
         Company company = new Company();
         company.setName("test");
@@ -102,28 +102,28 @@ public class JdbcJmhTest {
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        CndJpa cndJpa = this.db.cndJpa(Customer.class);
+        CndJdbc cndJpa = this.db.cndJdbc(Customer.class);
         List<Customer> customers1 = cndJpa.whereEq("username", "jack0").limit(0, 1).asc("id").select();
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getTableColumnNameAndValue() throws Exception {
-        JpaModelManager.getTableColumnNameAndValue(customers.get(0), true);
+        JdbcModelManager.getTableColumnNameAndValue(customers.get(0), true);
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getPrimaryKeyColName() throws Exception {
-        JpaModelManager.getPrimaryKeyColName(Customer.class);
+        JdbcModelManager.getPrimaryKeyColName(Customer.class);
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getDbColumnByClassColumn() throws Exception {
-        JpaModelManager.getDbColumnByClassColumn(Customer.class, "id");
+        JdbcModelManager.getDbColumnByClassColumn(Customer.class, "id");
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void getIdValue() throws Exception {
-        Customer customer = this.db.cndJpa(Customer.class).whereEq("id", customers.get(0).getId()).single();
+        Customer customer = this.db.cndJdbc(Customer.class).whereEq("id", customers.get(0).getId()).single();
         Assert.assertEquals(customer.getId(), customers.get(0).getId());
     }
 }

@@ -1,8 +1,8 @@
 package com.php25.common.jdbcsample.oracle.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.data.annotation.Version;
 
-import javax.persistence.Version;
 import java.util.Date;
 
 /**

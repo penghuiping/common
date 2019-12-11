@@ -76,7 +76,7 @@ public class OracleJdbcTest extends DbTest {
             });
 
     static {
-        oracle.setPortBindings(Lists.newArrayList("49161:1521"));
+        oracle.setPortBindings(Lists.newArrayList("1521:1521"));
         oracle.withEnv("ORACLE_ALLOW_REMOTE", "true");
         oracle.withEnv("ORACLE_DISABLE_ASYNCH_IO", "true");
     }

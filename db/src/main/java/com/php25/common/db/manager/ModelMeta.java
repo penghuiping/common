@@ -1,7 +1,8 @@
 package com.php25.common.db.manager;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.SequenceGenerator;
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.SequenceGenerator;
+
 import java.lang.reflect.Field;
 import java.util.List;
 

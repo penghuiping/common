@@ -1,5 +1,7 @@
 package com.php25.common.jdbcsample.mysql.model;
 
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.GenerationType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
@@ -7,8 +9,6 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

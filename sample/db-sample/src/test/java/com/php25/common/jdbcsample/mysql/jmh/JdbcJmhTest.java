@@ -7,7 +7,7 @@ import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
-import com.php25.common.db.manager.JpaModelManager;
+import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
 import com.php25.common.jdbcsample.mysql.test.MysqlJdbcTest;
@@ -114,17 +114,17 @@ public class JdbcJmhTest {
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getTableColumnNameAndValue() throws Exception {
-        JpaModelManager.getTableColumnNameAndValue(customers.get(0), true);
+        JdbcModelManager.getTableColumnNameAndValue(customers.get(0), true);
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getPrimaryKeyColName() throws Exception {
-        JpaModelManager.getPrimaryKeyColName(Customer.class);
+        JdbcModelManager.getPrimaryKeyColName(Customer.class);
     }
 
     //@org.openjdk.jmh.annotations.Benchmark
     public void getDbColumnByClassColumn() throws Exception {
-        JpaModelManager.getDbColumnByClassColumn(Customer.class, "id");
+        JdbcModelManager.getDbColumnByClassColumn(Customer.class, "id");
     }
 
     @org.openjdk.jmh.annotations.Benchmark

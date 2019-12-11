@@ -16,12 +16,12 @@
 package com.baidu.fsg.uid.worker.entity;
 
 import com.baidu.fsg.uid.worker.WorkerNodeType;
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.GenerationType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import java.time.LocalDateTime;
 
 /**

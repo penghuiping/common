@@ -1,5 +1,8 @@
 package com.php25.common.jdbcsample.oracle.model;
 
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.GenerationType;
+import com.php25.common.db.cnd.SequenceGenerator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
@@ -7,9 +10,6 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class Customer implements Persistable<Long> {
 
     @Id
-    @SequenceGenerator(name = "SEQ_ID", sequenceName = "SEQ_ID")
+    @SequenceGenerator(sequenceName = "SEQ_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 

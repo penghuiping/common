@@ -13,8 +13,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.Assert;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;

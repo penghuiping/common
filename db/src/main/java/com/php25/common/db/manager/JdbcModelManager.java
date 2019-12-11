@@ -1,13 +1,13 @@
 package com.php25.common.db.manager;
 
 import com.php25.common.core.exception.Exceptions;
+import com.php25.common.db.cnd.GeneratedValue;
+import com.php25.common.db.cnd.SequenceGenerator;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.SequenceGenerator;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;

@@ -61,7 +61,7 @@ public class DbTest {
         Properties properties = new Properties();
         properties.setProperty("user","system");
         properties.setProperty("password","oracle");
-        Connection connection = driver.connect("jdbc:oracle:thin:@localhost:49161:xe", properties);
+        Connection connection = driver.connect("jdbc:oracle:thin:@localhost:1521:xe", properties);
         Statement statement = connection.createStatement();
         if(isFirst) {
             isFirst = false;

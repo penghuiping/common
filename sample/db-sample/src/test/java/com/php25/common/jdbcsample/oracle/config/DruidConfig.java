@@ -38,7 +38,7 @@ public class DruidConfig {
     public DataSource druidDataSource() {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        druidDataSource.setUrl("jdbc:oracle:thin:@localhost:49161:xe");
+        druidDataSource.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
         druidDataSource.setUsername("system");
         druidDataSource.setPassword("oracle");
         druidDataSource.setMaxActive(1);
