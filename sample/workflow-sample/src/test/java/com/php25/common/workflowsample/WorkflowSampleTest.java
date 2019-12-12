@@ -57,8 +57,6 @@ public class WorkflowSampleTest {
     @Autowired
     private ProcessEngine processEngine;
 
-    @Autowired
-
     @Before
     public void setUp() {
         repositoryService.createDeployment().addClasspathResource("processes/holiday-request.bpmn20.xml").deploy();
