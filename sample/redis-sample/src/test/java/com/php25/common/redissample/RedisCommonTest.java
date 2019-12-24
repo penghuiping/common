@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,16 +60,30 @@ public class RedisCommonTest {
         String address = redis.getContainerIpAddress();
         Integer port = redis.getFirstMappedPort();
 
+        //单机
         RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
         redisConfiguration.setDatabase(0);
         redisConfiguration.setHostName(address);
         redisConfiguration.setPort(port);
-        this.redisConnectionFactory = new JedisConnectionFactory(redisConfiguration);
+        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisConfiguration);
+        lettuceConnectionFactory.afterPropertiesSet();
 
+        //集群
+//        RedisProperties.Cluster clusterProperties = new RedisProperties.Cluster();
+//        clusterProperties.setNodes();
+//        clusterProperties.setMaxRedirects();
+//        RedisClusterConfiguration config = new RedisClusterConfiguration(
+//                clusterProperties.getNodes());
+//
+//        if (clusterProperties.getMaxRedirects() != null) {
+//            config.setMaxRedirects(clusterProperties.getMaxRedirects());
+//        }
+//        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(config);
+//        lettuceConnectionFactory.afterPropertiesSet();
+
+        this.redisConnectionFactory = lettuceConnectionFactory;
         this.redisTemplate = new StringRedisTemplate(redisConnectionFactory);
-
         this.redisManager = new RedisSpringBootManagerImpl(redisTemplate);
-
     }
 
     int count = 0;

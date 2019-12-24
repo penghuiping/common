@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
 import java.util.Date;
@@ -28,7 +29,7 @@ public class RedisSpringBootManagerImpl implements RedisManager {
 
     public RedisSpringBootManagerImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.lockRegistry = new RRedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
+        this.lockRegistry = new RedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
     }
 
     public StringRedisTemplate getRedisTemplate() {
