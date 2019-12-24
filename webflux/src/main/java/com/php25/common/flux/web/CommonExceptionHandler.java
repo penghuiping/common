@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -43,7 +42,7 @@ public class CommonExceptionHandler {
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage(e.getMessage());
             return ResponseEntity.ok(jsonResponse);
-        } else if (e instanceof ServerWebInputException) {
+        } else if (e instanceof ServerWebInputException || e instanceof org.springframework.web.bind.MethodArgumentNotValidException) {
             log.warn("请求访问参数错误!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);

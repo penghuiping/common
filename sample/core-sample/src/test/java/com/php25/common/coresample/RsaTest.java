@@ -63,7 +63,7 @@ public class RsaTest {
 
     @Test
     public void test2() {
-        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.RSA,"jjjj123",2048);
+        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.RSA,"test12313123",2048);
         SecretKeyPair secretKeyPair = new SecretKeyPair(pair, RsaAlgorithm.RSA);
         log.info("publicKey:{}", secretKeyPair.getPublicKey());
         log.info("privateKey:{}", secretKeyPair.getPrivateKey());

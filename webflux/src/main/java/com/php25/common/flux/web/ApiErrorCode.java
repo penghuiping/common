@@ -18,18 +18,7 @@ public enum ApiErrorCode {
     /**
      * 服务器错误
      */
-    unknown_error("2"),
-
-    /**
-     * 非法状态
-     */
-    illegal_state("3"),
-
-    /**
-     * http方法不支持
-     */
-    http_request_method_not_supported("4");
-
+    unknown_error("2");
 
     public String value;
 

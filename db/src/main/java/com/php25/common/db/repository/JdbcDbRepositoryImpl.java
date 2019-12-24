@@ -46,6 +46,11 @@ public class JdbcDbRepositoryImpl<T, ID extends Serializable> implements JdbcDbR
     }
 
     @Override
+    public Optional<T> findByIdEnable(ID id) {
+        return Optional.of(db.cndJdbc(model).whereEq(pkName,id).andEq("enable",1).single());
+    }
+
+    @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
         CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
         return Optional.of(cnd.single());

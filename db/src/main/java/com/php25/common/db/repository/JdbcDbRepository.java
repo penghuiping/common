@@ -25,6 +25,8 @@ public interface JdbcDbRepository<T, ID extends Serializable> {
      */
     List<T> findAllEnabled();
 
+    Optional<T> findByIdEnable(ID id);
+
     /**
      * 根据查询条件，查询符合条件的一条数据
      *
