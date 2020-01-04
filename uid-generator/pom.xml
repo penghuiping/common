@@ -26,6 +26,10 @@
 
     <!-- Dependencies -->
     <dependencies>
+        <dependency>
+            <groupId>com.php25</groupId>
+            <artifactId>db</artifactId>
+        </dependency>
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -43,12 +47,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>com.php25</groupId>
-            <artifactId>db</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jdbc</artifactId>
         </dependency>
-
         <!-- Apache Commons -->
         <dependency>
             <groupId>commons-collections</groupId>

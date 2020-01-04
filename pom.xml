@@ -12,7 +12,6 @@
         <module>common-parent</module>
         <module>core</module>
         <module>db</module>
-        <module>jpa</module>
         <module>mvc</module>
         <module>webflux</module>
         <module>redis</module>
@@ -20,7 +19,6 @@
         <module>validation</module>
         <module>sample/core-sample</module>
         <module>sample/db-sample</module>
-        <module>sample/jpa-sample</module>
         <module>sample/redis-sample</module>
         <module>sample/uid-sample</module>
         <module>sample/validation-sample</module>

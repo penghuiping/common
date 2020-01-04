@@ -16,12 +16,10 @@
         <dependency>
             <groupId>com.php25</groupId>
             <artifactId>core</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.php25</groupId>
             <artifactId>db</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.baidu.fsg</groupId>
@@ -30,17 +28,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
