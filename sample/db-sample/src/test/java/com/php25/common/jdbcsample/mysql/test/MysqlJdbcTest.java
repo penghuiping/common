@@ -127,10 +127,10 @@ public class MysqlJdbcTest extends DbTest {
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        customers = db.cndJdbc(Customer.class).join(Company.class, "companyId").select(Customer.class);
+        customers = db.cndJdbc(Customer.class).join(Company.class,"id", "companyId").select(Customer.class);
         System.out.println(JsonUtil.toPrettyJson(customers));
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "companyId").whereEq(Company.class, "id", 1).select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id","companyId").whereEq(Company.class, "id", 1).select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
 
     }

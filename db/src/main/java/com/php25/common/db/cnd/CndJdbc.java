@@ -308,12 +308,12 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
-    public CndJdbc join(Class<?> model, String column) {
+    public CndJdbc join(Class<?> model, String column,String relationColumn) {
         String tmp = getSql().toString();
         if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
             throw Exceptions.throwIllegalStateException("join只能使用一次");
         }
-        String joinStatement = "a." + JdbcModelManager.getDbColumnByClassColumn(clazz, column) + "=b." + JdbcModelManager.getPrimaryKeyColName(model);
+        String joinStatement = "a." + JdbcModelManager.getDbColumnByClassColumn(clazz, relationColumn) + "=b." + JdbcModelManager.getDbColumnByClassColumn(model,column);
         StringBuilder sb = new StringBuilder(String.format("JOIN %s b ON %s ", JdbcModelManager.getTableName(model), joinStatement));
         sb.append(getSql());
         this.setSql(sb);

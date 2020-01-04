@@ -25,6 +25,12 @@ public interface JdbcDbRepository<T, ID extends Serializable> {
      */
     List<T> findAllEnabled();
 
+    /**
+     * 根据id获取有效数据
+     *
+     * @param id
+     * @return
+     */
     Optional<T> findByIdEnable(ID id);
 
     /**
