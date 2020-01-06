@@ -158,8 +158,8 @@ public class CndMysqlJdbc extends CndJdbc {
 
     @Override
     public int delete() {
-        StringBuilder sb = new StringBuilder("DELETE a FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz)).append(" a ").append(getSql());
+        StringBuilder sb = new StringBuilder("DELETE FROM ");
+        sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();

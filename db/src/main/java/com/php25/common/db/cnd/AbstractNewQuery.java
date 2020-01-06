@@ -19,10 +19,11 @@ public abstract class AbstractNewQuery extends AbstractQuery {
 
     protected String getCol(Class<?> modelClass, String name) {
         try {
+
             if (!clazz.equals(modelClass)) {
-                return " b." + JdbcModelManager.getDbColumnByClassColumn(modelClass, name) + " ";
+                return String.format(" %s.%s ", JdbcModelManager.getTableName(modelClass), JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
             } else {
-                return " a." + JdbcModelManager.getDbColumnByClassColumn(this.clazz, name) + " ";
+                return String.format(" %s.%s ", JdbcModelManager.getTableName(this.clazz), JdbcModelManager.getDbColumnByClassColumn(this.clazz, name));
             }
         } catch (Exception e) {
             //"无法通过jpa注解找到对应的column,直接调用父类的方法"

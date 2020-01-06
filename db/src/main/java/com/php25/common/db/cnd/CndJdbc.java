@@ -3,6 +3,7 @@ package com.php25.common.db.cnd;
 import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.specification.SearchParam;
 import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.DbType;
@@ -80,6 +81,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public <T> List<T> select(Class resultType, String... columns) {
+        AssertUtil.notNull(resultType,"resultType不能为null");
         StringBuilder sb = null;
         if (null != columns && columns.length > 0) {
             sb = new StringBuilder("SELECT ");
@@ -88,13 +90,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             }
             sb.deleteCharAt(sb.length() - 1);
         } else {
-            if (resultType.equals(clazz)) {
-                sb = new StringBuilder("SELECT a.*");
-            } else {
-                sb = new StringBuilder("SELECT b.*");
-            }
+            sb = new StringBuilder("SELECT *");
         }
-        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" a ").append(getSql());
+        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
@@ -239,7 +237,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     @Override
     public int delete() {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz)).append(" a ").append(getSql());
+        sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -253,7 +251,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     @Override
     public long count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) as a_count FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz)).append(" a ").append(getSql());
+        sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -313,8 +311,10 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
             throw Exceptions.throwIllegalStateException("join只能使用一次");
         }
-        String joinStatement = "a." + JdbcModelManager.getDbColumnByClassColumn(clazz, relationColumn) + "=b." + JdbcModelManager.getDbColumnByClassColumn(model,column);
-        StringBuilder sb = new StringBuilder(String.format("JOIN %s b ON %s ", JdbcModelManager.getTableName(model), joinStatement));
+        String tableB = JdbcModelManager.getTableName(model);
+        String tableA= JdbcModelManager.getTableName(clazz);
+        String joinStatement = String.format("%s.%s=%s.%s", tableA,JdbcModelManager.getDbColumnByClassColumn(clazz,relationColumn),tableB,JdbcModelManager.getDbColumnByClassColumn(model,column));
+        StringBuilder sb = new StringBuilder(String.format("JOIN %s ON %s ", tableB, joinStatement));
         sb.append(getSql());
         this.setSql(sb);
         return this;
