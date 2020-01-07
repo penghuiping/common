@@ -77,7 +77,7 @@ public class JdbcDbRepositoryImpl<T, ID extends Serializable> implements JdbcDbR
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
         List<T> list = cnd.limit(page[0], page[1]).select();
-        long total = cnd.condition().count();
+        long total = cnd.condition().andSearchParamBuilder(searchParamBuilder).count();
         return new PageImpl<T>(list, pageable, total);
     }
 

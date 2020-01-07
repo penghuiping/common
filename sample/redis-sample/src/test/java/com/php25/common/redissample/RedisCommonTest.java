@@ -2,8 +2,9 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.RedisSpringBootManagerImpl;
+import com.php25.common.redis.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
@@ -83,7 +84,7 @@ public class RedisCommonTest {
 
         this.redisConnectionFactory = lettuceConnectionFactory;
         this.redisTemplate = new StringRedisTemplate(redisConnectionFactory);
-        this.redisManager = new RedisSpringBootManagerImpl(redisTemplate);
+        this.redisManager = new RedisManagerImpl(redisTemplate);
     }
 
     int count = 0;
@@ -95,7 +96,7 @@ public class RedisCommonTest {
     public void distributeLock() throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         CountDownLatch countDownLatch = new CountDownLatch(1000);
-        Lock lock = redisManager.obtainDistributeLock("test12333");
+        Lock lock = redisManager.lock("test12333");
         for (int i = 0; i < 1000; i++) {
             executorService.submit(() -> {
                 long start = System.currentTimeMillis();
@@ -117,14 +118,13 @@ public class RedisCommonTest {
 
     @Test
     public void incr() throws Exception {
-        redisManager.remove("test");
         CountDownLatch countDownLatch = new CountDownLatch(200);
         ExecutorService executorService = new ThreadPoolExecutor(20, 20,
                 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2048));
         List<Callable<Integer>> list = Lists.newArrayList();
         for (int i = 0; i < 200; i++) {
             list.add(() -> {
-                redisManager.incr("test");
+                redisManager.string().incr("test");
                 countDownLatch.countDown();
                 logger.info("countdown" + countDownLatch.getCount());
                 return 1;
@@ -132,8 +132,41 @@ public class RedisCommonTest {
         }
         executorService.invokeAll(list);
         countDownLatch.await(10L, TimeUnit.SECONDS);
-        result = redisManager.incr("test");
+        result = redisManager.string().incr("test");
         Assertions.assertThat(result).isEqualTo(201);
     }
+
+
+    @Test
+    public void list_lpush_lpop_test() throws Exception {
+        RList<Long> list = redisManager.list("mylist",Long.class);
+        list.lpush(1L);
+        list.lpush(2L);
+        list.lpush(3L);
+        list.lpush(4L);
+        list.lpush(5L);
+        Assertions.assertThat(list.lpop()).isEqualTo(5L);
+        Assertions.assertThat(list.lpop()).isEqualTo(4L);
+        Assertions.assertThat(list.lpop()).isEqualTo(3L);
+        Assertions.assertThat(list.lpop()).isEqualTo(2L);
+        Assertions.assertThat(list.lpop()).isEqualTo(1L);
+    }
+
+    @Test
+    public void list_rpush_rpop_test() throws Exception {
+        RList<String> list = redisManager.list("mylist1",String.class);
+        list.rpush("hello");
+        list.rpush("world");
+        Assertions.assertThat(list.rpop()).isEqualTo("world");
+        Assertions.assertThat(list.rpop()).isEqualTo("hello");
+    }
+
+    @Test
+    public void list_lrange() throws Exception {
+
+    }
+
+
+
 
 }
