@@ -25,9 +25,14 @@ public class RedisManagerImpl implements RedisManager {
 
     private RString rString;
 
+
     public RedisManagerImpl(StringRedisTemplate redisTemplate) {
+        this(redisTemplate, "RedisSpringBootService_lock");
+    }
+
+    public RedisManagerImpl(StringRedisTemplate redisTemplate, String redisLockKey) {
         this.redisTemplate = redisTemplate;
-        this.lockRegistry = new RedisLockRegistry(redisTemplate.getConnectionFactory(), "RedisSpringBootService_lock");
+        this.lockRegistry = new RedisLockRegistry(redisTemplate.getConnectionFactory(), redisLockKey);
         this.rString = new RStringImpl(redisTemplate);
     }
 
@@ -78,12 +83,17 @@ public class RedisManagerImpl implements RedisManager {
     }
 
     @Override
-    public RHash hash(String hashKey) {
-        return new RHashImpl(redisTemplate, hashKey);
+    public <T> RHash<T> hash(String hashKey, Class<T> cls) {
+        return new RHashImpl<>(redisTemplate, hashKey);
     }
 
     @Override
-    public <T>RList<T> list(String listKey,Class<T> cls) {
-        return new RListImpl<>(redisTemplate, listKey,cls);
+    public <T> RList<T> list(String listKey, Class<T> cls) {
+        return new RListImpl<>(redisTemplate, listKey, cls);
+    }
+
+    @Override
+    public <T> RSet<T> set(String setKey, Class<T> cls) {
+        return new RSetImpl<>(redisTemplate, setKey, cls);
     }
 }

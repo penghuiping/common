@@ -81,16 +81,16 @@ public interface RedisManager {
     /**
      * 获取redis中Hash数据类型的相关操作对象
      *
-     * @param hashKey
-     * @return
      */
-    RHash hash(String hashKey);
+    <T> RHash<T> hash(String hashKey,Class<T> cls);
 
     /**
      * 获取redis中list数据类型的相关操作对象
-     *
-     * @param listKey
-     * @return
      */
     <T> RList<T> list(String listKey,Class<T> cls);
+
+    /**
+     * 获取redis中set数据类型的相关操作对象
+     */
+    <T> RSet<T> set(String setKey,Class<T> cls);
 }

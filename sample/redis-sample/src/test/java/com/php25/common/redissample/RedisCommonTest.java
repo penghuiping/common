@@ -2,7 +2,6 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
-import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
@@ -138,32 +137,12 @@ public class RedisCommonTest {
 
 
     @Test
-    public void list_lpush_lpop_test() throws Exception {
-        RList<Long> list = redisManager.list("mylist",Long.class);
-        list.lpush(1L);
-        list.lpush(2L);
-        list.lpush(3L);
-        list.lpush(4L);
-        list.lpush(5L);
-        Assertions.assertThat(list.lpop()).isEqualTo(5L);
-        Assertions.assertThat(list.lpop()).isEqualTo(4L);
-        Assertions.assertThat(list.lpop()).isEqualTo(3L);
-        Assertions.assertThat(list.lpop()).isEqualTo(2L);
-        Assertions.assertThat(list.lpop()).isEqualTo(1L);
-    }
-
-    @Test
-    public void list_rpush_rpop_test() throws Exception {
-        RList<String> list = redisManager.list("mylist1",String.class);
-        list.rpush("hello");
-        list.rpush("world");
-        Assertions.assertThat(list.rpop()).isEqualTo("world");
-        Assertions.assertThat(list.rpop()).isEqualTo("hello");
-    }
-
-    @Test
-    public void list_lrange() throws Exception {
-
+    public void listTest() throws Exception {
+        RListTest rListTest = new RListTest();
+        rListTest.lpush_lpop(redisManager);
+        rListTest.rpush_rpop(redisManager);
+        rListTest.lrange(redisManager);
+        rListTest.ltrim(redisManager);
     }
 
 

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -24,7 +25,18 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<JSONResponse> handleCustomException(Exception e) {
-        if (e instanceof WebExchangeBindException) {
+        if(e instanceof org.springframework.web.bind.MethodArgumentNotValidException) {
+            MethodArgumentNotValidException methodArgumentNotValidException = (MethodArgumentNotValidException)e;
+            FieldError fieldError= methodArgumentNotValidException.getBindingResult().getFieldError();
+            JSONResponse jsonResponse = new JSONResponse();
+            jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+            if (fieldError == null) {
+                jsonResponse.setMessage("input_params_error");
+            } else {
+                jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
+            }
+            return ResponseEntity.ok(jsonResponse);
+        }else if (e instanceof WebExchangeBindException) {
             log.warn("请求访问参数错误!!", e);
             WebExchangeBindException e1 = (WebExchangeBindException) e;
             JSONResponse jsonResponse = new JSONResponse();
@@ -42,7 +54,7 @@ public class CommonExceptionHandler {
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
             jsonResponse.setMessage(e.getMessage());
             return ResponseEntity.ok(jsonResponse);
-        } else if (e instanceof ServerWebInputException || e instanceof org.springframework.web.bind.MethodArgumentNotValidException) {
+        } else if (e instanceof ServerWebInputException) {
             log.warn("请求访问参数错误!!", e);
             JSONResponse jsonResponse = new JSONResponse();
             jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
@@ -69,5 +81,4 @@ public class CommonExceptionHandler {
             return ResponseEntity.ok(jsonResponse);
         }
     }
-
 }
