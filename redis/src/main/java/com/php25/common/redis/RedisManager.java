@@ -80,17 +80,26 @@ public interface RedisManager {
 
     /**
      * 获取redis中Hash数据类型的相关操作对象
-     *
      */
-    <T> RHash<T> hash(String hashKey,Class<T> cls);
+    <T> RHash<T> hash(String hashKey, Class<T> cls);
 
     /**
      * 获取redis中list数据类型的相关操作对象
      */
-    <T> RList<T> list(String listKey,Class<T> cls);
+    <T> RList<T> list(String listKey, Class<T> cls);
 
     /**
      * 获取redis中set数据类型的相关操作对象
      */
-    <T> RSet<T> set(String setKey,Class<T> cls);
+    <T> RSet<T> set(String setKey, Class<T> cls);
+
+    /**
+     * 获取布隆过滤器操作对象
+     *
+     * @param name               过滤器的名称，对应redis string类型的key
+     * @param expectedInsertions 预计插入量
+     * @param fpp                可接受错误率
+     * @return
+     */
+    RBloomFilter bloomFilter(String name, long expectedInsertions, double fpp);
 }

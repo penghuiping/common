@@ -69,18 +69,34 @@ public interface RString {
     /**
      * 线程安全的改变key对应的值，并且每调用一次值加1
      *
-     * @param key
-     * @return
+     * @param key 缓存key
+     * @return +1后的值
      */
     Long incr(final String key);
 
     /**
      * 线程安全的改变key对应的值，并且每调用一次值减1
      *
-     * @param key
-     * @return
+     * @param key 缓存key
+     * @return -1后的值
      */
     Long decr(final String key);
 
+    /**
+     * bitmap操作，可以用来实现 bloomfilter 布隆过滤器
+     *
+     * @param key    缓存key
+     * @param offset 设置位置
+     * @param value  0 or 1
+     * @return 上一个在offset位置的bit值
+     */
+    Boolean setBit(final String key, long offset, boolean value);
 
+    /**
+     * bitmap操作,获取指定位置的bit值
+     * @param key 缓存key
+     * @param offset 位置
+     * @return bit值
+     */
+    Boolean getBit(final String key, long offset);
 }

@@ -1,11 +1,13 @@
 package com.php25.common.coresample;
 
+import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.ConsistentHashingService;
 import com.php25.common.core.service.ConsistentHashingServiceImpl;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.util.HashUtil;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
-import java.security.SecureRandom;
 import java.util.List;
 
 /**
@@ -53,6 +54,14 @@ public class HashingTest {
         HashCode hashCode = Hashing.crc32c().hashString("HELLOWORLD", Charset.defaultCharset());
         logger.info("HashCode:" + hashCode.asInt());
         logger.info("serverIp:" + v.get(Hashing.consistentHash(hashCode, v.size())));
+    }
+
+    @Test
+    public void murmur128() {
+        String hello = "hello";
+        long value1 = Hashing.murmur3_128().hashBytes(hello.getBytes(Charsets.UTF_8)).asLong();
+        logger.info("guava:{},{}",(int)value1,(int)(value1>>>32));
+        logger.info("hashUtil:{}",HashUtil.murmur128(hello.getBytes(Charsets.UTF_8)));
     }
 
     @Test

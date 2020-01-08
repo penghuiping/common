@@ -5,9 +5,8 @@ package com.php25.common.core.util;
  * Hash算法大全<br>
  * 推荐使用FNV1算法
  *
- * @author Goodzzp, Looly
  */
-public class HashUtil {
+public abstract class HashUtil {
 
     /**
      * 加法hash

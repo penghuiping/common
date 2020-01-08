@@ -22,9 +22,9 @@ public class RStringImpl implements RString {
     @Override
     public <T> T get(String key, Class<T> cls) {
         String value = get(key);
-        if(StringUtil.isBlank(value)) {
+        if (StringUtil.isBlank(value)) {
             return null;
-        }else {
+        } else {
             return JsonUtil.fromJson(value, cls);
         }
     }
@@ -32,9 +32,9 @@ public class RStringImpl implements RString {
     @Override
     public <T> T get(String key, TypeReference<T> cls) {
         String value = get(key);
-        if(StringUtil.isBlank(value)) {
+        if (StringUtil.isBlank(value)) {
             return null;
-        }else {
+        } else {
             return JsonUtil.fromJson(value, cls);
         }
     }
@@ -78,5 +78,15 @@ public class RStringImpl implements RString {
     @Override
     public Long decr(String key) {
         return stringRedisTemplate.opsForValue().decrement(key);
+    }
+
+    @Override
+    public Boolean setBit(String key, long offset, boolean value) {
+        return stringRedisTemplate.opsForValue().setBit(key, offset, value);
+    }
+
+    @Override
+    public Boolean getBit(String key,long offset) {
+        return stringRedisTemplate.opsForValue().getBit(key,offset);
     }
 }

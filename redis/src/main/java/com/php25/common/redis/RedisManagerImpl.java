@@ -96,4 +96,9 @@ public class RedisManagerImpl implements RedisManager {
     public <T> RSet<T> set(String setKey, Class<T> cls) {
         return new RSetImpl<>(redisTemplate, setKey, cls);
     }
+
+    @Override
+    public RBloomFilter bloomFilter(String name,long expectedInsertions, double fpp) {
+        return new RBloomFilter(redisTemplate,name,expectedInsertions,fpp);
+    }
 }

@@ -2,6 +2,7 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
@@ -143,6 +144,19 @@ public class RedisCommonTest {
         rListTest.rpush_rpop(redisManager);
         rListTest.lrange(redisManager);
         rListTest.ltrim(redisManager);
+    }
+
+    @Test
+    public void bloomFilterTest() throws Exception {
+        RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
+        bloomFilter.put("你好");
+        bloomFilter.put("世界");
+        bloomFilter.put("测试");
+
+        Assertions.assertThat(bloomFilter.isExist("你好")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("世界")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("测试")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("测试测试")).isEqualTo(false);
     }
 
 
