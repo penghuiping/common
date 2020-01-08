@@ -1,4 +1,4 @@
-package com.php25.common.core.service;
+package com.php25.common.db.cnd;
 
 import reactor.core.publisher.Mono;
 

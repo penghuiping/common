@@ -12,7 +12,7 @@ import java.util.TreeMap;
  * @author penghuiping
  * @date: 2018/5/30 09:56
  */
-public class ConsistentHashingServiceImpl implements ConsistentHashingService {
+public class ConsistentHashingImpl implements ConsistentHashing {
 
     private String[] servers = null;
 
@@ -31,11 +31,11 @@ public class ConsistentHashingServiceImpl implements ConsistentHashingService {
      */
     private int virtualNodesNumber = 100;
 
-    public ConsistentHashingServiceImpl(String[] servers) {
+    public ConsistentHashingImpl(String[] servers) {
         this(servers, 100);
     }
 
-    public ConsistentHashingServiceImpl(String[] servers, Integer virtualNodeNum) {
+    public ConsistentHashingImpl(String[] servers, Integer virtualNodeNum) {
         this.virtualNodesNumber = virtualNodeNum;
 
         // 先把原始的服务器添加到真实结点列表中

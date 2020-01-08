@@ -2,14 +2,14 @@ package com.php25.common.jdbcsample.postgres.test;
 
 import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
-import com.php25.common.core.specification.Operator;
-import com.php25.common.core.specification.SearchParam;
-import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.specification.Operator;
+import com.php25.common.db.specification.SearchParam;
+import com.php25.common.db.specification.SearchParamBuilder;
 import com.php25.common.jdbcsample.postgres.CommonAutoConfigure;
 import com.php25.common.jdbcsample.postgres.model.Company;
 import com.php25.common.jdbcsample.postgres.model.Customer;

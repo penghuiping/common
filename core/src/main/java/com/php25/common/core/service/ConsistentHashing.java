@@ -6,7 +6,7 @@ package com.php25.common.core.service;
  * <p>
  * 一致性hash
  */
-public interface ConsistentHashingService {
+public interface ConsistentHashing {
 
     /**
      * 更具关键字key,得到应当路由到的结点

@@ -1,4 +1,4 @@
-package com.php25.common.core.specification;
+package com.php25.common.db.specification;
 
 
 import com.php25.common.core.exception.Exceptions;

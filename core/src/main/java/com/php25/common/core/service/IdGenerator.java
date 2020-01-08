@@ -6,7 +6,7 @@ package com.php25.common.core.service;
  * <p>
  * id生成器
  */
-public interface IdGeneratorService {
+public interface IdGenerator {
     /**
      * 实体类主键生产器 生成字符串主键
      *

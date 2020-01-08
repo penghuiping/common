@@ -1,4 +1,4 @@
-package com.php25.common.core.specification;
+package com.php25.common.db.specification;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.php25.common.core.util.JsonUtil;

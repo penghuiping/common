@@ -14,7 +14,7 @@ import java.util.UUID;
  * @date 2017/9/18
  */
 @Service("idGeneratorService")
-public class IdGeneratorServiceImpl implements IdGeneratorService {
+public class IdGeneratorImpl implements IdGenerator {
 
     @Override
     public String getUUID() {

@@ -2,8 +2,8 @@ package com.php25.common.jdbcsample.postgres.jmh;
 
 import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
-import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.DigestUtil;
+import com.php25.common.db.specification.SearchParamBuilder;
 import com.php25.common.jdbcsample.postgres.model.Customer;
 import com.php25.common.jdbcsample.postgres.repository.CustomerRepository;
 import com.php25.common.jdbcsample.postgres.test.PostgresJdbcTest;

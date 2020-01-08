@@ -1,6 +1,6 @@
 package com.php25.common.db.repository;
 
-import com.php25.common.core.specification.SearchParamBuilder;
+import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

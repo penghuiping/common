@@ -4,9 +4,9 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.php25.common.CommonAutoConfigure;
-import com.php25.common.core.service.ConsistentHashingService;
-import com.php25.common.core.service.ConsistentHashingServiceImpl;
-import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.ConsistentHashing;
+import com.php25.common.core.service.ConsistentHashingImpl;
+import com.php25.common.core.service.IdGenerator;
 import com.php25.common.core.util.HashUtil;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
@@ -29,10 +29,10 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 public class HashingTest {
 
-    ConsistentHashingService consistentHashingService;
+    ConsistentHashing consistentHashingService;
 
     @Autowired
-    IdGeneratorService idGeneratorService;
+    IdGenerator idGeneratorService;
 
 
     private Logger logger = LoggerFactory.getLogger(HashingTest.class);
@@ -41,7 +41,7 @@ public class HashingTest {
     public void consistentHashing() throws Exception {
         String[] servers = new String[]{"192.168.1.1", "192.168.1.2"};
 
-        consistentHashingService = new ConsistentHashingServiceImpl(servers, 100);
+        consistentHashingService = new ConsistentHashingImpl(servers, 100);
         String serverIp = consistentHashingService.getServer("HELLOWORLD");
         logger.info("serverIp:" + serverIp);
 

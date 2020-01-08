@@ -2,7 +2,7 @@ package com.php25.common.jdbcsample.mysql.jmh;
 
 import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
-import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.IdGenerator;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
@@ -41,7 +41,7 @@ import java.util.List;
 public class JdbcJmhTest {
     private JdbcTemplate jdbcTemplate;
 
-    private IdGeneratorService idGeneratorService;
+    private IdGenerator idGeneratorService;
 
     private UidGenerator uidGenerator;
 
@@ -74,7 +74,7 @@ public class JdbcJmhTest {
         TestContext testContext = bootstrapper.buildTestContext();
 
         this.jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
-        this.idGeneratorService = testContext.getApplicationContext().getBean(IdGeneratorService.class);
+        this.idGeneratorService = testContext.getApplicationContext().getBean(IdGenerator.class);
         this.uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
         this.db = new Db(this.jdbcTemplate, DbType.MYSQL);
 

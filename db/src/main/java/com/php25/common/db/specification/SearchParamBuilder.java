@@ -1,4 +1,4 @@
-package com.php25.common.core.specification;
+package com.php25.common.db.specification;
 
 import java.util.ArrayList;
 import java.util.List;

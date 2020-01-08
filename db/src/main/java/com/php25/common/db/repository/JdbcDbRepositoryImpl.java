@@ -1,10 +1,10 @@
 package com.php25.common.db.repository;
 
-import com.php25.common.core.specification.SearchParamBuilder;
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.manager.JdbcModelManager;
+import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
