@@ -1,6 +1,5 @@
 package com.php25.common.redis;
 
-import com.google.common.collect.Sets;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -37,7 +36,7 @@ public class RSetImpl<T> implements RSet<T> {
         if (null != result && !result.isEmpty()) {
             return result.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
         } else {
-            return Sets.newHashSet();
+            return null;
         }
     }
 
@@ -49,6 +48,51 @@ public class RSetImpl<T> implements RSet<T> {
     @Override
     public T pop() {
         String result = redisTemplate.opsForSet().pop(setKey);
+        if (StringUtil.isBlank(result)) {
+            return null;
+        } else {
+            return JsonUtil.fromJson(result, model);
+        }
+    }
+
+    @Override
+    public Set<T> union(String otherSetKey) {
+        Set<String> sets = redisTemplate.opsForSet().union(setKey, otherSetKey);
+        if (null != sets && !sets.isEmpty()) {
+            return sets.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Set<T> inter(String otherSetKey) {
+        Set<String> sets = redisTemplate.opsForSet().intersect(setKey, otherSetKey);
+        if (null != sets && !sets.isEmpty()) {
+            return sets.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Set<T> diff(String otherSetKey) {
+        Set<String> sets = redisTemplate.opsForSet().difference(setKey, otherSetKey);
+        if (null != sets && !sets.isEmpty()) {
+            return sets.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Long size() {
+        return redisTemplate.opsForSet().size(setKey);
+    }
+
+    @Override
+    public T getRandomMember() {
+        String result = redisTemplate.opsForSet().randomMember(setKey);
         if (StringUtil.isBlank(result)) {
             return null;
         } else {

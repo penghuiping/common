@@ -1,8 +1,9 @@
 package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
-import com.php25.common.core.service.IdGeneratorService;
+import com.php25.common.core.service.IdGenerator;
 import com.php25.common.redis.RBloomFilter;
+import com.php25.common.redis.RHyperLogLogs;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
@@ -44,7 +45,7 @@ public class RedisCommonTest {
     private static final Logger logger = LoggerFactory.getLogger(RedisCommonTest.class);
 
     @Autowired
-    IdGeneratorService idGeneratorService;
+    IdGenerator idGeneratorService;
 
 
     RedisManager redisManager;
@@ -140,23 +141,35 @@ public class RedisCommonTest {
     @Test
     public void listTest() throws Exception {
         RListTest rListTest = new RListTest();
-        rListTest.lpush_lpop(redisManager);
-        rListTest.rpush_rpop(redisManager);
-        rListTest.lrange(redisManager);
-        rListTest.ltrim(redisManager);
+        rListTest.leftPushAndLeftPop(redisManager);
+        rListTest.rightPushAndRightPop(redisManager);
+        rListTest.leftRange(redisManager);
+        rListTest.leftTrim(redisManager);
     }
 
     @Test
     public void bloomFilterTest() throws Exception {
         RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
-        bloomFilter.put("你好");
-        bloomFilter.put("世界");
-        bloomFilter.put("测试");
 
-        Assertions.assertThat(bloomFilter.isExist("你好")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("世界")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("测试")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("测试测试")).isEqualTo(false);
+        for(int i=0;i<1000;i++) {
+            bloomFilter.put(i+"");
+        }
+
+        Assertions.assertThat(bloomFilter.isExist("1")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("22")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("555")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.isExist("1001")).isEqualTo(false);
+    }
+
+    @Test
+    public void hyperLogLogsTests() throws Exception {
+        RHyperLogLogs rHyperLogLogs = redisManager.hyperLogLogs("testSET11");
+        String[] values = new String[1000];
+        for(int i=0;i<1000;i++) {
+           values[i] = i+"";
+        }
+        rHyperLogLogs.add(values);
+        logger.info("大小为:{}",rHyperLogLogs.size());
     }
 
 

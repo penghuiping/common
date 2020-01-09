@@ -102,4 +102,11 @@ public interface RedisManager {
      * @return
      */
     RBloomFilter bloomFilter(String name, long expectedInsertions, double fpp);
+
+    /**
+     * 获取 RHyperLogLogs 操作对象
+     * @param key
+     * @return
+     */
+    RHyperLogLogs hyperLogLogs(String key);
 }

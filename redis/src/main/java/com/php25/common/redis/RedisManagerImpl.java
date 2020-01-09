@@ -98,7 +98,12 @@ public class RedisManagerImpl implements RedisManager {
     }
 
     @Override
-    public RBloomFilter bloomFilter(String name,long expectedInsertions, double fpp) {
-        return new RBloomFilter(redisTemplate,name,expectedInsertions,fpp);
+    public RBloomFilter bloomFilter(String name, long expectedInsertions, double fpp) {
+        return new RBloomFilter(redisTemplate, name, expectedInsertions, fpp);
+    }
+
+    @Override
+    public RHyperLogLogs hyperLogLogs(String key) {
+        return new RHyperLogLogsImpl(redisTemplate, key);
     }
 }
