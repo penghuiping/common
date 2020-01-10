@@ -16,11 +16,11 @@
 package com.baidu.fsg.uid.worker.entity;
 
 import com.baidu.fsg.uid.worker.WorkerNodeType;
+import com.php25.common.db.cnd.Column;
 import com.php25.common.db.cnd.GeneratedValue;
 import com.php25.common.db.cnd.GenerationType;
+import com.php25.common.db.cnd.Table;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
