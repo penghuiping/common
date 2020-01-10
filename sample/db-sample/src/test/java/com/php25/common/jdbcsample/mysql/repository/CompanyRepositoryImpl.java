@@ -1,6 +1,6 @@
 package com.php25.common.jdbcsample.mysql.repository;
 
-import com.php25.common.db.repository.JdbcDbRepositoryImpl;
+import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
  * @description:
  */
 @Repository
-public class CompanyRepositoryImpl extends JdbcDbRepositoryImpl<Company, Long> implements CompanyExRepository {
+public class CompanyRepositoryImpl extends BaseDbRepositoryImpl<Company, Long> implements CompanyRepository {
 }

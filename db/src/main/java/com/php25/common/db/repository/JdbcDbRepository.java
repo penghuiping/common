@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,7 @@ import java.util.Optional;
  * @author penghuiping
  * @date 2019/7/25
  */
-public interface JdbcDbRepository<T, ID extends Serializable> {
+public interface JdbcDbRepository<T, ID > {
 
     /**
      * 获取所有有效的数据项,在软删除的环境中,指的是没有软删除的数据

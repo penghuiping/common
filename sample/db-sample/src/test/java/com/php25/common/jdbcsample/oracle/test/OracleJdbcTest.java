@@ -387,7 +387,7 @@ public class OracleJdbcTest extends DbTest {
         company.setEnable(1);
         company.setCreateTime(new Date());
         company.setNew(true);
-        companyRepository.save0(company);
+        companyRepository.save(company);
         SearchParamBuilder builder = SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "baidu"));
         Assert.assertEquals(companyRepository.findOne(builder).get().getName(), "baidu");
 
@@ -400,7 +400,7 @@ public class OracleJdbcTest extends DbTest {
         customer.setAge(4 * 10);
         customer.setCompanyId(company.getId());
         customer.setNew(true);
-        customerRepository.save0(customer);
+        customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack4"));
         Assert.assertEquals(customerRepository.findOne(builder).get().getUsername(), "jack4");
 
@@ -411,7 +411,7 @@ public class OracleJdbcTest extends DbTest {
         customer.setUsername("jack" + 5);
         customer.setUpdateTime(LocalDateTime.now());
         customer.setNew(false);
-        customerRepository.save0(customer);
+        customerRepository.save(customer);
 
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack5"));
         customerOptional = customerRepository.findOne(builder);
@@ -434,7 +434,7 @@ public class OracleJdbcTest extends DbTest {
             customer.setNew(true);
             customers.add(customer);
         }
-        customerRepository.saveAll0(customers);
+        customerRepository.saveAll(customers);
         Assert.assertEquals(Lists.newArrayList(customerRepository.findAll()).size(), 3);
 
         //更新
@@ -443,7 +443,7 @@ public class OracleJdbcTest extends DbTest {
             customers.get(i).setUsername("mary" + i);
             customers.get(i).setNew(false);
         }
-        customerRepository.saveAll0(customers);
+        customerRepository.saveAll(customers);
 
         System.out.println(JsonUtil.toPrettyJson(customerRepository.findAll()));
     }

@@ -5,17 +5,17 @@ import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.cnd.Column;
 import com.php25.common.db.cnd.DbSchema;
 import com.php25.common.db.cnd.GeneratedValue;
 import com.php25.common.db.cnd.SequenceGenerator;
+import com.php25.common.db.cnd.Table;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
@@ -105,7 +105,7 @@ class JdbcModelManagerHelper {
 
         Table table = cls.getAnnotation(Table.class);
         if (null == table) {
-            throw new IllegalArgumentException(cls.getName() + ":没有org.springframework.data.relational.core.mapping.Table注解");
+            throw new IllegalArgumentException(cls.getName() + ":没有Table注解");
         }
 
         DbSchema schema = cls.getAnnotation(DbSchema.class);

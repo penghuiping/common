@@ -357,7 +357,7 @@ public class MysqlJdbcTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        //company.setId(uidGenerator.getUID());
+        company.setId(uidGenerator.getUID());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());

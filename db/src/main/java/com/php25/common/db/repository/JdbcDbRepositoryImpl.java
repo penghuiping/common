@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Iterator;
@@ -23,7 +22,7 @@ import java.util.Optional;
  * @date: 2019/7/25 15:38
  * @description:
  */
-public class JdbcDbRepositoryImpl<T, ID extends Serializable> implements JdbcDbRepository<T, ID> {
+public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Autowired
     private Db db;
@@ -47,7 +46,7 @@ public class JdbcDbRepositoryImpl<T, ID extends Serializable> implements JdbcDbR
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        return Optional.of(db.cndJdbc(model).whereEq(pkName,id).andEq("enable",1).single());
+        return Optional.of(db.cndJdbc(model).whereEq(pkName, id).andEq("enable", 1).single());
     }
 
     @Override

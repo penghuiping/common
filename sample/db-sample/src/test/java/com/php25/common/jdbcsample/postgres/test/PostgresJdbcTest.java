@@ -368,7 +368,7 @@ public class PostgresJdbcTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        //company.setId(idGeneratorService.getSnowflakeId().longValue());
+        company.setId(uidGenerator.getUID());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
