@@ -31,7 +31,7 @@
         <jfairy.version>0.5.9</jfairy.version>
         <hikari.version>3.3.1</hikari.version>
         <bouncycastle.version>1.60</bouncycastle.version>
-        <hibernate-validator>6.0.17.Final</hibernate-validator>
+        <hibernate-validator>6.1.0.Final</hibernate-validator>
         <oracle>11.2.0.3</oracle>
         <spring-cloud-dependencies>Hoxton.RELEASE</spring-cloud-dependencies>
         <php-common.es>2.2.0-SNAPSHOT</php-common.es>
