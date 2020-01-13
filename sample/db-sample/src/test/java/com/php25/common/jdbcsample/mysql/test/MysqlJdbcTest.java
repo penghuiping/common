@@ -14,6 +14,7 @@ import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
 import com.php25.common.jdbcsample.mysql.repository.CompanyRepository;
 import com.php25.common.jdbcsample.mysql.repository.CustomerRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -350,7 +351,7 @@ public class MysqlJdbcTest extends DbTest {
         SearchParamBuilder searchParamBuilder = SearchParamBuilder.builder().append(Lists.newArrayList());
         Pageable page = PageRequest.of(1, 2, Sort.by(Sort.Order.desc("id")));
         Page<Customer> customers = customerRepository.findAll(searchParamBuilder, page);
-        Assert.assertEquals(customers.getContent().size(), 2);
+        Assertions.assertThat(customers.getContent().size()).isEqualTo(2);
     }
 
     @Test
