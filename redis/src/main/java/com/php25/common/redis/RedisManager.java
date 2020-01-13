@@ -94,6 +94,11 @@ public interface RedisManager {
     <T> RSet<T> set(String setKey, Class<T> cls);
 
     /**
+     * 获取redis中zset数据类型的相关操作对象
+     */
+    <T> RSortedSet<T> zset(String setKey, Class<T> cls);
+
+    /**
      * 获取布隆过滤器操作对象
      *
      * @param name               过滤器的名称，对应redis string类型的key
@@ -105,6 +110,7 @@ public interface RedisManager {
 
     /**
      * 获取 RHyperLogLogs 操作对象
+     *
      * @param key
      * @return
      */
