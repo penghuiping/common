@@ -25,11 +25,11 @@ import java.util.Optional;
 public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Autowired
-    private Db db;
+    protected Db db;
 
-    private Class model;
+    protected Class model;
 
-    private String pkName;
+    protected String pkName;
 
     public JdbcDbRepositoryImpl() {
         Type genType = getClass().getGenericSuperclass();

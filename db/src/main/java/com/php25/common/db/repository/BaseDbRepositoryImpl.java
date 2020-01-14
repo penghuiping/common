@@ -1,15 +1,11 @@
 package com.php25.common.db.repository;
 
 import com.google.common.collect.Lists;
-import com.php25.common.db.Db;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.repository.CrudRepository;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,19 +15,8 @@ import java.util.Optional;
  * @date 2020/1/8 16:37
  */
 public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbRepositoryImpl<T, ID> implements CrudRepository<T, ID>, JdbcDbRepository<T, ID> {
-
-    @Autowired
-    private Db db;
-
-    private Class model;
-
-    private String pkName;
-
     public BaseDbRepositoryImpl() {
-        Type genType = getClass().getGenericSuperclass();
-        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        model = (Class) params[0];
-        pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
+        super();
     }
 
     @Override

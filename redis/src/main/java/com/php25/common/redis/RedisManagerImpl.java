@@ -106,4 +106,9 @@ public class RedisManagerImpl implements RedisManager {
     public RHyperLogLogs hyperLogLogs(String key) {
         return new RHyperLogLogsImpl(redisTemplate, key);
     }
+
+    @Override
+    public <T> RSortedSet<T> zset(String setKey, Class<T> cls) {
+        return new RSortedSetImpl<>(redisTemplate,setKey,cls);
+    }
 }
