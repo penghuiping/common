@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.Optional;
  * @author penghuiping
  * @date 2020/1/8 16:37
  */
-public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbRepositoryImpl<T, ID> implements CrudRepository<T, ID>, JdbcDbRepository<T, ID> {
+public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
     public BaseDbRepositoryImpl() {
         super();
     }
