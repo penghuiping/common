@@ -86,7 +86,8 @@ public class OracleJdbcTest extends DbTest {
 
     @Override
     protected void initDb() {
-        this.db = new Db(jdbcTemplate, DbType.ORACLE);
+        this.db = new Db(DbType.ORACLE);
+        this.db.setJdbcOperations(jdbcTemplate);
     }
 
 

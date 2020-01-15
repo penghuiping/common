@@ -66,9 +66,13 @@ public class DbTest {
         if (isAutoIncrement) {
             statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
             statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+            statement.execute("create table t_department (id bigint primary key,name varchar(20))");
+            statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
         } else {
             statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
             statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+            statement.execute("create table t_department (id bigint primary key,name varchar(20))");
+            statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
         }
         statement.close();
         connection.close();

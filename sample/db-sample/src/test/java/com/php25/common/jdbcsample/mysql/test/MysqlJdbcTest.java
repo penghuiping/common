@@ -1,6 +1,7 @@
 package com.php25.common.jdbcsample.mysql.test;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.Db;
@@ -12,8 +13,11 @@ import com.php25.common.db.specification.SearchParamBuilder;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
+import com.php25.common.jdbcsample.mysql.model.Department;
+import com.php25.common.jdbcsample.mysql.model.DepartmentRef;
 import com.php25.common.jdbcsample.mysql.repository.CompanyRepository;
 import com.php25.common.jdbcsample.mysql.repository.CustomerRepository;
+import com.php25.common.jdbcsample.mysql.repository.DepartmentRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -64,7 +68,8 @@ public class MysqlJdbcTest extends DbTest {
 
     @Override
     protected void initDb() {
-        this.db = new Db(jdbcTemplate, DbType.MYSQL);
+        this.db = new Db(DbType.MYSQL);
+        this.db.setJdbcOperations(jdbcTemplate);
     }
 
     @Test
@@ -128,10 +133,10 @@ public class MysqlJdbcTest extends DbTest {
         Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        customers = db.cndJdbc(Customer.class).join(Company.class,"id", "companyId").select(Customer.class);
+        customers = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").select(Customer.class);
         System.out.println(JsonUtil.toPrettyJson(customers));
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id","companyId").whereEq(Company.class, "id", 1).select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").whereEq(Company.class, "id", 1).select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
 
     }
@@ -155,7 +160,7 @@ public class MysqlJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(result));
         Assert.assertTrue(null != customers1 && customers1.size() > 0);
         for (Map map : customers1) {
-            Assert.assertTrue(BigDecimal.valueOf(result.get(map.get("enable"))).intValue()== ((BigDecimal) map.get("avg_age")).intValue());
+            Assert.assertTrue(BigDecimal.valueOf(result.get(map.get("enable"))).intValue() == ((BigDecimal) map.get("avg_age")).intValue());
         }
     }
 
@@ -331,6 +336,9 @@ public class MysqlJdbcTest extends DbTest {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
 
     @Test
     public void findAllEnabled() {
@@ -483,5 +491,42 @@ public class MysqlJdbcTest extends DbTest {
     public void deleteAll() {
         customerRepository.deleteAll();
         Assert.assertEquals(customerRepository.count(), 0);
+    }
+
+    @Test
+    public void saveManyToMany() {
+        Department department = new Department();
+        department.setId(uidGenerator.getUID());
+        department.setName("testDepart");
+        department.setNew(true);
+        department = departmentRepository.save(department);
+
+        Customer customer = new Customer();
+        if (!isAutoIncrement)
+            customer.setId(uidGenerator.getUID());
+        customer.setUsername("jack12313");
+        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setStartTime(LocalDateTime.now());
+        customer.setAge(10);
+        customer.setNew(true);
+        customer.setEnable(1);
+
+        DepartmentRef departmentRef = new DepartmentRef();
+        departmentRef.setDepartmentId(department.getId());
+        customer.setDepartments(Sets.newHashSet(departmentRef));
+
+        customer = customerRepository.save(customer);
+        Department department1 = departmentRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "testDepart"))).get();
+        Assertions.assertThat(department.getId()).isEqualTo(department1.getId());
+
+        Customer customer1 = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
+        Assertions.assertThat(customer1.getId()).isEqualTo(customer.getId());
+
+        customerRepository.findById(customer.getId());
+    }
+
+    @Test
+    public void deleteManyToMany() {
+
     }
 }

@@ -169,6 +169,67 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return insert(t, false);
     }
 
+    public <T> int[] insertRelation(String pkName,Object pkValue,List list) {
+        //泛型获取类所有的属性
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+        pairList.add(new ImmutablePair<>(pkName,pkValue));
+
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append(pairList.get(i).getLeft());
+            } else {
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
+        }
+        stringBuilder.append(" ) VALUES ( ");
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append("?");
+            } else {
+                stringBuilder.append("?,");
+            }
+        }
+        stringBuilder.append(" )");
+        log.info("sql语句为:" + stringBuilder.toString());
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                } else {
+                    params.add(paramConvert(tmp.get(i).getRight()));
+                }
+            }
+            params.add(pkValue);
+            batchParams.add(params.toArray());
+        }
+
+        try {
+            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
+        } catch (Exception e) {
+            throw Exceptions.throwIllegalStateException("插入操作失败", e);
+        } finally {
+            clear();
+        }
+    }
 
     @Override
     public <M> int[] insertBatch(List<M> list) {

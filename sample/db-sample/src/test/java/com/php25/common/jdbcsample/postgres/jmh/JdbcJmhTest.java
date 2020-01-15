@@ -72,7 +72,8 @@ public class JdbcJmhTest {
 
         this.jdbcTemplate = testContext.getApplicationContext().getBean(JdbcTemplate.class);
         this.uidGenerator = testContext.getApplicationContext().getBean(UidGenerator.class);
-        this.db = new Db(this.jdbcTemplate, DbType.POSTGRES);
+        this.db = new Db( DbType.POSTGRES);
+        this.db.setJdbcOperations(jdbcTemplate);
 
         jdbcTemplate.update("drop table if exists t_customer;");
         jdbcTemplate.update("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time timestamp ,update_time timestamp,version bigint,company_id bigint,`enable` int);");

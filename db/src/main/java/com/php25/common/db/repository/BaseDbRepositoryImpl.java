@@ -6,6 +6,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.data.domain.Persistable;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,20 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
         if (s.isNew()) {
             //新增
             db.cndJdbc(model).insert(s);
+            List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(s);
+            for (int i = 0; i < immutablePairs.size(); i++) {
+                ImmutablePair<String, Object> tmp = immutablePairs.get(i);
+                Collection collection = (Collection) tmp.getRight();
+                List list = new ArrayList();
+                Iterator iterator = collection.iterator();
+                while (iterator.hasNext()) {
+                    Object obj = iterator.next();
+                    list.add(obj);
+                }
+                if (list.size() > 0) {
+                    db.cndJdbc(list.get(0).getClass()).insertRelation(tmp.getLeft(),s.getId(),list);
+                }
+            }
         } else {
             //更新
             db.cndJdbc(model).update(s);

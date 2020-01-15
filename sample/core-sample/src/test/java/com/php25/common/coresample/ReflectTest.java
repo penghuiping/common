@@ -1,14 +1,17 @@
 package com.php25.common.coresample;
 
+import com.php25.common.core.util.ObjectUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.TimeUtil;
 import com.php25.common.coresample.model.Customer;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Date;
 
 
@@ -121,6 +124,12 @@ public class ReflectTest {
         }
         Long end = TimeUtil.getCurrentTimeMillis();
         System.out.println("getCacheMethodJdk耗时为:" + (end - start));
+    }
+
+    @Test
+    public void getGenericCollection() {
+        Collection collection = Sets.newLinkedHashSet("hello");
+        ObjectUtil.getTypeArgument(collection);
     }
 
 

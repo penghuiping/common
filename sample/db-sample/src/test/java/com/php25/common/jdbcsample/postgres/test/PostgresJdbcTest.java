@@ -75,7 +75,8 @@ public class PostgresJdbcTest extends DbTest {
 
     @Override
     protected void initDb() {
-        this.db = new Db(jdbcTemplate, DbType.POSTGRES);
+        this.db = new Db(DbType.POSTGRES);
+        this.db.setJdbcOperations(jdbcTemplate);
     }
 
     @Test

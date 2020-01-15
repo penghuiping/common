@@ -56,7 +56,9 @@ public class DruidConfig {
 
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
-        return new Db(jdbcTemplate, DbType.POSTGRES);
+        Db db =  new Db(DbType.POSTGRES);
+        db.setJdbcOperations(jdbcTemplate);
+        return db;
     }
 
 

@@ -9,7 +9,6 @@ import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
-import com.php25.common.jdbcsample.oracle.test.OracleJdbcTest;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -59,7 +58,9 @@ public class DruidConfig {
 
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
-        return new Db(jdbcTemplate, DbType.ORACLE);
+        Db db =  new Db(DbType.ORACLE);
+        db.setJdbcOperations(jdbcTemplate);
+        return db;
     }
 
 
