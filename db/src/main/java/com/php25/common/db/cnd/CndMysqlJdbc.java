@@ -154,18 +154,4 @@ public class CndMysqlJdbc extends CndJdbc {
             clear();
         }
     }
-
-    @Override
-    public int delete() {
-        StringBuilder sb = new StringBuilder("DELETE FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
-        this.setSql(sb);
-        log.info("sql语句为:" + sb.toString());
-        String targetSql = this.getSql().toString();
-        Object[] paras = getParams().toArray();
-        //先清除，避免执行出错后无法清除
-        clear();
-        int row = this.jdbcOperations.update(targetSql, paras);
-        return row;
-    }
 }

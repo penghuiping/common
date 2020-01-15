@@ -48,7 +48,9 @@ public class DbConfig {
 
     @Bean
     Db db(JdbcTemplate jdbcTemplate) {
-        return new Db(jdbcTemplate, DbType.MYSQL);
+        Db db = new Db(DbType.MYSQL);
+        db.setJdbcOperations(jdbcTemplate);
+        return db;
     }
 
 

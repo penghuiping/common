@@ -493,8 +493,8 @@ public class MysqlJdbcTest extends DbTest {
         Assert.assertEquals(customerRepository.count(), 0);
     }
 
-    @Test
-    public void saveManyToMany() {
+//    @Test
+    public void testManyToMany() {
         Department department = new Department();
         department.setId(uidGenerator.getUID());
         department.setName("testDepart");
@@ -516,17 +516,21 @@ public class MysqlJdbcTest extends DbTest {
         customer.setDepartments(Sets.newHashSet(departmentRef));
 
         customer = customerRepository.save(customer);
+
+        customer.setDepartments(Sets.newHashSet(departmentRef));
+        customer.setNew(false);
+        customer = customerRepository.save(customer);
+
         Department department1 = departmentRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "testDepart"))).get();
         Assertions.assertThat(department.getId()).isEqualTo(department1.getId());
 
         Customer customer1 = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
         Assertions.assertThat(customer1.getId()).isEqualTo(customer.getId());
 
-        customerRepository.findById(customer.getId());
-    }
 
-    @Test
-    public void deleteManyToMany() {
+        customerRepository.delete(customer);
 
     }
+
+
 }
