@@ -324,11 +324,48 @@ class JdbcModelManagerHelper {
                 });
         List<ImmutablePair<String, Object>> pairList = null;
         if (ignoreNull) {
-            String id = getPrimaryKeyColName(t.getClass());
-            pairList = stream.filter(pair -> (pair.getLeft().equals(id) || pair.right != null)).collect(Collectors.toList());
+            String id = null;
+            try {
+                id = getPrimaryKeyColName(t.getClass());
+            } catch (Exception e) {
+
+            }
+            if (!StringUtil.isBlank(id)) {
+                String id1 = id;
+                pairList = stream.filter(pair -> (pair.getLeft().equals(id1) || pair.right != null)).collect(Collectors.toList());
+            } else {
+                pairList = stream.filter(pair -> pair.right != null).collect(Collectors.toList());
+            }
         } else {
             pairList = stream.collect(Collectors.toList());
         }
+        return pairList;
+    }
+
+    protected static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndCollectionValue(T t) {
+        AssertUtil.notNull(t, "t不能为null");
+        Field[] fields = t.getClass().getDeclaredFields();
+        Stream<ImmutablePair<String, Object>> stream = Lists.newArrayList(fields).stream()
+                .filter(field -> (null == field.getAnnotation(Transient.class)) && (Collection.class.isAssignableFrom(field.getType())))
+                .map(field1 -> {
+                    Column column = field1.getAnnotation(Column.class);
+                    String fieldName = field1.getName();
+                    String columnName = null;
+                    if (null == column || StringUtil.isBlank(column.value())) {
+                        throw Exceptions.throwIllegalStateException("collection属性必须指定@Column注解的value值，值为中间表的关联字段名");
+                    } else {
+                        columnName = column.value();
+                    }
+                    Object value = null;
+                    try {
+                        value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw Exceptions.throwIllegalStateException(e.getMessage(), e);
+                    }
+                    return new ImmutablePair<>(columnName, value);
+                });
+        List<ImmutablePair<String, Object>> pairList = null;
+        pairList = stream.filter(pair -> pair.right != null).collect(Collectors.toList());
         return pairList;
     }
 }

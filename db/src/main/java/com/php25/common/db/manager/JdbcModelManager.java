@@ -204,4 +204,15 @@ public class JdbcModelManager {
     public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndValue(T t, boolean ignoreNull) {
         return JdbcModelManagerHelper.getTableColumnNameAndValue(t, ignoreNull);
     }
+
+    /**
+     * 获取表属性列名与值
+     *
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndCollectionValue(T t) {
+        return JdbcModelManagerHelper.getTableColumnNameAndCollectionValue(t);
+    }
 }

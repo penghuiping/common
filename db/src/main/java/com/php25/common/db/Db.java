@@ -1,19 +1,17 @@
 package com.php25.common.db;
 
 import com.php25.common.db.cnd.CndJdbc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.transaction.support.TransactionOperations;
 
 /**
  * @author penghuiping
  * @date 2018-08-23
  */
 public class Db {
-
-    private Logger log = LoggerFactory.getLogger(Db.class);
-
     private JdbcOperations jdbcOperations;
+
+    private TransactionOperations transactionOperations;
 
     private DbType dbType;
 
@@ -21,11 +19,27 @@ public class Db {
         return dbType;
     }
 
-    public Db(JdbcOperations jdbcOperations, DbType dbType) {
-        this.jdbcOperations = jdbcOperations;
+
+    public Db(DbType dbType) {
         this.dbType = dbType;
     }
 
+
+    public void setJdbcOperations(JdbcOperations jdbcOperations) {
+        this.jdbcOperations = jdbcOperations;
+    }
+
+    public void setTransactionOperations(TransactionOperations transactionOperations) {
+        this.transactionOperations = transactionOperations;
+    }
+
+    public JdbcOperations getJdbcOperations() {
+        return jdbcOperations;
+    }
+
+    public TransactionOperations getTransactionOperations() {
+        return transactionOperations;
+    }
 
     /**
      * 获取一个新条件

@@ -81,7 +81,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public <T> List<T> select(Class resultType, String... columns) {
-        AssertUtil.notNull(resultType,"resultType不能为null");
+        AssertUtil.notNull(resultType, "resultType不能为null");
         StringBuilder sb = null;
         if (null != columns && columns.length > 0) {
             sb = new StringBuilder("SELECT ");
@@ -121,21 +121,21 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public <T> T single() {
-        List<T> list = limit(0, 1).select();
+        List<T> list = select();
         if (list.isEmpty()) {
             return null;
         }
-        // 同SQLManager.single 一致，只取第一条。
+        // 只取第一条。
         return list.get(0);
     }
 
     @Override
     public Map mapSingle() {
-        List<Map> list = limit(0, 1).select(Map.class);
+        List<Map> list = select(Map.class);
         if (list.isEmpty()) {
             return null;
         }
-        // 同SQLManager.single 一致，只取第一条
+        // 只取第一条
         return list.get(0);
     }
 
@@ -164,13 +164,15 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return insert(t, true);
     }
 
-
+    @Override
+    public <T> int insertIncludeNull(T t) {
+        return insert(t, false);
+    }
 
 
     @Override
     public <M> int[] insertBatch(List<M> list) {
         //泛型获取类所有的属性
-        Field[] fields = clazz.getDeclaredFields();
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
 
@@ -229,10 +231,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         }
     }
 
-    @Override
-    public <T> int insertIncludeNull(T t) {
-        return insert(t, false);
-    }
 
     @Override
     public int delete() {
@@ -306,14 +304,14 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
-    public CndJdbc join(Class<?> model, String column,String relationColumn) {
+    public CndJdbc join(Class<?> model, String column, String relationColumn) {
         String tmp = getSql().toString();
         if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
             throw Exceptions.throwIllegalStateException("join只能使用一次");
         }
         String tableB = JdbcModelManager.getTableName(model);
-        String tableA= JdbcModelManager.getTableName(clazz);
-        String joinStatement = String.format("%s.%s=%s.%s", tableA,JdbcModelManager.getDbColumnByClassColumn(clazz,relationColumn),tableB,JdbcModelManager.getDbColumnByClassColumn(model,column));
+        String tableA = JdbcModelManager.getTableName(clazz);
+        String joinStatement = String.format("%s.%s=%s.%s", tableA, JdbcModelManager.getDbColumnByClassColumn(clazz, relationColumn), tableB, JdbcModelManager.getDbColumnByClassColumn(model, column));
         StringBuilder sb = new StringBuilder(String.format("JOIN %s ON %s ", tableB, joinStatement));
         sb.append(getSql());
         this.setSql(sb);
@@ -546,11 +544,11 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType)) {
             //基本类型,string,date直接加入参数列表
             return paramValue;
-        }else if(Date.class.isAssignableFrom(paramValueType)) {
-            Date tmp = (Date)paramValue;
+        } else if (Date.class.isAssignableFrom(paramValueType)) {
+            Date tmp = (Date) paramValue;
             return new Timestamp(tmp.getTime());
-        }else if(LocalDateTime.class.isAssignableFrom(paramValueType)) {
-            LocalDateTime tmp = (LocalDateTime)paramValue;
+        } else if (LocalDateTime.class.isAssignableFrom(paramValueType)) {
+            LocalDateTime tmp = (LocalDateTime) paramValue;
             return new Timestamp(Date.from(tmp.toInstant(ZoneOffset.ofHours(8))).getTime());
         } else {
             if (!(Collection.class.isAssignableFrom(paramValueType))) {

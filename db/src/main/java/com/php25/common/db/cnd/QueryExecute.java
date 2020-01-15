@@ -72,6 +72,13 @@ public interface QueryExecute {
      */
     <M> int update(M t);
 
+    /***
+     * 更新，包括null值
+     * @param t 任意对象或者Map
+     * @return 影响的行数
+     */
+    <M> int updateIncludeNull(M t);
+
     /**
      * 批量更新操作
      *
@@ -81,12 +88,6 @@ public interface QueryExecute {
      */
     public <T> int[] updateBatch(List<T> lists);
 
-    /***
-     * 更新，包括null值
-     * @param t 任意对象或者Map
-     * @return 影响的行数
-     */
-    <M> int updateIncludeNull(M t);
 
     /***
      * 插入，不包括null值
@@ -94,6 +95,14 @@ public interface QueryExecute {
      * @return 影响的行数
      */
     <M> int insert(M m);
+
+
+    /***
+     * 插入，包括null值
+     * @param m
+     * @return 影响的行数
+     */
+    <M> int insertIncludeNull(M m);
 
     /**
      * 批量插入操作
@@ -104,12 +113,6 @@ public interface QueryExecute {
      */
     <M> int[] insertBatch(List<M> list);
 
-    /***
-     * 插入，包括null值
-     * @param m
-     * @return 影响的行数
-     */
-    <M> int insertIncludeNull(M m);
 
     /***
      * 删除

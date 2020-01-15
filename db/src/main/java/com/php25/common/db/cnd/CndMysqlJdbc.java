@@ -52,7 +52,6 @@ public class CndMysqlJdbc extends CndJdbc {
     @Override
     protected <T> int insert(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
-        Field[] fields = clazz.getDeclaredFields();
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
 
@@ -100,7 +99,7 @@ public class CndMysqlJdbc extends CndJdbc {
             if (i == (pairList.size() - 1)) {
                 stringBuilder.append(pairList.get(i).getLeft());
             } else {
-                stringBuilder.append(pairList.get(i).getLeft() + ",");
+                stringBuilder.append(pairList.get(i).getLeft()).append(",");
             }
         }
         stringBuilder.append(" ) VALUES ( ");
