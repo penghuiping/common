@@ -77,60 +77,62 @@ public class MysqlJdbcTest extends DbTest {
         //like
         List<Customer> customers = db.cndJdbc(Customer.class)
                 .whereLike("username", "jack%").asc("id").select();
-        Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
 
         //not like
         customers = db.cndJdbc(Customer.class)
                 .whereNotLike("username", "jack%").asc("id").select();
-        Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
 
         //eq
         Company company = db.cndJdbc(Company.class).whereEq("name", "Google").single();
-        Assert.assertNotNull(company);
+        Assertions.assertThat(company).isNotNull();
 
         //not eq
         company = db.cndJdbc(Company.class).whereNotEq("name", "Google").single();
-        Assert.assertNull(company);
+        Assertions.assertThat(company).isNull();
 
         //between...and..
         customers = db.cndJdbc(Customer.class).whereBetween("age", 20, 50).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
 
         //not between...and..
         customers = db.cndJdbc(Customer.class).whereNotBetween("age", 20, 50).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
 
         //in
         customers = db.cndJdbc(Customer.class).whereIn("age", Lists.newArrayList(20, 40)).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
 
         //not in
         customers = db.cndJdbc(Customer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
 
         //great
         customers = db.cndJdbc(Customer.class).whereGreat("age", 40).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() > 40).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() > 40).count());
 
         //great equal
         customers = db.cndJdbc(Customer.class).whereGreatEq("age", 40).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() >= 40).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 40).count());
 
         //less
         customers = db.cndJdbc(Customer.class).whereLess("age", 0).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() < 0).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 0).count());
 
         //less equal
         customers = db.cndJdbc(Customer.class).whereLessEq("age", 0).select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getAge() <= 0).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() <= 0).count());
 
         //is null
         customers = db.cndJdbc(Customer.class).whereIsNull("updateTime").select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //is not null
         customers = db.cndJdbc(Customer.class).whereIsNotNull("updateTime").select();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
         customers = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").select(Customer.class);
@@ -146,9 +148,9 @@ public class MysqlJdbcTest extends DbTest {
     public void orderBy() {
         List<Customer> customers = db.cndJdbc(Customer.class).orderBy("age asc").select();
         List<Customer> customers1 = db.cndJdbc(Customer.class).asc("age").select();
-        Assert.assertEquals(customers.size(), customers1.size());
+        Assertions.assertThat(customers.size()).isEqualTo(customers1.size());
         for (int i = 0; i < customers.size(); i++) {
-            Assert.assertEquals(customers.get(i).getAge(), customers1.get(i).getAge());
+            Assertions.assertThat(customers.get(i).getAge()).isEqualTo(customers1.get(i).getAge());
         }
     }
 
@@ -158,29 +160,31 @@ public class MysqlJdbcTest extends DbTest {
         List<Map> customers1 = cndJdbc.groupBy("enable").mapSelect("avg(age) as avg_age", "enable");
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
-        Assert.assertTrue(null != customers1 && customers1.size() > 0);
+        Assertions.assertThat(customers1).isNotNull();
+        Assertions.assertThat(customers1.size()>0);
         for (Map map : customers1) {
-            Assert.assertTrue(BigDecimal.valueOf(result.get(map.get("enable"))).intValue() == ((BigDecimal) map.get("avg_age")).intValue());
+            Assertions.assertThat(BigDecimal.valueOf(result.get(map.get("enable"))).intValue()).isEqualTo(((BigDecimal) map.get("avg_age")).intValue());
         }
     }
 
     @Test
     public void findAll() {
         List<Customer> customers = db.cndJdbc(Customer.class).select();
-        Assert.assertNotNull(customers);
-        Assert.assertEquals(customers.size(), this.customers.size());
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.size());
     }
 
     @Test
     public void findOne() {
         Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
-        Assert.assertTrue(null != customer && "jack0".equals(customer.getUsername()));
+        Assertions.assertThat(customer).isNotNull();
+        Assertions.assertThat("jack0").isEqualTo(customer.getUsername());
     }
 
     @Test
     public void count() {
         Long count = db.cndJdbc(Customer.class).whereEq("enable", "1").count();
-        Assert.assertEquals(this.customers.stream().filter(a -> a.getEnable() == 1).count(), (long) count);
+        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long)count);
     }
 
     @Test
@@ -221,8 +225,8 @@ public class MysqlJdbcTest extends DbTest {
 
         company.setCustomers(Lists.newArrayList(customer, customer1));
         db.cndJdbc(Company.class).insert(company);
-        Assert.assertEquals(2, db.cndJdbc(Customer.class).count());
-        Assert.assertEquals(1, db.cndJdbc(Company.class).count());
+        Assertions.assertThat(2).isEqualTo(db.cndJdbc(Customer.class).count());
+        Assertions.assertThat(1).isEqualTo(db.cndJdbc(Company.class).count());
     }
 
     @Test
@@ -261,8 +265,8 @@ public class MysqlJdbcTest extends DbTest {
         db.cndJdbc(Company.class).insertBatch(Lists.newArrayList(company));
         db.cndJdbc(Customer.class).insertBatch(Lists.newArrayList(customer, customer1));
 
-        Assert.assertEquals(2, db.cndJdbc(Customer.class).count());
-        Assert.assertEquals(1, db.cndJdbc(Company.class).count());
+        Assertions.assertThat(2).isEqualTo(db.cndJdbc(Customer.class).count());
+        Assertions.assertThat(1).isEqualTo(db.cndJdbc(Company.class).count());
     }
 
     @Test
@@ -271,9 +275,9 @@ public class MysqlJdbcTest extends DbTest {
         customer.setUsername("jack-0");
         db.cndJdbc(Customer.class).update(customer);
         customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
-        Assert.assertNull(customer);
+        Assertions.assertThat(customer).isNull();
         customer = db.cndJdbc(Customer.class).whereEq("username", "jack-0").single();
-        Assert.assertNotNull(customer);
+        Assertions.assertThat(customer).isNotNull();
     }
 
     @Test
@@ -285,7 +289,7 @@ public class MysqlJdbcTest extends DbTest {
         }).collect(Collectors.toList());
         int[] arr = db.cndJdbc(Customer.class).updateBatch(customers);
         for (int e : arr) {
-            Assert.assertEquals(e, 1);
+            Assertions.assertThat(e).isEqualTo(1);
         }
     }
 
@@ -314,7 +318,8 @@ public class MysqlJdbcTest extends DbTest {
         countDownLatch1.await();
         System.out.println("===========>更新成功的数量:" + atomicInteger.get());
         Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
-        Assert.assertTrue(1000L - customer.getScore().longValue() == atomicInteger.get() && atomicInteger.get() == customer.getVersion());
+        Assertions.assertThat(1000L - customer.getScore().longValue()).isEqualTo(atomicInteger.get());
+        Assertions.assertThat(customer.getVersion()).isEqualTo(atomicInteger.get());
     }
 
 
@@ -322,7 +327,8 @@ public class MysqlJdbcTest extends DbTest {
     public void delete() {
         db.cndJdbc(Customer.class).whereLike("username", "jack%").delete();
         List<Customer> customers = db.cndJdbc(Customer.class).select();
-        Assert.assertTrue(customers != null && customers.size() == this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
 
     /**
@@ -343,15 +349,15 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void findAllEnabled() {
         List<Customer> customers = customerRepository.findAllEnabled();
-        Assert.assertEquals(customers.size(), this.customers.stream().filter(a -> a.getEnable() == 1).count());
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getEnable() == 1).count());
     }
 
     @Test
     public void findAllSort() {
         SearchParamBuilder searchParamBuilder = SearchParamBuilder.builder().append(Lists.newArrayList());
         Iterable<Customer> customers = customerRepository.findAll(searchParamBuilder, Sort.by(Sort.Order.desc("id")));
-        Assert.assertEquals(Lists.newArrayList(customers).size(), this.customers.size());
-        Assert.assertEquals(Lists.newArrayList(customers).get(0).getId(), this.customers.get(this.customers.size() - 1).getId());
+        Assertions.assertThat(Lists.newArrayList(customers).size()).isEqualTo(this.customers.size());
+        Assertions.assertThat(Lists.newArrayList(customers).get(0).getId()).isEqualTo(this.customers.get(this.customers.size() - 1).getId());
     }
 
     @Test
@@ -373,7 +379,7 @@ public class MysqlJdbcTest extends DbTest {
         company.setNew(true);
         companyRepository.save(company);
         SearchParamBuilder builder = SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "baidu"));
-        Assert.assertEquals(companyRepository.findOne(builder).get().getName(), "baidu");
+        Assertions.assertThat(companyRepository.findOne(builder).get().getName()).isEqualTo("baidu");
 
         Customer customer = new Customer();
         if (!isAutoIncrement)
@@ -386,7 +392,7 @@ public class MysqlJdbcTest extends DbTest {
         customer.setNew(true);
         customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack4"));
-        Assert.assertEquals(customerRepository.findOne(builder).get().getUsername(), "jack4");
+        Assertions.assertThat(customerRepository.findOne(builder).get().getUsername()).isEqualTo("jack4");
 
         //更新
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack4"));
@@ -399,7 +405,7 @@ public class MysqlJdbcTest extends DbTest {
         customerRepository.save(customer);
         builder = SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack5"));
         customerOptional = customerRepository.findOne(builder);
-        Assert.assertEquals(customerOptional.get().getUsername(), "jack" + 5);
+        Assertions.assertThat(customerOptional.get().getUsername()).isEqualTo("jack" + 5);
     }
 
     @Test
@@ -428,54 +434,53 @@ public class MysqlJdbcTest extends DbTest {
             customers.get(i).setNew(false);
         }
         customerRepository.saveAll(customers);
-
-        System.out.println(JsonUtil.toPrettyJson(customerRepository.findAll()));
+        Assertions.assertThat(Lists.newArrayList(customerRepository.findAll()).stream().filter(customer -> customer.getUsername().startsWith("mary")).count()).isEqualTo(3);
     }
 
     @Test
     public void findById() {
         Customer customer = customers.get(0);
         Optional<Customer> customer1 = customerRepository.findById(customer.getId());
-        Assert.assertEquals(customer1.get().getId(), customer.getId());
+        Assertions.assertThat(customer1.get().getId()).isEqualTo(customer.getId());
     }
 
     @Test
     public void existsById() {
         Customer customer = customers.get(0);
         Boolean result = customerRepository.existsById(customer.getId());
-        Assert.assertTrue(result);
+        Assertions.assertThat(result).isTrue();
     }
 
     @Test
     public void _findAll() {
         Iterable iterable = customerRepository.findAll();
-        Assert.assertEquals(Lists.newArrayList(iterable).size(), customers.size());
+        Assertions.assertThat(Lists.newArrayList(iterable).size()).isEqualTo(customers.size());
     }
 
     @Test
     public void findAllById() {
         List<Long> ids = customers.stream().map(Customer::getId).collect(Collectors.toList());
         Iterable iterable = customerRepository.findAllById(ids);
-        Assert.assertEquals(Lists.newArrayList(iterable).size(), customers.size());
+        Assertions.assertThat(Lists.newArrayList(iterable).size()).isEqualTo(customers.size());
     }
 
     @Test
     public void _count() {
-        Assert.assertEquals(customerRepository.count(), customers.size());
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size());
     }
 
     @Test
     public void deleteById() {
         customerRepository.deleteById(customers.get(0).getId());
-        Assert.assertEquals(customerRepository.count(), customers.size() - 1);
-        Assert.assertFalse(customerRepository.existsById(customers.get(0).getId()));
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.existsById(customers.get(0).getId())).isFalse();
     }
 
     @Test
     public void deleteByModel() {
         customerRepository.delete(customers.get(1));
-        Assert.assertEquals(customerRepository.count(), customers.size() - 1);
-        Assert.assertFalse(customerRepository.existsById(customers.get(1).getId()));
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.existsById(customers.get(1).getId())).isFalse();
     }
 
     @Test
@@ -483,14 +488,14 @@ public class MysqlJdbcTest extends DbTest {
         Iterable<Customer> ids = customers.stream().filter(customer -> customer.getId() % 2 == 0).collect(Collectors.toList());
         customerRepository.deleteAll(ids);
         customers.stream().filter(customer -> customer.getId() % 2 == 0).collect(Collectors.toList()).forEach(customer -> {
-            Assert.assertFalse(customerRepository.existsById(customer.getId()));
+            Assertions.assertThat(customerRepository.existsById(customer.getId())).isFalse();
         });
     }
 
     @Test
     public void deleteAll() {
         customerRepository.deleteAll();
-        Assert.assertEquals(customerRepository.count(), 0);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(0);
     }
 
     @Test
@@ -535,11 +540,11 @@ public class MysqlJdbcTest extends DbTest {
         DepartmentRef departmentRef1 = new DepartmentRef();
         departmentRef1.setDepartmentId(department1.getId());
 
-        customer.setDepartments(Sets.newHashSet(departmentRef,departmentRef1));
+        customer.setDepartments(Sets.newHashSet(departmentRef, departmentRef1));
         customer.setNew(false);
         customer = customerRepository.save(customer);
 
-       _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
+        _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
         Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(2);
 
         customerRepository.deleteAll(Lists.newArrayList(customer));

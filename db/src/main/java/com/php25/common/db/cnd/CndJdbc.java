@@ -445,12 +445,14 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public CndJdbc asc(String column) {
+        this.getOrderBy();
         orderBy.add(getCol(column) + " ASC");
         return this;
     }
 
     @Override
     public CndJdbc desc(String column) {
+        this.getOrderBy();
         orderBy.add(column + " DESC");
         return this;
     }
