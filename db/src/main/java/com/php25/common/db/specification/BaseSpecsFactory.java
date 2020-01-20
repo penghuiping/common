@@ -1,7 +1,7 @@
 package com.php25.common.db.specification;
 
 
-import com.php25.common.core.exception.Exceptions;
+import com.php25.common.db.exception.DbException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class BaseSpecsFactory {
             }
             return (BaseSpecs<T>) result;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw Exceptions.throwIllegalStateException("获取BaseSpecs实例失败", e);
+            throw new DbException("获取BaseSpecs实例失败", e);
         }
 
 

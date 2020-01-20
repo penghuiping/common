@@ -1,15 +1,15 @@
 package com.php25.common.db.manager;
 
 import com.google.common.collect.Lists;
-import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.cnd.Column;
-import com.php25.common.db.cnd.DbSchema;
-import com.php25.common.db.cnd.GeneratedValue;
-import com.php25.common.db.cnd.SequenceGenerator;
-import com.php25.common.db.cnd.Table;
+import com.php25.common.db.cnd.annotation.Column;
+import com.php25.common.db.cnd.annotation.DbSchema;
+import com.php25.common.db.cnd.annotation.GeneratedValue;
+import com.php25.common.db.cnd.annotation.SequenceGenerator;
+import com.php25.common.db.cnd.annotation.Table;
+import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +66,7 @@ class JdbcModelManagerHelper {
         modelMeta.setPkField(getPrimaryKeyField(cls));
         modelMeta.setDbPkName(getPrimaryKeyColName(cls));
         modelMeta.setClassPkName(getPrimaryKeyFieldName(cls));
+        modelMeta.setExistCollectionAttribute(existCollectionAttribute(cls));
         Optional<Field> versionOptional = getVersionField(cls);
         versionOptional.ifPresent(modelMeta::setVersionField);
         Optional<GeneratedValue> generatedValueOptional = getAnnotationGeneratedValue(cls);
@@ -144,7 +145,8 @@ class JdbcModelManagerHelper {
             }
         }
         if (null == primaryKeyField) {
-            throw Exceptions.throwIllegalStateException("此类没有用@Id主键");
+            return null;
+            //throw new DbException("此类没有用@Id主键");
         }
         return primaryKeyField;
     }
@@ -167,7 +169,8 @@ class JdbcModelManagerHelper {
             }
         }
         if (null == primaryKeyField) {
-            throw Exceptions.throwIllegalStateException("此类没有用@Id主键");
+            //throw new DbException("此类没有用@Id主键");
+            return null;
         }
 
         String pkName = primaryKeyField.getName();
@@ -236,7 +239,8 @@ class JdbcModelManagerHelper {
             }
         }
         if (null == primaryKeyField) {
-            throw Exceptions.throwIllegalStateException("此类没有用@Id主键");
+            return null;
+            //throw new DbException("此类没有用@Id主键");
         }
         return primaryKeyField.getName();
     }
@@ -318,7 +322,7 @@ class JdbcModelManagerHelper {
                     try {
                         value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw Exceptions.throwIllegalStateException(e.getMessage(), e);
+                        throw new DbException(e.getMessage(), e);
                     }
                     return new ImmutablePair<>(columnName, value);
                 });
@@ -352,7 +356,7 @@ class JdbcModelManagerHelper {
                     String fieldName = field1.getName();
                     String columnName = null;
                     if (null == column || StringUtil.isBlank(column.value())) {
-                        throw Exceptions.throwIllegalStateException("collection属性必须指定@Column注解的value值，值为中间表的关联字段名");
+                        throw new DbException("collection属性必须指定@Column注解的value值，值为中间表的关联字段名");
                     } else {
                         columnName = column.value();
                     }
@@ -360,12 +364,19 @@ class JdbcModelManagerHelper {
                     try {
                         value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw Exceptions.throwIllegalStateException(e.getMessage(), e);
+                        throw new DbException(e.getMessage(), e);
                     }
                     return new ImmutablePair<>(columnName, value);
                 });
         List<ImmutablePair<String, Object>> pairList = null;
         pairList = stream.filter(pair -> pair.right != null).collect(Collectors.toList());
         return pairList;
+    }
+
+    protected static Boolean existCollectionAttribute(Class cls) {
+        AssertUtil.notNull(cls, "cls不能为null");
+        Field[] fields = cls.getDeclaredFields();
+        Optional<Field> fieldOptional = Lists.newArrayList(fields).stream().filter(field -> (null == field.getAnnotation(Transient.class)) && (Collection.class.isAssignableFrom(field.getType()))).findAny();
+        return fieldOptional.isPresent();
     }
 }

@@ -1,10 +1,10 @@
 package com.baidu.fsg.uid.worker.entity;
 
-import com.php25.common.db.cnd.Column;
-import com.php25.common.db.cnd.GeneratedValue;
 import com.php25.common.db.cnd.GenerationType;
-import com.php25.common.db.cnd.SequenceGenerator;
-import com.php25.common.db.cnd.Table;
+import com.php25.common.db.cnd.annotation.Column;
+import com.php25.common.db.cnd.annotation.GeneratedValue;
+import com.php25.common.db.cnd.annotation.SequenceGenerator;
+import com.php25.common.db.cnd.annotation.Table;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;

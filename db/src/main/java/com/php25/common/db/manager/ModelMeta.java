@@ -1,7 +1,7 @@
 package com.php25.common.db.manager;
 
-import com.php25.common.db.cnd.GeneratedValue;
-import com.php25.common.db.cnd.SequenceGenerator;
+import com.php25.common.db.cnd.annotation.GeneratedValue;
+import com.php25.common.db.cnd.annotation.SequenceGenerator;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -32,6 +32,11 @@ public class ModelMeta {
     private GeneratedValue generatedValue;
 
     private SequenceGenerator sequenceGenerator;
+
+    /**
+     * 是否存在集合属性
+     */
+    private Boolean existCollectionAttribute;
 
     public List<String> getClassColumns() {
         return classColumns;
@@ -111,5 +116,13 @@ public class ModelMeta {
 
     public void setColumnTypes(List<Class> columnTypes) {
         this.columnTypes = columnTypes;
+    }
+
+    public Boolean getExistCollectionAttribute() {
+        return existCollectionAttribute;
+    }
+
+    public void setExistCollectionAttribute(Boolean existCollectionAttribute) {
+        this.existCollectionAttribute = existCollectionAttribute;
     }
 }

@@ -1,6 +1,6 @@
 package com.php25.common.db.cnd;
 
-import com.php25.common.core.exception.Exceptions;
+import com.php25.common.db.exception.DbException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -389,7 +389,7 @@ public abstract class AbstractQuery implements Query {
 
     private Query manyCondition(Query condition, String link) {
         if (!(condition instanceof QueryCondition)) {
-            throw Exceptions.throwIllegalStateException("连接条件必须是一个 QueryCondition 类型");
+            throw new DbException("连接条件必须是一个 QueryCondition 类型");
         }
 
         //去除叠加条件中的WHERE

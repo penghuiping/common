@@ -1,10 +1,14 @@
 package com.php25.common.db.cnd;
 
-import com.php25.common.core.exception.Exceptions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.php25.common.core.util.AssertUtil;
+import com.php25.common.core.util.ObjectUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.DbType;
+import com.php25.common.db.cnd.annotation.Column;
+import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.specification.SearchParam;
 import com.php25.common.db.specification.SearchParamBuilder;
@@ -26,6 +30,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author: penghuiping
@@ -36,9 +42,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(CndJdbc.class);
 
-    JdbcOperations jdbcOperations = null;
+    protected JdbcOperations jdbcOperations = null;
 
-    DbType dbType;
+    protected DbType dbType;
 
     public static CndJdbc of(Class cls, DbType dbType, JdbcOperations jdbcOperations) {
         CndJdbc dsl = null;
@@ -78,7 +84,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return dsl;
     }
 
-
     @Override
     public <T> List<T> select(Class resultType, String... columns) {
         AssertUtil.notNull(resultType, "resultType不能为null");
@@ -105,6 +110,42 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             list = (List<T>) this.jdbcOperations.query(targetSql, paras, new ColumnMapRowMapper());
         } else {
             list = this.jdbcOperations.query(targetSql, paras, new JdbcModelRowMapper<T>(resultType));
+
+            if (JdbcModelManager.existCollectionAttribute(clazz)) {
+                //存在集合属性
+                Field[] fields = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    if (Set.class.isAssignableFrom(field.getType()) || List.class.isAssignableFrom(field.getType())) {
+                        //处理集合属性
+                        Column column = field.getAnnotation(Column.class);
+                        if (column == null || StringUtil.isBlank(column.value())) {
+                            throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
+                        }
+                        Class collectionTypeClass = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
+
+                        for (T t : list) {
+                            Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
+
+                            Object obj = null;
+                            List list1 = this.jdbcOperations.query(String.format("select * from %s where %s=?", JdbcModelManager.getTableName(collectionTypeClass), column.value()), new Object[]{id}, new JdbcModelRowMapper<>(collectionTypeClass));
+                            if (Set.class.isAssignableFrom(field.getType())) {
+                                Set set = Sets.newHashSet(list1);
+                                obj = set;
+                            } else {
+                                obj = list1;
+                            }
+
+                            try {
+                                ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(t, obj);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new DbException(String.format("%s类%s方法反射调用出错", clazz.getName(), "set" + StringUtil.capitalizeFirstLetter(field.getName())));
+                            }
+                        }
+
+                    }
+
+                }
+            }
         }
         return list;
     }
@@ -151,25 +192,25 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public <T> int update(T t) {
-        return update(t, true);
+        return update0(t, true);
     }
 
     @Override
     public <T> int updateIncludeNull(T t) {
-        return update(t, false);
+        return update0(t, false);
     }
 
     @Override
     public <T> int insert(T t) {
-        return insert(t, true);
+        return insert0(t, true);
     }
 
     @Override
     public <T> int insertIncludeNull(T t) {
-        return insert(t, false);
+        return insert0(t, false);
     }
 
-    public <T> int[] insertRelation(String pkName,Object pkValue,List list) {
+    private <T> int[] insertRelation(String pkName, Object pkValue, List list) {
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
@@ -180,7 +221,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         if (versionFieldOptional.isPresent()) {
             versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
         }
-        pairList.add(new ImmutablePair<>(pkName,pkValue));
+        pairList.add(new ImmutablePair<>(pkName, pkValue));
 
         //拼装sql语句
         for (int i = 0; i < pairList.size(); i++) {
@@ -225,7 +266,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         try {
             return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
         } catch (Exception e) {
-            throw Exceptions.throwIllegalStateException("插入操作失败", e);
+            throw new DbException("插入操作失败", e);
         } finally {
             clear();
         }
@@ -286,12 +327,61 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         try {
             return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
         } catch (Exception e) {
-            throw Exceptions.throwIllegalStateException("插入操作失败", e);
+            throw new DbException("插入操作失败", e);
         } finally {
             clear();
         }
     }
 
+    @Override
+    public <M> int delete(M m) {
+        Object id = JdbcModelManager.getPrimaryKeyValue(clazz, m);
+        String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
+        int result = CndJdbc.of(clazz, dbType, jdbcOperations).whereEq(pkName, id).delete();
+
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            //获取类中的集合属性
+            Field[] fields = clazz.getDeclaredFields();
+            List<Field> collectionFields = Lists.newArrayList(fields).stream()
+                    .filter(field -> Collection.class.isAssignableFrom(field.getType()))
+                    .collect(Collectors.toList());
+            for (Field field : collectionFields) {
+                Column column = field.getAnnotation(Column.class);
+                if (column == null || StringUtil.isBlank(column.value())) {
+                    throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
+                }
+                //清空所有关系
+                Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
+                CndJdbc.of(type, dbType, jdbcOperations).whereEq(column.value(), id).delete();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public <M> int deleteAll(List<M> m) {
+        List<Object> ids = m.stream().map(m1 -> JdbcModelManager.getPrimaryKeyValue(clazz, m1)).collect(Collectors.toList());
+        String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
+        int result = CndJdbc.of(clazz, dbType, jdbcOperations).whereIn(pkName, ids).delete();
+
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            //获取类中的集合属性
+            Field[] fields = clazz.getDeclaredFields();
+            List<Field> collectionFields = Lists.newArrayList(fields).stream()
+                    .filter(field -> Collection.class.isAssignableFrom(field.getType()))
+                    .collect(Collectors.toList());
+            for (Field field : collectionFields) {
+                Column column = field.getAnnotation(Column.class);
+                if (column == null || StringUtil.isBlank(column.value())) {
+                    throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
+                }
+                //清空所有关系
+                Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
+                CndJdbc.of(type, dbType, jdbcOperations).whereIn(column.value(), ids).delete();
+            }
+        }
+        return result;
+    }
 
     @Override
     public int delete() {
@@ -309,7 +399,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public long count() {
-        StringBuilder sb = new StringBuilder("SELECT COUNT(1) as a_count FROM ");
+        StringBuilder sb = new StringBuilder("SELECT COUNT(1) FROM ");
         sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
@@ -318,6 +408,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         //先清除，避免执行出错后无法清除
         clear();
         Long result = this.jdbcOperations.queryForObject(targetSql, Long.class, paras);
+        if (null == result) {
+            result = -1L;
+        }
         return result;
     }
 
@@ -329,7 +422,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             condition.getSql().delete(i, i + 5);
         }
         if (this.groupBy == null) {
-            throw Exceptions.throwIllegalStateException("having 需要在groupBy后调用");
+            throw new DbException("having 需要在groupBy后调用");
         }
         groupBy.addHaving(condition.getSql().toString());
         this.addParam(condition.getParams());
@@ -352,14 +445,12 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public CndJdbc asc(String column) {
-        OrderBy orderByInfo = this.getOrderBy();
         orderBy.add(getCol(column) + " ASC");
         return this;
     }
 
     @Override
     public CndJdbc desc(String column) {
-        OrderBy orderByInfo = this.getOrderBy();
         orderBy.add(column + " DESC");
         return this;
     }
@@ -368,7 +459,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     public CndJdbc join(Class<?> model, String column, String relationColumn) {
         String tmp = getSql().toString();
         if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
-            throw Exceptions.throwIllegalStateException("join只能使用一次");
+            throw new DbException("join只能使用一次");
         }
         String tableB = JdbcModelManager.getTableName(model);
         String tableA = JdbcModelManager.getTableName(clazz);
@@ -404,6 +495,29 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return this.groupBy;
     }
 
+    private <T> int insert0(T t, boolean ignoreNull) {
+        int result = insert(t, ignoreNull);
+
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            //获取主键值
+            Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
+
+            //处理集合关联关系
+            List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(t);
+            for (int i = 0; i < immutablePairs.size(); i++) {
+                ImmutablePair<String, Object> tmp = immutablePairs.get(i);
+                Collection<Object> collection = (Collection<Object>) tmp.getRight();
+                List<Object> list = new ArrayList<>(collection);
+                if (list.size() > 0) {
+                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
     /**
      * 实现sql语句中的insert
      *
@@ -415,9 +529,33 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     protected abstract <T> int insert(T t, boolean ignoreNull);
 
 
+    private <T> int update0(T t, boolean ignoreNull) {
+        int result = update(t, ignoreNull);
+
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            //获取主键值
+            Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
+
+            //处理集合关联关系
+            List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(t);
+            for (int i = 0; i < immutablePairs.size(); i++) {
+                ImmutablePair<String, Object> tmp = immutablePairs.get(i);
+                Collection<Object> collection = (Collection<Object>) tmp.getRight();
+                List<Object> list = new ArrayList<>(collection);
+                if (list.size() > 0) {
+                    //清空所有关系
+                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
+                    //插入关系
+                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
+                }
+            }
+        }
+        return result;
+    }
+
     private <T> int update(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE " + JdbcModelManager.getTableName(t.getClass()) + " SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(t.getClass())).append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(t.getClass());
@@ -470,7 +608,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         try {
             return jdbcOperations.update(stringBuilder.toString(), params.toArray());
         } catch (Exception e) {
-            throw Exceptions.throwIllegalStateException("更新操作失败", e);
+            throw new DbException("更新操作失败", e);
         } finally {
             clear();
         }
@@ -480,7 +618,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     public <T> int[] updateBatch(List<T> lists) {
         T t = lists.get(0);
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE " + JdbcModelManager.getTableName(t.getClass()) + " SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(t.getClass())).append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, false);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(t.getClass());
@@ -544,7 +682,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         try {
             return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
         } catch (Exception e) {
-            throw Exceptions.throwIllegalStateException("批量更新操作失败", e);
+            throw new DbException("批量更新操作失败", e);
         } finally {
             clear();
         }
@@ -618,11 +756,11 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 try {
                     return ReflectUtil.getMethod(paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)).invoke(paramValue);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw Exceptions.throwIllegalStateException(String.format("%s没有%s方法", paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)), e);
+                    throw new DbException(String.format("%s没有%s方法", paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)), e);
                 }
             } else {
                 //Collection类型不做任何处理
-                throw Exceptions.throwIllegalStateException("此orm框架中model中不支持Collection类型的属性");
+                throw new DbException("此orm框架中model中不支持Collection类型的属性");
             }
         }
     }

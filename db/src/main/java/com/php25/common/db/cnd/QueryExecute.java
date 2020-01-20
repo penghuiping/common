@@ -121,6 +121,19 @@ public interface QueryExecute {
     int delete();
 
     /***
+     * 删除
+     * @return 影响的行数
+     */
+    <M> int delete(M m);
+
+
+    /***
+     * 删除
+     * @return 影响的行数
+     */
+    <M> int deleteAll(List<M> m);
+
+    /***
      * count
      * @return 总行数
      */

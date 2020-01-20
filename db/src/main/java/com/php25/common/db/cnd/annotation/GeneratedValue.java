@@ -1,4 +1,6 @@
-package com.php25.common.db.cnd;
+package com.php25.common.db.cnd.annotation;
+
+import com.php25.common.db.cnd.GenerationType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

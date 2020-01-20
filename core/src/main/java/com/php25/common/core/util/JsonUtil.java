@@ -1,18 +1,30 @@
 package com.php25.common.core.util;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.php25.common.core.exception.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -31,6 +43,10 @@ public abstract class JsonUtil {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+
+        JavaTimeModule timeModule = new JavaTimeModule();
+        timeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
+        objectMapper.registerModule(timeModule);
     }
 
 
@@ -101,6 +117,23 @@ public abstract class JsonUtil {
             return objectMapper.writer(PRETTY_PRINTER).writeValueAsString(obj);
         } catch (IOException e) {
             throw Exceptions.throwIllegalStateException("json解析出错", e);
+        }
+    }
+
+    //时间序列化时变为时间戳
+    public static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+        @Override
+        public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeString(TimeUtil.getTime(new Date(localDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+    }
+
+    //时间戳反序列化时间
+    public static class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+        @Override
+        public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+            Long timestamp = jsonParser.getLongValue();
+            return LocalDateTime.ofEpochSecond(timestamp / 1000, 0, ZoneOffset.ofHours(8));
         }
     }
 }

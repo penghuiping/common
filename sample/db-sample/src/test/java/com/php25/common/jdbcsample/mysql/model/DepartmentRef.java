@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.mysql.model;
 
-import com.php25.common.db.cnd.Column;
-import com.php25.common.db.cnd.Table;
+import com.php25.common.db.cnd.annotation.Column;
+import com.php25.common.db.cnd.annotation.Table;
 
 /**
  * @author penghuiping

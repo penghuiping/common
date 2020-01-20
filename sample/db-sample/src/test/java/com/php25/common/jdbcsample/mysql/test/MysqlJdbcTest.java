@@ -493,14 +493,22 @@ public class MysqlJdbcTest extends DbTest {
         Assert.assertEquals(customerRepository.count(), 0);
     }
 
-//    @Test
+    @Test
     public void testManyToMany() {
+        //部门
         Department department = new Department();
         department.setId(uidGenerator.getUID());
         department.setName("testDepart");
         department.setNew(true);
         department = departmentRepository.save(department);
 
+        Department department1 = new Department();
+        department1.setId(uidGenerator.getUID());
+        department1.setName("testDepart1");
+        department1.setNew(true);
+        department1 = departmentRepository.save(department1);
+
+        //人员
         Customer customer = new Customer();
         if (!isAutoIncrement)
             customer.setId(uidGenerator.getUID());
@@ -513,22 +521,31 @@ public class MysqlJdbcTest extends DbTest {
 
         DepartmentRef departmentRef = new DepartmentRef();
         departmentRef.setDepartmentId(department.getId());
-        customer.setDepartments(Sets.newHashSet(departmentRef));
 
+        customer.setDepartments(Sets.newHashSet(departmentRef));
         customer = customerRepository.save(customer);
 
-        customer.setDepartments(Sets.newHashSet(departmentRef));
+        Department _department = departmentRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "testDepart"))).get();
+        Assertions.assertThat(department.getId()).isEqualTo(_department.getId());
+
+        Customer _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
+        Assertions.assertThat(_customer.getId()).isEqualTo(customer.getId());
+        Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(1);
+
+        DepartmentRef departmentRef1 = new DepartmentRef();
+        departmentRef1.setDepartmentId(department1.getId());
+
+        customer.setDepartments(Sets.newHashSet(departmentRef,departmentRef1));
         customer.setNew(false);
         customer = customerRepository.save(customer);
 
-        Department department1 = departmentRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "testDepart"))).get();
-        Assertions.assertThat(department.getId()).isEqualTo(department1.getId());
+       _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
+        Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(2);
 
-        Customer customer1 = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
-        Assertions.assertThat(customer1.getId()).isEqualTo(customer.getId());
+        customerRepository.deleteAll(Lists.newArrayList(customer));
 
-
-        customerRepository.delete(customer);
+        Optional optional = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313")));
+        Assertions.assertThat(optional.isPresent()).isEqualTo(false);
 
     }
 

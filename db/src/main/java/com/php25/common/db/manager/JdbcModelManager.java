@@ -1,14 +1,17 @@
 package com.php25.common.db.manager;
 
-import com.php25.common.core.exception.Exceptions;
-import com.php25.common.db.cnd.GeneratedValue;
-import com.php25.common.db.cnd.SequenceGenerator;
+import com.php25.common.core.util.ReflectUtil;
+import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.cnd.annotation.GeneratedValue;
+import com.php25.common.db.cnd.annotation.SequenceGenerator;
+import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +68,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getPkField();
         } else {
+            log.info("getPrimaryKeyField没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyField(cls);
         }
     }
@@ -80,6 +84,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getVersionField());
         } else {
+            log.info("getVersionField没有使用缓存");
             return JdbcModelManagerHelper.getVersionField(cls);
         }
     }
@@ -95,6 +100,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getDbPkName();
         } else {
+            log.info("getPrimaryKeyColName没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyColName(cls);
         }
     }
@@ -110,6 +116,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getGeneratedValue());
         } else {
+            log.info("getAnnotationGeneratedValue没有使用缓存");
             return JdbcModelManagerHelper.getAnnotationGeneratedValue(cls);
         }
     }
@@ -125,6 +132,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getSequenceGenerator());
         } else {
+            log.info("getAnnotationSequenceGenerator没有使用缓存");
             return JdbcModelManagerHelper.getAnnotationSequenceGenerator(cls);
         }
     }
@@ -140,6 +148,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getClassPkName();
         } else {
+            log.info("getPrimaryKeyFieldName没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyFieldName(cls);
         }
     }
@@ -162,8 +171,9 @@ public class JdbcModelManager {
 
                 }
             }
-            throw Exceptions.throwIllegalStateException("无法找到相对应的column");
+            throw new DbException("无法找到相对应的column");
         } else {
+            log.info("getDbColumnByClassColumn没有使用缓存");
             return JdbcModelManagerHelper.getDbColumnByClassColumn(cls, name);
         }
     }
@@ -189,6 +199,7 @@ public class JdbcModelManager {
             }
             return result;
         } else {
+            log.info("getClassColumnByDbColumn没有使用缓存");
             return JdbcModelManagerHelper.getClassColumnByDbColumn(cls, name);
         }
     }
@@ -214,5 +225,41 @@ public class JdbcModelManager {
      */
     public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndCollectionValue(T t) {
         return JdbcModelManagerHelper.getTableColumnNameAndCollectionValue(t);
+    }
+
+    /**
+     * 获取主键的值
+     *
+     * @param clazz
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public static <T> Object getPrimaryKeyValue(Class<?> clazz, T t) {
+        //获取主键值
+        String idField = JdbcModelManager.getPrimaryKeyFieldName(clazz);
+        Object id = null;
+        try {
+            id = ReflectUtil.getMethod(clazz, "get" + StringUtil.capitalizeFirstLetter(idField)).invoke(t);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new DbException(String.format("%s类%s方法反射调用出错", clazz.getName(), "get" + StringUtil.capitalizeFirstLetter(idField)));
+        }
+        return id;
+    }
+
+    /**
+     * 判断model是否存在集合属性
+     *
+     * @param cls
+     * @return
+     */
+    public static Boolean existCollectionAttribute(Class cls) {
+        ModelMeta modelMeta = modelMetas.get(cls.getName());
+        if (null != modelMeta && null != modelMeta.getExistCollectionAttribute()) {
+            return modelMeta.getExistCollectionAttribute();
+        } else {
+            log.info("existCollectionAttribute 没有使用缓存");
+            return JdbcModelManagerHelper.existCollectionAttribute(cls);
+        }
     }
 }

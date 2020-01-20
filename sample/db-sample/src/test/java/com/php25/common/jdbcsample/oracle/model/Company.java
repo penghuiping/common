@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.oracle.model;
 
-import com.php25.common.db.cnd.Column;
-import com.php25.common.db.cnd.Table;
+import com.php25.common.db.cnd.annotation.Column;
+import com.php25.common.db.cnd.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;

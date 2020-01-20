@@ -1,4 +1,4 @@
-package com.php25.common.db.cnd;
+package com.php25.common.db.cnd.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,16 +9,16 @@ import java.lang.annotation.Target;
 
 /**
  * @author penghuiping
- * @date 2019/10/21 20:32
+ * @date 2020/1/9 14:08
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 @Inherited
-public @interface DbSchema {
+public @interface Table {
 
     /**
-     * The mapping Schema name.
+     * The mapping table name.
      */
-    String value();
+    String value() default "";
 }

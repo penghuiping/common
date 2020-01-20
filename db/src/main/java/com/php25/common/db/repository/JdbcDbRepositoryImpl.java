@@ -52,7 +52,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
         CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
-        return Optional.of(cnd.single());
+        return Optional.ofNullable(cnd.single());
     }
 
     @Override

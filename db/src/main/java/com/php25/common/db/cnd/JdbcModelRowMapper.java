@@ -1,9 +1,9 @@
 package com.php25.common.db.cnd;
 
-import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.manager.ModelMeta;
 import org.springframework.core.convert.ConversionService;
@@ -78,7 +78,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
             }
             return model;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw Exceptions.throwIllegalStateException("数据库数据转化为model出错,class:" + mapperClass.getName(), e);
+            throw new DbException("数据库数据转化为model出错,class:" + mapperClass.getName(), e);
         }
     }
 
@@ -90,7 +90,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
             if (Number.class.isAssignableFrom(value.getClass())) {
                 return ((Number) value).intValue() == 1;
             } else {
-                throw Exceptions.throwIllegalStateException(
+                throw new DbException(
                         "Value [" + value + "] is of type [" + value.getClass().getName() +
                                 "] and cannot be converted to required type [" + requiredType.getName() + "]");
             }
@@ -105,7 +105,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
         } else if (this.conversionService != null && this.conversionService.canConvert(value.getClass(), requiredType)) {
             return this.conversionService.convert(value, requiredType);
         } else {
-            throw Exceptions.throwIllegalStateException(
+            throw new DbException(
                     "Value [" + value + "] is of type [" + value.getClass().getName() +
                             "] and cannot be converted to required type [" + requiredType.getName() + "]");
         }

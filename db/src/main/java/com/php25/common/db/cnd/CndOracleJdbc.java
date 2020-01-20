@@ -1,9 +1,11 @@
 package com.php25.common.db.cnd;
 
-import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.DbType;
+import com.php25.common.db.cnd.annotation.GeneratedValue;
+import com.php25.common.db.cnd.annotation.SequenceGenerator;
+import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -72,14 +74,14 @@ public class CndOracleJdbc extends CndJdbc {
                     //程序指定,什么也不需要做
                     break;
                 case TABLE:
-                    throw Exceptions.throwIllegalStateException("抱歉!oracle不支持这种模式");
+                    throw new DbException("抱歉!oracle不支持这种模式");
                 case IDENTITY:
-                    throw Exceptions.throwIllegalStateException("抱歉!oracle不支持这种模式");
+                    throw new DbException("抱歉!oracle不支持这种模式");
                 case SEQUENCE:
                     flag = true;
                     Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
                     if (!sequenceGeneratorOptional.isPresent()) {
-                        throw Exceptions.throwIllegalStateException("@SequenceGenerator注解不存在");
+                        throw new DbException("@SequenceGenerator注解不存在");
                     } else {
                         SequenceGenerator sequenceGenerator = sequenceGeneratorOptional.get();
                         String sequenceName = sequenceGenerator.sequenceName();
@@ -180,11 +182,11 @@ public class CndOracleJdbc extends CndJdbc {
                     return ps;
                 }, keyHolder);
                 if (rows <= 0) {
-                    throw Exceptions.throwIllegalStateException("insert 操作失败");
+                    throw new DbException("insert 操作失败");
                 }
                 Field field = JdbcModelManager.getPrimaryKeyField(clazz);
                 if (!field.getType().isAssignableFrom(Long.class)) {
-                    throw Exceptions.throwIllegalStateException("主键必须是Long类型");
+                    throw new DbException("主键必须是Long类型");
                 }
                 ReflectUtil.getMethod(clazz, "set" + StringUtil.capitalizeFirstLetter(idField), field.getType()).invoke(t, keyHolder.getKey().longValue());
                 return rows;
@@ -192,14 +194,14 @@ public class CndOracleJdbc extends CndJdbc {
                 //非sequence情况
                 int rows = jdbcOperations.update(pair.left.toString(), params.toArray());
                 if (rows <= 0) {
-                    throw Exceptions.throwIllegalStateException("insert 操作失败");
+                    throw new DbException("insert 操作失败");
                 }
                 return rows;
             }
 
         } catch (Exception e) {
             log.error("插入操作失败", e);
-            throw Exceptions.throwIllegalStateException("插入操作失败", e);
+            throw new DbException("插入操作失败", e);
         } finally {
             clear();
         }
@@ -227,14 +229,14 @@ public class CndOracleJdbc extends CndJdbc {
                     //程序指定,什么也不需要做
                     break;
                 case TABLE:
-                    throw Exceptions.throwIllegalStateException("抱歉!oracle不支持这种模式");
+                    throw new DbException("抱歉!oracle不支持这种模式");
                 case IDENTITY:
-                    throw Exceptions.throwIllegalStateException("抱歉!oracle不支持这种模式");
+                    throw new DbException("抱歉!oracle不支持这种模式");
                 case SEQUENCE:
                     flag = true;
                     Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
                     if (!sequenceGeneratorOptional.isPresent()) {
-                        throw Exceptions.throwIllegalStateException("@SequenceGenerator注解不存在");
+                        throw new DbException("@SequenceGenerator注解不存在");
                     } else {
                         SequenceGenerator sequenceGenerator = sequenceGeneratorOptional.get();
                         String sequenceName = sequenceGenerator.sequenceName();
@@ -339,7 +341,7 @@ public class CndOracleJdbc extends CndJdbc {
         try {
             return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
         } catch (Exception e) {
-            throw Exceptions.throwIllegalStateException("插入操作失败", e);
+            throw new DbException("插入操作失败", e);
         } finally {
             clear();
         }
