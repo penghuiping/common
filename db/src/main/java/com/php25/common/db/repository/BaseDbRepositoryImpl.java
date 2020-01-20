@@ -90,7 +90,8 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAll() {
-        db.cndJdbc(model).delete();
+        db.cndJdbc(model).deleteAll();
     }
 }

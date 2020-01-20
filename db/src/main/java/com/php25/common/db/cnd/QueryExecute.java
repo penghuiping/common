@@ -120,6 +120,12 @@ public interface QueryExecute {
      */
     int delete();
 
+    /**
+     * 删除所有数据
+     * @return
+     */
+    int deleteAll();
+
     /***
      * 删除
      * @return 影响的行数

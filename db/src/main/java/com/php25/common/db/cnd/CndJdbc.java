@@ -84,33 +84,17 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return dsl;
     }
 
-    @Override
-    public <T> List<T> select(Class resultType, String... columns) {
-        AssertUtil.notNull(resultType, "resultType不能为null");
-        StringBuilder sb = null;
-        if (null != columns && columns.length > 0) {
-            sb = new StringBuilder("SELECT ");
-            for (String column : columns) {
-                sb.append(column).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-        } else {
-            sb = new StringBuilder("SELECT *");
-        }
-        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
-        this.setSql(sb);
-        addAdditionalPartSql();
-        String targetSql = this.getSql().toString();
-        log.info("sql语句为:" + targetSql);
-        Object[] paras = getParams().toArray();
-        //先清楚
-        clear();
-        List<T> list = null;
-        if (resultType.isAssignableFrom(Map.class)) {
-            list = (List<T>) this.jdbcOperations.query(targetSql, paras, new ColumnMapRowMapper());
-        } else {
-            list = this.jdbcOperations.query(targetSql, paras, new JdbcModelRowMapper<T>(resultType));
+    private <T> List<T> select0(Class resultType, String... columns) {
+        List<T> list = select(resultType, columns);
 
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        if (list.get(0) instanceof Map) {
+
+        } else {
+            //集合属性处理
             if (JdbcModelManager.existCollectionAttribute(clazz)) {
                 //存在集合属性
                 Field[] fields = clazz.getDeclaredFields();
@@ -151,13 +135,43 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
+    public <T> List<T> select(Class resultType, String... columns) {
+        AssertUtil.notNull(resultType, "resultType不能为null");
+        StringBuilder sb = null;
+        if (null != columns && columns.length > 0) {
+            sb = new StringBuilder("SELECT ");
+            for (String column : columns) {
+                sb.append(column).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        } else {
+            sb = new StringBuilder("SELECT *");
+        }
+        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
+        this.setSql(sb);
+        addAdditionalPartSql();
+        String targetSql = this.getSql().toString();
+        log.info("sql语句为:" + targetSql);
+        Object[] paras = getParams().toArray();
+        //先清楚
+        clear();
+        List<T> list = null;
+        if (resultType.isAssignableFrom(Map.class)) {
+            list = (List<T>) this.jdbcOperations.query(targetSql, paras, new ColumnMapRowMapper());
+        } else {
+            list = this.jdbcOperations.query(targetSql, paras, new JdbcModelRowMapper<T>(resultType));
+        }
+        return list;
+    }
+
+    @Override
     public <T> List<T> select(String... columns) {
-        return this.select(clazz, columns);
+        return this.select0(clazz, columns);
     }
 
     @Override
     public <T> List<T> select() {
-        return this.select(clazz);
+        return this.select0(clazz);
     }
 
     @Override
@@ -172,7 +186,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public Map mapSingle() {
-        List<Map> list = select(Map.class);
+        List<Map> list = select0(Map.class);
         if (list.isEmpty()) {
             return null;
         }
@@ -182,12 +196,12 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public List<Map> mapSelect() {
-        return this.select(Map.class);
+        return this.select0(Map.class);
     }
 
     @Override
     public List<Map> mapSelect(String... columns) {
-        return this.select(Map.class, columns);
+        return this.select0(Map.class, columns);
     }
 
     @Override
@@ -384,6 +398,31 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
+    public int deleteAll() {
+        String sql = String.format("DELETE FROM %s", JdbcModelManager.getTableName(clazz));
+        int result = this.jdbcOperations.update(sql);
+
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            //获取类中的集合属性
+            Field[] fields = clazz.getDeclaredFields();
+            List<Field> collectionFields = Lists.newArrayList(fields).stream()
+                    .filter(field -> Collection.class.isAssignableFrom(field.getType()))
+                    .collect(Collectors.toList());
+            for (Field field : collectionFields) {
+                Column column = field.getAnnotation(Column.class);
+                if (column == null || StringUtil.isBlank(column.value())) {
+                    throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
+                }
+                //清空所有关系
+                Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
+                String sql1 = String.format("DELETE FROM %s", JdbcModelManager.getTableName(type));
+                this.jdbcOperations.update(sql1);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public int delete() {
         StringBuilder sb = new StringBuilder("DELETE FROM ");
         sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
@@ -497,6 +536,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return this.groupBy;
     }
 
+    /**
+     * 用于支持内嵌对象集合
+     */
     private <T> int insert0(T t, boolean ignoreNull) {
         int result = insert(t, ignoreNull);
 
@@ -531,6 +573,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     protected abstract <T> int insert(T t, boolean ignoreNull);
 
 
+    /**
+     * 用于支持内嵌对象集合
+     */
     private <T> int update0(T t, boolean ignoreNull) {
         int result = update(t, ignoreNull);
 
