@@ -43,7 +43,6 @@ public class DbTest {
 
     Db db;
 
-    boolean isAutoIncrement = true;
 
     List<Customer> customers = Lists.newArrayList();
 
@@ -53,7 +52,7 @@ public class DbTest {
 
     }
 
-    private void initMeta(boolean isAutoIncrement) throws Exception {
+    private void initMeta() throws Exception {
         Class cls = Class.forName("com.mysql.cj.jdbc.Driver");
         Driver driver = (Driver) cls.newInstance();
         Properties properties = new Properties();
@@ -65,43 +64,33 @@ public class DbTest {
         statement.execute("drop table if exists t_company");
         statement.execute("drop table if exists t_department");
         statement.execute("drop table if exists t_customer_department");
-        if (isAutoIncrement) {
-            statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-            statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-            statement.execute("create table t_department (id bigint primary key,name varchar(20))");
-            statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
-        } else {
-            statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-            statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-            statement.execute("create table t_department (id bigint primary key,name varchar(20))");
-            statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
-        }
+
+        statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+        statement.execute("create table t_department (id bigint primary key,name varchar(20))");
+        statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+
         statement.close();
         connection.close();
     }
 
     @Before
     public void before() throws Exception {
-        initMeta(isAutoIncrement);
+        initMeta();
         this.initDb();
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
 
-
         Company company = new Company();
-        company.setName("Google");
         company.setId(uidGenerator.getUID());
+        company.setName("Google");
         company.setCreateTime(new Date());
         company.setNew(true);
         company.setEnable(1);
         cndJdbcCompany.insert(company);
 
-
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isAutoIncrement) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -118,9 +107,6 @@ public class DbTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isAutoIncrement) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());

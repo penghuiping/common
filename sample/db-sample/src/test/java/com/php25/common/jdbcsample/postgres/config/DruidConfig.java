@@ -58,6 +58,7 @@ public class DruidConfig {
     Db db(JdbcTemplate jdbcTemplate) {
         Db db =  new Db(DbType.POSTGRES);
         db.setJdbcOperations(jdbcTemplate);
+        db.scanPackage("com.php25.common.jdbcsample.postgres.model");
         return db;
     }
 

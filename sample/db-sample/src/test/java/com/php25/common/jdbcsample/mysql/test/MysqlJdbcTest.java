@@ -200,8 +200,6 @@ public class MysqlJdbcTest extends DbTest {
 
 
         Customer customer = new Customer();
-        if (!isAutoIncrement)
-            customer.setId(uidGenerator.getUID());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -212,8 +210,6 @@ public class MysqlJdbcTest extends DbTest {
         db.cndJdbc(Customer.class).insert(customer);
 
         Customer customer1 = new Customer();
-        if (!isAutoIncrement)
-            customer1.setId(uidGenerator.getUID());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
@@ -241,8 +237,6 @@ public class MysqlJdbcTest extends DbTest {
         company.setEnable(1);
 
         Customer customer = new Customer();
-        if (!isAutoIncrement)
-            customer.setId(uidGenerator.getUID());
         customer.setUsername("mary");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setAge(10);
@@ -252,8 +246,6 @@ public class MysqlJdbcTest extends DbTest {
         customer.setCompanyId(company.getId());
 
         Customer customer1 = new Customer();
-        if (!isAutoIncrement)
-            customer1.setId(uidGenerator.getUID());
         customer1.setUsername("perter");
         customer1.setPassword(DigestUtil.MD5Str("123456"));
         customer1.setAge(10);
@@ -382,8 +374,6 @@ public class MysqlJdbcTest extends DbTest {
         Assertions.assertThat(companyRepository.findOne(builder).get().getName()).isEqualTo("baidu");
 
         Customer customer = new Customer();
-        if (!isAutoIncrement)
-            customer.setId(uidGenerator.getUID());
         customer.setUsername("jack" + 4);
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setStartTime(LocalDateTime.now());
@@ -415,8 +405,6 @@ public class MysqlJdbcTest extends DbTest {
         List<Customer> customers = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isAutoIncrement)
-                customer.setId(uidGenerator.getUID());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
@@ -515,8 +503,6 @@ public class MysqlJdbcTest extends DbTest {
 
         //人员
         Customer customer = new Customer();
-        if (!isAutoIncrement)
-            customer.setId(uidGenerator.getUID());
         customer.setUsername("jack12313");
         customer.setPassword(DigestUtil.MD5Str("123456"));
         customer.setStartTime(LocalDateTime.now());

@@ -43,8 +43,6 @@ public class DbTest {
 
     Db db;
 
-    boolean isSequence = true;
-
     List<Customer> customers = Lists.newArrayList();
 
     List<CustomerDto> customerDtos = Lists.newArrayList();
@@ -53,29 +51,33 @@ public class DbTest {
 
     }
 
-    private void initMeta(boolean isSequence) throws Exception {
+    private void initMeta() throws Exception {
         Class cls = Class.forName("org.postgresql.Driver");
         Driver driver = (Driver) cls.newInstance();
         Properties properties = new Properties();
-        properties.setProperty("user","root");
-        properties.setProperty("password","root");
+        properties.setProperty("user", "root");
+        properties.setProperty("password", "root");
         Connection connection = driver.connect("jdbc:postgresql://127.0.0.1:5432/test?currentSchema=public", properties);
         Statement statement = connection.createStatement();
         statement.execute("drop table if exists t_customer");
         statement.execute("drop table if exists t_company");
+        statement.execute("drop table if exists t_department");
+        statement.execute("drop table if exists t_customer_department");
+
         statement.execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
         statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
-        if (isSequence) {
-            statement.execute("drop SEQUENCE if exists SEQ_ID");
-            statement.execute("CREATE SEQUENCE SEQ_ID");
-        }
+        statement.execute("create table t_department (id bigint primary key,name varchar(20))");
+        statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+
+        statement.execute("drop SEQUENCE if exists SEQ_ID");
+        statement.execute("CREATE SEQUENCE SEQ_ID");
         statement.closeOnCompletion();
         connection.close();
     }
 
     @Before
     public void before() throws Exception {
-        initMeta(isSequence);
+        initMeta();
         this.initDb();
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
@@ -90,9 +92,6 @@ public class DbTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isSequence) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -108,9 +107,6 @@ public class DbTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isSequence) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
