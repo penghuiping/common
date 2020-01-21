@@ -43,8 +43,6 @@ public class DbTest {
 
     Db db;
 
-    boolean isSequence = true;
-
     List<Customer> customers = Lists.newArrayList();
 
     List<CustomerDto> customerDtos = Lists.newArrayList();
@@ -55,30 +53,32 @@ public class DbTest {
 
     }
 
-    private void initMeta(boolean isSequence) throws Exception {
+    private void initMeta() throws Exception {
         Class cls = Class.forName("oracle.jdbc.driver.OracleDriver");
         Driver driver = (Driver) cls.newInstance();
         Properties properties = new Properties();
-        properties.setProperty("user","system");
-        properties.setProperty("password","oracle");
+        properties.setProperty("user", "system");
+        properties.setProperty("password", "oracle");
         Connection connection = driver.connect("jdbc:oracle:thin:@localhost:1521:xe", properties);
         Statement statement = connection.createStatement();
-        if(isFirst) {
+        if (isFirst) {
             isFirst = false;
             statement.execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
             statement.execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
-            if (isSequence) {
-                statement.execute("CREATE SEQUENCE SEQ_ID");
-            }
-        }else {
+            statement.execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
+            statement.execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
+            statement.execute("CREATE SEQUENCE SEQ_ID");
+        } else {
             statement.execute("drop table t_customer");
             statement.execute("drop table t_company");
+            statement.execute("drop table t_department");
+            statement.execute("drop table t_customer_department");
             statement.execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
             statement.execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
-            if (isSequence) {
-                statement.execute("drop SEQUENCE SEQ_ID");
-                statement.execute("CREATE SEQUENCE SEQ_ID");
-            }
+            statement.execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
+            statement.execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
+            statement.execute("drop SEQUENCE SEQ_ID");
+            statement.execute("CREATE SEQUENCE SEQ_ID");
         }
         statement.close();
         connection.close();
@@ -86,7 +86,7 @@ public class DbTest {
 
     @Before
     public void before() throws Exception {
-        initMeta(isSequence);
+        initMeta();
         this.initDb();
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
@@ -101,9 +101,6 @@ public class DbTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isSequence) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -119,9 +116,6 @@ public class DbTest {
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            if (!isSequence) {
-                customer.setId(uidGenerator.getUID());
-            }
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
