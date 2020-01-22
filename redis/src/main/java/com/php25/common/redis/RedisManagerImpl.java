@@ -99,7 +99,7 @@ public class RedisManagerImpl implements RedisManager {
 
     @Override
     public RBloomFilter bloomFilter(String name, long expectedInsertions, double fpp) {
-        return new RBloomFilter(redisTemplate, name, expectedInsertions, fpp);
+        return new RBloomFilterImpl(redisTemplate, name, expectedInsertions, fpp);
     }
 
     @Override
@@ -109,6 +109,6 @@ public class RedisManagerImpl implements RedisManager {
 
     @Override
     public <T> RSortedSet<T> zset(String setKey, Class<T> cls) {
-        return new RSortedSetImpl<>(redisTemplate,setKey,cls);
+        return new RSortedSetImpl<>(redisTemplate, setKey, cls);
     }
 }

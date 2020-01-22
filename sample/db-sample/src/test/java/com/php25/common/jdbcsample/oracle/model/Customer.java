@@ -12,6 +12,7 @@ import org.springframework.data.domain.Persistable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * Created by penghuiping on 2018/5/1.
@@ -53,6 +54,9 @@ public class Customer implements Persistable<Long> {
 
     @Transient
     private Boolean isNew;
+
+    @Column("customer_id")
+    private Set<DepartmentRef> departments;
 
     public Boolean getNew() {
         return isNew;
@@ -145,5 +149,13 @@ public class Customer implements Persistable<Long> {
     @Override
     public boolean isNew() {
         return this.isNew;
+    }
+
+    public Set<DepartmentRef> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(Set<DepartmentRef> departments) {
+        this.departments = departments;
     }
 }

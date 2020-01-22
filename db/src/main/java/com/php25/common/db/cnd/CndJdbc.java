@@ -286,8 +286,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         }
     }
 
-    @Override
-    public <M> int[] insertBatch(List<M> list) {
+    private <M> int[] insertBatch0(List<M> list) {
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
@@ -345,6 +344,30 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         } finally {
             clear();
         }
+    }
+
+    @Override
+    public <M> int[] insertBatch(List<M> list) {
+        int[] result = insertBatch0(list);
+        //todo
+        for (M m : list) {
+            if (JdbcModelManager.existCollectionAttribute(clazz)) {
+                //获取主键值
+                Object id = JdbcModelManager.getPrimaryKeyValue(clazz, m);
+
+                //处理集合关联关系
+                List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(m);
+                for (int i = 0; i < immutablePairs.size(); i++) {
+                    ImmutablePair<String, Object> tmp = immutablePairs.get(i);
+                    Collection<Object> collection = (Collection<Object>) tmp.getRight();
+                    List<Object> list1 = new ArrayList<>(collection);
+                    if (list1.size() > 0) {
+                        CndJdbc.of(list1.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list1);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -438,7 +461,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public long count() {
-        StringBuilder sb = new StringBuilder("SELECT COUNT(1) FROM ");
+        StringBuilder sb = new StringBuilder("SELECT COUNT(1) as num_count FROM ");
         sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
@@ -661,8 +684,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         }
     }
 
-    @Override
-    public <T> int[] updateBatch(List<T> lists) {
+    private <T> int[] updateBatch0(List<T> lists) {
         T t = lists.get(0);
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(t.getClass())).append(" SET ");
@@ -733,6 +755,32 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         } finally {
             clear();
         }
+    }
+
+    @Override
+    public <T> int[] updateBatch(List<T> lists) {
+        int[] result = updateBatch0(lists);
+        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            for (T t : lists) {
+                //获取主键值
+                Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
+
+                //处理集合关联关系
+                List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(t);
+                for (int i = 0; i < immutablePairs.size(); i++) {
+                    ImmutablePair<String, Object> tmp = immutablePairs.get(i);
+                    Collection<Object> collection = (Collection<Object>) tmp.getRight();
+                    List<Object> list = new ArrayList<>(collection);
+                    if (list.size() > 0) {
+                        //清空所有关系
+                        CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
+                        //插入关系
+                        CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
 

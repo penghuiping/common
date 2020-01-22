@@ -2,7 +2,7 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGenerator;
-import com.php25.common.redis.RBloomFilter;
+import com.php25.common.redis.RBloomFilterImpl;
 import com.php25.common.redis.RHyperLogLogs;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
@@ -149,7 +149,7 @@ public class RedisCommonTest {
 
     @Test
     public void bloomFilterTest() throws Exception {
-        RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
+        RBloomFilterImpl bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
 
         for(int i=0;i<1000;i++) {
             bloomFilter.put(i+"");
