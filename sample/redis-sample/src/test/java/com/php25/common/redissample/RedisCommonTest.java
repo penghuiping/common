@@ -2,7 +2,7 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGenerator;
-import com.php25.common.redis.RBloomFilterImpl;
+import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHyperLogLogs;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
@@ -149,16 +149,16 @@ public class RedisCommonTest {
 
     @Test
     public void bloomFilterTest() throws Exception {
-        RBloomFilterImpl bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
+        RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
 
         for(int i=0;i<1000;i++) {
             bloomFilter.put(i+"");
         }
 
-        Assertions.assertThat(bloomFilter.isExist("1")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("22")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("555")).isEqualTo(true);
-        Assertions.assertThat(bloomFilter.isExist("1001")).isEqualTo(false);
+        Assertions.assertThat(bloomFilter.mightContain("1")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.mightContain("22")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.mightContain("555")).isEqualTo(true);
+        Assertions.assertThat(bloomFilter.mightContain("1001")).isEqualTo(false);
     }
 
     @Test

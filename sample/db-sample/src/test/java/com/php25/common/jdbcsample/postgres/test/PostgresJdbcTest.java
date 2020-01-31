@@ -18,6 +18,7 @@ import com.php25.common.jdbcsample.postgres.model.Department;
 import com.php25.common.jdbcsample.postgres.model.DepartmentRef;
 import com.php25.common.jdbcsample.postgres.repository.CompanyRepository;
 import com.php25.common.jdbcsample.postgres.repository.CustomerRepository;
+import com.php25.common.jdbcsample.postgres.repository.DepartmentRefRepository;
 import com.php25.common.jdbcsample.postgres.repository.DepartmentRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -351,6 +352,8 @@ public class PostgresJdbcTest extends DbTest {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private DepartmentRefRepository departmentRefRepository;
 
     @Test
     public void findAllEnabled() {
@@ -501,7 +504,7 @@ public class PostgresJdbcTest extends DbTest {
     }
 
     @Test
-    public void testManyToMany() {
+    public void testManyToMany0() {
         //部门
         Department department = new Department();
         department.setId(uidGenerator.getUID());
@@ -524,6 +527,7 @@ public class PostgresJdbcTest extends DbTest {
         customer.setNew(true);
         customer.setEnable(1);
 
+        //新增操作
         DepartmentRef departmentRef = new DepartmentRef();
         departmentRef.setDepartmentId(department.getId());
 
@@ -537,6 +541,7 @@ public class PostgresJdbcTest extends DbTest {
         Assertions.assertThat(_customer.getId()).isEqualTo(customer.getId());
         Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(1);
 
+        //更新操作
         DepartmentRef departmentRef1 = new DepartmentRef();
         departmentRef1.setDepartmentId(department1.getId());
 
@@ -547,11 +552,49 @@ public class PostgresJdbcTest extends DbTest {
         _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
         Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(2);
 
-        customerRepository.deleteAll(Lists.newArrayList(customer));
-
+        //删除操作
+        customerRepository.delete(customer);
         Optional optional = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313")));
         Assertions.assertThat(optional.isPresent()).isEqualTo(false);
+    }
 
+    @Test
+    public void testManyToMany1() {
+        List<Customer> customers = (List<Customer>) customerRepository.findAllEnabled();
+        Assertions.assertThat(customers.size()).isEqualTo(3);
+
+        Customer customer1 = customers.stream().filter(customer -> customer.getUsername().equals("jack0")).findAny().get();
+        //部门
+        Department department = new Department();
+        department.setId(uidGenerator.getUID());
+        department.setName("testDepart");
+        department.setNew(true);
+
+        Department department1 = new Department();
+        department1.setId(uidGenerator.getUID());
+        department1.setName("testDepart1");
+        department1.setNew(true);
+        departmentRepository.saveAll(Lists.newArrayList(department, department1));
+
+        DepartmentRef departmentRef = new DepartmentRef();
+        departmentRef.setDepartmentId(department.getId());
+        departmentRef.setCustomerId(customer1.getId());
+
+        DepartmentRef departmentRef1 = new DepartmentRef();
+        departmentRef1.setDepartmentId(department1.getId());
+        departmentRef1.setCustomerId(customer1.getId());
+
+        departmentRefRepository.save(Lists.newArrayList(departmentRef, departmentRef1));
+        List<DepartmentRef> departmentRefs = departmentRefRepository.findByCustomerId(customer1.getId());
+        Assertions.assertThat(departmentRefs.size()).isEqualTo(2);
+        departmentRefs.forEach(departmentRef2 -> {
+            Assertions.assertThat(departmentRef2.getCustomerId()).isNotNull();
+            Assertions.assertThat(departmentRef2.getDepartmentId()).isNotNull();
+        });
+
+        departmentRefRepository.deleteByCustomerIds(Lists.newArrayList(customer1.getId()));
+        departmentRefs = departmentRefRepository.findByCustomerId(customer1.getId());
+        Assertions.assertThat(departmentRefs).isNullOrEmpty();
     }
 
 }

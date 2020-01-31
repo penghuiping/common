@@ -60,6 +60,7 @@ public class DruidConfig {
     Db db(JdbcTemplate jdbcTemplate) {
         Db db =  new Db(DbType.ORACLE);
         db.setJdbcOperations(jdbcTemplate);
+        db.scanPackage("com.php25.common.jdbcsample.oracle.model");
         return db;
     }
 

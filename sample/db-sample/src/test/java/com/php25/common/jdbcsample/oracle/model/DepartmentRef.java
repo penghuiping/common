@@ -13,6 +13,8 @@ public class DepartmentRef {
     @Column("department_id")
     private Long departmentId;
 
+    @Column("customer_id")
+    private Long customerId;
 
     public Long getDepartmentId() {
         return departmentId;
@@ -20,5 +22,13 @@ public class DepartmentRef {
 
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 }

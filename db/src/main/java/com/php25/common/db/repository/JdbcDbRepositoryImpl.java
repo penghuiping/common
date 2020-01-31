@@ -46,12 +46,12 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        return Optional.of(db.cndJdbc(model).whereEq(pkName, id).andEq("enable", 1).single());
+        return Optional.of(db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).andEq("enable", 1).single());
     }
 
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
-        CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        CndJdbc cnd = db.cndJdbc(model).ignoreCollection(false).andSearchParamBuilder(searchParamBuilder);
         return Optional.ofNullable(cnd.single());
     }
 

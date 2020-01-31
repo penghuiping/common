@@ -42,6 +42,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(CndJdbc.class);
 
+    private boolean ignoreCollection = true;
+
     protected JdbcOperations jdbcOperations = null;
 
     protected DbType dbType;
@@ -84,6 +86,11 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return dsl;
     }
 
+    public CndJdbc ignoreCollection(Boolean value) {
+        this.ignoreCollection = value;
+        return this;
+    }
+
     private <T> List<T> select0(Class resultType, String... columns) {
         List<T> list = select(resultType, columns);
 
@@ -95,7 +102,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
         } else {
             //集合属性处理
-            if (JdbcModelManager.existCollectionAttribute(clazz)) {
+            if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
                 //存在集合属性
                 Field[] fields = clazz.getDeclaredFields();
                 for (Field field : fields) {
@@ -166,17 +173,17 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public <T> List<T> select(String... columns) {
-        return this.select0(clazz, columns);
+        return this.select(clazz, columns);
     }
 
     @Override
     public <T> List<T> select() {
-        return this.select0(clazz);
+        return this.select(clazz);
     }
 
     @Override
     public <T> T single() {
-        List<T> list = select();
+        List<T> list = select0(clazz);
         if (list.isEmpty()) {
             return null;
         }
@@ -196,12 +203,12 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public List<Map> mapSelect() {
-        return this.select0(Map.class);
+        return this.select(Map.class);
     }
 
     @Override
     public List<Map> mapSelect(String... columns) {
-        return this.select0(Map.class, columns);
+        return this.select(Map.class, columns);
     }
 
     @Override
@@ -224,150 +231,70 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return insert0(t, false);
     }
 
-    private <T> int[] insertRelation(String pkName, Object pkValue, List list) {
-        //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
-
-        //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
-        String versionColumnName = null;
-        if (versionFieldOptional.isPresent()) {
-            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
-        }
-        pairList.add(new ImmutablePair<>(pkName, pkValue));
-
-        //拼装sql语句
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append(pairList.get(i).getLeft());
-            } else {
-                stringBuilder.append(pairList.get(i).getLeft() + ",");
-            }
-        }
-        stringBuilder.append(" ) VALUES ( ");
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append("?");
-            } else {
-                stringBuilder.append("?,");
-            }
-        }
-        stringBuilder.append(" )");
-        log.info("sql语句为:" + stringBuilder.toString());
-
-        //拼装参数
-        List<Object[]> batchParams = new ArrayList<>();
-        for (int j = 0; j < list.size(); j++) {
-            List<Object> params = new ArrayList<>();
-            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
-            for (int i = 0; i < tmp.size(); i++) {
-                //判断是否有@version注解，如果有默认给0
-                if (versionFieldOptional.isPresent()) {
-                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
-                        params.add(0);
-                    } else {
-                        params.add(paramConvert(tmp.get(i).getRight()));
-                    }
-                } else {
-                    params.add(paramConvert(tmp.get(i).getRight()));
-                }
-            }
-            params.add(pkValue);
-            batchParams.add(params.toArray());
-        }
-
-        try {
-            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
-        } catch (Exception e) {
-            throw new DbException("插入操作失败", e);
-        } finally {
-            clear();
-        }
-    }
-
-    private <M> int[] insertBatch0(List<M> list) {
-        //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
-
-        //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
-        String versionColumnName = null;
-        if (versionFieldOptional.isPresent()) {
-            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
-        }
-
-        //拼装sql语句
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append(pairList.get(i).getLeft());
-            } else {
-                stringBuilder.append(pairList.get(i).getLeft() + ",");
-            }
-        }
-        stringBuilder.append(" ) VALUES ( ");
-        for (int i = 0; i < pairList.size(); i++) {
-            if (i == (pairList.size() - 1)) {
-                stringBuilder.append("?");
-            } else {
-                stringBuilder.append("?,");
-            }
-        }
-        stringBuilder.append(" )");
-        log.info("sql语句为:" + stringBuilder.toString());
-
-        //拼装参数
-        List<Object[]> batchParams = new ArrayList<>();
-        for (int j = 0; j < list.size(); j++) {
-            List<Object> params = new ArrayList<>();
-            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
-            for (int i = 0; i < tmp.size(); i++) {
-                //判断是否有@version注解，如果有默认给0
-                if (versionFieldOptional.isPresent()) {
-                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
-                        params.add(0);
-                    } else {
-                        params.add(paramConvert(tmp.get(i).getRight()));
-                    }
-                } else {
-                    params.add(paramConvert(tmp.get(i).getRight()));
-                }
-            }
-            batchParams.add(params.toArray());
-        }
-
-        try {
-            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
-        } catch (Exception e) {
-            throw new DbException("插入操作失败", e);
-        } finally {
-            clear();
-        }
-    }
-
     @Override
     public <M> int[] insertBatch(List<M> list) {
-        int[] result = insertBatch0(list);
-        //todo
-        for (M m : list) {
-            if (JdbcModelManager.existCollectionAttribute(clazz)) {
-                //获取主键值
-                Object id = JdbcModelManager.getPrimaryKeyValue(clazz, m);
+        //实体类中存在集合属性的情况
+        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
+            log.warn("此实体类中存在集合属性，批量插入操作不支持集合属性,对于集合属性将直接忽略");
+        }
 
-                //处理集合关联关系
-                List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(m);
-                for (int i = 0; i < immutablePairs.size(); i++) {
-                    ImmutablePair<String, Object> tmp = immutablePairs.get(i);
-                    Collection<Object> collection = (Collection<Object>) tmp.getRight();
-                    List<Object> list1 = new ArrayList<>(collection);
-                    if (list1.size() > 0) {
-                        CndJdbc.of(list1.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list1);
-                    }
-                }
+        //泛型获取类所有的属性
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append(pairList.get(i).getLeft());
+            } else {
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
             }
         }
-        return result;
+        stringBuilder.append(" ) VALUES ( ");
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append("?");
+            } else {
+                stringBuilder.append("?,");
+            }
+        }
+        stringBuilder.append(" )");
+        log.info("sql语句为:" + stringBuilder.toString());
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                } else {
+                    params.add(paramConvert(tmp.get(i).getRight()));
+                }
+            }
+            batchParams.add(params.toArray());
+        }
+
+        try {
+            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
+        } catch (Exception e) {
+            throw new DbException("插入操作失败", e);
+        } finally {
+            clear();
+        }
     }
 
     @Override
@@ -376,7 +303,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
         int result = CndJdbc.of(clazz, dbType, jdbcOperations).whereEq(pkName, id).delete();
 
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+        //实体类中存在集合属性的情况
+        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
             //获取类中的集合属性
             Field[] fields = clazz.getDeclaredFields();
             List<Field> collectionFields = Lists.newArrayList(fields).stream()
@@ -390,56 +318,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 //清空所有关系
                 Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
                 CndJdbc.of(type, dbType, jdbcOperations).whereEq(column.value(), id).delete();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public <M> int deleteAll(List<M> m) {
-        List<Object> ids = m.stream().map(m1 -> JdbcModelManager.getPrimaryKeyValue(clazz, m1)).collect(Collectors.toList());
-        String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
-        int result = CndJdbc.of(clazz, dbType, jdbcOperations).whereIn(pkName, ids).delete();
-
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
-            //获取类中的集合属性
-            Field[] fields = clazz.getDeclaredFields();
-            List<Field> collectionFields = Lists.newArrayList(fields).stream()
-                    .filter(field -> Collection.class.isAssignableFrom(field.getType()))
-                    .collect(Collectors.toList());
-            for (Field field : collectionFields) {
-                Column column = field.getAnnotation(Column.class);
-                if (column == null || StringUtil.isBlank(column.value())) {
-                    throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
-                }
-                //清空所有关系
-                Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
-                CndJdbc.of(type, dbType, jdbcOperations).whereIn(column.value(), ids).delete();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public int deleteAll() {
-        String sql = String.format("DELETE FROM %s", JdbcModelManager.getTableName(clazz));
-        int result = this.jdbcOperations.update(sql);
-
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
-            //获取类中的集合属性
-            Field[] fields = clazz.getDeclaredFields();
-            List<Field> collectionFields = Lists.newArrayList(fields).stream()
-                    .filter(field -> Collection.class.isAssignableFrom(field.getType()))
-                    .collect(Collectors.toList());
-            for (Field field : collectionFields) {
-                Column column = field.getAnnotation(Column.class);
-                if (column == null || StringUtil.isBlank(column.value())) {
-                    throw new DbException("集合属性，必须要加上@Column注解,并且指定value值,值中间表对应的列名");
-                }
-                //清空所有关系
-                Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
-                String sql1 = String.format("DELETE FROM %s", JdbcModelManager.getTableName(type));
-                this.jdbcOperations.update(sql1);
             }
         }
         return result;
@@ -565,7 +443,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     private <T> int insert0(T t, boolean ignoreNull) {
         int result = insert(t, ignoreNull);
 
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
             //获取主键值
             Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
 
@@ -576,7 +454,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 Collection<Object> collection = (Collection<Object>) tmp.getRight();
                 List<Object> list = new ArrayList<>(collection);
                 if (list.size() > 0) {
-                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
+                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
                 }
             }
         }
@@ -602,7 +480,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     private <T> int update0(T t, boolean ignoreNull) {
         int result = update(t, ignoreNull);
 
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
+        //实体类存在集合属性的情况
+        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
             //获取主键值
             Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
 
@@ -616,7 +495,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                     //清空所有关系
                     CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
                     //插入关系
-                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
+                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
                 }
             }
         }
@@ -684,7 +563,13 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         }
     }
 
-    private <T> int[] updateBatch0(List<T> lists) {
+    @Override
+    public <T> int[] updateBatch(List<T> lists) {
+        //实体类中存在集合属性的情况
+        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
+            log.warn("此实体类中存在集合属性，批量更新操作不支持集合属性,对于集合属性将直接忽略");
+        }
+
         T t = lists.get(0);
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(t.getClass())).append(" SET ");
@@ -755,32 +640,6 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         } finally {
             clear();
         }
-    }
-
-    @Override
-    public <T> int[] updateBatch(List<T> lists) {
-        int[] result = updateBatch0(lists);
-        if (JdbcModelManager.existCollectionAttribute(clazz)) {
-            for (T t : lists) {
-                //获取主键值
-                Object id = JdbcModelManager.getPrimaryKeyValue(clazz, t);
-
-                //处理集合关联关系
-                List<ImmutablePair<String, Object>> immutablePairs = JdbcModelManager.getTableColumnNameAndCollectionValue(t);
-                for (int i = 0; i < immutablePairs.size(); i++) {
-                    ImmutablePair<String, Object> tmp = immutablePairs.get(i);
-                    Collection<Object> collection = (Collection<Object>) tmp.getRight();
-                    List<Object> list = new ArrayList<>(collection);
-                    if (list.size() > 0) {
-                        //清空所有关系
-                        CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
-                        //插入关系
-                        CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertRelation(tmp.getLeft(), id, list);
-                    }
-                }
-            }
-        }
-        return result;
     }
 
 
@@ -864,4 +723,69 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
      * 增加分页，排序
      */
     protected abstract void addAdditionalPartSql();
+
+
+    private <T> int[] insertCollectionColumns(String pkName, Object pkValue, List list) {
+        //泛型获取类所有的属性
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append(pairList.get(i).getLeft());
+            } else {
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
+        }
+        stringBuilder.append(" ) VALUES ( ");
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append("?");
+            } else {
+                stringBuilder.append("?,");
+            }
+        }
+        stringBuilder.append(" )");
+        log.info("sql语句为:" + stringBuilder.toString());
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                } else {
+                    if (tmp.get(i).getLeft().equals(pkName)) {
+                        params.add(paramConvert(pkValue));
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                }
+            }
+            batchParams.add(params.toArray());
+        }
+
+        try {
+            return jdbcOperations.batchUpdate(stringBuilder.toString(), batchParams);
+        } catch (Exception e) {
+            throw new DbException("插入操作失败", e);
+        } finally {
+            clear();
+        }
+    }
 }

@@ -17,6 +17,7 @@ import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.model.DepartmentRef;
 import com.php25.common.jdbcsample.mysql.repository.CompanyRepository;
 import com.php25.common.jdbcsample.mysql.repository.CustomerRepository;
+import com.php25.common.jdbcsample.mysql.repository.DepartmentRefRepository;
 import com.php25.common.jdbcsample.mysql.repository.DepartmentRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -162,7 +163,7 @@ public class MysqlJdbcTest extends DbTest {
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();
-        Assertions.assertThat(customers1.size()>0);
+        Assertions.assertThat(customers1.size() > 0);
         for (Map map : customers1) {
             Assertions.assertThat(BigDecimal.valueOf(result.get(map.get("enable"))).intValue()).isEqualTo(((BigDecimal) map.get("avg_age")).intValue());
         }
@@ -185,7 +186,7 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void count() {
         Long count = db.cndJdbc(Customer.class).whereEq("enable", "1").count();
-        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long)count);
+        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long) count);
     }
 
     @Test
@@ -338,6 +339,9 @@ public class MysqlJdbcTest extends DbTest {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private DepartmentRefRepository departmentRefRepository;
+
 
     @Test
     public void findAllEnabled() {
@@ -461,14 +465,14 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void deleteById() {
         customerRepository.deleteById(customers.get(0).getId());
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(0).getId())).isFalse();
     }
 
     @Test
     public void deleteByModel() {
         customerRepository.delete(customers.get(1));
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(1).getId())).isFalse();
     }
 
@@ -488,7 +492,7 @@ public class MysqlJdbcTest extends DbTest {
     }
 
     @Test
-    public void testManyToMany() {
+    public void testManyToMany0() {
         //部门
         Department department = new Department();
         department.setId(uidGenerator.getUID());
@@ -511,6 +515,7 @@ public class MysqlJdbcTest extends DbTest {
         customer.setNew(true);
         customer.setEnable(1);
 
+        //新增操作
         DepartmentRef departmentRef = new DepartmentRef();
         departmentRef.setDepartmentId(department.getId());
 
@@ -524,6 +529,7 @@ public class MysqlJdbcTest extends DbTest {
         Assertions.assertThat(_customer.getId()).isEqualTo(customer.getId());
         Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(1);
 
+        //更新操作
         DepartmentRef departmentRef1 = new DepartmentRef();
         departmentRef1.setDepartmentId(department1.getId());
 
@@ -534,11 +540,49 @@ public class MysqlJdbcTest extends DbTest {
         _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
         Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(2);
 
-        customerRepository.deleteAll(Lists.newArrayList(customer));
-
+        //删除操作
+        customerRepository.delete(customer);
         Optional optional = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313")));
         Assertions.assertThat(optional.isPresent()).isEqualTo(false);
+    }
 
+    @Test
+    public void testManyToMany1() {
+        List<Customer> customers = (List<Customer>) customerRepository.findAllEnabled();
+        Assertions.assertThat(customers.size()).isEqualTo(3);
+
+        Customer customer1 = customers.stream().filter(customer -> customer.getUsername().equals("jack0")).findAny().get();
+        //部门
+        Department department = new Department();
+        department.setId(uidGenerator.getUID());
+        department.setName("testDepart");
+        department.setNew(true);
+
+        Department department1 = new Department();
+        department1.setId(uidGenerator.getUID());
+        department1.setName("testDepart1");
+        department1.setNew(true);
+        departmentRepository.saveAll(Lists.newArrayList(department, department1));
+
+        DepartmentRef departmentRef = new DepartmentRef();
+        departmentRef.setDepartmentId(department.getId());
+        departmentRef.setCustomerId(customer1.getId());
+
+        DepartmentRef departmentRef1 = new DepartmentRef();
+        departmentRef1.setDepartmentId(department1.getId());
+        departmentRef1.setCustomerId(customer1.getId());
+
+        departmentRefRepository.save(Lists.newArrayList(departmentRef, departmentRef1));
+        List<DepartmentRef> departmentRefs = departmentRefRepository.findByCustomerId(customer1.getId());
+        Assertions.assertThat(departmentRefs.size()).isEqualTo(2);
+        departmentRefs.forEach(departmentRef2 -> {
+            Assertions.assertThat(departmentRef2.getCustomerId()).isNotNull();
+            Assertions.assertThat(departmentRef2.getDepartmentId()).isNotNull();
+        });
+
+        departmentRefRepository.deleteByCustomerIds(Lists.newArrayList(customer1.getId()));
+        departmentRefs = departmentRefRepository.findByCustomerId(customer1.getId());
+        Assertions.assertThat(departmentRefs).isNullOrEmpty();
     }
 
 

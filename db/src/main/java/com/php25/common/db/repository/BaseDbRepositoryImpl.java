@@ -1,10 +1,13 @@
 package com.php25.common.db.repository;
 
 import com.google.common.collect.Lists;
+import com.php25.common.db.manager.JdbcModelManager;
 import org.springframework.data.domain.Persistable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author penghuiping
@@ -20,10 +23,10 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public <S extends T> S save(S s) {
         if (s.isNew()) {
             //新增
-            db.cndJdbc(model).insert(s);
+            db.cndJdbc(model).ignoreCollection(false).insert(s);
         } else {
             //更新
-            db.cndJdbc(model).update(s);
+            db.cndJdbc(model).ignoreCollection(false).update(s);
         }
         return s;
     }
@@ -42,7 +45,7 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
 
     @Override
     public Optional<T> findById(ID id) {
-        T t = db.cndJdbc(model).whereEq(pkName, id).single();
+        T t = db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).single();
         if (null == t) {
             return Optional.empty();
         } else {
@@ -80,18 +83,20 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(T t) {
-        db.cndJdbc(model).delete(t);
+        db.cndJdbc(model).ignoreCollection(false).delete(t);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll(Iterable<? extends T> objs) {
-        db.cndJdbc(model).deleteAll(Lists.newArrayList(objs));
+        List<Object> ids = Lists.newArrayList(objs).stream().map(o -> JdbcModelManager.getPrimaryKeyValue(model, o)).collect(Collectors.toList());
+        String pkName = JdbcModelManager.getPrimaryKeyColName(model);
+        db.cndJdbc(model).whereIn(pkName, ids).delete();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll() {
-        db.cndJdbc(model).deleteAll();
+        db.cndJdbc(model).delete();
     }
 }
