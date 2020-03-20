@@ -31,6 +31,11 @@ public class RSetImpl<T> implements RSet<T> {
     }
 
     @Override
+    public void remove(T element) {
+        redisTemplate.opsForSet().remove(setKey, JsonUtil.toJson(element));
+    }
+
+    @Override
     public Set<T> members() {
         Set<String> result = redisTemplate.opsForSet().members(setKey);
         if (null != result && !result.isEmpty()) {

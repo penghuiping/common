@@ -27,6 +27,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -730,6 +731,23 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(list.get(0), false);
 
+        Iterator<ImmutablePair<String, Object>> immutablePairIterator = pairList.iterator();
+
+        //用于判断是否包含pkName属性
+        boolean flag = false;
+        while (immutablePairIterator.hasNext()) {
+            ImmutablePair<String, Object> immutablePair = immutablePairIterator.next();
+            if (immutablePair.getLeft().equals(pkName)) {
+                flag = true;
+                break;
+            }
+        }
+
+        if (!flag) {
+            //不包含则放入pkName
+            pairList.add(new ImmutablePair<>(pkName, pkValue));
+        }
+
         //判断是否有@version注解
         Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
         String versionColumnName = null;
@@ -761,6 +779,12 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         for (int j = 0; j < list.size(); j++) {
             List<Object> params = new ArrayList<>();
             List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(list.get(j), false);
+
+            if (!flag) {
+                //不包含则放入pkName
+                tmp.add(new ImmutablePair<>(pkName, pkValue));
+            }
+
             for (int i = 0; i < tmp.size(); i++) {
                 //判断是否有@version注解，如果有默认给0
                 if (versionFieldOptional.isPresent()) {

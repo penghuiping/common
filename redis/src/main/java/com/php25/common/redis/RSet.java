@@ -16,6 +16,12 @@ public interface RSet<T> {
     void add(T element);
 
     /**
+     * 移除元素
+     * @param element 元素对象
+     */
+    void remove(T element);
+
+    /**
      * 获取set中的所有元素
      *
      * @return set中的元素集

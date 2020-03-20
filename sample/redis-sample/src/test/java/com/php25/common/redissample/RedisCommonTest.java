@@ -2,8 +2,10 @@ package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.util.RandomUtil;
 import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHyperLogLogs;
+import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
@@ -172,6 +174,28 @@ public class RedisCommonTest {
         logger.info("大小为:{}",rHyperLogLogs.size());
     }
 
+    @Test
+    public void rsetTest() throws Exception {
+
+        RSet<String> rSet = redisManager.set("blacklist",String.class);
+
+        for(int i=0;i<500;i++) {
+            rSet.add(RandomUtil.getRandomNumbers(11));
+        }
+
+        rSet.add("18812345678");
+
+        logger.info("set的大小:{}",rSet.size());
+
+        long start = System.currentTimeMillis();
+        Assertions.assertThat(rSet.isMember("18812345678")).isTrue();
+        logger.info("耗时:{}ms",System.currentTimeMillis()-start);
+
+        rSet.remove("18812345678");
+
+        Assertions.assertThat(rSet.isMember("18812345678")).isFalse();
+
+    }
 
 
 
