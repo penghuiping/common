@@ -37,7 +37,7 @@ public class RHashImpl<T> implements RHash<T> {
         Object value = this.stringRedisTemplate.opsForHash().get(this.hashKey, key);
         if (null == value) {
             return null;
-        }else {
+        } else {
             return JsonUtil.fromJson(value.toString(), model);
         }
     }
@@ -48,5 +48,8 @@ public class RHashImpl<T> implements RHash<T> {
         return this.stringRedisTemplate.opsForHash().increment(this.hashKey, key, 1);
     }
 
-
+    @Override
+    public void delete(String key) {
+        this.stringRedisTemplate.opsForHash().delete(this.hashKey, key);
+    }
 }

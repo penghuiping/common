@@ -3,7 +3,6 @@ package com.php25.common.mvc;
 import com.php25.common.core.util.ThreadLocalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
@@ -23,9 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 @ConditionalOnClass(HttpServletRequest.class)
 public class CommonInterceptor extends HandlerInterceptorAdapter {
     private static Logger logger = LoggerFactory.getLogger(CommonInterceptor.class);
-
-    @Autowired
-    HtmlServiceImpl htmlService;
 
     @Value("${base_assets_url:null}")
     private String baseAssetsUrl;
@@ -49,7 +45,7 @@ public class CommonInterceptor extends HandlerInterceptorAdapter {
             if (!"null".equals(baseUrl)) {
                 modelAndView.getModelMap().addAttribute("ctx", baseUrl);
             } else {
-                modelAndView.getModelMap().addAttribute("ctx", htmlService.getBasePath(request));
+                modelAndView.getModelMap().addAttribute("ctx", RequestUtil.getBasePath(request));
             }
             modelAndView.getModelMap().addAttribute("frontAssetsUrl", baseAssetsUrl + "front/");
             modelAndView.getModelMap().addAttribute("adminAssetsUrl", baseAssetsUrl + "admin/");

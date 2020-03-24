@@ -25,9 +25,16 @@ public interface RHash<T> {
     T get(String key);
 
     /**
+     * 移除指定的key
+     *
+     * @param key 键
+     */
+    void delete(String key);
+
+    /**
      * 线程安全的改变redis的Hash结构中key对应的值，并且每调用一次值加1
      *
-     * @param key
+     * @param key 键
      * @return
      */
     Long incr(String key);
