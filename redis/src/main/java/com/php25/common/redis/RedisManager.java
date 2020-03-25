@@ -115,4 +115,14 @@ public interface RedisManager {
      * @return
      */
     RHyperLogLogs hyperLogLogs(String key);
+
+    /**
+     * 获取限流器，使用令牌桶算法
+     *
+     * @param capacity 令牌桶最大容量
+     * @param rate     令牌增长率，单位时间(秒)内向令牌桶里添加令牌的数量
+     * @param id       令牌桶唯一标识
+     * @return
+     */
+    RRateLimiterImpl rateLimiter(int capacity, int rate, String id);
 }

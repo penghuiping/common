@@ -111,4 +111,9 @@ public class RedisManagerImpl implements RedisManager {
     public <T> RSortedSet<T> zset(String setKey, Class<T> cls) {
         return new RSortedSetImpl<>(redisTemplate, setKey, cls);
     }
+
+    @Override
+    public RRateLimiterImpl rateLimiter(int capacity, int rate, String id) {
+        return new RRateLimiterImpl(redisTemplate, capacity, rate, id);
+    }
 }

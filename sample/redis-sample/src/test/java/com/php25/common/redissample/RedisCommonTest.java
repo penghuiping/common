@@ -5,6 +5,7 @@ import com.php25.common.core.service.IdGenerator;
 import com.php25.common.core.util.RandomUtil;
 import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHyperLogLogs;
+import com.php25.common.redis.RRateLimiter;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
@@ -151,10 +152,10 @@ public class RedisCommonTest {
 
     @Test
     public void bloomFilterTest() throws Exception {
-        RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test",1000,0.001d);
+        RBloomFilter bloomFilter = redisManager.bloomFilter("bf:test", 1000, 0.001d);
 
-        for(int i=0;i<1000;i++) {
-            bloomFilter.put(i+"");
+        for (int i = 0; i < 1000; i++) {
+            bloomFilter.put(i + "");
         }
 
         Assertions.assertThat(bloomFilter.mightContain("1")).isEqualTo(true);
@@ -167,29 +168,27 @@ public class RedisCommonTest {
     public void hyperLogLogsTests() throws Exception {
         RHyperLogLogs rHyperLogLogs = redisManager.hyperLogLogs("testSET11");
         String[] values = new String[1000];
-        for(int i=0;i<1000;i++) {
-           values[i] = i+"";
+        for (int i = 0; i < 1000; i++) {
+            values[i] = i + "";
         }
         rHyperLogLogs.add(values);
-        logger.info("大小为:{}",rHyperLogLogs.size());
+        logger.info("大小为:{}", rHyperLogLogs.size());
     }
 
     @Test
     public void rsetTest() throws Exception {
-
-        RSet<String> rSet = redisManager.set("blacklist",String.class);
-
-        for(int i=0;i<500;i++) {
+        RSet<String> rSet = redisManager.set("blacklist", String.class);
+        for (int i = 0; i < 500; i++) {
             rSet.add(RandomUtil.getRandomNumbers(11));
         }
 
         rSet.add("18812345678");
 
-        logger.info("set的大小:{}",rSet.size());
+        logger.info("set的大小:{}", rSet.size());
 
         long start = System.currentTimeMillis();
         Assertions.assertThat(rSet.isMember("18812345678")).isTrue();
-        logger.info("耗时:{}ms",System.currentTimeMillis()-start);
+        logger.info("耗时:{}ms", System.currentTimeMillis() - start);
 
         rSet.remove("18812345678");
 
@@ -197,6 +196,21 @@ public class RedisCommonTest {
 
     }
 
+    @Test
+    public void rrateLimiter() throws Exception {
+        RRateLimiter rRateLimiter = redisManager.rateLimiter(10, 5, "test");
+        for (int i = 0; i < 20; i++) {
+            boolean result = rRateLimiter.isAllowed();
+            logger.info("result:{}", result);
+        }
+        Thread.sleep(4000);
+        for (int i = 0; i < 20; i++) {
+            boolean result = rRateLimiter.isAllowed();
+            logger.info("result1:{}", result);
+        }
+
+
+    }
 
 
 }
