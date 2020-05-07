@@ -356,17 +356,11 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
-    public CndJdbc having(QueryCondition condition) {
-        // 去除叠加条件中的WHERE
-        int i = condition.getSql().indexOf(WHERE);
-        if (i > -1) {
-            condition.getSql().delete(i, i + 5);
-        }
+    public CndJdbc having(String condition) {
         if (this.groupBy == null) {
             throw new DbException("having 需要在groupBy后调用");
         }
-        groupBy.addHaving(condition.getSql().toString());
-        this.addParam(condition.getParams());
+        groupBy.addHaving(condition);
         return this;
     }
 

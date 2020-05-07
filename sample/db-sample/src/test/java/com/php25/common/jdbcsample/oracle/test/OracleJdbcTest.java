@@ -184,7 +184,7 @@ public class OracleJdbcTest extends DbTest {
     @Test
     public void groupBy() {
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        List<Map> customers1 = cndJdbc.groupBy("enable").mapSelect("avg(age) as avg_age", "enable");
+        List<Map> customers1 = cndJdbc.groupBy("enable").having("avg(age)>1").mapSelect("avg(age) avg_age", "enable");
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();

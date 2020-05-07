@@ -14,7 +14,7 @@ public interface QueryOther {
      * @param condition
      * @return
      */
-    Query having(QueryCondition condition);
+    Query having(String condition);
 
     /***
      * groupBy 子句

@@ -140,7 +140,7 @@ public class MysqlJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").whereEq( "t_company.name", "Google").select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").whereEq("t_company.name", "Google").select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
     }
@@ -159,7 +159,7 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void groupBy() {
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        List<Map> customers1 = cndJdbc.groupBy("enable").mapSelect("avg(age) as avg_age", "enable");
+        List<Map> customers1 = cndJdbc.groupBy("enable").having("avg_age>1").mapSelect("avg(age) as avg_age", "enable");
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();
