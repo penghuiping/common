@@ -104,37 +104,38 @@ public class CronTest {
 
     @Test
     public void cronNextExecTime() {
+        LocalDateTime now = LocalDateTime.now();
         String cron0 = "0 15 10 LW 10 ?";
-        LocalDateTime time0 = Cron.nextExecuteTime(cron0);
-        log.info("{}",time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron3 = "15,30,45 * * * * ?";
-        LocalDateTime time = Cron.nextExecuteTime(cron3);
-        log.info("{}",time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        LocalDateTime time = Cron.nextExecuteTime(cron3, now);
+        log.info("{}", time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron4 = "15-30/5 * * * * ?";
-        LocalDateTime time1 = Cron.nextExecuteTime(cron4);
-        log.info("{}",time1.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        LocalDateTime time1 = Cron.nextExecuteTime(cron4, now);
+        log.info("{}", time1.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron5 = "30 10 1 ? 10 FRI-SAT 2021";
-        LocalDateTime time2 = Cron.nextExecuteTime(cron5);
+        LocalDateTime time2 = Cron.nextExecuteTime(cron5, now);
         log.info("{}", time2.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron6 = "0 15 10 ? * 5#3";
-        LocalDateTime time3 = Cron.nextExecuteTime(cron6);
+        LocalDateTime time3 = Cron.nextExecuteTime(cron6, now);
         log.info("{}", time3.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron7 = "0 15 10 ? * MON-FRI";
-        LocalDateTime time4 = Cron.nextExecuteTime(cron7);
+        LocalDateTime time4 = Cron.nextExecuteTime(cron7, now);
         log.info("{}", time4.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron8 = "0 15 10 ? * 5L";
-        LocalDateTime time5 = Cron.nextExecuteTime(cron8);
+        LocalDateTime time5 = Cron.nextExecuteTime(cron8, now);
         log.info("{}", time5.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         String cron9 = "0 0 1 * * ?";
-        LocalDateTime time6 = Cron.nextExecuteTime(cron9);
-        log.info("{}",time6.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        LocalDateTime time6 = Cron.nextExecuteTime(cron9, now);
+        log.info("{}", time6.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
     }
 

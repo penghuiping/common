@@ -1,40 +1,33 @@
 package com.php25.timetasks;
 
-import com.php25.timetasks.timewheel.RoundScope;
-import com.php25.timetasks.timewheel.TimeTask;
 import com.php25.timetasks.timewheel.TimeWheel;
 import org.junit.Test;
-
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author penghuiping
  * @date 2020/5/18 14:03
  */
 public class TimeWheelTest {
+    private static final Logger log = LoggerFactory.getLogger(TimeWheelTest.class);
 
     @Test
     public void test() {
-        TimeWheel timeWheel = new TimeWheel(RoundScope.MINUTE);
-        timeWheel.start();
-
-        AtomicInteger count = new AtomicInteger(0);
-        TimeTask timeTask1 = new TimeTask(2020, 5, 15, 17, 53, 30, () -> {
-            System.out.println(LocalDateTime.now() + " hello1 "+ count.addAndGet(1));
+        String cron = "0/5 * * * * ? *";
+        TimeWheel timeWheel = TimeTasks.startTimeWheel();
+        TimeTasks.submit(timeWheel, cron, () -> {
+            log.info("执行了一条语句");
         });
-        timeWheel.add(timeTask1);
 
-        TimeTask timeTask2 = new TimeTask(2020, 5, 15, 17, 54, 30, () -> {
-            System.out.println(LocalDateTime.now() + " hello2 ");
-        });
-        timeWheel.add(timeTask2);
-
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        timeWheel.stop();
+        while (true) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+
 }

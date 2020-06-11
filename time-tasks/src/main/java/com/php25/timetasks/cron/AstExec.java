@@ -42,12 +42,13 @@ public class AstExec {
      * 返回从当前时间算的下次执行时间
      *
      * @param ast
+     * @param baseTime 基时间,下次执行的时间需要在基时间之后
      * @return
      */
-    public LocalDateTime execCronExpr(AST ast) {
+    public LocalDateTime execCronExpr(AST ast, LocalDateTime baseTime) {
         IntStream[] timeStreams = getAllPossibleTimeStream(ast);
         TimeNode rootNode = getTimeNode(timeStreams);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = baseTime;
         boolean getFirst = false;
         TimeNode node = rootNode;
         while (true) {
@@ -165,9 +166,20 @@ public class AstExec {
             }
 
             if (needGoBack) {
-                node = node.getPrevious();
-                if (node.getIndex() + 1 < node.getTimes().length) {
-                    node.setIndex(node.getIndex() + 1);
+                while (true) {
+                    node = node.getPrevious();
+                    if (null == node) {
+                        return null;
+                    }
+
+                    if (node.getIndex() + 1 < node.getTimes().length) {
+                        node.setIndex(node.getIndex() + 1);
+                        break;
+                    }
+
+                    if (node.getIndex() + 1 == node.getTimes().length) {
+                        node.setIndex(0);
+                    }
                 }
             } else {
                 node = node.getNext();

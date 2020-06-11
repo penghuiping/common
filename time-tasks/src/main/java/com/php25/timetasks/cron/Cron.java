@@ -80,9 +80,9 @@ public class Cron {
      *
      * @param ast AST树
      */
-    static LocalDateTime execute(AST ast) {
+    static LocalDateTime execute(AST ast, LocalDateTime baseTime) {
         AstExec astExec = new AstExec();
-        return astExec.execCronExpr(ast);
+        return astExec.execCronExpr(ast, baseTime);
     }
 
 
@@ -90,10 +90,11 @@ public class Cron {
      * 把cron表达式翻译成下次需要执行的时间点
      *
      * @param cron cron表达式
+     * @param cron baseTime 基时间，下次执行的时间点需要在基时间之后
      * @return
      */
-    public static LocalDateTime nextExecuteTime(String cron) {
-        return execute(ast(lexer(cron)));
+    public static LocalDateTime nextExecuteTime(String cron, LocalDateTime baseTime) {
+        return execute(ast(lexer(cron)), baseTime);
     }
 
 

@@ -45,32 +45,34 @@ public class Db {
         return jdbcOperations;
     }
 
-    public void scanPackage(String basePackage) {
-        try {
-            String basePackage1 = basePackage.replace(".", "/");
-            Enumeration<URL> urlEnumeration = ClassUtils.getDefaultClassLoader().getResources(basePackage1);
-            while (urlEnumeration.hasMoreElements()) {
-                URL url = urlEnumeration.nextElement();
-                if ("file".equals(url.getProtocol())) {
-                    String fileBasePath = url.getPath();
-                    Stream<Path> pathStream = Files.list(Paths.get(fileBasePath));
-                    Set<String> result = pathStream.filter(path -> path.toString().endsWith(".class"))
-                            .map(path -> {
-                                String tmp = path.getFileName().toString();
-                                return tmp.substring(0, tmp.length() - 6);
-                            }).collect(Collectors.toSet());
+    public void scanPackage(String ...basePackages) {
+        for(String basePackage:basePackages) {
+            try {
+                String basePackage1 = basePackage.replace(".", "/");
+                Enumeration<URL> urlEnumeration = ClassUtils.getDefaultClassLoader().getResources(basePackage1);
+                while (urlEnumeration.hasMoreElements()) {
+                    URL url = urlEnumeration.nextElement();
+                    if ("file".equals(url.getProtocol())) {
+                        String fileBasePath = url.getPath();
+                        Stream<Path> pathStream = Files.list(Paths.get(fileBasePath));
+                        Set<String> result = pathStream.filter(path -> path.toString().endsWith(".class"))
+                                .map(path -> {
+                                    String tmp = path.getFileName().toString();
+                                    return tmp.substring(0, tmp.length() - 6);
+                                }).collect(Collectors.toSet());
 
-                    Iterator<String> iterator = result.iterator();
-                    while (iterator.hasNext()) {
-                        String className = iterator.next();
-                        Class class0 = ClassUtils.getDefaultClassLoader().loadClass(basePackage + "." + className);
-                        JdbcModelManager.getModelMeta(class0);
+                        Iterator<String> iterator = result.iterator();
+                        while (iterator.hasNext()) {
+                            String className = iterator.next();
+                            Class class0 = ClassUtils.getDefaultClassLoader().loadClass(basePackage + "." + className);
+                            JdbcModelManager.getModelMeta(class0);
 
+                        }
                     }
                 }
+            } catch (Exception e) {
+                throw new DbException("Db在扫描包:" + basePackage + "出错", e);
             }
-        } catch (Exception e) {
-            throw new DbException("Db在扫描包:" + basePackage + "出错", e);
         }
     }
 

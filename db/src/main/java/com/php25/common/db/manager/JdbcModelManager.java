@@ -68,7 +68,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getPkField();
         } else {
-            log.info("getPrimaryKeyField没有使用缓存");
+            log.warn("getPrimaryKeyField没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyField(cls);
         }
     }
@@ -84,7 +84,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getVersionField());
         } else {
-            log.info("getVersionField没有使用缓存");
+            log.warn("getVersionField没有使用缓存");
             return JdbcModelManagerHelper.getVersionField(cls);
         }
     }
@@ -100,7 +100,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getDbPkName();
         } else {
-            log.info("getPrimaryKeyColName没有使用缓存");
+            log.warn("getPrimaryKeyColName没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyColName(cls);
         }
     }
@@ -116,7 +116,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getGeneratedValue());
         } else {
-            log.info("getAnnotationGeneratedValue没有使用缓存");
+            log.warn("getAnnotationGeneratedValue没有使用缓存");
             return JdbcModelManagerHelper.getAnnotationGeneratedValue(cls);
         }
     }
@@ -132,7 +132,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getSequenceGenerator());
         } else {
-            log.info("getAnnotationSequenceGenerator没有使用缓存");
+            log.warn("getAnnotationSequenceGenerator没有使用缓存");
             return JdbcModelManagerHelper.getAnnotationSequenceGenerator(cls);
         }
     }
@@ -148,7 +148,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getClassPkName();
         } else {
-            log.info("getPrimaryKeyFieldName没有使用缓存");
+            log.warn("getPrimaryKeyFieldName没有使用缓存");
             return JdbcModelManagerHelper.getPrimaryKeyFieldName(cls);
         }
     }
@@ -173,7 +173,7 @@ public class JdbcModelManager {
             }
             throw new DbException("无法找到相对应的column");
         } else {
-            log.info("getDbColumnByClassColumn没有使用缓存");
+            log.warn("getDbColumnByClassColumn没有使用缓存");
             return JdbcModelManagerHelper.getDbColumnByClassColumn(cls, name);
         }
     }
@@ -199,7 +199,7 @@ public class JdbcModelManager {
             }
             return result;
         } else {
-            log.info("getClassColumnByDbColumn没有使用缓存");
+            log.warn("getClassColumnByDbColumn没有使用缓存");
             return JdbcModelManagerHelper.getClassColumnByDbColumn(cls, name);
         }
     }
@@ -258,7 +258,7 @@ public class JdbcModelManager {
         if (null != modelMeta && null != modelMeta.getExistCollectionAttribute()) {
             return modelMeta.getExistCollectionAttribute();
         } else {
-            log.info("existCollectionAttribute 没有使用缓存");
+            log.warn("existCollectionAttribute 没有使用缓存");
             return JdbcModelManagerHelper.existCollectionAttribute(cls);
         }
     }

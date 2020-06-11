@@ -1,6 +1,8 @@
 package com.php25.timetasks.timewheel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -18,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2020/5/14 16:12
  */
 public class TimeWheel {
+
+    private static final Logger log = LoggerFactory.getLogger(TimeWheel.class);
 
     /**
      * 时间轮,类比钟表，一圈60, 可容纳1天的数据
@@ -43,12 +47,6 @@ public class TimeWheel {
      * 时间轮范围
      */
     private RoundScope scope;
-
-
-    /**
-     * 上一次时间轮交换时间
-     */
-    private LocalDateTime exchangeTime;
 
 
     /**
@@ -125,6 +123,14 @@ public class TimeWheel {
                     LocalDateTime now = LocalDateTime.now();
                     int slot = getWheelSlotByTime(now, this.scope);
                     WheelSlotList ptr = wheel[slot];
+
+                    //当时间轮运行到最后一个槽位时，替换为下一个时间轮
+                    if (slot == wheel.length - 1) {
+                        WheelSlotList[] tmp = wheel;
+                        wheel = nextWheel;
+                        nextWheel = tmp;
+                    }
+
                     //运行所有的task
                     Iterator<TimeTask> iterator = ptr.iterator();
                     while (iterator.hasNext()) {
@@ -133,19 +139,14 @@ public class TimeWheel {
                         iterator.remove();
                     }
 
-                    //当时间轮运行到最后一个槽位时，替换为下一个时间轮
-                    if (slot == wheel.length - 1 && !hasExchanged()) {
-                        exchangeTime = LocalDateTime.now();
-                        WheelSlotList[] tmp = wheel;
-                        wheel = nextWheel;
-                        nextWheel = tmp;
+                    now = LocalDateTime.now();
+                    try {
+                        Thread.sleep((999999999 - now.getNano()) / 1000000,(999999999 - now.getNano()) % 1000000);
+
+                    } catch (InterruptedException e) {
+                        log.error("时间轮睡眠被打断", e);
                     }
 
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                 }
             });
             thread.start();
@@ -196,20 +197,28 @@ public class TimeWheel {
      */
     private boolean isTaskInCurrentRound(TimeTask timeTask) {
         LocalDateTime taskTime = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
+
         LocalDateTime now = LocalDateTime.now();
+        if (now.getSecond() == 59) {
+            now = now.plusSeconds(1);
+        }
+        LocalDateTime start = null;
         LocalDateTime end = null;
         switch (scope) {
             case MINUTE: {
+                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), now.getMinute(), 0);
                 LocalDateTime next = now.plusMinutes(1);
                 end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), next.getMinute(), 0);
                 break;
             }
             case HOUR: {
+                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), 0, 0);
                 LocalDateTime next = now.plusHours(1);
                 end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), 0, 0);
                 break;
             }
             case DAY: {
+                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), 0, 0, 0);
                 LocalDateTime next = now.plusDays(1);
                 end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), 0, 0, 0);
                 break;
@@ -218,9 +227,10 @@ public class TimeWheel {
                 break;
         }
 
-        if (taskTime.isAfter(now) && taskTime.isBefore(end)) {
+        if ((taskTime.isEqual(start) || taskTime.isAfter(start)) && taskTime.isBefore(end)) {
             return true;
         }
+
 
         return false;
     }
@@ -266,23 +276,10 @@ public class TimeWheel {
                 break;
         }
 
-        if (taskTime.isAfter(start) && taskTime.isBefore(end)) {
+        if ((taskTime.isEqual(start) || taskTime.isAfter(start)) && taskTime.isBefore(end)) {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 用于判断是否近期新旧时间轮是否已经交换过
-     *
-     * @return true:交换过 false:没有交换过
-     */
-    private boolean hasExchanged() {
-        if (exchangeTime == null) {
-            return false;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        return exchangeTime.plusSeconds(1).isAfter(now);
     }
 
 

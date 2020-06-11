@@ -689,7 +689,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             return null;
         }
         Class<?> paramValueType = paramValue.getClass();
-        if (paramValueType.isPrimitive() || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType)) {
+        if (paramValueType.isPrimitive() || Boolean.class.isAssignableFrom(paramValueType) || Number.class.isAssignableFrom(paramValueType) || String.class.isAssignableFrom(paramValueType)) {
             //基本类型,string,date直接加入参数列表
             return paramValue;
         } else if (Date.class.isAssignableFrom(paramValueType)) {

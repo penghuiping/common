@@ -89,6 +89,8 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
         } else if (Boolean.class.isAssignableFrom(requiredType)) {
             if (Number.class.isAssignableFrom(value.getClass())) {
                 return ((Number) value).intValue() == 1;
+            } else if (Boolean.class.isAssignableFrom(value.getClass())) {
+                return value;
             } else {
                 throw new DbException(
                         "Value [" + value + "] is of type [" + value.getClass().getName() +
