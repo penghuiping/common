@@ -394,7 +394,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
 
     @Override
-    public Query join(Class<?> model) {
+    public CndJdbc join(Class<?> model) {
         String tmp = getSql().toString();
         if (!StringUtil.isBlank(tmp)) {
             throw new DbException("请先使用join子句");
@@ -406,7 +406,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     }
 
     @Override
-    public Query on(String leftColumn, String rightColumn) {
+    public CndJdbc on(String leftColumn, String rightColumn) {
         String tmp = getSql().toString();
         if (!StringUtil.isBlank(tmp) && tmp.contains("ON")) {
             throw new DbException("on只能使用一次");
