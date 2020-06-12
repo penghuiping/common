@@ -60,10 +60,16 @@ public interface QueryOther {
      * join 子句
      *
      * @param model  需要join的表实体类
-     * @param column 对应model里需要关联的属性名
-     * @param relationColumn 对应关联model的关联属性名
      * @return
      */
-    Query join(Class<?> model, String column,String relationColumn);
+    Query join(Class<?> model);
 
+
+    /**
+     * on 子句
+     * @param leftColumn
+     * @param rightColumn
+     * @return
+     */
+    Query on(String leftColumn,String rightColumn);
 }

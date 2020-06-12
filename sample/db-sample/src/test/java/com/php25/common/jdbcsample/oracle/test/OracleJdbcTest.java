@@ -160,13 +160,13 @@ public class OracleJdbcTest extends DbTest {
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        customers = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").select(Customer.class);
+        customers = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").select(Customer.class);
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class, "id", "companyId").whereEq( "t_company.name", "Google").select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
-        Assertions.assertThat(customers.size()).isEqualTo(6);
+        Assertions.assertThat(companies.size()).isEqualTo(6);
 
     }
 

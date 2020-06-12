@@ -1,5 +1,6 @@
 package com.php25.common.db.cnd;
 
+import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 
 /**
@@ -12,6 +13,15 @@ public abstract class AbstractNewQuery extends AbstractQuery {
 
     @Override
     public String getCol(String name) {
+        if (name.contains(".")) {
+            String[] parts = name.split("\\.");
+            if (parts.length == 2) {
+                Class<?> modelClass = JdbcModelManager.getClassFromModelName(parts[0]);
+                return getCol(modelClass, parts[1]);
+            } else {
+                throw new DbException("Db Column name is illegal");
+            }
+        }
         return getCol(clazz, name);
     }
 

@@ -392,17 +392,30 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return this;
     }
 
+
     @Override
-    public CndJdbc join(Class<?> model, String column, String relationColumn) {
+    public Query join(Class<?> model) {
         String tmp = getSql().toString();
-        if (!StringUtil.isBlank(tmp) && tmp.contains("JOIN")) {
-            throw new DbException("join只能使用一次");
+        if (!StringUtil.isBlank(tmp)) {
+            throw new DbException("请先使用join子句");
         }
         String tableB = JdbcModelManager.getTableName(model);
-        String tableA = JdbcModelManager.getTableName(clazz);
-        String joinStatement = String.format("%s.%s=%s.%s", tableA, JdbcModelManager.getDbColumnByClassColumn(clazz, relationColumn), tableB, JdbcModelManager.getDbColumnByClassColumn(model, column));
-        StringBuilder sb = new StringBuilder(String.format("JOIN %s ON %s ", tableB, joinStatement));
-        sb.append(getSql());
+        StringBuilder sb = new StringBuilder(String.format("JOIN %s  ", tableB));
+        this.setSql(sb);
+        return this;
+    }
+
+    @Override
+    public Query on(String leftColumn, String rightColumn) {
+        String tmp = getSql().toString();
+        if (!StringUtil.isBlank(tmp) && tmp.contains("ON")) {
+            throw new DbException("on只能使用一次");
+        }
+        String left = getCol(leftColumn);
+        String right = getCol(rightColumn);
+        String joinStatement = String.format("%s=%s", left, right);
+        StringBuilder sb = new StringBuilder(String.format("ON %s ", joinStatement));
+        sb = getSql().append(sb);
         this.setSql(sb);
         return this;
     }
@@ -510,6 +523,15 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         Long versionValue = 0L;
 
         Object pkValue = null;
+
+        boolean flag = false;
+        List<Object> whereParams = params;
+        String sql = this.getSql().toString();
+        if (!StringUtil.isBlank(sql)) {
+            flag = true;
+            params = new ArrayList<>();
+        }
+
         for (int i = 0; i < pairList.size(); i++) {
             //移除主键
             if (!pairList.get(i).getLeft().equals(pkName)) {
@@ -538,14 +560,18 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             }
         }
 
+        if (flag) {
+            params.addAll(whereParams);
+            stringBuilder.append(sql);
+        } else {
+            stringBuilder.append(String.format("WHERE %s=?", pkName));
+            params.add(pkValue);
 
-        stringBuilder.append(String.format("WHERE %s=?", pkName));
-        params.add(pkValue);
-
-        if (versionFieldOptional.isPresent()) {
-            //具有@version的情况
-            stringBuilder.append(String.format(" AND %s=?", versionColumnName));
-            params.add(versionValue);
+            if (versionFieldOptional.isPresent() && null != versionColumnName) {
+                //具有@version的情况
+                stringBuilder.append(String.format(" AND %s=?", versionColumnName));
+                params.add(versionValue);
+            }
         }
 
         log.info("sql语句为:" + stringBuilder.toString());

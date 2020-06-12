@@ -26,6 +26,8 @@ public class JdbcModelManager {
 
     private static ConcurrentReferenceHashMap<String, ModelMeta> modelMetas = new ConcurrentReferenceHashMap<>();
 
+    private static ConcurrentReferenceHashMap<String, Class<?>> modelNameToClass = new ConcurrentReferenceHashMap<>();
+
     /****
      * 根据实体class获取表名
      * @param cls
@@ -53,8 +55,19 @@ public class JdbcModelManager {
         } else {
             modelMeta = JdbcModelManagerHelper.getModelMeta(cls);
             modelMetas.putIfAbsent(cls.getName(), modelMeta);
+            modelNameToClass.putIfAbsent(cls.getSimpleName(), cls);
             return modelMeta;
         }
+    }
+
+    /**
+     * 通过modelName获取对应的实体类
+     *
+     * @param modelName
+     * @return
+     */
+    public static Class<?> getClassFromModelName(String modelName) {
+        return modelNameToClass.get(modelName);
     }
 
     /**
