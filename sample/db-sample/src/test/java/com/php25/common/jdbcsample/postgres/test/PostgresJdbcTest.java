@@ -161,6 +161,21 @@ public class PostgresJdbcTest extends DbTest {
 
     }
 
+    @Test
+    public void or() {
+        CndJdbc cnd = db.cndJdbc(Customer.class);
+        List<Customer> customers =
+                cnd.where(cnd.clone().andEq("age", 0).andEq("username","jack0"))
+                        .or(cnd.clone().andEq("age",0).andEq("username","mary0"))
+                        .select();
+        System.out.println(JsonUtil.toPrettyJson(customers));
+        Assertions.assertThat(customers.size()).isEqualTo(2);
+
+        customers = cnd.clone().whereEq("age",0).orEq("age",10).select();
+        System.out.println(JsonUtil.toPrettyJson(customers));
+        Assertions.assertThat(customers.size()).isEqualTo(3);
+    }
+
 
     @Test
     public void orderBy() {
@@ -175,7 +190,7 @@ public class PostgresJdbcTest extends DbTest {
     @Test
     public void groupBy() {
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        List<Map> customers1 = cndJdbc.groupBy("enable").having("avg_age>1").mapSelect("avg(age) as avg_age", "enable");
+        List<Map> customers1 = cndJdbc.groupBy("enable").having("avg(age)>1").mapSelect("avg(age) as avg_age", "enable");
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();

@@ -405,6 +405,8 @@ public interface QueryCondition {
 
     Query or(Query condition);
 
+    Query where(Query condition);
+
 
     /**
      * 获取sql

@@ -68,7 +68,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         return dsl;
     }
 
-    public CndJdbc condition() {
+    @Override
+    public CndJdbc clone() {
         CndJdbc dsl = null;
         switch (dbType) {
             case MYSQL:
@@ -388,7 +389,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     @Override
     public CndJdbc desc(String column) {
         this.getOrderBy();
-        orderBy.add(column + " DESC");
+        orderBy.add(getCol(column) + " DESC");
         return this;
     }
 

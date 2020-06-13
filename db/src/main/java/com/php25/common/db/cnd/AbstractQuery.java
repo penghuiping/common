@@ -377,6 +377,12 @@ public abstract class AbstractQuery implements Query {
         return this;
     }
 
+
+    @Override
+    public Query where(Query condition) {
+        return manyCondition(condition, WHERE);
+    }
+
     @Override
     public Query and(Query condition) {
         return manyCondition(condition, AND);
@@ -388,7 +394,7 @@ public abstract class AbstractQuery implements Query {
     }
 
     private Query manyCondition(Query condition, String link) {
-        if (!(condition instanceof QueryCondition)) {
+        if (condition == null) {
             throw new DbException("连接条件必须是一个 QueryCondition 类型");
         }
 
@@ -398,9 +404,6 @@ public abstract class AbstractQuery implements Query {
             condition.getSql().delete(i, i + 5);
         }
 
-        if (getSql().indexOf(WHERE) < 0) {
-            link = WHERE;
-        }
         appendSql(link)
                 .appendSql(" (")
                 .appendSql(condition.getSql().toString())

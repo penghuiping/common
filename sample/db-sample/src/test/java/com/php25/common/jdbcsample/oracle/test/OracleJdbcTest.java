@@ -170,6 +170,21 @@ public class OracleJdbcTest extends DbTest {
 
     }
 
+    @Test
+    public void or() {
+        CndJdbc cnd = db.cndJdbc(Customer.class);
+        List<Customer> customers =
+                cnd.where(cnd.clone().andEq("age", 0).andEq("username","jack0"))
+                        .or(cnd.clone().andEq("age",0).andEq("username","mary0"))
+                        .select();
+        System.out.println(JsonUtil.toPrettyJson(customers));
+        Assertions.assertThat(customers.size()).isEqualTo(2);
+
+        customers = cnd.clone().whereEq("age",0).orEq("age",10).select();
+        System.out.println(JsonUtil.toPrettyJson(customers));
+        Assertions.assertThat(customers.size()).isEqualTo(3);
+    }
+
 
     @Test
     public void orderBy() {
