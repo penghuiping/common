@@ -59,17 +59,43 @@ public interface QueryOther {
     /**
      * join 子句
      *
-     * @param model  需要join的表实体类
+     * @param model 需要join的表实体类
      * @return
      */
     Query join(Class<?> model);
 
+    /**
+     * join 子句
+     *
+     * @param model 需要join的表实体类
+     * @param alias as名
+     * @return
+     */
+    Query join(Class<?> model, String alias);
+
+    /**
+     * left join 子句
+     *
+     * @param model 需要left join的表实体类
+     * @return
+     */
+    Query leftJoin(Class<?> model);
+
+    /**
+     * left join 子句
+     *
+     * @param model 需要left join的表实体类
+     * @param alias 别名
+     * @return
+     */
+    Query leftJoin(Class<?> model, String alias);
 
     /**
      * on 子句
+     *
      * @param leftColumn
      * @param rightColumn
      * @return
      */
-    Query on(String leftColumn,String rightColumn);
+    Query on(String leftColumn, String rightColumn);
 }

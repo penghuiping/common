@@ -143,6 +143,14 @@ public class MysqlJdbcTest extends DbTest {
         List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class);
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
+
+        //alias
+        customers = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId","b.id").select(Customer.class);
+        Assertions.assertThat(customers.size()).isEqualTo(6);
+        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class);
+        Assertions.assertThat(companies.size()).isEqualTo(6);
+
+
     }
 
     @Test

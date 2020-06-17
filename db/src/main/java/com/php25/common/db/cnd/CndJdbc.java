@@ -49,7 +49,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     protected DbType dbType;
 
-    public static CndJdbc of(Class cls, DbType dbType, JdbcOperations jdbcOperations) {
+    public static CndJdbc of(Class cls,String alias, DbType dbType, JdbcOperations jdbcOperations) {
         CndJdbc dsl = null;
         switch (dbType) {
             case MYSQL:
@@ -64,6 +64,10 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
             default:
                 dsl = new CndMysqlJdbc(cls, jdbcOperations);
                 break;
+        }
+        if (!StringUtil.isBlank(alias)) {
+            dsl.aliasMap.put(alias, cls);
+            dsl.clazzAlias = alias;
         }
         return dsl;
     }
@@ -85,6 +89,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 dsl = new CndMysqlJdbc(this.clazz, jdbcOperations);
                 break;
         }
+        dsl.aliasMap = this.aliasMap;
+        dsl.clazzAlias = this.clazzAlias;
         return dsl;
     }
 
@@ -156,7 +162,13 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
         } else {
             sb = new StringBuilder("SELECT *");
         }
-        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+
+        if (!StringUtil.isBlank(clazzAlias)) {
+            sb.append(" ").append(clazzAlias);
+        }
+        sb.append(" ").append(getSql());
+
         this.setSql(sb);
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
@@ -303,7 +315,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     public <M> int delete(M m) {
         Object id = JdbcModelManager.getPrimaryKeyValue(clazz, m);
         String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
-        int result = CndJdbc.of(clazz, dbType, jdbcOperations).whereEq(pkName, id).delete();
+        int result = CndJdbc.of(clazz,null, dbType, jdbcOperations).whereEq(pkName, id).delete();
 
         //实体类中存在集合属性的情况
         if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
@@ -319,7 +331,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 }
                 //清空所有关系
                 Class type = (Class) ObjectUtil.getTypeArgument(field.getGenericType(), 0);
-                CndJdbc.of(type, dbType, jdbcOperations).whereEq(column.value(), id).delete();
+                CndJdbc.of(type, null,dbType, jdbcOperations).whereEq(column.value(), id).delete();
             }
         }
         return result;
@@ -342,7 +354,11 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
     @Override
     public long count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) as num_count FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz)).append(" ").append(getSql());
+        sb.append(JdbcModelManager.getTableName(clazz));
+        if (!StringUtil.isBlank(clazzAlias)) {
+            sb.append(" ").append(clazzAlias);
+        }
+        sb.append(" ").append(getSql());
         this.setSql(sb);
         log.info("sql语句为:" + sb.toString());
         String targetSql = this.getSql().toString();
@@ -396,28 +412,43 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     @Override
     public CndJdbc join(Class<?> model) {
-        String tmp = getSql().toString();
-        if (!StringUtil.isBlank(tmp)) {
-            throw new DbException("请先使用join子句");
-        }
+        return join(model, null);
+    }
+
+    @Override
+    public CndJdbc join(Class<?> model, String alias) {
         String tableB = JdbcModelManager.getTableName(model);
-        StringBuilder sb = new StringBuilder(String.format("JOIN %s  ", tableB));
-        this.setSql(sb);
+        this.setSql(this.getSql().append(String.format("JOIN %s  ", tableB)));
+
+        if (!StringUtil.isBlank(alias)) {
+            this.setSql(this.getSql().append(alias).append(" "));
+            aliasMap.put(alias, model);
+        }
+        return this;
+    }
+
+    @Override
+    public CndJdbc leftJoin(Class<?> model) {
+        return leftJoin(model, null);
+    }
+
+    @Override
+    public CndJdbc leftJoin(Class<?> model, String alias) {
+        String tableB = JdbcModelManager.getTableName(model);
+        this.setSql(this.getSql().append(String.format("LEFT JOIN %s  ", tableB)));
+
+        if (!StringUtil.isBlank(alias)) {
+            this.setSql(this.getSql().append(alias).append(" "));
+            aliasMap.put(alias, model);
+        }
         return this;
     }
 
     @Override
     public CndJdbc on(String leftColumn, String rightColumn) {
-        String tmp = getSql().toString();
-        if (!StringUtil.isBlank(tmp) && tmp.contains("ON")) {
-            throw new DbException("on只能使用一次");
-        }
         String left = getCol(leftColumn);
         String right = getCol(rightColumn);
-        String joinStatement = String.format("%s=%s", left, right);
-        StringBuilder sb = new StringBuilder(String.format("ON %s ", joinStatement));
-        sb = getSql().append(sb);
-        this.setSql(sb);
+        this.setSql(this.getSql().append(String.format("ON %s=%s", left,right)));
         return this;
     }
 
@@ -463,7 +494,7 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 Collection<Object> collection = (Collection<Object>) tmp.getRight();
                 List<Object> list = new ArrayList<>(collection);
                 if (list.size() > 0) {
-                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
+                    CndJdbc.of(list.get(0).getClass(),null, dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
                 }
             }
         }
@@ -502,9 +533,9 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
                 List<Object> list = new ArrayList<>(collection);
                 if (list.size() > 0) {
                     //清空所有关系
-                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
+                    CndJdbc.of(list.get(0).getClass(),null, dbType, jdbcOperations).whereEq(tmp.getLeft(), id).delete();
                     //插入关系
-                    CndJdbc.of(list.get(0).getClass(), dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
+                    CndJdbc.of(list.get(0).getClass(), null,dbType, jdbcOperations).insertCollectionColumns(tmp.getLeft(), id, list);
                 }
             }
         }
@@ -513,7 +544,8 @@ public abstract class CndJdbc extends AbstractNewQuery implements Query {
 
     private <T> int update(T t, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(t.getClass())).append(" SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(clazz)).append(" SET ");
+
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(t.getClass());

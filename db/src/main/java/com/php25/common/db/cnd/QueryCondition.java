@@ -10,6 +10,13 @@ import java.util.List;
 public interface QueryCondition {
 
     /**
+     * where 1=1
+     *
+     * @return
+     */
+    Query whereOneEqualOne();
+
+    /**
      * where column = value
      *
      * @param column

@@ -157,8 +157,11 @@ public class PostgresJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
-
-
+        //alias
+        customers = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId","b.id").select(com.php25.common.jdbcsample.mysql.model.Customer.class);
+        Assertions.assertThat(customers.size()).isEqualTo(6);
+        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class);
+        Assertions.assertThat(companies.size()).isEqualTo(6);
     }
 
     @Test

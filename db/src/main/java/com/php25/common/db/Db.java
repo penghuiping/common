@@ -82,7 +82,16 @@ public class Db {
      * @return
      */
     public CndJdbc cndJdbc(Class cls) {
-        return CndJdbc.of(cls, dbType, this.jdbcOperations);
+        return CndJdbc.of(cls, null, dbType, this.jdbcOperations);
+    }
+
+    /**
+     * 获取一个关系型数据库 新条件
+     *
+     * @return
+     */
+    public CndJdbc cndJdbc(Class cls, String alias) {
+        return CndJdbc.of(cls, alias, dbType, this.jdbcOperations);
     }
 
 
