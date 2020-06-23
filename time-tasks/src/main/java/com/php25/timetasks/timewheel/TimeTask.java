@@ -1,5 +1,7 @@
 package com.php25.timetasks.timewheel;
 
+import java.time.LocalDateTime;
+
 /**
  * 定时任务
  *
@@ -47,19 +49,43 @@ public class TimeTask {
      */
     int second;
 
+    /**
+     * 任务id
+     */
+    String jobId;
+
+    /**
+     * cron表达式
+     */
+    String cron;
 
     /**
      * 具体需要执行的任务
      */
     Runnable task;
 
-    public TimeTask(int year, int month, int day, int hour, int minute, int second, Runnable task) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.second = second;
-        this.minute = minute;
-        this.hour = hour;
+
+    public TimeTask(LocalDateTime executeTime, Runnable task, String jobId,String cron) {
+        this.year = executeTime.getYear();
+        this.month = executeTime.getMonth().getValue();
+        this.day = executeTime.getDayOfMonth();
+        this.second = executeTime.getSecond();
+        this.minute = executeTime.getMinute();
+        this.hour = executeTime.getHour();
         this.task = task;
+        this.jobId = jobId;
+        this.cron = cron;
+    }
+
+    public String getJobId() {
+        return jobId;
+    }
+
+    public String getCron() {
+        return cron;
+    }
+
+    public Runnable getTask() {
+        return task;
     }
 }

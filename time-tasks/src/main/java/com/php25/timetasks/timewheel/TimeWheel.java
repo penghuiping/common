@@ -1,17 +1,22 @@
 package com.php25.timetasks.timewheel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.php25.timetasks.cron.Cron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 时间轮
@@ -24,14 +29,10 @@ public class TimeWheel {
     private static final Logger log = LoggerFactory.getLogger(TimeWheel.class);
 
     /**
-     * 时间轮,类比钟表，一圈60, 可容纳1天的数据
+     * 时间轮,类比钟表，一圈3600, 可容纳1小时的数据
      */
     private WheelSlotList[] wheel;
 
-    /**
-     * 下一轮的时间轮
-     */
-    private WheelSlotList[] nextWheel;
 
     /**
      * 时间轮运行状态  0:stop 1:run
@@ -44,9 +45,23 @@ public class TimeWheel {
     private int slotNumber;
 
     /**
-     * 时间轮范围
+     * 头指针，随着秒针移动而变化
      */
-    private RoundScope scope;
+    private int head = 0;
+
+    /**
+     * 尾指针
+     */
+    private int tail = 0;
+
+
+    private Boolean empty() {
+        return head == tail;
+    }
+
+    private Boolean full() {
+        return (tail + 1) % slotNumber == head;
+    }
 
 
     /**
@@ -54,28 +69,12 @@ public class TimeWheel {
      */
     private ExecutorService threadPool;
 
-    public TimeWheel(RoundScope roundScope) {
-        this.scope = roundScope;
-        switch (this.scope) {
-            case DAY:
-                slotNumber = 60 * 60 * 24;
-                break;
-            case HOUR:
-                slotNumber = 60 * 60;
-                break;
-            case MINUTE:
-                slotNumber = 60;
-                break;
-            default:
-                break;
-        }
-
+    public TimeWheel() {
+        slotNumber = 60;
         this.wheel = new WheelSlotList[slotNumber];
-        this.nextWheel = new WheelSlotList[slotNumber];
 
         for (int i = 0; i < slotNumber; i++) {
             wheel[i] = new WheelSlotList();
-            nextWheel[i] = new WheelSlotList();
         }
     }
 
@@ -85,24 +84,23 @@ public class TimeWheel {
      * @param timeTask return true:成功 false:失败
      */
     public boolean add(TimeTask timeTask) {
-        if (isTaskInCurrentRound(timeTask)) {
-            //放入当前时间轮槽
-            LocalDateTime time = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
-            int slot = getWheelSlotByTime(time, this.scope);
-            WheelSlotList ptr = wheel[slot];
-            ptr.add(timeTask);
-            return true;
-        }
+        //放入当前时间轮槽
+        LocalDateTime time = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
+        long timeSeconds = time.toEpochSecond(ZoneOffset.of("+8"));
+        int length = (int) (timeSeconds - getCurrentTimeStamp());
 
-        if (isTaskInNextRound(timeTask)) {
-            //放入下一轮时间轮槽
-            LocalDateTime time = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
-            int slot = getWheelSlotByTime(time, this.scope);
-            WheelSlotList ptr = nextWheel[slot];
+        int scope = (tail >= head) ? (tail - head) : (tail + slotNumber - head);
+        if (length > 0 && length < scope) {
+            log.debug("加入wheel，{}", time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            WheelSlotList ptr = wheel[(head + length) % slotNumber];
             ptr.add(timeTask);
             return true;
+        } else {
+            //放入数据库
+            log.debug("加入数据库，{}", time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            DbFactory.getJobDao().save(timeTask);
+            return true;
         }
-        return false;
     }
 
     /**
@@ -110,6 +108,9 @@ public class TimeWheel {
      */
     public void start() {
         if (state.get() == 0) {
+            head = (int) getCurrentTimeStamp() % slotNumber;
+            tail = (head + slotNumber - 1) % slotNumber;
+
             ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
                     .setNameFormat("TimeTasks-Thread-%d").build();
 
@@ -120,29 +121,50 @@ public class TimeWheel {
             Thread thread = namedThreadFactory.newThread(() -> {
                 state.compareAndSet(0, 1);
                 while (state.get() == 1) {
-                    LocalDateTime now = LocalDateTime.now();
-                    int slot = getWheelSlotByTime(now, this.scope);
-                    WheelSlotList ptr = wheel[slot];
+                    final LocalDateTime now = LocalDateTime.now();
+                    long nowSeconds = now.toEpochSecond(ZoneOffset.of("+8"));
+                    head = (int) nowSeconds % slotNumber;
+                    WheelSlotList ptr = wheel[head];
 
-                    //当时间轮运行到最后一个槽位时，替换为下一个时间轮
-                    if (slot == wheel.length - 1) {
-                        WheelSlotList[] tmp = wheel;
-                        wheel = nextWheel;
-                        nextWheel = tmp;
+                    int scope = (tail >= head) ? (tail - head) : (tail + slotNumber - head);
+                    if (scope == slotNumber / 2) {
+                        //运行过半以后，调整tail值，并且加载新的一半数据进入时间轮
+                        tail = (tail + slotNumber / 2 - 1) % slotNumber;
+                        namedThreadFactory.newThread(() -> {
+                            log.debug("触发补数据操作");
+                            //加载数据
+                            List<TimeTask> timeTasks = DbFactory.getJobDao().findByExecuteTimeScope(now.plusSeconds(scope), now.plusSeconds(scope + slotNumber / 2 - 1));
+                            log.debug("触发补数据操作,补时间{}-{}", now.plusSeconds(scope).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                                    , now.plusSeconds(scope + slotNumber / 2 - 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                            if (null != timeTasks && !timeTasks.isEmpty()) {
+                                timeTasks.forEach(this::add);
+                                DbFactory.getJobDao().deleteAll(timeTasks.stream().map(TimeTask::getJobId).collect(Collectors.toList()));
+                                DbFactory.getJobDao().deleteAllInvalidJob();
+                            }
+                        }).start();
                     }
 
                     //运行所有的task
                     Iterator<TimeTask> iterator = ptr.iterator();
                     while (iterator.hasNext()) {
                         TimeTask timeTask = iterator.next();
-                        threadPool.submit(timeTask.task);
+                        threadPool.submit(() -> {
+                            if (null != timeTask.cron && timeTask.cron.length() > 0) {
+                                //如果cron可以生成下一次的执行时间
+                                LocalDateTime next = Cron.nextExecuteTime(timeTask.cron, now.plusSeconds(1));
+                                if (null != next) {
+                                    TimeTask timeTask1 = new TimeTask(next, timeTask.task, DbFactory.getJobDao().generateJobId(), timeTask.cron);
+                                    this.add(timeTask1);
+                                }
+                            }
+                            timeTask.task.run();
+                        });
                         iterator.remove();
                     }
 
-                    now = LocalDateTime.now();
                     try {
-                        Thread.sleep((999999999 - now.getNano()) / 1000000,(999999999 - now.getNano()) % 1000000);
-
+                        LocalDateTime now1 = LocalDateTime.now();
+                        Thread.sleep((999999999 - now1.getNano()) / 1000000, (999999999 - now1.getNano()) % 1000000);
                     } catch (InterruptedException e) {
                         log.error("时间轮睡眠被打断", e);
                     }
@@ -151,6 +173,12 @@ public class TimeWheel {
             });
             thread.start();
         }
+    }
+
+
+    private long getCurrentTimeStamp() {
+        final LocalDateTime now = LocalDateTime.now();
+        return now.toEpochSecond(ZoneOffset.of("+8"));
     }
 
     /**
@@ -163,124 +191,4 @@ public class TimeWheel {
         this.threadPool.shutdown();
         this.threadPool = null;
     }
-
-    /**
-     * 根据当前时间，计算时间轮槽的位置
-     *
-     * @param now 当前时间
-     * @return
-     */
-    private int getWheelSlotByTime(LocalDateTime now, RoundScope roundScope) {
-        int result = 0;
-        switch (roundScope) {
-            case MINUTE:
-                result = now.getSecond();
-                break;
-            case HOUR:
-                result = now.getMinute() * 60 + now.getSecond();
-                break;
-            case DAY:
-                result = now.getHour() * 60 * 60 + now.getMinute() * 60 + now.getSecond();
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-
-
-    /**
-     * 判断任务是否是当前时间轮
-     *
-     * @param timeTask
-     * @return
-     */
-    private boolean isTaskInCurrentRound(TimeTask timeTask) {
-        LocalDateTime taskTime = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
-
-        LocalDateTime now = LocalDateTime.now();
-        if (now.getSecond() == 59) {
-            now = now.plusSeconds(1);
-        }
-        LocalDateTime start = null;
-        LocalDateTime end = null;
-        switch (scope) {
-            case MINUTE: {
-                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), now.getMinute(), 0);
-                LocalDateTime next = now.plusMinutes(1);
-                end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), next.getMinute(), 0);
-                break;
-            }
-            case HOUR: {
-                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), 0, 0);
-                LocalDateTime next = now.plusHours(1);
-                end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), 0, 0);
-                break;
-            }
-            case DAY: {
-                start = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), 0, 0, 0);
-                LocalDateTime next = now.plusDays(1);
-                end = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), 0, 0, 0);
-                break;
-            }
-            default:
-                break;
-        }
-
-        if ((taskTime.isEqual(start) || taskTime.isAfter(start)) && taskTime.isBefore(end)) {
-            return true;
-        }
-
-
-        return false;
-    }
-
-    /**
-     * 判断任务是否是下一个时间轮
-     *
-     * @param timeTask
-     * @return
-     */
-    private boolean isTaskInNextRound(TimeTask timeTask) {
-        LocalDateTime taskTime = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = null;
-        LocalDateTime end = null;
-        switch (scope) {
-            case MINUTE: {
-
-                LocalDateTime next = now.plusMinutes(1);
-                start = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), next.getMinute(), 0);
-
-                LocalDateTime next1 = now.plusMinutes(2);
-                end = LocalDateTime.of(next1.getYear(), next1.getMonth(), next1.getDayOfMonth(), next1.getHour(), next1.getMinute(), 0);
-                break;
-            }
-            case HOUR: {
-                LocalDateTime next = now.plusHours(1);
-                start = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), next.getHour(), 0, 0);
-
-                LocalDateTime next1 = now.plusHours(2);
-                end = LocalDateTime.of(next1.getYear(), next1.getMonth(), next1.getDayOfMonth(), next1.getHour(), 0, 0);
-                break;
-            }
-            case DAY: {
-                LocalDateTime next = now.plusDays(1);
-                start = LocalDateTime.of(next.getYear(), next.getMonth(), next.getDayOfMonth(), 0, 0, 0);
-
-                LocalDateTime next1 = now.plusDays(2);
-                end = LocalDateTime.of(next1.getYear(), next1.getMonth(), next1.getDayOfMonth(), 0, 0, 0);
-                break;
-            }
-            default:
-                break;
-        }
-
-        if ((taskTime.isEqual(start) || taskTime.isAfter(start)) && taskTime.isBefore(end)) {
-            return true;
-        }
-        return false;
-    }
-
-
 }

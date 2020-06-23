@@ -14,11 +14,9 @@ public class TimeWheelTest {
 
     @Test
     public void test() {
-        String cron = "0/5 * * * * ? *";
+        String cron = "0 0/2 * 23 * ? *";
         TimeWheel timeWheel = TimeTasks.startTimeWheel();
-        TimeTasks.submit(timeWheel, cron, () -> {
-            log.info("执行了一条语句");
-        });
+        TimeTasks.submit(timeWheel, cron, new TestJob());
 
         while (true) {
             try {
@@ -28,6 +26,8 @@ public class TimeWheelTest {
             }
         }
     }
+
+
 
 
 }

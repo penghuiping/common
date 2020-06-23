@@ -5,18 +5,12 @@ import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.ClassUtils;
-
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *
@@ -45,35 +39,33 @@ public class Db {
         return jdbcOperations;
     }
 
+    private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+    private static final String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
+
+
     public void scanPackage(String ...basePackages) {
-        for(String basePackage:basePackages) {
+        for (String basePackage : basePackages) {
             try {
-                String basePackage1 = basePackage.replace(".", "/");
-                Enumeration<URL> urlEnumeration = ClassUtils.getDefaultClassLoader().getResources(basePackage1);
-                while (urlEnumeration.hasMoreElements()) {
-                    URL url = urlEnumeration.nextElement();
-                    if ("file".equals(url.getProtocol())) {
-                        String fileBasePath = url.getPath();
-                        Stream<Path> pathStream = Files.list(Paths.get(fileBasePath));
-                        Set<String> result = pathStream.filter(path -> path.toString().endsWith(".class"))
-                                .map(path -> {
-                                    String tmp = path.getFileName().toString();
-                                    return tmp.substring(0, tmp.length() - 6);
-                                }).collect(Collectors.toSet());
-
-                        Iterator<String> iterator = result.iterator();
-                        while (iterator.hasNext()) {
-                            String className = iterator.next();
-                            Class class0 = ClassUtils.getDefaultClassLoader().loadClass(basePackage + "." + className);
-                            JdbcModelManager.getModelMeta(class0);
-
-                        }
-                    }
+                String packageSearchPath = CLASSPATH_ALL_URL_PREFIX +
+                        resolveBasePackage(basePackage) + '/' + DEFAULT_RESOURCE_PATTERN;
+                Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
+                for(Resource resource:resources) {
+                    String className = basePackage +"."+resource.getFilename().split("\\.")[0];
+                    Class class0 = ClassUtils.getDefaultClassLoader().loadClass(className);
+                    JdbcModelManager.getModelMeta(class0);
                 }
             } catch (Exception e) {
                 throw new DbException("Db在扫描包:" + basePackage + "出错", e);
             }
         }
+    }
+
+    private ResourcePatternResolver getResourcePatternResolver() {
+        return new PathMatchingResourcePatternResolver();
+    }
+
+    private String resolveBasePackage(String basePackage) {
+        return ClassUtils.convertClassNameToResourcePath(new StandardEnvironment().resolveRequiredPlaceholders(basePackage));
     }
 
     /**
