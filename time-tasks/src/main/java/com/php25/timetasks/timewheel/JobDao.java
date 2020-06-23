@@ -30,8 +30,10 @@ public class JobDao {
     public void save(TimeTask timeTask) {
         LocalDateTime time = LocalDateTime.of(timeTask.year, timeTask.month, timeTask.day, timeTask.hour, timeTask.minute, timeTask.second);
         String className = timeTask.task.getClass().getName();
+        String sql = "insert into t_time_task(`id`,`class_name`,`execute_time`,`cron`)values (?,?,?,?)";
+        log.debug(sql);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("insert into t_time_task(`id`,`class_name`,`execute_time`,`cron`)values (?,?,?,?)");) {
+             PreparedStatement statement = connection.prepareStatement(sql);) {
             statement.setString(1, timeTask.getJobId());
             statement.setString(2, className);
             statement.setTimestamp(3, Timestamp.valueOf(time));
@@ -50,7 +52,7 @@ public class JobDao {
         });
         String sqlIn = sb.substring(0,sb.length()-1);
         String sql = String.format("delete from t_time_task where id in (%s)", sqlIn);
-        log.info(sql);
+        log.debug(sql);
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
         ) {
@@ -62,6 +64,7 @@ public class JobDao {
 
     public void deleteAllInvalidJob() {
         String sql = "delete from t_time_task where execute_time < ?";
+        log.debug(sql);
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
         ) {
@@ -73,8 +76,10 @@ public class JobDao {
     }
 
     public List<TimeTask> findByExecuteTimeScope(LocalDateTime start, LocalDateTime end) {
+        String sql = "select * from t_time_task a where a.execute_time between ? and ?";
+        log.debug(sql);
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from t_time_task a where a.execute_time between ? and ?");
+             PreparedStatement statement = connection.prepareStatement(sql);
         ) {
             statement.setTimestamp(1, Timestamp.valueOf(start));
             statement.setTimestamp(2, Timestamp.valueOf(end));

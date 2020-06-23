@@ -47,21 +47,12 @@ public class TimeWheel {
     /**
      * 头指针，随着秒针移动而变化
      */
-    private int head = 0;
+    private volatile int head = 0;
 
     /**
      * 尾指针
      */
-    private int tail = 0;
-
-
-    private Boolean empty() {
-        return head == tail;
-    }
-
-    private Boolean full() {
-        return (tail + 1) % slotNumber == head;
-    }
+    private volatile int tail = 0;
 
 
     /**

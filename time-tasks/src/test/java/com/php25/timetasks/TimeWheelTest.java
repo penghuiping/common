@@ -14,7 +14,7 @@ public class TimeWheelTest {
 
     @Test
     public void test() {
-        String cron = "0 0/2 * 23 * ? *";
+        String cron = "0 15 17 23 6 ? 2020";
         TimeWheel timeWheel = TimeTasks.startTimeWheel();
         TimeTasks.submit(timeWheel, cron, new TestJob());
 
