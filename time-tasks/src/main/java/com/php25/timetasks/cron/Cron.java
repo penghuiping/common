@@ -13,7 +13,7 @@ import java.util.List;
  * {小时} ==> 允许值范围: 0~23 ,不允许为空值
  * {日期} ==> 允许值范围: 1~31 ,不允许为空值
  * {月份} ==> 允许值范围: 1~12 ,不允许为空值
- * {星期} ==> 允许值范围: 1~7 1代表星期天(一星期的第一天)，以此类推，7代表星期六,不允许为空值
+ * {星期} ==> 允许值范围: 1~7或SUN-SAT 1代表星期天(一星期的第一天)，以此类推，7代表星期六,不允许为空值
  * {年份} ==> 允许值范围: 1970~2099 ,允许为空
  * <p>
  * "*" 代表每隔1(秒/分/小时/日/月/星期/年)触发；
@@ -74,7 +74,6 @@ public class Cron {
         return AstBuild.getCronExpr(tokens1);
     }
 
-
     /**
      * 执行AST树
      *
@@ -84,7 +83,6 @@ public class Cron {
         AstExec astExec = new AstExec();
         return astExec.execCronExpr(ast, baseTime);
     }
-
 
     /**
      * 把cron表达式翻译成下次需要执行的时间点

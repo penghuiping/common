@@ -109,6 +109,10 @@ public class CronTest {
         LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
+        String cron2 = "0 * * 11,12,20 * ?";
+        LocalDateTime time22= Cron.nextExecuteTime(cron2, now);
+        log.info("{}", time22.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
         String cron3 = "15,30,45 * * * * ?";
         LocalDateTime time = Cron.nextExecuteTime(cron3, now);
         log.info("{}", time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));

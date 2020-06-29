@@ -61,7 +61,11 @@ public class TimeWheel {
     private ExecutorService threadPool;
 
     public TimeWheel() {
-        slotNumber = 60;
+        this(3600);
+    }
+
+    public TimeWheel(int slotSize) {
+        slotNumber = slotSize;
         this.wheel = new WheelSlotList[slotNumber];
 
         for (int i = 0; i < slotNumber; i++) {

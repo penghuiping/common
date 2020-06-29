@@ -6,4 +6,5 @@ package com.php25.timetasks.cron;
  */
 abstract class AST {
 
+    protected Symbol symbol;
 }

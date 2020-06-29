@@ -8,9 +8,15 @@ import java.time.temporal.ChronoUnit;
  * @date 2020/6/4 17:59
  */
 public class TimeNode {
+    /**
+     * 时间范围，比如unit是秒，times为0~59
+     */
     private int[] times;
     private TimeNode next;
     private TimeNode previous;
+    /**
+     * 表示时间范围times 中某一个时间点
+     */
     private int index;
     private ChronoUnit unit;
 
