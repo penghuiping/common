@@ -132,7 +132,7 @@ class Lexer {
                 i = i + token.getSize();
                 continue;
             }
-            throw new CronException("cron表达式不正确,错误位置在第:" + i + "字符");
+            throw new CronException("cron表达式不正确,错误位置在第" + i + "字符");
         }
 
         return tokens;

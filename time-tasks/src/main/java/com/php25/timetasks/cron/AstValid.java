@@ -140,6 +140,7 @@ public class AstValid {
                 if (!(left instanceof ASTSimplestSymbol) || !(right instanceof ASTSimplestSymbol)) {
                     throw new CronException("cron表达式问题,'-'前面与后面只能是数字或者SUN-SAT英文字母的星期");
                 }
+
                 ASTSimplestSymbol left1 = (ASTSimplestSymbol) left;
                 ASTSimplestSymbol right1 = (ASTSimplestSymbol) right;
 
@@ -151,6 +152,15 @@ public class AstValid {
 
                 int left2 = left.symbol.possibleTimeValues.findFirst().orElse(0);
                 int right2 = right.symbol.possibleTimeValues.findFirst().orElse(0);
+
+                if (left2 >= right2) {
+                    throw new CronException("cron表达式问题,'-'前后数字大小需要递增");
+                }
+
+                SymbolThreeExpr symbolThreeExpr = (SymbolThreeExpr) node.symbol;
+                symbolThreeExpr.min = left2;
+                symbolThreeExpr.max = right2;
+
                 if (TokenType.digit.equals(left1.getToken().getType()) && TokenType.digit.equals(right1.getToken().getType())) {
                     node.symbol.possibleTimeValues = IntStream.rangeClosed(left2, right2);
                 } else if (TokenType.letter.equals(left1.getToken().getType()) && TokenType.letter.equals(right1.getToken().getType())) {
@@ -170,6 +180,7 @@ public class AstValid {
                         throw new CronException("cron表达式问题,'/'后面只能是数字");
                     }
 
+
                     SymbolSimplestSymbol symbol = new SymbolSimplestSymbol();
                     symbol.unit = node.symbol.unit;
                     symbol.previous = node.symbol;
@@ -177,6 +188,15 @@ public class AstValid {
                     validateSimplestSymbol(right1);
 
                     int rightResult = Integer.parseInt(right1.getToken().getValue());
+
+                    SymbolThreeExpr symbolThreeExpr = (SymbolThreeExpr) left.symbol;
+                    int min = symbolThreeExpr.min;
+                    int max = symbolThreeExpr.max;
+
+                    if (min + rightResult > max) {
+                        throw new CronException("cron表达式问题,'/'后面数字超出范围");
+                    }
+
                     node.symbol.possibleTimeValues = left.symbol.possibleTimeValues
                             .filter(value -> value % rightResult == 0);
                 } else {
@@ -202,6 +222,11 @@ public class AstValid {
 
                     int leftResult = Integer.parseInt(left1.getToken().getValue());
                     int rightResult = Integer.parseInt(right1.getToken().getValue());
+
+                    int max = getScopeTime(node.symbol.unit).max().orElse(0);
+                    if (leftResult + rightResult > max) {
+                        throw new CronException("cron表达式问题,'/'后面数字超出范围");
+                    }
                     node.symbol.possibleTimeValues = getScopeTime(node.symbol.unit)
                             .filter(value -> value >= leftResult)
                             .filter(value -> value % rightResult == 0);
@@ -220,13 +245,30 @@ public class AstValid {
                 validateSimplestSymbol(right1);
 
                 if (left instanceof ASTThreeExpr) {
-                    node.symbol.possibleTimeValues = IntStream.concat(left.symbol.possibleTimeValues, right1.symbol.possibleTimeValues);
+                    SymbolThreeExpr symbolThreeExpr = (SymbolThreeExpr) left.symbol;
+                    int min = symbolThreeExpr.min;
+                    int max = symbolThreeExpr.max;
+                    int right2 = right1.symbol.possibleTimeValues.findFirst().orElse(0);
+                    if (right2 <= max) {
+                        throw new CronException("cron表达式问题,','分隔的内容需要按递增顺序排列");
+                    }
+                    node.symbol.possibleTimeValues = IntStream.concat(left.symbol.possibleTimeValues, IntStream.of(right2));
                 } else {
                     ASTSimplestSymbol left1 = (ASTSimplestSymbol) left;
-                    if (TokenType.digit.equals(left1.getToken().getType()) && TokenType.digit.equals(right1.getToken().getType())) {
-                        node.symbol.possibleTimeValues = IntStream.concat(left1.symbol.possibleTimeValues, right1.symbol.possibleTimeValues);
-                    } else if (TokenType.letter.equals(left1.getToken().getType()) && TokenType.letter.equals(left1.getToken().getType())) {
-                        node.symbol.possibleTimeValues = IntStream.concat(left1.symbol.possibleTimeValues, right1.symbol.possibleTimeValues);
+                    if (
+                            (TokenType.digit.equals(left1.getToken().getType()) && TokenType.digit.equals(right1.getToken().getType()))
+                                    || (TokenType.letter.equals(left1.getToken().getType()) && TokenType.letter.equals(left1.getToken().getType()))
+
+                    ) {
+                        int left2 = left1.symbol.possibleTimeValues.findFirst().orElse(0);
+                        int right2 = right1.symbol.possibleTimeValues.findFirst().orElse(0);
+                        if (left2 >= right2) {
+                            throw new CronException("cron表达式问题,','分隔的内容需要按递增顺序排列");
+                        }
+                        SymbolThreeExpr symbolThreeExpr = (SymbolThreeExpr) node.symbol;
+                        symbolThreeExpr.min = left2;
+                        symbolThreeExpr.max = right2;
+                        node.symbol.possibleTimeValues = IntStream.of(left2, right2);
                     } else {
                         throw new CronException("cron表达式问题,','前面与后面只能是数字或者SUN-SAT英文字母的星期");
                     }
@@ -252,6 +294,12 @@ public class AstValid {
                 if (TokenType.digit.equals(left1.getToken().getType()) && TokenType.digit.equals(right1.getToken().getType())) {
                     int left2 = Integer.parseInt(left1.getToken().getValue());
                     int right2 = Integer.parseInt(right1.getToken().getValue());
+
+                    if (!IntStream.rangeClosed(1, 7).filter(value -> value == left2).findFirst().isPresent()) {
+                        throw new CronException("cron表达式问题,数字范围存在问题#前面数字只能为1-7");
+                    }
+                    //todo
+
                     node.symbol.weekOfMonth = right2;
                     node.symbol.possibleTimeValues = IntStream.of(left2);
                 } else {
@@ -269,10 +317,18 @@ public class AstValid {
         Token token = ss.getToken();
         if (Tokens.isDigit(token)) {
             //token: [0-9]
-            ss.symbol.possibleTimeValues = IntStream.of(Integer.parseInt(token.getValue()));
+            int number = Integer.parseInt(token.getValue());
+            if (!validateNumber(number, ss.symbol.unit)) {
+                throw new CronException("cron表达式问题,数字超出范围");
+            }
+            ss.symbol.possibleTimeValues = IntStream.of(number);
         } else if (Tokens.isLetter(token)) {
             //token: SUN-SAT
-            ss.symbol.possibleTimeValues = IntStream.of(getFromWeekName(token.getValue()));
+            int number = getFromWeekName(token.getValue());
+            if (!validateNumber(number, ss.symbol.unit)) {
+                throw new CronException("cron表达式问题,数字超出范围");
+            }
+            ss.symbol.possibleTimeValues = IntStream.of();
         } else if (Tokens.isQuestionMark(token)) {
             //token: ?
             if (ChronoUnit.WEEKS.equals(ss.symbol.unit)) {
@@ -335,6 +391,10 @@ public class AstValid {
         } else {
             throw new CronException("不支持此时间单位" + unit.toString());
         }
+    }
+
+    private boolean validateNumber(int number, ChronoUnit unit) {
+        return getScopeTime(unit).filter(value -> value == number).findFirst().isPresent();
     }
 
     /**

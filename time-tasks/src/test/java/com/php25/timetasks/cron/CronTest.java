@@ -1,5 +1,6 @@
 package com.php25.timetasks.cron;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,10 +109,12 @@ public class CronTest {
         String cron0 = "0 15 10 LW 10 ?";
         LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        Assertions.assertThat(time0).isEqualTo(LocalDateTime.of(2020,10,30,10,15,0));
 
         String cron2 = "0 * * 11,12,20 * ?";
         LocalDateTime time22= Cron.nextExecuteTime(cron2, now);
         log.info("{}", time22.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        Assertions.assertThat(time22).isEqualTo(LocalDateTime.of(2020,7,11,0,0,0));
 
         String cron3 = "15,30,45 * * * * ?";
         LocalDateTime time = Cron.nextExecuteTime(cron3, now);
@@ -140,8 +143,17 @@ public class CronTest {
         String cron9 = "0 0 1 * * ?";
         LocalDateTime time6 = Cron.nextExecuteTime(cron9, now);
         log.info("{}", time6.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-
     }
+
+    @Test
+    public void cronErrorTest() {
+        LocalDateTime now = LocalDateTime.now();
+        String cron0 = "0 15-16/2 10 ? * *";
+        LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+
 
 
 }
