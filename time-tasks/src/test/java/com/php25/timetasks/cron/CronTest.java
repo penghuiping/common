@@ -148,7 +148,7 @@ public class CronTest {
     @Test
     public void cronErrorTest() {
         LocalDateTime now = LocalDateTime.now();
-        String cron0 = "0 15-16/2 10 ? * *";
+        String cron0 = "0 15-30/2 10 -10 * ?";
         LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }

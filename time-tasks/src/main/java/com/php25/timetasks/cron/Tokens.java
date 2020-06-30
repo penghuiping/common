@@ -17,6 +17,14 @@ class Tokens {
         this.tokens = tokens;
     }
 
+    public boolean isEOF() {
+        return index == (tokens.size());
+    }
+
+    public int getCurrentIndex() {
+        return index;
+    }
+
     public Token getCurrent() {
         if (index < tokens.size()) {
             return tokens.get(index);

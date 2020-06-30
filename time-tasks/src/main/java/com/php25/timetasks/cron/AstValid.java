@@ -394,6 +394,9 @@ public class AstValid {
     }
 
     private boolean validateNumber(int number, ChronoUnit unit) {
+        if(ChronoUnit.DAYS == unit) {
+            return IntStream.rangeClosed(1,31).filter(value -> value == number).findFirst().isPresent();
+        }
         return getScopeTime(unit).filter(value -> value == number).findFirst().isPresent();
     }
 

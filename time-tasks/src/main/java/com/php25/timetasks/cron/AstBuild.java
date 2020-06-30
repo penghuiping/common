@@ -1,5 +1,7 @@
 package com.php25.timetasks.cron;
 
+import com.php25.timetasks.exception.CronException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,6 +104,10 @@ public class AstBuild {
                 tokens.eat();
             }
         }
-        return new ASTCronExpr(nodes);
+        AST ast = new ASTCronExpr(nodes);
+        if (!tokens.isEOF()) {
+            throw new CronException("cron语法不正确,请仔细检查，错误在第" + tokens.getCurrentIndex() + "位,内容为:" + tokens.getCurrent());
+        }
+        return ast;
     }
 }
