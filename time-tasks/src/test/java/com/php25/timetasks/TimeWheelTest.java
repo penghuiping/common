@@ -20,7 +20,7 @@ public class TimeWheelTest {
         TimeWheel timeWheel = TimeTasks.startTimeWheel();
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         executorService.submit(() -> {
-            String cron = "0/1 * * LW * ? 2020";
+            String cron = "0/3 * * * * ? 2020";
             TimeTasks.submit(timeWheel, cron, new TestJob());
         });
 
