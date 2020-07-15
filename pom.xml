@@ -18,6 +18,7 @@
         <module>uid-generator</module>
         <module>validation</module>
         <module>time-tasks</module>
+        <module>auditlog</module>
         <module>sample/core-sample</module>
         <module>sample/db-sample</module>
         <module>sample/redis-sample</module>
