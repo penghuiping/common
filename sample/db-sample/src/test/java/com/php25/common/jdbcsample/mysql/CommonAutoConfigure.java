@@ -3,13 +3,14 @@ package com.php25.common.jdbcsample.mysql;
 import com.php25.common.core.service.IdGenerator;
 import com.php25.common.core.service.IdGeneratorImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Created by penghuiping on 2018/3/21.
  */
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {JdbcRepositoriesAutoConfiguration.class})
 @ComponentScan
 public class CommonAutoConfigure {
 
@@ -17,6 +18,4 @@ public class CommonAutoConfigure {
     IdGenerator idGeneratorService() {
         return new IdGeneratorImpl();
     }
-
-
 }

@@ -298,8 +298,6 @@ public class AstValid {
                     if (!IntStream.rangeClosed(1, 7).filter(value -> value == left2).findFirst().isPresent()) {
                         throw new CronException("cron表达式问题,数字范围存在问题#前面数字只能为1-7");
                     }
-                    //todo
-
                     node.symbol.weekOfMonth = right2;
                     node.symbol.possibleTimeValues = IntStream.of(left2);
                 } else {
@@ -328,7 +326,7 @@ public class AstValid {
             if (!validateNumber(number, ss.symbol.unit)) {
                 throw new CronException("cron表达式问题,数字超出范围");
             }
-            ss.symbol.possibleTimeValues = IntStream.of();
+            ss.symbol.possibleTimeValues = IntStream.of(number);
         } else if (Tokens.isQuestionMark(token)) {
             //token: ?
             if (ChronoUnit.WEEKS.equals(ss.symbol.unit)) {
