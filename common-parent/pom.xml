@@ -23,7 +23,7 @@
         <spring-cloud-dependencies>Hoxton.SR6</spring-cloud-dependencies>
         <guava.version>29.0-jre</guava.version>
         <jackson.version>2.11.1</jackson.version>
-        <okhttp.version>3.6.0</okhttp.version>
+        <okhttp.version>4.8.0</okhttp.version>
         <druid.version>1.1.21</druid.version>
         <easypoi.version>4.1.0</easypoi.version>
         <commons-collections.version>3.2.2</commons-collections.version>
@@ -33,7 +33,7 @@
         <jfairy.version>0.5.9</jfairy.version>
         <hikari.version>3.3.1</hikari.version>
         <bouncycastle.version>1.60</bouncycastle.version>
-        <hibernate-validator>6.0.17.Final</hibernate-validator>
+        <hibernate-validator>6.0.18.Final</hibernate-validator>
         <oracle>11.2.0.3</oracle>
         <testcontainer>1.12.2</testcontainer>
         <java-uuid-generator>3.2.0</java-uuid-generator>
