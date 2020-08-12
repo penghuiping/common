@@ -1,6 +1,5 @@
 package com.php25.common.jdbcsample.oracle.jmh;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.baidu.fsg.uid.UidGenerator;
 import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
@@ -11,6 +10,7 @@ import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
+import com.zaxxer.hikari.HikariDataSource;
 import org.assertj.core.api.Assertions;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -22,11 +22,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -63,19 +61,19 @@ public class OracleJdbcJmhTest {
 
 
     public DataSource druidDataSource() {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        druidDataSource.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
-        druidDataSource.setUsername("system");
-        druidDataSource.setPassword("oracle");
-        druidDataSource.setMaxActive(15);
-        druidDataSource.setTestWhileIdle(false);
-        try {
-            druidDataSource.setFilters("stat, wall");
-        } catch (SQLException e) {
-            LoggerFactory.getLogger(OracleJdbcJmhTest.class).error("出错啦！", e);
-        }
-        return druidDataSource;
+        HikariDataSource hikariDataSource = new HikariDataSource();
+        hikariDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        hikariDataSource.setJdbcUrl("jdbc:oracle:thin:@localhost:1521:xe");
+        hikariDataSource.setUsername("system");
+        hikariDataSource.setPassword("oracle");
+        hikariDataSource.setAutoCommit(true);
+        hikariDataSource.setConnectionTimeout(30000);
+        hikariDataSource.setIdleTimeout(300000);
+        hikariDataSource.setMinimumIdle(1);
+        hikariDataSource.setMaxLifetime(1800000);
+        hikariDataSource.setMaximumPoolSize(15);
+        hikariDataSource.setPoolName("hikariDataSource");
+        return hikariDataSource;
     }
 
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {

@@ -47,6 +47,7 @@
         <php-common.mvc>2.3.2-SNAPSHOT</php-common.mvc>
         <php-common.redis>2.3.2-SNAPSHOT</php-common.redis>
         <php-common.validation>2.3.2-SNAPSHOT</php-common.validation>
+        <php-common.auditlog>2.3.2-SNAPSHOT</php-common.auditlog>
         <uid-generator>2.3.2-SNAPSHOT</uid-generator>
     </properties>
 
@@ -127,12 +128,6 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid</artifactId>
-                <version>${druid.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
@@ -159,6 +154,12 @@
                 <groupId>com.php25</groupId>
                 <artifactId>core</artifactId>
                 <version>${php-common.core}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.php25</groupId>
+                <artifactId>auditlog</artifactId>
+                <version>${php-common.auditlog}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>

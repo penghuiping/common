@@ -1,6 +1,5 @@
 package com.php25.common.uid.mysql.config;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.baidu.fsg.uid.UidGenerator;
 import com.baidu.fsg.uid.impl.DefaultUidGenerator;
 import com.baidu.fsg.uid.worker.DisposableWorkerIdAssigner;
@@ -9,13 +8,12 @@ import com.baidu.fsg.uid.worker.dao.WorkerNodeDAO;
 import com.baidu.fsg.uid.worker.dao.WorkerNodeDaoImpl;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import org.slf4j.LoggerFactory;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 /**
  * Created by penghuiping on 2018/5/1.
@@ -25,19 +23,19 @@ public class DbConfig {
 
     @Bean
     public DataSource druidDataSource() {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("org.h2.Driver");
-        druidDataSource.setUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
-        druidDataSource.setUsername("");
-        druidDataSource.setPassword("");
-        druidDataSource.setMaxActive(15);
-        druidDataSource.setTestWhileIdle(false);
-        try {
-            druidDataSource.setFilters("stat, wall");
-        } catch (SQLException e) {
-            LoggerFactory.getLogger(DbConfig.class).error("出错啦！", e);
-        }
-        return druidDataSource;
+        HikariDataSource hikariDataSource = new HikariDataSource();
+        hikariDataSource.setDriverClassName("org.h2.Driver");
+        hikariDataSource.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
+        hikariDataSource.setUsername("");
+        hikariDataSource.setPassword("");
+        hikariDataSource.setAutoCommit(true);
+        hikariDataSource.setConnectionTimeout(30000);
+        hikariDataSource.setIdleTimeout(300000);
+        hikariDataSource.setMinimumIdle(1);
+        hikariDataSource.setMaxLifetime(1800000);
+        hikariDataSource.setMaximumPoolSize(15);
+        hikariDataSource.setPoolName("hikariDataSource");
+        return hikariDataSource;
     }
 
     @Bean

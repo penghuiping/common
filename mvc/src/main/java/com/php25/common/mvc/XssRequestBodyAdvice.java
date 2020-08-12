@@ -50,17 +50,18 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             if (count <= 0) {
                 break;
             }
-            content.append(new String(buff.array(), 0, buff.position(), Charsets.UTF_8));
+            content.append(new String(buff.array(), 0, buff.position(), Charsets.ISO_8859_1));
         }
 
-        log.info("request body:{}", content.toString());
+        String result1=  new String(content.toString().getBytes(Charsets.ISO_8859_1),Charsets.UTF_8);
+        log.info("request body:{}", result1);
         SafeHtmlValidator safeHtmlValidator = initializeValidator();
         boolean result = safeHtmlValidator.isValid(content.toString(), null);
         if (result) {
             return new HttpInputMessage() {
                 @Override
                 public InputStream getBody() throws IOException {
-                    return new ByteArrayInputStream(content.toString().getBytes(Charsets.UTF_8));
+                    return new ByteArrayInputStream(result1.getBytes(Charsets.UTF_8));
                 }
 
                 @Override

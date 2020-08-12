@@ -1,6 +1,5 @@
 package com.php25.common.jdbcsample.mysql.jmh;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.baidu.fsg.uid.UidGenerator;
 import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
@@ -9,9 +8,9 @@ import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
-import com.php25.common.jdbcsample.mysql.config.DbConfig;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
+import com.zaxxer.hikari.HikariDataSource;
 import org.assertj.core.api.Assertions;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -23,11 +22,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -64,19 +61,19 @@ public class MysqlJdbcJmhTest {
 
 
     public DataSource druidDataSource() {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        druidDataSource.setUrl("jdbc:mysql://127.0.0.1:33306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false");
-        druidDataSource.setUsername("root");
-        //druidDataSource.setPassword("root");
-        druidDataSource.setMaxActive(15);
-        druidDataSource.setTestWhileIdle(false);
-        try {
-            druidDataSource.setFilters("stat, wall");
-        } catch (SQLException e) {
-            LoggerFactory.getLogger(DbConfig.class).error("出错啦！", e);
-        }
-        return druidDataSource;
+        HikariDataSource hikariDataSource = new HikariDataSource();
+        hikariDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        hikariDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false");
+        hikariDataSource.setUsername("root");
+//        hikariDataSource.setPassword("root");
+        hikariDataSource.setAutoCommit(true);
+        hikariDataSource.setConnectionTimeout(30000);
+        hikariDataSource.setIdleTimeout(300000);
+        hikariDataSource.setMinimumIdle(1);
+        hikariDataSource.setMaxLifetime(1800000);
+        hikariDataSource.setMaximumPoolSize(15);
+        hikariDataSource.setPoolName("hikariDataSource");
+        return hikariDataSource;
     }
 
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {

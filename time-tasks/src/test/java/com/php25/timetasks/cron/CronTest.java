@@ -111,10 +111,10 @@ public class CronTest {
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         Assertions.assertThat(time0).isEqualTo(LocalDateTime.of(2020,10,30,10,15,0));
 
-        String cron2 = "0 * * 11,12,20 * ?";
+        String cron2 = "0 * * 20 * ?";
         LocalDateTime time22= Cron.nextExecuteTime(cron2, now);
         log.info("{}", time22.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        Assertions.assertThat(time22).isEqualTo(LocalDateTime.of(2020,8,11,0,0,0));
+        Assertions.assertThat(time22).isEqualTo(LocalDateTime.of(2020,8,20,0,0,0));
 
         String cron3 = "15,30,45 * * * * ?";
         LocalDateTime time = Cron.nextExecuteTime(cron3, now);

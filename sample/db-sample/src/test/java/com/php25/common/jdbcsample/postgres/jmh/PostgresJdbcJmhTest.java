@@ -1,6 +1,5 @@
 package com.php25.common.jdbcsample.postgres.jmh;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.baidu.fsg.uid.UidGenerator;
 import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
@@ -11,6 +10,7 @@ import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.jdbcsample.postgres.model.Company;
 import com.php25.common.jdbcsample.postgres.model.Customer;
+import com.zaxxer.hikari.HikariDataSource;
 import org.assertj.core.api.Assertions;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -60,14 +60,19 @@ public class PostgresJdbcJmhTest {
     }
 
     public DataSource druidDataSource() {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriverClassName("org.postgresql.Driver");
-        druidDataSource.setUrl("jdbc:postgresql://127.0.0.1:35432/test?currentSchema=public");
-        druidDataSource.setUsername("root");
-        druidDataSource.setPassword("root");
-        druidDataSource.setMaxActive(15);
-        druidDataSource.setTestWhileIdle(false);
-        return druidDataSource;
+        HikariDataSource hikariDataSource = new HikariDataSource();
+        hikariDataSource.setDriverClassName("org.postgresql.Driver");
+        hikariDataSource.setJdbcUrl("jdbc:postgresql://127.0.0.1:5432/test?currentSchema=public");
+        hikariDataSource.setUsername("root");
+        hikariDataSource.setPassword("root");
+        hikariDataSource.setAutoCommit(true);
+        hikariDataSource.setConnectionTimeout(30000);
+        hikariDataSource.setIdleTimeout(300000);
+        hikariDataSource.setMinimumIdle(1);
+        hikariDataSource.setMaxLifetime(1800000);
+        hikariDataSource.setMaximumPoolSize(15);
+        hikariDataSource.setPoolName("hikariDataSource");
+        return hikariDataSource;
     }
 
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
