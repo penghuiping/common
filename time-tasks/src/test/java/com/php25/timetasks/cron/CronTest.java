@@ -1,6 +1,5 @@
 package com.php25.timetasks.cron;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,12 +108,10 @@ public class CronTest {
         String cron0 = "0 15 10 LW 10 ?";
         LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        Assertions.assertThat(time0).isEqualTo(LocalDateTime.of(2020,10,30,10,15,0));
 
         String cron2 = "0 * * 20 * ?";
-        LocalDateTime time22= Cron.nextExecuteTime(cron2, now);
+        LocalDateTime time22 = Cron.nextExecuteTime(cron2, now);
         log.info("{}", time22.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        Assertions.assertThat(time22).isEqualTo(LocalDateTime.of(2020,8,20,0,0,0));
 
         String cron3 = "15,30,45 * * * * ?";
         LocalDateTime time = Cron.nextExecuteTime(cron3, now);
@@ -145,15 +142,127 @@ public class CronTest {
         log.info("{}", time6.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
-    @Test
-    public void cronErrorTest() {
-//        LocalDateTime now = LocalDateTime.now();
-//        //{秒数} {分钟} {小时} {日期} {月份} {星期} {年份(可为空)}
-//        String cron0 = "0 15-30/2 10 30 13 ?";
-//        LocalDateTime time0 = Cron.nextExecuteTime(cron0, now);
-//        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-    }
 
+    @Test
+    public void cronNextExecTime2() {
+        LocalDateTime now = null;
+        String cron0 = null;
+        LocalDateTime time0 = null;
+
+        //每天上午10点，下午2点，4点
+        now = LocalDateTime.now();
+        cron0 = "0 0 10,14,16 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //朝九晚五工作时间内每半小时
+        now = LocalDateTime.now();
+        cron0 = "0 0/30 9-17 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //表示每个星期三中午12点
+        now = LocalDateTime.now();
+        cron0 = "0 0 12 ? * WED";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每天中午12点触发
+        now = LocalDateTime.now();
+        cron0 = "0 0 12 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每天上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 ? * *";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每天上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每天上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 * * ? *";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //2025年的每天上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 * * ? 2025";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //在每天下午2点到下午2:59期间的每1分钟触发
+        now = LocalDateTime.now();
+        cron0 = "0 * 14 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //在每天下午2点到下午2:55期间的每5分钟触发
+        now = LocalDateTime.now();
+        cron0 = "0 0/5 14 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //在每天下午2点到2:55期间和下午6点到6:55期间的每5分钟触发
+        now = LocalDateTime.now();
+        cron0 = "0 0/5 14,18 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //在每天下午2点到下午2:05期间的每1分钟触发
+        now = LocalDateTime.now();
+        cron0 = "0 0-5 14 * * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每年三月的星期三的下午2:10和2:44触发
+        now = LocalDateTime.now();
+        cron0 = "0 10,44 14 ? 3 WED";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //周一至周五的上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 ? * MON-FRI";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每月15日上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 15 * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每月最后一日的上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 L * ?";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每月的最后一个星期五上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 ? * 6L";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //2022年至2025年的每月的最后一个星期五上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 ? * 6L 2021-2025";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        //每月的第三个星期五上午10:15触发
+        now = LocalDateTime.now();
+        cron0 = "0 15 10 ? * 6#3";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
 
 
 

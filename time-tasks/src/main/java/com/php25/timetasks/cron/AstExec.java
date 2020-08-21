@@ -70,11 +70,12 @@ public class AstExec {
                     int year = rootNode.getTimes()[rootNode.getIndex()];
                     int month = rootNode.getNext().getTimes()[rootNode.getNext().getIndex()];
                     int maxDay = TimeUtil.getLastDayOfMonth(year, month);
-                    if(flag) {
+                    if (flag) {
                         weekTimes = node.getTimes();
                         flag = false;
                     }
                     IntStream weekStream = IntStream.empty();
+                    int t = -1;
                     for (int i = 1; i <= maxDay; i++) {
                         LocalDateTime temp = LocalDateTime.of(year, month, i, 0, 0);
                         for (int j = 0; j < weekTimes.length; j++) {
@@ -83,8 +84,19 @@ public class AstExec {
                             if (weekday == mapToCronWeekday(temp.getDayOfWeek().getValue())) {
                                 if (weekOfMonth > 0) {
                                     //>0表示: 一个月中的某一周
-                                    LocalDateTime start = TimeUtil.getWeekDayOfMonth(year, 1, weekOfMonth, month).minusDays(1);
-                                    LocalDateTime end = TimeUtil.getWeekDayOfMonth(year, 7, weekOfMonth, month).plusDays(1);
+                                    //先判断第一周从哪里开始算
+                                    if(t<0) {
+                                        LocalDateTime start0 = TimeUtil.getWeekDayOfMonth(year, 1, 1, month).minusDays(1);
+                                        LocalDateTime end0 = TimeUtil.getWeekDayOfMonth(year, 7, 1, month).plusDays(1);
+                                        if (temp.isAfter(start0) && temp.isBefore(end0)) {
+                                            t = 0;
+                                        } else {
+                                            t = 1;
+                                        }
+                                    }
+
+                                    LocalDateTime start = TimeUtil.getWeekDayOfMonth(year, 1, weekOfMonth+t, month).minusDays(1);
+                                    LocalDateTime end = TimeUtil.getWeekDayOfMonth(year, 7, weekOfMonth+t, month).plusDays(1);
                                     if (temp.isAfter(start) && temp.isBefore(end)) {
                                         weekStream = IntStream.concat(weekStream, IntStream.of(temp.getDayOfMonth()));
                                     }
@@ -93,8 +105,10 @@ public class AstExec {
                                     weekStream = IntStream.concat(weekStream, IntStream.of(temp.getDayOfMonth()));
                                 } else {
                                     //<0表示: 一个月的倒数第几周
-                                    LocalDateTime start = TimeUtil.getWeekDayOfMonthReverse(year, 1, -weekOfMonth, month).minusDays(1);
-                                    LocalDateTime end = TimeUtil.getWeekDayOfMonthReverse(year, 7, -weekOfMonth, month).plusDays(1);
+                                    // 这种情况在cron表达式中，只有L字母出现会发生，表示最后的意思，比如本月最后一个星期五。
+                                    // 这里给出最后两周的时间，因为很可能本月最后一周没有星期五
+                                    LocalDateTime start = TimeUtil.getWeekDayOfMonthReverse(year, 1, 2, month).minusDays(1);
+                                    LocalDateTime end = TimeUtil.getWeekDayOfMonthReverse(year, 7, 1, month).plusDays(1);
                                     if (temp.isAfter(start) && temp.isBefore(end)) {
                                         weekStream = IntStream.concat(weekStream, IntStream.of(temp.getDayOfMonth()));
                                     }
@@ -103,7 +117,12 @@ public class AstExec {
                             }
                         }
                     }
-                    node.setTimes(weekStream.toArray());
+
+                    if (weekOfMonth < 0) {
+                        node.setTimes(new int[]{weekStream.max().getAsInt()});
+                    } else {
+                        node.setTimes(weekStream.toArray());
+                    }
                     nowTime = now.getDayOfMonth();
                     break;
                 }
@@ -120,7 +139,7 @@ public class AstExec {
                             //没有工作日范围限定
                             node.setTimes(IntStream.of(maxDay + node.getTimes()[0] + 1).toArray());
                         } else {
-                            //只能是工作日 //todo 计算有问题
+                            //只能是工作日
                             int[] value = IntStream.rangeClosed(1, maxDay).mapToObj(v -> LocalDateTime.of(year, month, v, 0, 0))
                                     .filter(localDateTime -> localDateTime.getDayOfWeek().getValue() >= 1 && localDateTime.getDayOfWeek().getValue() <= 5)
                                     .mapToInt(LocalDateTime::getDayOfMonth).toArray();
@@ -192,7 +211,6 @@ public class AstExec {
                 break;
             }
         }
-
         return fromTimeNode(rootNode);
     }
 

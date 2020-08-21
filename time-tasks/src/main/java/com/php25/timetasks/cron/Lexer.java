@@ -40,13 +40,16 @@ class Lexer {
                 }
 
                 if (c == 'W') {
-                    Token token = new Token();
-                    token.setValue(c + "");
-                    token.setType(TokenType.W);
-                    token.setSize(1);
-                    tokens.add(token);
-                    i = i + 1;
-                    continue;
+                    //是否是单词WED
+                    if(arr[i+1]!='E') {
+                        Token token = new Token();
+                        token.setValue(c + "");
+                        token.setType(TokenType.W);
+                        token.setSize(1);
+                        tokens.add(token);
+                        i = i + 1;
+                        continue;
+                    }
                 }
 
                 StringBuilder sb = new StringBuilder();
