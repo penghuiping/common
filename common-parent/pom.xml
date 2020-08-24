@@ -229,7 +229,11 @@
                 <artifactId>uid-generator</artifactId>
                 <version>${uid-generator}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.xerial</groupId>
+                <artifactId>sqlite-jdbc</artifactId>
+                <version>3.31.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.glassfish</groupId>
                 <artifactId>javax.el</artifactId>

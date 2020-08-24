@@ -233,6 +233,12 @@ public class CronTest {
         time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
+        //每周二、四、六下午五点
+        now = LocalDateTime.now();
+        cron0 = "0 0 17 ? * TUE,THU,SAT";
+        time0 = Cron.nextExecuteTime(cron0, now);
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
         //每月15日上午10:15触发
         now = LocalDateTime.now();
         cron0 = "0 15 10 15 * ?";
@@ -263,7 +269,4 @@ public class CronTest {
         time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
-
-
-
 }

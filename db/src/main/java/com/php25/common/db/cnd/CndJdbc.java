@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * @date: 2019/7/25 15:19
  * @description:
  */
-public abstract class CndJdbc extends AbstractNewQuery implements Query {
+public abstract class CndJdbc extends AbstractQuery implements Query {
 
     private static final Logger log = LoggerFactory.getLogger(CndJdbc.class);
 

@@ -1,10 +1,14 @@
 package com.php25.common.db.cnd;
 
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.manager.JdbcModelManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author penghuiping
@@ -20,22 +24,76 @@ public abstract class AbstractQuery implements Query {
     public final String BETWEEN = "BETWEEN";
     public final String NOT_BETWEEN = "NOT BETWEEN";
     protected StringBuilder sql = null;
-    protected List<Object> params = new ArrayList<Object>();
+    protected List<Object> params = new ArrayList<>();
     protected long startRow = -1, pageSize = -1;
     protected OrderBy orderBy = null;
     protected GroupBy groupBy = null;
 
+    protected Class<?> clazz;
+
+    protected String clazzAlias;
+
+    protected Map<String, Class<?>> aliasMap = new HashMap<>(8);
+
+
     protected void clear() {
         sql = null;
-        params = new ArrayList<Object>();
+        params = new ArrayList<>();
         startRow = -1;
         pageSize = -1;
         orderBy = null;
         groupBy = null;
     }
 
-    protected String getCol(String colName) {
-        return " " + colName + " ";
+
+    public String getCol(String name) {
+        if (name.contains(".")) {
+            String[] parts = name.split("\\.");
+            if (parts.length == 2) {
+                //先尝试从aliasMap中获取
+                Class<?> modelClass = aliasMap.getOrDefault(parts[0], null);
+                if (null == modelClass) {
+                    //不存在 没使用别名，试试是否是类名
+                    modelClass = JdbcModelManager.getClassFromModelName(parts[0]);
+                    return getCol(modelClass, null, parts[1]);
+                } else {
+                    //存在说明使用了别名
+                    return getCol(modelClass, parts[0], parts[1]);
+                }
+            } else {
+                throw new DbException("Db Column name is illegal");
+            }
+        }
+        return getCol(clazz, null, name);
+    }
+
+    protected String getCol(Class<?> modelClass, String alias, String name) {
+        try {
+            if (StringUtil.isBlank(alias)) {
+                //没有使用别名
+                if (!clazz.equals(modelClass)) {
+                    return String.format(" %s.%s ", JdbcModelManager.getTableName(modelClass), JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
+                } else {
+                    return String.format(" %s.%s ", JdbcModelManager.getTableName(this.clazz), JdbcModelManager.getDbColumnByClassColumn(this.clazz, name));
+                }
+            } else {
+                //使用了别名
+                if (!clazz.equals(modelClass)) {
+                    return String.format(" %s.%s ", alias, JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
+                } else {
+                    return String.format(" %s.%s ", alias, JdbcModelManager.getDbColumnByClassColumn(this.clazz, name));
+                }
+            }
+        } catch (Exception e) {
+            //"无法通过jpa注解找到对应的column,直接使用传入的名字符串"
+            return " " + name + " ";
+        }
+    }
+
+    @Override
+    public Query whereOneEqualOne() {
+        this.getSql().append(" ").append(WHERE).append(" 1=1 ");
+        return this;
     }
 
 
