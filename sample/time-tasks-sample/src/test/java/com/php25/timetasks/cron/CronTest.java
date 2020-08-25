@@ -269,4 +269,19 @@ public class CronTest {
         time0 = Cron.nextExecuteTime(cron0, now);
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
+
+    @Test
+    public void cronNextExecTime3() {
+        LocalDateTime now = null;
+        String cron0 = null;
+        LocalDateTime time0 = null;
+
+        //每秒执行一次
+        now = LocalDateTime.now();
+        cron0 = "0/1 * * * * ? 2020";
+        time0 = Cron.nextExecuteTime(cron0, now.plusSeconds(5));
+        log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+
+    }
 }

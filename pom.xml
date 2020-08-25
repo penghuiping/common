@@ -21,6 +21,7 @@
         <module>auditlog</module>
         <module>ws</module>
         <module>sample/core-sample</module>
+        <module>sample/time-tasks-sample</module>
         <module>sample/db-sample</module>
         <module>sample/redis-sample</module>
         <module>sample/uid-sample</module>

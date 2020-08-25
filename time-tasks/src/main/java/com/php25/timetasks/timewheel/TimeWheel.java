@@ -2,8 +2,11 @@ package com.php25.timetasks.timewheel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.timetasks.cron.Cron;
+import com.php25.timetasks.repository.TimeTaskDbRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -24,7 +27,7 @@ import java.util.stream.Collectors;
  * @author penghuiping
  * @date 2020/5/14 16:12
  */
-public class TimeWheel {
+public class TimeWheel implements InitializingBean, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(TimeWheel.class);
 
@@ -60,8 +63,18 @@ public class TimeWheel {
      */
     private ExecutorService threadPool;
 
+    private TimeTaskDbRepository timeTaskDbRepository;
+
+    public void setTimeTaskDbRepository(TimeTaskDbRepository timeTaskDbRepository) {
+        this.timeTaskDbRepository = timeTaskDbRepository;
+    }
+
     public TimeWheel() {
         this(3600);
+    }
+
+    public String generateJobId() {
+        return timeTaskDbRepository.generateJobId();
     }
 
     public TimeWheel(int slotSize) {
@@ -93,7 +106,7 @@ public class TimeWheel {
         } else {
             //放入数据库
             log.debug("加入数据库，{}", time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            DbFactory.getJobDao().save(timeTask);
+            timeTaskDbRepository.save(timeTask);
             return true;
         }
     }
@@ -128,13 +141,13 @@ public class TimeWheel {
                         namedThreadFactory.newThread(() -> {
                             log.debug("触发补数据操作");
                             //加载数据
-                            List<TimeTask> timeTasks = DbFactory.getJobDao().findByExecuteTimeScope(now.plusSeconds(scope), now.plusSeconds(scope + slotNumber / 2 - 1));
+                            List<TimeTask> timeTasks = timeTaskDbRepository.findByExecuteTimeScope(now.plusSeconds(scope), now.plusSeconds(scope + slotNumber / 2 - 1));
                             log.debug("触发补数据操作,补时间{}-{}", now.plusSeconds(scope).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                                     , now.plusSeconds(scope + slotNumber / 2 - 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                             if (null != timeTasks && !timeTasks.isEmpty()) {
                                 timeTasks.forEach(this::add);
-                                DbFactory.getJobDao().deleteAll(timeTasks.stream().map(TimeTask::getJobId).collect(Collectors.toList()));
-                                DbFactory.getJobDao().deleteAllInvalidJob();
+                                timeTaskDbRepository.deleteAll(timeTasks.stream().map(TimeTask::getJobId).collect(Collectors.toList()));
+                                timeTaskDbRepository.deleteAllInvalidJob();
                             }
                         }).start();
                     }
@@ -148,7 +161,7 @@ public class TimeWheel {
                                 //如果cron可以生成下一次的执行时间
                                 LocalDateTime next = Cron.nextExecuteTime(timeTask.cron, now.plusSeconds(1));
                                 if (null != next) {
-                                    TimeTask timeTask1 = new TimeTask(next, timeTask.task, DbFactory.getJobDao().generateJobId(), timeTask.cron);
+                                    TimeTask timeTask1 = new TimeTask(next, timeTask.task, timeTaskDbRepository.generateJobId(), timeTask.cron);
                                     this.add(timeTask1);
                                 }
                             }
@@ -185,5 +198,17 @@ public class TimeWheel {
         }
         this.threadPool.shutdown();
         this.threadPool = null;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        log.info("时间轮销毁...");
+        this.stop();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.info("时间轮开始...");
+        this.start();
     }
 }

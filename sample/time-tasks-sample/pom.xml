@@ -4,13 +4,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.php25</groupId>
-    <artifactId>ws</artifactId>
+    <artifactId>time-tasks-sample</artifactId>
     <version>2.3.2-SNAPSHOT</version>
     <parent>
         <groupId>com.php25</groupId>
         <artifactId>common-parent</artifactId>
         <version>2.3.2-SNAPSHOT</version>
-        <relativePath>../common-parent/pom.xml</relativePath>
+        <relativePath>../../common-parent/pom.xml</relativePath>
     </parent>
     <dependencies>
         <dependency>
@@ -19,15 +19,29 @@
         </dependency>
         <dependency>
             <groupId>com.php25</groupId>
-            <artifactId>redis</artifactId>
+            <artifactId>time-tasks</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
         </dependency>
     </dependencies>
 </project>

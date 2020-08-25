@@ -48,6 +48,7 @@
         <php-common.redis>2.3.2-SNAPSHOT</php-common.redis>
         <php-common.validation>2.3.2-SNAPSHOT</php-common.validation>
         <php-common.auditlog>2.3.2-SNAPSHOT</php-common.auditlog>
+        <php-common.time-tasks>2.3.2-SNAPSHOT</php-common.time-tasks>
         <uid-generator>2.3.2-SNAPSHOT</uid-generator>
     </properties>
 
@@ -164,6 +165,12 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
+                <artifactId>time-tasks</artifactId>
+                <version>${php-common.time-tasks}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.php25</groupId>
                 <artifactId>validation</artifactId>
                 <version>${php-common.validation}</version>
                 <scope>compile</scope>
@@ -243,6 +250,11 @@
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc6</artifactId>
                 <version>${oracle}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.12</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>

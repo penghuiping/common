@@ -1,7 +1,6 @@
 package com.php25.timetasks;
 
 import com.php25.timetasks.cron.Cron;
-import com.php25.timetasks.timewheel.DbFactory;
 import com.php25.timetasks.timewheel.TimeTask;
 import com.php25.timetasks.timewheel.TimeWheel;
 
@@ -13,12 +12,6 @@ import java.time.LocalDateTime;
  */
 public class TimeTasks {
 
-    public static TimeWheel startTimeWheel() {
-        TimeWheel timeWheel = new TimeWheel();
-        timeWheel.start();
-        return timeWheel;
-    }
-
     public static void submit(TimeWheel timeWheel, String cron, Runnable task) {
         execute0(timeWheel, cron, task);
     }
@@ -27,7 +20,7 @@ public class TimeTasks {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime next = Cron.nextExecuteTime(cron, now.plusSeconds(2));
         if (null != next) {
-            TimeTask timeTask = new TimeTask(next, task, DbFactory.getJobDao().generateJobId(),cron);
+            TimeTask timeTask = new TimeTask(next, task, timeWheel.generateJobId(), cron);
             timeWheel.add(timeTask);
         }
     }
