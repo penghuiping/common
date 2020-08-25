@@ -1,8 +1,8 @@
 package com.php25.timetasks.mysql.config;
 
-import com.php25.common.core.service.IdGenerator;
-import com.php25.common.core.service.IdGeneratorImpl;
-import com.php25.common.core.service.SnowflakeIdWorker;
+import com.php25.common.core.mess.IdGenerator;
+import com.php25.common.core.mess.IdGeneratorImpl;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.timetasks.repository.TimeTaskDbRepository;

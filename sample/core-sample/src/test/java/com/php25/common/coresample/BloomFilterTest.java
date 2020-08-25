@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
-import com.php25.common.core.service.StringBloomFilter;
+import com.php25.common.core.mess.StringBloomFilter;
 import org.junit.Assert;
 import org.junit.Test;
 

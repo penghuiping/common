@@ -1,6 +1,6 @@
 package com.php25.timetasks.repository;
 
-import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.timetasks.exception.TimeTasksException;
 import com.php25.timetasks.model.TimeTaskDb;

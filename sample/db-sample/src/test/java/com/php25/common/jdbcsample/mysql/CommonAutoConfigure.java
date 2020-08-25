@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.mysql;
 
-import com.php25.common.core.service.IdGenerator;
-import com.php25.common.core.service.IdGeneratorImpl;
+import com.php25.common.core.mess.IdGenerator;
+import com.php25.common.core.mess.IdGeneratorImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jdbc.JdbcRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;

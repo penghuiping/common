@@ -36,7 +36,14 @@ public class TimeTasksTest extends BaseTest {
 
     @Test
     public void test() throws Exception{
-        TimeTasks.submit(timeWheel,"30 35 13 25 8 ? 2020",new TestJob());
+        new Thread(()->{
+            TimeTasks.submit(timeWheel,"0/5 * * 25 8 ? 2020",new TestJob("每5秒"));
+        }).start();
+
+        new Thread(()->{
+            TimeTasks.submit(timeWheel,"0/30 * * 25 8 ? 2020",new TestJob("每30秒"));
+        }).start();
+
         while (true) {
             Thread.sleep(1000);
         }

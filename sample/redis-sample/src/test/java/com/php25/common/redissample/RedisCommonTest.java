@@ -1,7 +1,7 @@
 package com.php25.common.redissample;
 
 import com.php25.common.CommonAutoConfigure;
-import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.util.RandomUtil;
 import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHyperLogLogs;

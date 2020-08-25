@@ -3,7 +3,7 @@ package com.php25.common.jdbcsample.oracle.jmh;
 import com.baidu.fsg.uid.UidGenerator;
 import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
-import com.php25.common.core.service.SnowflakeIdWorker;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;

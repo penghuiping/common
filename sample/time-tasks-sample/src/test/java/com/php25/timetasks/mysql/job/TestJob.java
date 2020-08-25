@@ -10,9 +10,14 @@ import org.slf4j.LoggerFactory;
 public class TestJob implements Runnable{
     private static final Logger log = LoggerFactory.getLogger(TestJob.class);
 
+    private String printMsg;
+
+    public TestJob(String printMsg) {
+        this.printMsg = printMsg;
+    }
 
     @Override
     public void run() {
-        log.info("执行了一条语句");
+        log.info("执行了一条语句:{}",this.printMsg);
     }
 }

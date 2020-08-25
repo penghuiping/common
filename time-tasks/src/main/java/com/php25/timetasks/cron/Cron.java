@@ -1,5 +1,8 @@
 package com.php25.timetasks.cron;
 
+import com.php25.common.core.mess.LruCache;
+import com.php25.common.core.mess.LruCacheImpl;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,6 +56,8 @@ import java.util.List;
  */
 public class Cron {
 
+    final static LruCache<String, AST> lruCache = new LruCacheImpl<>(256);
+
     /**
      * 解析cron表达式为token流
      *
@@ -92,7 +97,12 @@ public class Cron {
      * @return
      */
     public static LocalDateTime nextExecuteTime(String cron, LocalDateTime baseTime) {
-        return execute(ast(lexer(cron)), baseTime);
+        AST ast = lruCache.getValue(cron);
+        if (null == ast) {
+            ast = ast(lexer(cron));
+            lruCache.putValueIfAbsent(cron,ast);
+        }
+        return execute(ast, baseTime);
     }
 
 

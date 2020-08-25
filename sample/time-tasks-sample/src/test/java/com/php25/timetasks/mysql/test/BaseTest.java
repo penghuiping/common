@@ -1,6 +1,6 @@
 package com.php25.timetasks.mysql.test;
 
-import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.mess.IdGenerator;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

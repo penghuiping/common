@@ -1,7 +1,7 @@
 package com.php25.common.ws;
 
 
-import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;

@@ -1,4 +1,4 @@
-package com.php25.common.core.service;
+package com.php25.common.core.mess;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.BloomFilter;

@@ -1,4 +1,4 @@
-package com.php25.common.core.service;
+package com.php25.common.core.mess;
 
 /**
  * @author penghuiping

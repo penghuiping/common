@@ -2,7 +2,7 @@ package com.php25.common.jdbcsample.oracle.test;
 
 import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
-import com.php25.common.core.service.IdGenerator;
+import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;

@@ -4,7 +4,7 @@ import com.php25.common.auditlog.dto.AuditLog;
 import com.php25.common.auditlog.model.DbAuditLog;
 import com.php25.common.auditlog.mq.AuditLogProcessor;
 import com.php25.common.auditlog.repository.AuditLogRepository;
-import com.php25.common.core.service.SnowflakeIdWorker;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.JsonUtil;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.support.GenericMessage;

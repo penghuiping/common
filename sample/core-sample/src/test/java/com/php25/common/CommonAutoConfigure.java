@@ -1,6 +1,6 @@
 package com.php25.common;
 
-import com.php25.common.core.service.SnowflakeIdWorker;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
