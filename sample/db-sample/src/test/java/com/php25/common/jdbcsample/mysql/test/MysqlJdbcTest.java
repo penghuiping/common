@@ -346,10 +346,17 @@ public class MysqlJdbcTest extends DbTest {
         Assertions.assertThat(customer.getVersion()).isEqualTo(atomicInteger.get());
     }
 
-
     @Test
     public void delete() {
         db.cndJdbc(Customer.class).whereLike("username", "jack%").delete();
+        List<Customer> customers = db.cndJdbc(Customer.class).select();
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
+    }
+
+    @Test
+    public void deleteAlias() {
+        db.cndJdbc(Customer.class,"a").whereLike("a.username", "jack%").delete();
         List<Customer> customers = db.cndJdbc(Customer.class).select();
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());

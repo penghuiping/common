@@ -12,7 +12,10 @@ public class TestJob implements Runnable{
 
     private String printMsg;
 
-    public TestJob(String printMsg) {
+    public TestJob() {
+    }
+
+    public void setPrintMsg(String printMsg) {
         this.printMsg = printMsg;
     }
 

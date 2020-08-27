@@ -63,7 +63,8 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
         List<TimeTaskDb> timeTaskDbs = db.cndJdbc(TimeTaskDb.class).whereBetween("executeTime", start, end).select();
         List<TimeTask> timeTasks = timeTaskDbs.stream().map(timeTaskDb -> {
             try {
-                Runnable runnable = (Runnable) Class.forName(timeTaskDb.getClassName()).newInstance();
+                Class<?> cls = Class.forName(timeTaskDb.getClassName());
+                Runnable runnable = (Runnable) cls.newInstance();
                 TimeTask timeTask = new TimeTask(timeTaskDb.getExecuteTime(), runnable, timeTaskDb.getId(), timeTaskDb.getCron());
                 return timeTask;
             } catch (Exception e) {

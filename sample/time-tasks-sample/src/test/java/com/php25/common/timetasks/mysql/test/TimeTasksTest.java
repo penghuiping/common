@@ -37,11 +37,15 @@ public class TimeTasksTest extends BaseTest {
     @Test
     public void test() throws Exception{
         new Thread(()->{
-            TimeTasks.submit(timeWheel,"0/5 57 * 26 8 ? 2020",new TestJob("每5秒"));
+            TestJob job = new TestJob();
+            job.setPrintMsg("每23秒");
+            TimeTasks.submit(timeWheel,"0/23 15 * 27 8 ? 2020",job);
         }).start();
 
         new Thread(()->{
-            TimeTasks.submit(timeWheel,"0/1 58 * 26 8 ? 2020",new TestJob("每1秒"));
+            TestJob job = new TestJob();
+            job.setPrintMsg("每10秒");
+            TimeTasks.submit(timeWheel,"0/10 20 * 27 8 ? 2020",job);
         }).start();
 
         while (true) {

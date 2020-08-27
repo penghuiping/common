@@ -373,6 +373,16 @@ public class OracleJdbcTest extends DbTest {
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
 
+    @Test
+    public void deleteAlias() {
+        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class,"a").whereLike("a.username", "jack%").delete();
+        List<com.php25.common.jdbcsample.mysql.model.Customer> customers = db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class).select();
+        Assertions.assertThat(customers).isNotNull();
+        Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
+    }
+
+
+
     /**
      * repository test
      */
