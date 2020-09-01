@@ -4,7 +4,9 @@ import com.php25.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Executors;
 
 /**
  * 消息重发器,此类用于实现延时消息重发
@@ -20,6 +22,8 @@ public class InnerMsgRetryQueue implements InitializingBean {
 
     private DelayQueue<BaseRetryMsg> delayQueue = new DelayQueue<>();
 
+    private ConcurrentHashMap<String,BaseRetryMsg> msgs = new ConcurrentHashMap<>(1024);
+
     private MsgDispatcher msgDispatcher;
 
     public InnerMsgRetryQueue(MsgDispatcher msgDispatcher) {
@@ -32,7 +36,11 @@ public class InnerMsgRetryQueue implements InitializingBean {
     }
 
     public void run() {
-        Thread thread = new Thread(() -> {
+        Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r);
+            thread.setName("cpicwx-healthy-delay-queue-subscriber");
+            return thread;
+        }).submit(() -> {
             while (true) {
                 BaseRetryMsg msg = null;
                 try {
@@ -47,20 +55,21 @@ public class InnerMsgRetryQueue implements InitializingBean {
                 }
             }
         });
-        thread.setName("cpicwx-healthy-delay-queue-subscriber");
-        thread.start();
     }
-
-
 
 
     public void put(BaseRetryMsg baseRetry) {
         delayQueue.put(baseRetry);
+        msgs.put(baseRetry.getMsgId()+baseRetry.getAction(),baseRetry);
     }
 
     public void remove(BaseRetryMsg baseRetry) {
         delayQueue.remove(baseRetry);
+        msgs.remove(baseRetry.getMsgId()+baseRetry.getAction());
     }
 
+    public BaseRetryMsg get(String msgId,String action) {
+        return msgs.get(msgId+action);
+    }
 
 }

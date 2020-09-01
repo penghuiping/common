@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,14 +29,11 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private InnerMsgRetryQueue innerMsgRetryQueue;
 
-    private Thread innerThread;
-
     public RedisQueueSubscriber(RedisManager redisService, String serverId, InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
         this.serverId = serverId;
         this.innerMsgRetryQueue = innerMsgRetryQueue;
     }
-
 
 
     @Override
@@ -50,7 +48,11 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
     }
 
     public void run() {
-        innerThread = new Thread(() -> {
+        Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r);
+            thread.setName("cpicwx-healthy-redis-queue-subscriber");
+            return thread;
+        }).submit(() -> {
             RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
             while (true) {
                 try {
@@ -66,8 +68,6 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
             }
         });
-        innerThread.setName("cpicwx-healthy-redis-queue-subscriber");
-        innerThread.start();
     }
 
     private void registerRedisQueue() {
@@ -84,7 +84,6 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
         RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
         StringRedisTemplate stringRedisTemplate = redisSpringBootService.getRedisTemplate();
         stringRedisTemplate.delete(Constants.prefix + serverId);
-        innerThread.stop();
     }
 
     /**

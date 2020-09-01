@@ -23,7 +23,7 @@ public class DbConfig {
     public DataSource druidDataSource() {
         HikariDataSource hikariDataSource = new HikariDataSource();
         hikariDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        hikariDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false");
+        hikariDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai");
         hikariDataSource.setUsername("root");
         hikariDataSource.setPassword("root");
         hikariDataSource.setAutoCommit(true);

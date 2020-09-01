@@ -13,6 +13,9 @@ public class AckHandler implements MsgHandler<BaseRetryMsg> {
     public void handle(GlobalSession session, BaseRetryMsg msg) throws Exception {
         Ack ack = (Ack) msg;
         log.info("ack...;msgid:{},reply_action:{}", ack.getMsgId(), ack.getReplyAction());
+        BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
+        session.dispatchAck(ack.getReplyAction(), srcMsg);
+
         BaseRetryMsg baseRetryMsg = new BaseRetryMsg();
         baseRetryMsg.setMsgId(msg.getMsgId());
         baseRetryMsg.setAction(ack.getReplyAction());

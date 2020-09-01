@@ -2,8 +2,6 @@ package com.php25.common.timetasks.mysql.test;
 
 import com.google.common.collect.Lists;
 import com.php25.common.timetasks.CommonAutoConfigure;
-import com.php25.common.timetasks.TimeTasks;
-import com.php25.common.timetasks.mysql.job.TestJob;
 import com.php25.common.timetasks.timewheel.TimeWheel;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,21 +34,21 @@ public class TimeTasksTest extends BaseTest {
 
     @Test
     public void test() throws Exception{
-        new Thread(()->{
-            TestJob job = new TestJob();
-            job.setPrintMsg("每23秒");
-            TimeTasks.submit(timeWheel,"0/23 15 * 27 8 ? 2020",job);
-        }).start();
-
-        new Thread(()->{
-            TestJob job = new TestJob();
-            job.setPrintMsg("每10秒");
-            TimeTasks.submit(timeWheel,"0/10 20 * 27 8 ? 2020",job);
-        }).start();
-
-        while (true) {
-            Thread.sleep(1000);
-        }
+//        new Thread(()->{
+//            TestJob job = new TestJob();
+//            job.setPrintMsg("每23秒");
+//            TimeTasks.submit(timeWheel,"0/23 55 * 28 8 ? 2020",job);
+//        }).start();
+//
+//        new Thread(()->{
+//            TestJob job = new TestJob();
+//            job.setPrintMsg("每10秒");
+//            TimeTasks.submit(timeWheel,"0/10 0 * 28 8 ? 2020",job);
+//        }).start();
+//
+//        while (true) {
+//            Thread.sleep(1000);
+//        }
     }
 
 

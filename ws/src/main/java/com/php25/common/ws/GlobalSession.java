@@ -32,6 +32,22 @@ public class GlobalSession {
 
     private IdGenerator idGenerator;
 
+    private ConcurrentHashMap<String, ReplyAckHandler> ackHandlers = new ConcurrentHashMap<>();
+
+    public void registerAckHandler(String action, ReplyAckHandler ackHandler) {
+        ackHandlers.put(action, ackHandler);
+    }
+
+    public void dispatchAck(String action,BaseRetryMsg srcMsg) {
+        ReplyAckHandler replyAckHandler = ackHandlers.get(action);
+        if(null != replyAckHandler) {
+            replyAckHandler.handle(this,srcMsg);
+        }
+    }
+
+    public BaseRetryMsg getMsg(String msgId,String action) {
+        return this.msgRetry.get(msgId,action);
+    }
 
     public String getServerId() {
         return serverId;
@@ -111,6 +127,8 @@ public class GlobalSession {
     protected void updateExpireTime(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
         expirationSocketSession.setTimestamp(System.currentTimeMillis());
+        expireSessionQueue.remove(expirationSocketSession);
+        expireSessionQueue.add(expirationSocketSession);
     }
 
     protected String generateUUID() {

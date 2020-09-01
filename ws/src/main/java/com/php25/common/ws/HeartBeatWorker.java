@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,7 +29,11 @@ public class HeartBeatWorker implements InitializingBean {
     }
 
     public void run() {
-        Thread thread = new Thread(() -> {
+        Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r);
+            thread.setName("cpicwx-healthy-heartbeat-worker");
+            return thread;
+        }).submit(() -> {
             log.info("heart beat thread start...");
             while (true) {
                 DelayQueue<ExpirationSocketSession> delayQueue = globalSession.getAllExpirationSessions();
@@ -50,7 +55,5 @@ public class HeartBeatWorker implements InitializingBean {
 
             }
         });
-        thread.setName("cpicwx-healthy-heartbeat-worker");
-        thread.start();
     }
 }
