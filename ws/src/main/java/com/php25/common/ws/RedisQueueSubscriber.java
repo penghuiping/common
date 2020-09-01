@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,8 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private InnerMsgRetryQueue innerMsgRetryQueue;
 
+    private ExecutorService singleThreadExecutor;
+
     public RedisQueueSubscriber(RedisManager redisService, String serverId, InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
         this.serverId = serverId;
@@ -39,20 +42,24 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         registerRedisQueue();
+        this.run();
     }
 
 
     @Override
     public void destroy() throws Exception {
         unRegisterRedisQueue();
+        this.singleThreadExecutor.shutdown();
     }
 
     public void run() {
-        Executors.newSingleThreadExecutor(r -> {
+        this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r);
             thread.setName("cpicwx-healthy-redis-queue-subscriber");
             return thread;
-        }).submit(() -> {
+        });
+
+        this.singleThreadExecutor.submit(() -> {
             RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
             while (true) {
                 try {
@@ -76,7 +83,6 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
         StringRedisTemplate stringRedisTemplate = redisSpringBootService.getRedisTemplate();
         BoundListOperations<String, String> boundListOperations = stringRedisTemplate.boundListOps(Constants.prefix + serverId);
         boundListOperations.expire(2, TimeUnit.HOURS);
-        this.run();
     }
 
     private void unRegisterRedisQueue() {

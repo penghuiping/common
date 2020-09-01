@@ -2,10 +2,12 @@ package com.php25.common.ws;
 
 import com.php25.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -18,13 +20,15 @@ import java.util.concurrent.Executors;
  * @date 20/8/11 10:50
  */
 @Slf4j
-public class InnerMsgRetryQueue implements InitializingBean {
+public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
 
     private DelayQueue<BaseRetryMsg> delayQueue = new DelayQueue<>();
 
-    private ConcurrentHashMap<String,BaseRetryMsg> msgs = new ConcurrentHashMap<>(1024);
+    private ConcurrentHashMap<String, BaseRetryMsg> msgs = new ConcurrentHashMap<>(1024);
 
     private MsgDispatcher msgDispatcher;
+
+    private ExecutorService singleThreadExecutor;
 
     public InnerMsgRetryQueue(MsgDispatcher msgDispatcher) {
         this.msgDispatcher = msgDispatcher;
@@ -35,12 +39,19 @@ public class InnerMsgRetryQueue implements InitializingBean {
         run();
     }
 
+    @Override
+    public void destroy() throws Exception {
+        this.singleThreadExecutor.shutdown();
+    }
+
     public void run() {
-        Executors.newSingleThreadExecutor(r -> {
+        this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r);
             thread.setName("cpicwx-healthy-delay-queue-subscriber");
             return thread;
-        }).submit(() -> {
+        });
+
+        this.singleThreadExecutor.submit(() -> {
             while (true) {
                 BaseRetryMsg msg = null;
                 try {
@@ -60,16 +71,16 @@ public class InnerMsgRetryQueue implements InitializingBean {
 
     public void put(BaseRetryMsg baseRetry) {
         delayQueue.put(baseRetry);
-        msgs.put(baseRetry.getMsgId()+baseRetry.getAction(),baseRetry);
+        msgs.put(baseRetry.getMsgId() + baseRetry.getAction(), baseRetry);
     }
 
     public void remove(BaseRetryMsg baseRetry) {
         delayQueue.remove(baseRetry);
-        msgs.remove(baseRetry.getMsgId()+baseRetry.getAction());
+        msgs.remove(baseRetry.getMsgId() + baseRetry.getAction());
     }
 
-    public BaseRetryMsg get(String msgId,String action) {
-        return msgs.get(msgId+action);
+    public BaseRetryMsg get(String msgId, String action) {
+        return msgs.get(msgId + action);
     }
 
 }

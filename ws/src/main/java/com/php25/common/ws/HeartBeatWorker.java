@@ -1,9 +1,11 @@
 package com.php25.common.ws;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -12,11 +14,13 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/8/17 14:03
  */
 @Slf4j
-public class HeartBeatWorker implements InitializingBean {
+public class HeartBeatWorker implements InitializingBean, DisposableBean {
 
     private Long interval;
 
     private GlobalSession globalSession;
+
+    private ExecutorService singleThreadExecutor;
 
     public HeartBeatWorker(Long interval, GlobalSession globalSession) {
         this.interval = interval;
@@ -28,12 +32,19 @@ public class HeartBeatWorker implements InitializingBean {
         run();
     }
 
+    @Override
+    public void destroy() throws Exception {
+        singleThreadExecutor.shutdown();
+    }
+
     public void run() {
-        Executors.newSingleThreadExecutor(r -> {
+        this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r);
             thread.setName("cpicwx-healthy-heartbeat-worker");
             return thread;
-        }).submit(() -> {
+        });
+
+        this.singleThreadExecutor.submit(() -> {
             log.info("heart beat thread start...");
             while (true) {
                 DelayQueue<ExpirationSocketSession> delayQueue = globalSession.getAllExpirationSessions();
@@ -55,5 +66,6 @@ public class HeartBeatWorker implements InitializingBean {
 
             }
         });
+
     }
 }
