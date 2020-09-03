@@ -2,7 +2,6 @@ package com.php25.common.ws;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
  * @author penghuiping
  * @date 20/8/12 16:31

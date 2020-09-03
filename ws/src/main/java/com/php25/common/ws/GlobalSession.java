@@ -1,8 +1,7 @@
 package com.php25.common.ws;
 
-
 import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.core.util.JsonUtil;
+import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -15,39 +14,31 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 public class GlobalSession {
-    private ConcurrentHashMap<String, ExpirationSocketSession> sessions = new ConcurrentHashMap<>(1024);
+    private final ConcurrentHashMap<String, ExpirationSocketSession> sessions = new ConcurrentHashMap<>(1024);
 
-    private DelayQueue<ExpirationSocketSession> expireSessionQueue = new DelayQueue<>();
+    private final DelayQueue<ExpirationSocketSession> expireSessionQueue = new DelayQueue<>();
 
-    private InnerMsgRetryQueue msgRetry;
+    private final InnerMsgRetryQueue msgRetry;
 
-    private RedisManager redisService;
+    private final RedisManager redisService;
 
-    private String serverId;
+    private final String serverId;
 
-    private SecurityAuthentication securityAuthentication;
+    private final SecurityAuthentication securityAuthentication;
 
-    private IdGenerator idGenerator;
+    private final ExecutorService executorService;
 
-    private ConcurrentHashMap<String, ReplyAckHandler> ackHandlers = new ConcurrentHashMap<>();
+    private final MsgDispatcher msgDispatcher;
 
-    public void registerAckHandler(String action, ReplyAckHandler ackHandler) {
-        ackHandlers.put(action, ackHandler);
-    }
+    private final VueMsgSerializer vueMsgSerializer = new VueMsgSerializer();
 
-    public void dispatchAck(String action,BaseRetryMsg srcMsg) {
-        ReplyAckHandler replyAckHandler = ackHandlers.get(action);
-        if(null != replyAckHandler) {
-            replyAckHandler.handle(this,srcMsg);
-        }
-    }
+    private final InternalMsgSerializer internalMsgSerializer = new InternalMsgSerializer();
 
-    public BaseRetryMsg getMsg(String msgId,String action) {
-        return this.msgRetry.get(msgId,action);
-    }
+    private final IdGenerator idGenerator = new IdGeneratorImpl();
 
     public String getServerId() {
         return serverId;
@@ -56,15 +47,21 @@ public class GlobalSession {
     public GlobalSession(InnerMsgRetryQueue msgRetry,
                          RedisManager redisService,
                          SecurityAuthentication securityAuthentication,
-                         IdGenerator idGenerator,
-                         String serverId) {
+                         String serverId,
+                         ExecutorService executorService,
+                         MsgDispatcher msgDispatcher) {
         this.msgRetry = msgRetry;
         this.redisService = redisService;
         this.serverId = serverId;
         this.securityAuthentication = securityAuthentication;
-        this.idGenerator = idGenerator;
+        this.executorService = executorService;
+        this.msgDispatcher = msgDispatcher;
     }
 
+
+    public void dispatchAck(String action, BaseRetryMsg srcMsg) {
+        msgDispatcher.dispatchAck(action, srcMsg);
+    }
 
     protected void init(SidUid sidUid) {
         //先判断uid原来是否存在，存在就无法创建新连接
@@ -87,9 +84,9 @@ public class GlobalSession {
     @PreDestroy
     public void cleanAll() {
         log.info("GlobalSession clean all...");
-        Iterator<Map.Entry<String,ExpirationSocketSession>> iterator = sessions.entrySet().iterator();
+        Iterator<Map.Entry<String, ExpirationSocketSession>> iterator = sessions.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String,ExpirationSocketSession> entry = iterator.next();
+            Map.Entry<String, ExpirationSocketSession> entry = iterator.next();
             ExpirationSocketSession socketSession = entry.getValue();
             clean(socketSession.getSessionId());
         }
@@ -101,17 +98,18 @@ public class GlobalSession {
         expirationSocketSession.setTimestamp(System.currentTimeMillis());
         expirationSocketSession.setWebSocketSession(webSocketSession);
         expirationSocketSession.setSessionId(webSocketSession.getId());
+        expirationSocketSession.setExecutorService(executorService);
+        expirationSocketSession.setMsgDispatcher(msgDispatcher);
         sessions.put(webSocketSession.getId(), expirationSocketSession);
         expireSessionQueue.put(expirationSocketSession);
     }
 
 
-    protected void close(WebSocketSession webSocketSession) {
-        String sid = webSocketSession.getId();
-        sessions.remove(sid);
-        ExpirationSocketSession expirationSocketSession = new ExpirationSocketSession();
+    protected void close(String sid) {
+        ExpirationSocketSession expirationSocketSession = sessions.remove(sid);
         expirationSocketSession.setSessionId(sid);
         expireSessionQueue.remove(expirationSocketSession);
+        expirationSocketSession.stop();
     }
 
 
@@ -123,16 +121,16 @@ public class GlobalSession {
         return null;
     }
 
+    protected ExpirationSocketSession getExpirationSocketSession(String sid) {
+        return sessions.get(sid);
+    }
+
 
     protected void updateExpireTime(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
         expirationSocketSession.setTimestamp(System.currentTimeMillis());
         expireSessionQueue.remove(expirationSocketSession);
         expireSessionQueue.add(expirationSocketSession);
-    }
-
-    protected String generateUUID() {
-        return idGenerator.getUUID();
     }
 
     public String getSid(String uid) {
@@ -159,7 +157,7 @@ public class GlobalSession {
             if (this.sessions.containsKey(sid)) {
                 //本地存在,直接通过本地session发送
                 WebSocketSession socketSession = sessions.get(sid).getWebSocketSession();
-                socketSession.sendMessage(new TextMessage(JsonUtil.toJson(baseRetryMsg)));
+                socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseRetryMsg)));
                 if (retry) {
                     msgRetry.put(baseRetryMsg);
                 }
@@ -169,10 +167,10 @@ public class GlobalSession {
                 SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
                 String serverId = sidUid.getServerId();
                 BoundListOperations<String, String> listOperations = redisManagerImpl.getRedisTemplate().boundListOps(Constants.prefix + serverId);
-                listOperations.leftPush(JsonUtil.toJson(baseRetryMsg));
+                listOperations.leftPush(internalMsgSerializer.from(baseRetryMsg));
             }
         } catch (Exception e) {
-            log.error("通过websocket发送消息失败,sid:{}", sid, e);
+            log.info("通过websocket发送消息失败,sid:{}", sid, e);
         }
     }
 
@@ -181,10 +179,20 @@ public class GlobalSession {
     }
 
     public void revokeRetry(BaseRetryMsg baseRetryMsg) {
+        //这里interval必须要大于0才能从重试队列中移除
+        baseRetryMsg.setInterval(1);
         msgRetry.remove(baseRetryMsg);
+    }
+
+    public BaseRetryMsg getMsg(String msgId, String action) {
+        return this.msgRetry.get(msgId, action);
     }
 
     protected DelayQueue<ExpirationSocketSession> getAllExpirationSessions() {
         return this.expireSessionQueue;
+    }
+
+    protected String generateUUID() {
+        return idGenerator.getUUID();
     }
 }

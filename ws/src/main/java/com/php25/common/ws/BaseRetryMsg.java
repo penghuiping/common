@@ -1,6 +1,7 @@
 package com.php25.common.ws;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Objects;
@@ -44,7 +45,7 @@ public class BaseRetryMsg implements Delayed {
     /**
      * websocket sessionId
      */
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     protected String sessionId;
 
     /**
@@ -66,8 +67,8 @@ public class BaseRetryMsg implements Delayed {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null) {return false;}
+        if (this == o) return true;
+        if (o == null) return false;
         BaseRetryMsg that = (BaseRetryMsg) o;
         return Objects.equal(msgId, that.msgId) &&
                 Objects.equal(action, that.action);

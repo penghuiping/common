@@ -7,6 +7,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+
 @Slf4j
 public class WebsocketHandler extends TextWebSocketHandler {
 
@@ -30,7 +31,6 @@ public class WebsocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        globalSession.close(session);
         ConnectionClose connectionClose = new ConnectionClose();
         connectionClose.setAction(ConnectionClose.getAction0());
         connectionClose.setCount(1);

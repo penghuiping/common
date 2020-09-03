@@ -18,6 +18,7 @@ public class ConnectionCloseHandler implements MsgHandler<BaseRetryMsg> {
         if (null != webSocketSession && webSocketSession.isOpen()) {
             webSocketSession.close();
         }
+        session.close(msg.getSessionId());
         session.clean(msg.getSessionId());
     }
 }

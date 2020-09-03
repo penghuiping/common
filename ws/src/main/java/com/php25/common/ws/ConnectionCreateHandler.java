@@ -19,6 +19,7 @@ public class ConnectionCreateHandler implements MsgHandler<BaseRetryMsg> {
         requestAuthInfo.setMsgId(connectionCreate.getMsgId());
         requestAuthInfo.setSessionId(msg.getSessionId());
         requestAuthInfo.setInterval(5000);
+        requestAuthInfo.setTimestamp(System.currentTimeMillis());
         session.send(requestAuthInfo);
     }
 }

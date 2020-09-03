@@ -34,7 +34,7 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        singleThreadExecutor.shutdown();
+        this.singleThreadExecutor.shutdown();
     }
 
     public void run() {
@@ -57,7 +57,7 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
                         ConnectionClose connectionClose = new ConnectionClose();
                         connectionClose.setCount(1);
                         connectionClose.setMsgId(globalSession.generateUUID());
-                        connectionClose.setSessionId( expirationSocketSession.getSessionId());
+                        connectionClose.setSessionId(expirationSocketSession.getSessionId());
                         globalSession.send(connectionClose);
                     } catch (InterruptedException e) {
                         log.info("HeartBeatWorker心跳线程睡眠被打断", e);
@@ -66,6 +66,5 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
 
             }
         });
-
     }
 }
