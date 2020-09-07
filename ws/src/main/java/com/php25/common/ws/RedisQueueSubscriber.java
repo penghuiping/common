@@ -35,7 +35,7 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private AtomicBoolean isRunning = new AtomicBoolean(true);
 
-    public RedisQueueSubscriber(RedisManager redisService, String serverId, InnerMsgRetryQueue innerMsgRetryQueue) {
+    public RedisQueueSubscriber(RedisManager redisService, String serverId,InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
         this.serverId = serverId;
         this.innerMsgRetryQueue = innerMsgRetryQueue;

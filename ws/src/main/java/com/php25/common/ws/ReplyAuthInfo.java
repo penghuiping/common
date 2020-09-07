@@ -11,18 +11,13 @@ import lombok.Setter;
 @Getter
 public class ReplyAuthInfo extends BaseRetryMsg {
 
+    public static final String ACTION0 = "reply_auth_info";
+
     private String uid;
 
     public ReplyAuthInfo() {
-        this.action = getAction0();
+        this.action = ACTION0;
     }
 
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
 
-    public static String getAction0() {
-        return "reply_auth_info";
-    }
 }

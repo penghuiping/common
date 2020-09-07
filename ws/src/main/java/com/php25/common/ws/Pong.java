@@ -6,12 +6,9 @@ package com.php25.common.ws;
  */
 public class Pong extends BaseRetryMsg {
 
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
+    public static final String ACTION0 = "pong";
 
-    public static String getAction0() {
-        return "pong";
+    public Pong() {
+        this.action = ACTION0;
     }
 }

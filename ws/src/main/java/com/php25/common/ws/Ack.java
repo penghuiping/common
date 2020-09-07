@@ -12,19 +12,12 @@ import lombok.Setter;
 @Getter
 public class Ack extends BaseRetryMsg {
 
+    public static final String ACTION0 = "ack";
+
     @JsonProperty("reply_action")
     private String replyAction;
 
     public Ack() {
-        this.action = getAction0();
-    }
-
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
-
-    public static String getAction0() {
-        return "ack";
+        this.action = ACTION0;
     }
 }

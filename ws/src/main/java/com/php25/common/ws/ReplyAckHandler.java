@@ -12,5 +12,5 @@ public interface ReplyAckHandler {
      * @param session 全局websocketSession
      * @param msg     需要回复的源消息
      */
-    public void handle(GlobalSession session, BaseRetryMsg msg);
+    void handle(GlobalSession session,BaseRetryMsg msg) throws Exception;
 }

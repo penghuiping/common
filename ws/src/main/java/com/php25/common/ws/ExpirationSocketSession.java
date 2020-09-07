@@ -1,7 +1,6 @@
 package com.php25.common.ws;
 
 import com.google.common.base.Objects;
-import com.php25.common.core.util.JsonUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +48,7 @@ public class ExpirationSocketSession implements Delayed {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ExpirationSocketSession that = (ExpirationSocketSession) o;
+       ExpirationSocketSession that = (ExpirationSocketSession) o;
         return Objects.equal(sessionId, that.sessionId);
     }
 
@@ -77,9 +76,7 @@ public class ExpirationSocketSession implements Delayed {
     }
 
     public void stop() {
-        while (isRunning.compareAndSet(true,false)){
-
-        }
+       isRunning.set(false);
     }
 
     public void put(BaseRetryMsg baseRetryMsg) {
@@ -94,7 +91,6 @@ public class ExpirationSocketSession implements Delayed {
                             try {
                                 BaseRetryMsg baseRetryMsg1 = buffer.poll(1, TimeUnit.SECONDS);
                                 if (null != baseRetryMsg1) {
-                                    log.info("expirationSocketSession发送消息:{}", JsonUtil.toJson(baseRetryMsg1));
                                     msgDispatcher.dispatch(baseRetryMsg1);
                                     count = 0;
                                 } else {

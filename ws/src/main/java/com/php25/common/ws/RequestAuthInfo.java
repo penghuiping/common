@@ -11,16 +11,11 @@ import lombok.Setter;
 @Getter
 public class RequestAuthInfo extends BaseRetryMsg {
 
+    public static final String ACTION0 = "request_auth_info";
+
     public RequestAuthInfo() {
-        this.action = getAction0();
+        this.action = ACTION0;
     }
 
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
 
-    public static String getAction0() {
-        return "request_auth_info";
-    }
 }

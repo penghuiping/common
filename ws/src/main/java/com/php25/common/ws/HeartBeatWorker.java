@@ -22,7 +22,7 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
 
     private ExecutorService singleThreadExecutor;
 
-    public HeartBeatWorker(Long interval, GlobalSession globalSession) {
+    public HeartBeatWorker(Long interval,GlobalSession globalSession) {
         this.interval = interval;
         this.globalSession = globalSession;
     }
@@ -50,11 +50,11 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
                 DelayQueue<ExpirationSocketSession> delayQueue = globalSession.getAllExpirationSessions();
                 while (true) {
                     try {
-                        ExpirationSocketSession expirationSocketSession = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
+                       ExpirationSocketSession expirationSocketSession = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
                         if (null == expirationSocketSession) {
                             break;
                         }
-                        ConnectionClose connectionClose = new ConnectionClose();
+                       ConnectionClose connectionClose = new ConnectionClose();
                         connectionClose.setCount(1);
                         connectionClose.setMsgId(globalSession.generateUUID());
                         connectionClose.setSessionId(expirationSocketSession.getSessionId());

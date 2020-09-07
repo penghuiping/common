@@ -11,18 +11,11 @@ import lombok.Setter;
 @Getter
 public class SubmitAuthInfo extends BaseRetryMsg {
 
+    public static final String ACTION0 = "submit_auth_info";
+
     private String token;
 
     public SubmitAuthInfo() {
-        this.action = getAction0();
-    }
-
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
-
-    public static String getAction0() {
-        return "submit_auth_info";
+        this.action = ACTION0;
     }
 }

@@ -6,16 +6,9 @@ package com.php25.common.ws;
  */
 public class ConnectionCreate extends BaseRetryMsg {
 
+    public static final String ACTION0 = "connection_create";
+
     public ConnectionCreate() {
-        this.action = getAction0();
-    }
-
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
-
-    public static String getAction0() {
-        return "connection_create";
+        this.action = ACTION0;
     }
 }

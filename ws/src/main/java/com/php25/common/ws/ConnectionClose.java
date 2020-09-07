@@ -6,17 +6,9 @@ package com.php25.common.ws;
  */
 public class ConnectionClose extends BaseRetryMsg {
 
+    public static final String ACTION0 = "connection_close";
 
     public ConnectionClose() {
-        this.action = getAction0();
-    }
-
-    @Override
-    public String getAction() {
-        return getAction0();
-    }
-
-    public static String getAction0() {
-        return "connection_close";
+        this.action = ACTION0;
     }
 }

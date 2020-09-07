@@ -11,11 +11,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Slf4j
 public class WebsocketHandler extends TextWebSocketHandler {
 
-    private GlobalSession globalSession;
+    private final GlobalSession globalSession;
 
-    private InnerMsgRetryQueue innerMsgRetryQueue;
+    private final InnerMsgRetryQueue innerMsgRetryQueue;
 
-    public WebsocketHandler(GlobalSession globalSession, InnerMsgRetryQueue innerMsgRetryQueue) {
+    public WebsocketHandler(GlobalSession globalSession,InnerMsgRetryQueue innerMsgRetryQueue) {
         this.globalSession = globalSession;
         this.innerMsgRetryQueue = innerMsgRetryQueue;
     }
@@ -23,7 +23,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload, BaseRetryMsg.class);
+       BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload,BaseRetryMsg.class);
         baseRetryMsg.setSessionId(session.getId());
         baseRetryMsg.setCount(0);
         innerMsgRetryQueue.put(baseRetryMsg);
@@ -31,8 +31,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        ConnectionClose connectionClose = new ConnectionClose();
-        connectionClose.setAction(ConnectionClose.getAction0());
+       ConnectionClose connectionClose = new ConnectionClose();
         connectionClose.setCount(1);
         connectionClose.setMsgId(globalSession.generateUUID());
         connectionClose.setSessionId(session.getId());
@@ -43,8 +42,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         globalSession.create(session);
-        ConnectionCreate connectionCreate = new ConnectionCreate();
-        connectionCreate.setAction(ConnectionCreate.getAction0());
+       ConnectionCreate connectionCreate = new ConnectionCreate();
         connectionCreate.setCount(1);
         connectionCreate.setMsgId(globalSession.generateUUID());
         connectionCreate.setSessionId(session.getId());

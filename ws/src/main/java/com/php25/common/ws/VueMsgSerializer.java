@@ -11,7 +11,7 @@ public class VueMsgSerializer implements MsgSerializable {
 
     @Override
     public String from(BaseRetryMsg baseRetryMsg) {
-        BaseRetryMsg baseRetryMsg1 = JsonUtil.fromJson(JsonUtil.toJson(baseRetryMsg), BaseRetryMsg.class);
+       BaseRetryMsg baseRetryMsg1 = JsonUtil.fromJson(JsonUtil.toJson(baseRetryMsg),BaseRetryMsg.class);
         baseRetryMsg1.setSessionId(null);
         return JsonUtil.toJson(baseRetryMsg1);
     }

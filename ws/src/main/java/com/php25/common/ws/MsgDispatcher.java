@@ -13,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class MsgDispatcher {
 
-    private ConcurrentHashMap<String, MsgHandler<BaseRetryMsg>> handlers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, MsgHandler<BaseRetryMsg>> handlers = new ConcurrentHashMap<>();
 
     private GlobalSession session;
 
-    private ConcurrentHashMap<String, ReplyAckHandler> ackHandlers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ReplyAckHandler> ackHandlers = new ConcurrentHashMap<>();
 
     public void setSession(GlobalSession session) {
         this.session = session;
@@ -27,7 +27,9 @@ public class MsgDispatcher {
         try {
             String action = baseRetry.getAction();
             MsgHandler<BaseRetryMsg> handler = handlers.get(action);
-            handler.handle(session, baseRetry);
+            if (null != handler) {
+                handler.handle(session, baseRetry);
+            }
         } catch (Exception e) {
             log.error("发送websocket消息出错", e);
         }
@@ -41,10 +43,14 @@ public class MsgDispatcher {
         ackHandlers.put(action, ackHandler);
     }
 
-    public void dispatchAck(String action, BaseRetryMsg srcMsg) {
-        ReplyAckHandler replyAckHandler = ackHandlers.get(action);
-        if (null != replyAckHandler) {
-            replyAckHandler.handle(session, srcMsg);
+    public void dispatchAck(String action,BaseRetryMsg srcMsg) {
+        try {
+            ReplyAckHandler replyAckHandler = ackHandlers.get(action);
+            if (null != replyAckHandler) {
+                replyAckHandler.handle(session, srcMsg);
+            }
+        } catch (Exception e) {
+            log.error("发送websocket消息出错", e);
         }
     }
 

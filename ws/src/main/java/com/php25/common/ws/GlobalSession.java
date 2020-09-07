@@ -1,7 +1,5 @@
 package com.php25.common.ws;
 
-import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +10,7 @@ import org.springframework.web.socket.WebSocketSession;
 import javax.annotation.PreDestroy;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
@@ -37,8 +36,6 @@ public class GlobalSession {
     private final VueMsgSerializer vueMsgSerializer = new VueMsgSerializer();
 
     private final InternalMsgSerializer internalMsgSerializer = new InternalMsgSerializer();
-
-    private final IdGenerator idGenerator = new IdGeneratorImpl();
 
     public String getServerId() {
         return serverId;
@@ -193,6 +190,6 @@ public class GlobalSession {
     }
 
     protected String generateUUID() {
-        return idGenerator.getUUID();
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }
