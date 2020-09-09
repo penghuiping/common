@@ -5,7 +5,6 @@ import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.specification.SearchParamBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,18 +23,18 @@ import java.util.Optional;
  */
 public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
-    @Autowired
     protected Db db;
 
     protected Class model;
 
     protected String pkName;
 
-    public JdbcDbRepositoryImpl() {
+    public JdbcDbRepositoryImpl(Db db) {
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        model = (Class) params[0];
-        pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
+        this.model = (Class) params[0];
+        this.pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
+        this.db = db;
     }
 
     @Override

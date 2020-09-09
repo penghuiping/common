@@ -1,6 +1,7 @@
 package com.php25.common.db.repository;
 
 import com.google.common.collect.Lists;
+import com.php25.common.db.Db;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.springframework.data.domain.Persistable;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,9 @@ import java.util.stream.Collectors;
  * @date 2020/1/8 16:37
  */
 public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
-    public BaseDbRepositoryImpl() {
-        super();
+
+    public BaseDbRepositoryImpl(Db db) {
+        super(db);
     }
 
     @Transactional(rollbackFor = Exception.class)

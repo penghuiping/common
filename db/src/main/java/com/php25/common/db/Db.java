@@ -49,10 +49,14 @@ public class Db {
                 String packageSearchPath = CLASSPATH_ALL_URL_PREFIX +
                         resolveBasePackage(basePackage) + '/' + DEFAULT_RESOURCE_PATTERN;
                 Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
-                for(Resource resource:resources) {
-                    String className = basePackage +"."+resource.getFilename().split("\\.")[0];
-                    Class class0 = ClassUtils.getDefaultClassLoader().loadClass(className);
-                    JdbcModelManager.getModelMeta(class0);
+                String basePackage0 = basePackage.replace(".", "/");
+                for (Resource resource : resources) {
+                    String path = resource.getURI().toString();
+                    if (path.indexOf(basePackage0) > 0) {
+                        String className = path.substring(path.indexOf(basePackage0)).split("\\.")[0].replace("/", ".");
+                        Class<?> class0 = ClassUtils.getDefaultClassLoader().loadClass(className);
+                        JdbcModelManager.getModelMeta(class0);
+                    }
                 }
             } catch (Exception e) {
                 throw new DbException("Db在扫描包:" + basePackage + "出错", e);

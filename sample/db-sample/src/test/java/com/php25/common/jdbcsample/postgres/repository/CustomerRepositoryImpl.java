@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.postgres.repository;
 
+import com.php25.common.db.Db;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.common.jdbcsample.postgres.model.Customer;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CustomerRepositoryImpl extends BaseDbRepositoryImpl<Customer, Long> implements CustomerRepository {
 
+    public CustomerRepositoryImpl(Db db) {
+        super(db);
+    }
 }
