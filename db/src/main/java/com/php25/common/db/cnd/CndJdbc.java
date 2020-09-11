@@ -156,7 +156,7 @@ public abstract class CndJdbc extends AbstractQuery implements Query {
         if (null != columns && columns.length > 0) {
             sb = new StringBuilder("SELECT ");
             for (String column : columns) {
-                sb.append(column).append(",");
+                sb.append(getCol(column)).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);
         } else {

@@ -70,7 +70,7 @@ public class OracleJdbcTest extends DbTest {
                 @Override
                 protected void waitUntilReady() {
                     try {
-                        Thread.sleep(1000*30);
+                        Thread.sleep(1000 * 30);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -164,14 +164,14 @@ public class OracleJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class, "Company.id", "Company.name", "Company.enable", "Company.createTime", "Company.updateTime");
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
         //alias
-        customers = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId","b.id").select(Customer.class);
+        customers = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").select(Customer.class);
         Assertions.assertThat(customers.size()).isEqualTo(6);
-        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class);
+        companies = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime");
         Assertions.assertThat(companies.size()).isEqualTo(6);
     }
 
@@ -179,13 +179,13 @@ public class OracleJdbcTest extends DbTest {
     public void or() {
         CndJdbc cnd = db.cndJdbc(Customer.class);
         List<Customer> customers =
-                cnd.where(cnd.clone().andEq("age", 0).andEq("username","jack0"))
-                        .or(cnd.clone().andEq("age",0).andEq("username","mary0"))
+                cnd.where(cnd.clone().andEq("age", 0).andEq("username", "jack0"))
+                        .or(cnd.clone().andEq("age", 0).andEq("username", "mary0"))
                         .select();
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(2);
 
-        customers = cnd.clone().whereEq("age",0).orEq("age",10).select();
+        customers = cnd.clone().whereEq("age", 0).orEq("age", 10).select();
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(3);
     }
@@ -208,7 +208,7 @@ public class OracleJdbcTest extends DbTest {
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();
-        Assertions.assertThat(customers1.size()>0);
+        Assertions.assertThat(customers1.size() > 0);
         for (Map map : customers1) {
             Integer key1 = Integer.parseInt(map.get("enable".toUpperCase()).toString());
             Integer key2 = Integer.parseInt(map.get("avg_age".toUpperCase()).toString());
@@ -234,7 +234,7 @@ public class OracleJdbcTest extends DbTest {
     @Test
     public void count() {
         Long count = db.cndJdbc(Customer.class).whereEq("enable", 1).count();
-        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long)count);
+        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long) count);
     }
 
     @Test
@@ -375,12 +375,11 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void deleteAlias() {
-        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class,"a").whereLike("a.username", "jack%").delete();
+        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class, "a").whereLike("a.username", "jack%").delete();
         List<com.php25.common.jdbcsample.mysql.model.Customer> customers = db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class).select();
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
-
 
 
     /**
@@ -522,14 +521,14 @@ public class OracleJdbcTest extends DbTest {
     @Test
     public void deleteById() {
         customerRepository.deleteById(customers.get(0).getId());
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(0).getId())).isFalse();
     }
 
     @Test
     public void deleteByModel() {
         customerRepository.delete(customers.get(1));
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(1).getId())).isFalse();
     }
 

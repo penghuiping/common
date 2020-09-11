@@ -25,22 +25,21 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     protected Db db;
 
-    protected Class model;
+    protected Class<?> model;
 
     protected String pkName;
 
     public JdbcDbRepositoryImpl(Db db) {
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        this.model = (Class) params[0];
+        this.model = (Class<?>) params[0];
         this.pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
         this.db = db;
     }
 
     @Override
     public List<T> findAllEnabled() {
-        List<T> list = db.cndJdbc(model).whereEq("enable", 1).select();
-        return list;
+        return db.cndJdbc(model).whereEq("enable", 1).select();
     }
 
     @Override

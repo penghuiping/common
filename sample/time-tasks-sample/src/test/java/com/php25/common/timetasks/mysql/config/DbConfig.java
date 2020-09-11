@@ -61,7 +61,7 @@ public class DbConfig {
     }
 
     @Bean
-    public TimeTaskDbRepository timeTaskDbRepository() {
-        return new TimeTaskDbRepositoryImpl();
+    public TimeTaskDbRepository timeTaskDbRepository(Db db) {
+        return new TimeTaskDbRepositoryImpl(db);
     }
 }

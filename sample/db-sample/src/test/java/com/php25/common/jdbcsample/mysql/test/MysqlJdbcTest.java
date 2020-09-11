@@ -140,14 +140,14 @@ public class MysqlJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class);
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class, "Company.id", "Company.name", "Company.enable", "Company.createTime", "Company.updateTime");
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
         //alias
         customers = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId","b.id").select(Customer.class);
         Assertions.assertThat(customers.size()).isEqualTo(6);
-        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class);
+        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class,"b.id","b.name","b.enable","b.createTime","b.updateTime");
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
 
