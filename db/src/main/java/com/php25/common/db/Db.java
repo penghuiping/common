@@ -1,6 +1,7 @@
 package com.php25.common.db;
 
 import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.JdbcPair;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.slf4j.Logger;
@@ -9,7 +10,6 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -19,7 +19,8 @@ import org.springframework.util.ClassUtils;
  */
 public class Db {
     private static final Logger log = LoggerFactory.getLogger(Db.class);
-    private JdbcOperations jdbcOperations;
+
+    private JdbcPair jdbcPair;
 
     private DbType dbType;
 
@@ -31,12 +32,12 @@ public class Db {
         this.dbType = dbType;
     }
 
-    public void setJdbcOperations(JdbcOperations jdbcOperations) {
-        this.jdbcOperations = jdbcOperations;
+    public JdbcPair getJdbcPair() {
+        return jdbcPair;
     }
 
-    public JdbcOperations getJdbcOperations() {
-        return jdbcOperations;
+    public void setJdbcPair(JdbcPair jdbcPair) {
+        this.jdbcPair = jdbcPair;
     }
 
     private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
@@ -78,7 +79,7 @@ public class Db {
      * @return
      */
     public CndJdbc cndJdbc(Class cls) {
-        return CndJdbc.of(cls, null, dbType, this.jdbcOperations);
+        return CndJdbc.of(cls, null, dbType, this.jdbcPair.getJdbcOperations());
     }
 
     /**
@@ -87,7 +88,7 @@ public class Db {
      * @return
      */
     public CndJdbc cndJdbc(Class cls, String alias) {
-        return CndJdbc.of(cls, alias, dbType, this.jdbcOperations);
+        return CndJdbc.of(cls, alias, dbType, this.jdbcPair.getJdbcOperations());
     }
 
 

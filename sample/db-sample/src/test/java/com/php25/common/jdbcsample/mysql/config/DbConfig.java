@@ -5,16 +5,21 @@ import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
+import com.php25.common.db.cnd.JdbcPair;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
 /**
  * Created by penghuiping on 2018/5/1.
  */
+@Profile(value = "single_db")
 @Configuration
 public class DbConfig {
     @Bean
@@ -39,11 +44,16 @@ public class DbConfig {
         return new JdbcTemplate(dataSource);
     }
 
+    @Bean
+    public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+        return new TransactionTemplate(transactionManager);
+    }
 
     @Bean
-    Db db(JdbcTemplate jdbcTemplate) {
+    Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
         Db db = new Db(DbType.MYSQL);
-        db.setJdbcOperations(jdbcTemplate);
+        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate, transactionTemplate);
+        db.setJdbcPair(jdbcPair);
         db.scanPackage("com.php25.common.jdbcsample.mysql.model");
         return db;
     }

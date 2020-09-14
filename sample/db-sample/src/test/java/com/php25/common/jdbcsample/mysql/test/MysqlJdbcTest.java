@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.db.Db;
-import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.specification.Operator;
 import com.php25.common.db.specification.SearchParam;
@@ -30,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
@@ -53,24 +52,18 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
+@ActiveProfiles(profiles = {"single_db"})
 @RunWith(SpringRunner.class)
 public class MysqlJdbcTest extends DbTest {
 
     @ClassRule
     public static GenericContainer mysql = new GenericContainer<>("mysql:5.7").withExposedPorts(3306);
 
-
     static {
         mysql.setPortBindings(Lists.newArrayList("3306:3306"));
         mysql.withEnv("MYSQL_USER", "root");
         mysql.withEnv("MYSQL_ROOT_PASSWORD", "root");
         mysql.withEnv("MYSQL_DATABASE", "test");
-    }
-
-    @Override
-    protected void initDb() {
-        this.db = new Db(DbType.MYSQL);
-        this.db.setJdbcOperations(jdbcTemplate);
     }
 
     @Test

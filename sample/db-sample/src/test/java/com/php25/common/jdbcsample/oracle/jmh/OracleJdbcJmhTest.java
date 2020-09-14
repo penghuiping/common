@@ -82,7 +82,7 @@ public class OracleJdbcJmhTest {
 
     public Db db(JdbcTemplate jdbcTemplate) {
         Db db = new Db(DbType.ORACLE);
-        db.setJdbcOperations(jdbcTemplate);
+        db.getJdbcPair().setJdbcOperations(jdbcTemplate);
         db.scanPackage("com.php25.common.jdbcsample.oracle.model");
         return db;
     }
@@ -108,16 +108,16 @@ public class OracleJdbcJmhTest {
         this.uidGenerator = uidGenerator(new SnowflakeIdWorker());
         this.db = this.db(new JdbcTemplate(druidDataSource()));
 
-        this.db.getJdbcOperations().execute("drop table t_customer");
-        this.db.getJdbcOperations().execute("drop table t_company");
-        this.db.getJdbcOperations().execute("drop table t_department");
-        this.db.getJdbcOperations().execute("drop table t_customer_department");
-        this.db.getJdbcOperations().execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
-        this.db.getJdbcOperations().execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
-        this.db.getJdbcOperations().execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
-        this.db.getJdbcOperations().execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
-        this.db.getJdbcOperations().execute("drop SEQUENCE SEQ_ID");
-        this.db.getJdbcOperations().execute("CREATE SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_customer");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_company");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_department");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_customer_department");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcOperations().execute("CREATE SEQUENCE SEQ_ID");
 
 
         CndJdbc cndJpa = this.db.cndJdbc(Customer.class);
@@ -155,7 +155,7 @@ public class OracleJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void update0() throws Exception {
-        this.db.getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
+        this.db.getJdbcPair().getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -165,7 +165,7 @@ public class OracleJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete0() throws Exception {
-        this.db.getJdbcOperations().update("delete from t_customer where id=1");
+        this.db.getJdbcPair().getJdbcOperations().update("delete from t_customer where id=1");
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -176,7 +176,7 @@ public class OracleJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
         Assertions.assertThat(map.get("id").toString()).isEqualTo(customers.get(0).getId().toString());
     }
 }

@@ -41,16 +41,12 @@ public class DbTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
     Db db;
-
 
     List<Customer> customers = Lists.newArrayList();
 
     List<CustomerDto> customerDtos = Lists.newArrayList();
-
-    protected void initDb() {
-
-    }
 
     private void initMeta() throws Exception {
         Class cls = Class.forName("com.mysql.cj.jdbc.Driver");
@@ -77,7 +73,6 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        this.initDb();
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
 

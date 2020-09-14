@@ -81,7 +81,7 @@ public class PostgresJdbcJmhTest {
 
     public Db db(JdbcTemplate jdbcTemplate) {
         Db db = new Db(DbType.POSTGRES);
-        db.setJdbcOperations(jdbcTemplate);
+        db.getJdbcPair().setJdbcOperations(jdbcTemplate);
         db.scanPackage("com.php25.common.jdbcsample.postgres.model");
         return db;
     }
@@ -106,18 +106,18 @@ public class PostgresJdbcJmhTest {
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
         this.uidGenerator = uidGenerator(snowflakeIdWorker);
         this.db = this.db(jdbcTemplate(dataSource));
-        this.db.getJdbcOperations().execute("drop table if exists t_customer");
-        this.db.getJdbcOperations().execute("drop table if exists t_company");
-        this.db.getJdbcOperations().execute("drop table if exists t_department");
-        this.db.getJdbcOperations().execute("drop table if exists t_customer_department");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_company");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer_department");
 
-        this.db.getJdbcOperations().execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
-        this.db.getJdbcOperations().execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
-        this.db.getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
-        this.db.getJdbcOperations().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
+        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
 
-        this.db.getJdbcOperations().execute("drop SEQUENCE if exists SEQ_ID");
-        this.db.getJdbcOperations().execute("create SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcOperations().execute("drop SEQUENCE if exists SEQ_ID");
+        this.db.getJdbcPair().getJdbcOperations().execute("create SEQUENCE SEQ_ID");
 
         CndJdbc cndJdbc = this.db.cndJdbc(Customer.class);
 
@@ -155,7 +155,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void update0() throws Exception {
-        this.db.getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
+        this.db.getJdbcPair().getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -165,7 +165,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete0() throws Exception {
-        this.db.getJdbcOperations().update("delete from t_customer where id=1");
+        this.db.getJdbcPair().getJdbcOperations().update("delete from t_customer where id=1");
     }
 
 
@@ -177,7 +177,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
         Assertions.assertThat(map.get("id")).isEqualTo(customers.get(0).getId());
     }
 
@@ -190,7 +190,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryById0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcOperations().queryForMap("select * from t_customer where id =?", new Object[]{customers.get(0).getId()});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where id =?", new Object[]{customers.get(0).getId()});
         Assertions.assertThat(map.get("id")).isEqualTo(customers.get(0).getId());
     }
 }

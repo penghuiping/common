@@ -41,6 +41,7 @@ public class DbTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
     Db db;
 
     List<Customer> customers = Lists.newArrayList();
@@ -49,9 +50,6 @@ public class DbTest {
 
     private static boolean isFirst = true;
 
-    protected void initDb() {
-
-    }
 
     private void initMeta() throws Exception {
         Class cls = Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -87,7 +85,6 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        this.initDb();
         CndJdbc cndJdbc = db.cndJdbc(Customer.class);
         CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
 

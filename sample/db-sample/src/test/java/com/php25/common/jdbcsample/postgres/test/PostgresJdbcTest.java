@@ -5,8 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.db.Db;
-import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.specification.Operator;
 import com.php25.common.db.specification.SearchParam;
@@ -78,12 +76,6 @@ public class PostgresJdbcTest extends DbTest {
 
     @Autowired
     private UidGenerator uidGenerator;
-
-    @Override
-    protected void initDb() {
-        this.db = new Db(DbType.POSTGRES);
-        this.db.setJdbcOperations(jdbcTemplate);
-    }
 
     @Test
     public void query() {
