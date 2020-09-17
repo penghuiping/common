@@ -19,7 +19,6 @@ public class BloomFilterTest {
     @Test
     public void test1() {
         StringBloomFilter stringBloomFilter = new StringBloomFilter(100, 0.01);
-
         stringBloomFilter.put("123");
         stringBloomFilter.put("abc");
         stringBloomFilter.put("ddd");

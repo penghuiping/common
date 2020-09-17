@@ -23,12 +23,9 @@ public class TreesTest {
         Department department3 = new Department("4", "2", "部门3");
         Department department4 = new Department("5", "3", "部门4");
 
-
         TreeNode<Department> treeNode = Trees.buildTree(Lists.newArrayList(department,department1,department2,department3,department4));
-
         List<Department> nodes0= Trees.getAllSuccessorNodes(treeNode,department1);
         System.out.println(JsonUtil.toPrettyJson(nodes0));
-
         System.out.println();
 
         List<Department> nodes1= Trees.getAllSuccessorNodes(treeNode,department2);

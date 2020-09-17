@@ -13,7 +13,7 @@ import java.util.UUID;
  * @author penghuiping
  * @date 2017/9/18
  */
-@Service("idGeneratorService")
+@Service("idGeneratorImpl")
 public class IdGeneratorImpl implements IdGenerator {
 
     @Override

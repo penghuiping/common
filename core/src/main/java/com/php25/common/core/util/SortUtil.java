@@ -20,7 +20,7 @@ public abstract class SortUtil {
      * @param start 数组的起始位置
      * @param end   数组的结束位置
      */
-    public static <T extends Comparable> void quickSort(T[] arr, int start, int end) {
+    public static <T extends Comparable<T>> void quickSort(T[] arr, int start, int end) {
         if (end <= start) {
             return;
         }
@@ -69,7 +69,7 @@ public abstract class SortUtil {
      * @param end   需要排序数组的结束位置
      * @param temp  临时数组,存放归并排序中的临时数据，避免不停的创建数组
      */
-    public static <T extends Comparable> void mergeSort(T[] arr, int start, int end, T[] temp) {
+    public static <T extends Comparable<T>> void mergeSort(T[] arr, int start, int end, T[] temp) {
         if (end - start <= 1) {
             //一直以一分为二的方式分裂，直到数组中只有一个元素时候，天然有就序了，所以无需在进行下面的排序操作
             return;
@@ -91,7 +91,7 @@ public abstract class SortUtil {
      * @param srcArr1 原数组1
      * @param distArr 目标数组
      */
-    private static <T extends Comparable> void mergeArray(T[] srcArr0, T[] srcArr1, T[] distArr) {
+    private static <T extends Comparable<T>> void mergeArray(T[] srcArr0, T[] srcArr1, T[] distArr) {
         int i = 0, j = 0, z = 0;
         while (i < srcArr0.length && j < srcArr1.length) {
             //两个数组必然一长一短,比如一个数组长度7，一个数组长度5，那么归并阶段在5(包括5)以下处理情况
@@ -127,7 +127,7 @@ public abstract class SortUtil {
      * @param end     逻辑上一分为二，右边量
      * @param distArr 临时数组，用于存放临时copy量
      */
-    private static <T extends Comparable> void mergeArray(T[] srcArr, int start, int mid, int end, T[] distArr) {
+    private static <T extends Comparable<T>> void mergeArray(T[] srcArr, int start, int mid, int end, T[] distArr) {
         int i = start, j = mid, z = 0;
         while (i < mid && j < end) {
             //两个数组必然一长一短,比如一个数组长度7，一个数组长度5，那么归并阶段在5(包括5)以下处理情况
@@ -168,7 +168,7 @@ public abstract class SortUtil {
      * @param max          true:最大堆，false最小堆
      * @param <T>
      */
-    private static <T extends Comparable> void heapElementDown(T[] arr, int length, int elementIndex, boolean max) {
+    private static <T extends Comparable<T>> void heapElementDown(T[] arr, int length, int elementIndex, boolean max) {
         //求出element元素的两个子节点
         int childLeft = 2 * elementIndex + 1;
         int childRight = childLeft + 1;
@@ -243,7 +243,7 @@ public abstract class SortUtil {
      * @param arr 需要排序的数组
      * @param max true:最大堆;false:最小堆
      */
-    public static <T extends Comparable> void heapSort(T[] arr, boolean max) {
+    public static <T extends Comparable<T>> void heapSort(T[] arr, boolean max) {
         heapCreation(arr, max);
         //只处理到只剩最后两个元素
         for (int i = arr.length - 1; i > 1; i--) {
@@ -262,7 +262,7 @@ public abstract class SortUtil {
      * @param arr 需要排序的数组
      * @param max true:最大堆;false:最小堆
      */
-    private static <T extends Comparable> void heapCreation(T[] arr, boolean max) {
+    private static <T extends Comparable<T>> void heapCreation(T[] arr, boolean max) {
         int i = 0;
         //((n-1)*2)+1 =n/2-1:0~(n/2-1)为非叶子节点
         for (i = arr.length / 2 - 1; i >= 0; i--) {
@@ -277,7 +277,7 @@ public abstract class SortUtil {
      * @param a   目标数组，需要交换元素的下标
      * @param b   目标数组，需要交换元素的下标
      */
-    private static <T extends Comparable> void swap(T[] arr, int a, int b) {
+    private static <T extends Comparable<T>> void swap(T[] arr, int a, int b) {
         T tmp = arr[a];
         arr[a] = arr[b];
         arr[b] = tmp;

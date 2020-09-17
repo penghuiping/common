@@ -1,8 +1,6 @@
 package com.php25.common.coresample;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.XmlUtil;
 import com.php25.common.coresample.dto.CustomerDto;
 import org.assertj.core.util.Lists;
@@ -21,8 +19,6 @@ import java.util.List;
 public class XmlTest {
 
     private Logger logger = LoggerFactory.getLogger(XmlTest.class);
-
-
 
     @Test
     public void objToXml() throws Exception {

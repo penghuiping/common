@@ -15,7 +15,6 @@
         <module>mvc</module>
         <module>webflux</module>
         <module>redis</module>
-        <module>uid-generator</module>
         <module>validation</module>
         <module>time-tasks</module>
         <module>auditlog</module>
@@ -24,7 +23,6 @@
         <module>sample/time-tasks-sample</module>
         <module>sample/db-sample</module>
         <module>sample/redis-sample</module>
-        <module>sample/uid-sample</module>
         <module>sample/validation-sample</module>
     </modules>
 
