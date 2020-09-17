@@ -8,10 +8,13 @@ import com.baidu.fsg.uid.worker.dao.WorkerNodeDAO;
 import com.baidu.fsg.uid.worker.dao.WorkerNodeDaoImpl;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
+import com.php25.common.db.cnd.JdbcPair;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
@@ -22,7 +25,7 @@ import javax.sql.DataSource;
 public class DbConfig {
 
     @Bean
-    public DataSource druidDataSource() {
+    public DataSource hikariDataSource() {
         HikariDataSource hikariDataSource = new HikariDataSource();
         hikariDataSource.setDriverClassName("org.h2.Driver");
         hikariDataSource.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MYSQL;");
@@ -43,11 +46,16 @@ public class DbConfig {
         return new JdbcTemplate(dataSource);
     }
 
+    @Bean
+    public TransactionTemplate transactionTemplate(DataSourceTransactionManager transactionManager) {
+        return new TransactionTemplate(transactionManager);
+    }
 
     @Bean
-    Db db(JdbcTemplate jdbcTemplate) {
+    Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
         Db db = new Db(DbType.MYSQL);
-        db.setJdbcOperations(jdbcTemplate);
+        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate,transactionTemplate);
+        db.setJdbcPair(jdbcPair);
         return db;
     }
 
