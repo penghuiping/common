@@ -5,12 +5,15 @@ import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
+import com.php25.common.db.cnd.JdbcPair;
 import com.php25.common.timetasks.repository.TimeTaskDbRepository;
 import com.php25.common.timetasks.repository.TimeTaskDbRepositoryImpl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
@@ -41,11 +44,16 @@ public class DbConfig {
         return new JdbcTemplate(dataSource);
     }
 
+    @Bean
+    public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager) {
+        return new TransactionTemplate(platformTransactionManager);
+    }
 
     @Bean
-    public Db db(JdbcTemplate jdbcTemplate) {
+    public Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
         Db db = new Db(DbType.MYSQL);
-        db.setJdbcOperations(jdbcTemplate);
+        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate,transactionTemplate);
+        db.setJdbcPair(jdbcPair);
         db.scanPackage("com.php25.common.timetasks.model");
         return db;
     }

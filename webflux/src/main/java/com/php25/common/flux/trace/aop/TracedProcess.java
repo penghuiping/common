@@ -9,10 +9,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
 
 /**
  * @author: penghuiping
@@ -22,6 +26,8 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class TracedProcess {
+
+    private final static Logger log = LoggerFactory.getLogger(TracedProcess.class);
 
     @Autowired
     Tracer tracer;
@@ -33,7 +39,10 @@ public class TracedProcess {
     @Around("tracedAnnotation()")
     public Object traceThing(ProceedingJoinPoint pjp) throws Throwable {
         ScopedSpan span = null;
+        long start = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
+        long end = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
+        log.info("Traced:{},方法名:{},耗时:{}ms",tracer.currentSpan(),method.getName(),end-start);
         Traced traced = method.getDeclaredAnnotation(Traced.class);
         if (null == traced || StringUtil.isBlank(traced.spanName())) {
             span = tracer.startScopedSpan(method.getName());
