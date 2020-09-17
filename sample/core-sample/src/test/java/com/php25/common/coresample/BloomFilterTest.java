@@ -1,11 +1,7 @@
 package com.php25.common.coresample;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnel;
-import com.google.common.hash.PrimitiveSink;
 import com.php25.common.core.mess.StringBloomFilter;
-import org.junit.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 /**
@@ -15,9 +11,8 @@ import org.junit.Test;
  */
 public class BloomFilterTest {
 
-
     @Test
-    public void test1() {
+    public void test() {
         StringBloomFilter stringBloomFilter = new StringBloomFilter(100, 0.01);
         stringBloomFilter.put("123");
         stringBloomFilter.put("abc");
@@ -27,35 +22,11 @@ public class BloomFilterTest {
         stringBloomFilter.put("ddd2");
         stringBloomFilter.put("ddd3");
 
-        Assert.assertTrue(stringBloomFilter.mightContain("abc"));
-        Assert.assertTrue(stringBloomFilter.mightContain("ddd"));
-        Assert.assertTrue(stringBloomFilter.mightContain("123"));
-        Assert.assertTrue(stringBloomFilter.mightContain("18812345678"));
+        Assertions.assertThat(stringBloomFilter.mightContain("abc")).isTrue();
+        Assertions.assertThat(stringBloomFilter.mightContain("ddd")).isTrue();
+        Assertions.assertThat(stringBloomFilter.mightContain("123")).isTrue();
+        Assertions.assertThat(stringBloomFilter.mightContain("18812345678")).isTrue();
+        Assertions.assertThat(stringBloomFilter.mightContain("ddd5")).isFalse();
     }
 
-
-    @Test
-    public void test2() {
-        Funnel<String> strFunnel = new Funnel<String>() {
-            @Override
-            public void funnel(String str, PrimitiveSink into) {
-                into.putString(str, Charsets.UTF_8);
-            }
-        };
-
-        BloomFilter<String> filter = BloomFilter.create(strFunnel, 500, 0.01);
-
-        filter.put("123");
-        filter.put("abc");
-        filter.put("ddd");
-        filter.put("18812345678");
-        filter.put("ddd1");
-        filter.put("ddd2");
-        filter.put("ddd3");
-
-        Assert.assertTrue(filter.mightContain("abc"));
-        Assert.assertTrue(filter.mightContain("ddd"));
-        Assert.assertTrue(filter.mightContain("123"));
-        Assert.assertTrue(filter.mightContain("18812345678"));
-    }
 }

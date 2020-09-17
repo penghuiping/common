@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.tree.TreeNode;
 import com.php25.common.core.tree.Trees;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.coresample.model.Department;
+import com.php25.common.coresample.dto.Department;
 import org.junit.Test;
 
 import java.util.List;

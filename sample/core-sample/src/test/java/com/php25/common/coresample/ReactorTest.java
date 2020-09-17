@@ -3,6 +3,7 @@ package com.php25.common.coresample;
 import com.php25.common.core.util.HttpClientUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.RandomUtil;
+import com.php25.common.coresample.dto.Person;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,7 +13,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,50 +24,22 @@ import java.util.concurrent.Executors;
  */
 
 public class ReactorTest {
-
     private static final Logger log = LoggerFactory.getLogger(ReactorTest.class);
-
-    public class Person {
-        private Integer id;
-        private String name;
-
-        public Integer getId() {
-            return id;
-        }
-
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
 
     @Test
     public void test() throws Exception {
-        System.out.println("=========================>main thread:" + Thread.currentThread().getName());
+        log.info("=========================>main thread:" + Thread.currentThread().getName());
         CountDownLatch countDownLatch = new CountDownLatch(1);
-//        Flux<Integer> flux = Flux.generate(() -> 0, (integer, synchronousSink) -> {
-//            System.out.println("=========================>publisher thread:"+Thread.currentThread().getName());
-//            synchronousSink.next(integer + 1);
-//            return integer + 1;
-//        });
-
         Flux<Integer> flux = Flux.range(2, 7).doOnRequest(n -> log.info("Request {} number", n));
         flux.subscribeOn(Schedulers.parallel()).map(integer -> {
-            System.out.println("=========================>map thread:" + Thread.currentThread().getName());
+            log.info("=========================>map thread:" + Thread.currentThread().getName());
             Person person = new Person();
             person.setId(integer);
             person.setName(RandomUtil.getRandomLetters(4));
             return person;
         }).publishOn(Schedulers.elastic()).subscribe(person -> {
-            System.out.println("=========================>subscribe thread:" + Thread.currentThread().getName());
-            System.out.println(JsonUtil.toPrettyJson(person));
+            log.info("=========================>subscribe thread:" + Thread.currentThread().getName());
+            log.info(JsonUtil.toPrettyJson(person));
             countDownLatch.countDown();
         }, throwable -> {
         }, () -> {
@@ -118,30 +90,30 @@ public class ReactorTest {
         ExecutorService executorService = Executors.newFixedThreadPool(60);
         long startTime = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        for (int i=0;i<1;i++) {
+        for (int i = 0; i < 1; i++) {
             Mono.fromCallable(() -> {
-                String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(),"http://www.baidu.com",null);
+                String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(), "http://www.baidu.com", null);
                 return resp;
             }).subscribeOn(Schedulers.fromExecutor(executorService)).subscribe(s -> {
                 Assert.assertTrue(s.contains("STATUS OK"));
-            },throwable -> {
-                log.error("出错啦",throwable);
-            },() -> {
+            }, throwable -> {
+                log.error("出错啦", throwable);
+            }, () -> {
                 countDownLatch.countDown();
             });
         }
         countDownLatch.await();
-        log.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+        log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
     }
 
     @Test
     public void testHttp() throws Exception {
         long startTime = System.currentTimeMillis();
-        for (int i=0;i<1;i++) {
-            String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(),"http://www.baidu.com",null);
+        for (int i = 0; i < 1; i++) {
+            String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(), "http://www.baidu.com", null);
             Assert.assertTrue(resp.contains("STATUS OK"));
         }
-        log.info("耗时:{}ms",System.currentTimeMillis()-startTime);
+        log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
     }
 
 

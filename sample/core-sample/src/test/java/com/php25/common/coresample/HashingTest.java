@@ -5,15 +5,12 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.php25.common.core.mess.ConsistentHashing;
 import com.php25.common.core.mess.ConsistentHashingImpl;
-import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.core.util.HashUtil;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -24,18 +21,14 @@ import java.util.List;
 
 public class HashingTest {
 
-    ConsistentHashing consistentHashingService;
-
-    IdGenerator idGeneratorService = new IdGeneratorImpl();
-
-    private static Logger log = LoggerFactory.getLogger(HashingTest.class);
+    ConsistentHashing consistentHashing;
+    private static final Logger log = LoggerFactory.getLogger(HashingTest.class);
 
     @Test
     public void consistentHashing() throws Exception {
         String[] servers = new String[]{"192.168.1.1", "192.168.1.2"};
-
-        consistentHashingService = new ConsistentHashingImpl(servers, 100);
-        String serverIp = consistentHashingService.getServer("HELLOWORLD");
+        consistentHashing = new ConsistentHashingImpl(servers, 100);
+        String serverIp = consistentHashing.getServer("HELLOWORLD");
         log.info("serverIp:" + serverIp);
         List<String> v = Lists.newArrayList();
         for (String server : servers) {
@@ -43,9 +36,14 @@ public class HashingTest {
                 v.add(server + "&&VN" + i);
             }
         }
-        HashCode hashCode = Hashing.crc32c().hashString("HELLOWORLD", Charset.defaultCharset());
-        log.info("HashCode:" + hashCode.asInt());
-        log.info("serverIp:" + v.get(Hashing.consistentHash(hashCode, v.size())));
+        HashCode hashCode = Hashing.crc32c().hashString("HELLOWORLD", Charsets.UTF_8);
+        log.info("HashCode:{}", hashCode.asInt());
+        log.info("serverIp:{}", v.get(Hashing.consistentHash(hashCode, v.size())));
+    }
+
+
+    public void crc32() {
+
     }
 
     @Test
@@ -56,10 +54,5 @@ public class HashingTest {
         log.info("hashUtil:{}", HashUtil.murmur128(hello.getBytes(Charsets.UTF_8)));
     }
 
-    @Test
-    public void idGeneratorService() throws Exception {
-        log.info("uuid:" + idGeneratorService.getUUID());
-        log.info("juid:" + idGeneratorService.getJUID());
-    }
 
 }

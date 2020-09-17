@@ -2,6 +2,7 @@ package com.php25.common.coresample;
 
 import com.php25.common.core.mess.LruCache;
 import com.php25.common.core.mess.LruCacheImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 /**
@@ -19,9 +20,15 @@ public class LruCacheTest {
         lruCache.putValue("4","d");
         lruCache.putValue("5","e");
         lruCache.putValue("6","f");
-        lruCache.getValue("1");
+        Assertions.assertThat(lruCache.size()).isEqualTo(6);
         lruCache.putValue("7","g");
-        System.out.println();
-
+        lruCache.putValue("8","h");
+        lruCache.putValue("9","i");
+        Assertions.assertThat(lruCache.size()).isEqualTo(6);
+        Assertions.assertThat(lruCache.getValue("1")).isEqualTo(null);
+        Assertions.assertThat(lruCache.getValue("2")).isEqualTo(null);
+        Assertions.assertThat(lruCache.getValue("4")).isEqualTo("d");
     }
+
+
 }

@@ -1,4 +1,4 @@
-package com.php25.common.coresample.model;
+package com.php25.common.coresample.dto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -4,15 +4,15 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.php25.common.core.util.JsonUtil;
 import com.php25.common.coresample.dto.CustomerDto;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,38 +25,42 @@ import java.util.List;
  * @Description:
  */
 public class ExcelTest {
-
-    private final static ObjectMapper objectMapper = new ObjectMapper();
-    private Logger logger = LoggerFactory.getLogger(ExcelTest.class);
+    private final static Logger log = LoggerFactory.getLogger(ExcelTest.class);
 
     @Test
-    public void objToExcel() {
+    public void test() throws Exception {
+        objToExcel();
+        excelToObj();
+    }
+
+
+    public void objToExcel() throws Exception {
+        Path path = Paths.get("/tmp/1.xls");
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
         CustomerDto customerDto = new CustomerDto();
         customerDto.setUsername("test");
         customerDto.setCreateTime(new Date());
         customerDto.setUpdateTime(new Date());
         customerDto.setEnable(1);
-        customerDto.setId(1l);
+        customerDto.setId(1L);
         customerDto.setPassword("1231312312333");
-
         Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(), CustomerDto.class, Lists.newArrayList(customerDto));
-
-        Path path = Paths.get("/Users/penghuiping/Desktop/joinsoft-docker/1.xls");
-        try {
-            workbook.write(Files.newOutputStream(path));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        workbook.write(Files.newOutputStream(path));
+        Assertions.assertThat(Files.exists(path));
     }
 
-    @Test
-    public void excelToObj() {
-        Path path = Paths.get("/Users/penghuiping/Desktop/joinsoft-docker/1.xls");
-        try {
-            List<CustomerDto> customerDtoList = ExcelImportUtil.importExcel(Files.newInputStream(path), CustomerDto.class, new ImportParams());
-            logger.info(objectMapper.writeValueAsString(customerDtoList));
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void excelToObj() throws Exception {
+        objToExcel();
+        Path path = Paths.get("/tmp/1.xls");
+        List<CustomerDto> customerDtoList = ExcelImportUtil.importExcel(Files.newInputStream(path), CustomerDto.class, new ImportParams());
+        log.info("客户列表为:{}", JsonUtil.toJson(customerDtoList));
+        Assertions.assertThat(customerDtoList.size()).isEqualTo(1);
+        Assertions.assertThat(customerDtoList.get(0).getUsername()).isEqualTo("test");
+        Assertions.assertThat(customerDtoList.get(0).getPassword()).isEqualTo("1231312312333");
+        if (Files.exists(path)) {
+            Files.delete(path);
         }
     }
 }
