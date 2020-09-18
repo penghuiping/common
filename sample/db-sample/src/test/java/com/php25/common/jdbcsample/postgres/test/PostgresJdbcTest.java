@@ -1,8 +1,8 @@
 package com.php25.common.jdbcsample.postgres.test;
 
-import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.cnd.CndJdbc;
@@ -31,7 +31,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
@@ -58,7 +57,7 @@ import java.util.stream.Collectors;
 @RunWith(SpringRunner.class)
 public class PostgresJdbcTest extends DbTest {
 
-    private Logger log = LoggerFactory.getLogger(PostgresJdbcTest.class);
+    private final Logger log = LoggerFactory.getLogger(PostgresJdbcTest.class);
 
     @ClassRule
     public static GenericContainer postgres = new GenericContainer<>("postgres:12.0-alpine")
@@ -71,11 +70,7 @@ public class PostgresJdbcTest extends DbTest {
         postgres.setPortBindings(org.assertj.core.util.Lists.newArrayList("5432:5432"));
     }
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private UidGenerator uidGenerator;
+    SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     @Test
     public void query() {
@@ -145,14 +140,14 @@ public class PostgresJdbcTest extends DbTest {
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class,"Company.id","Company.name","Company.enable","Company.createTime","Company.updateTime");
+        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class, "Company.id", "Company.name", "Company.enable", "Company.createTime", "Company.updateTime");
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
         //alias
-        customers = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId","b.id").select(com.php25.common.jdbcsample.mysql.model.Customer.class);
+        customers = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").select(com.php25.common.jdbcsample.mysql.model.Customer.class);
         Assertions.assertThat(customers.size()).isEqualTo(6);
-        companies = db.cndJdbc(Customer.class,"a").join(Company.class,"b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime");
+        companies = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime");
         Assertions.assertThat(companies.size()).isEqualTo(6);
     }
 
@@ -160,13 +155,13 @@ public class PostgresJdbcTest extends DbTest {
     public void or() {
         CndJdbc cnd = db.cndJdbc(Customer.class);
         List<Customer> customers =
-                cnd.where(cnd.clone().andEq("age", 0).andEq("username","jack0"))
-                        .or(cnd.clone().andEq("age",0).andEq("username","mary0"))
+                cnd.where(cnd.clone().andEq("age", 0).andEq("username", "jack0"))
+                        .or(cnd.clone().andEq("age", 0).andEq("username", "mary0"))
                         .select();
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(2);
 
-        customers = cnd.clone().whereEq("age",0).orEq("age",10).select();
+        customers = cnd.clone().whereEq("age", 0).orEq("age", 10).select();
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(3);
     }
@@ -189,7 +184,7 @@ public class PostgresJdbcTest extends DbTest {
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();
-        Assertions.assertThat(customers1.size()>0);
+        Assertions.assertThat(customers1.size() > 0);
         for (Map map : customers1) {
             Assertions.assertThat(BigDecimal.valueOf(result.get(map.get("enable"))).intValue()).isEqualTo(((BigDecimal) map.get("avg_age")).intValue());
         }
@@ -212,7 +207,7 @@ public class PostgresJdbcTest extends DbTest {
     @Test
     public void count() {
         Long count = db.cndJdbc(Customer.class).whereEq("enable", 1).count();
-        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long)count);
+        Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long) count);
     }
 
     @Test
@@ -222,7 +217,7 @@ public class PostgresJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
@@ -260,7 +255,7 @@ public class PostgresJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
@@ -354,7 +349,7 @@ public class PostgresJdbcTest extends DbTest {
 
     @Test
     public void deleteAlias() {
-        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class,"a").whereLike("a.username", "jack%").delete();
+        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class, "a").whereLike("a.username", "jack%").delete();
         List<com.php25.common.jdbcsample.mysql.model.Customer> customers = db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class).select();
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
@@ -403,7 +398,7 @@ public class PostgresJdbcTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
@@ -499,14 +494,14 @@ public class PostgresJdbcTest extends DbTest {
     @Test
     public void deleteById() {
         customerRepository.deleteById(customers.get(0).getId());
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(0).getId())).isFalse();
     }
 
     @Test
     public void deleteByModel() {
         customerRepository.delete(customers.get(1));
-        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size()-1);
+        Assertions.assertThat(customerRepository.count()).isEqualTo(customers.size() - 1);
         Assertions.assertThat(customerRepository.existsById(customers.get(1).getId())).isFalse();
     }
 
@@ -529,13 +524,13 @@ public class PostgresJdbcTest extends DbTest {
     public void testManyToMany0() {
         //部门
         Department department = new Department();
-        department.setId(uidGenerator.getUID());
+        department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
         department.setNew(true);
         department = departmentRepository.save(department);
 
         Department department1 = new Department();
-        department1.setId(uidGenerator.getUID());
+        department1.setId(snowflakeIdWorker.nextId());
         department1.setName("testDepart1");
         department1.setNew(true);
         department1 = departmentRepository.save(department1);
@@ -588,12 +583,12 @@ public class PostgresJdbcTest extends DbTest {
         Customer customer1 = customers.stream().filter(customer -> customer.getUsername().equals("jack0")).findAny().get();
         //部门
         Department department = new Department();
-        department.setId(uidGenerator.getUID());
+        department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
         department.setNew(true);
 
         Department department1 = new Department();
-        department1.setId(uidGenerator.getUID());
+        department1.setId(snowflakeIdWorker.nextId());
         department1.setName("testDepart1");
         department1.setNew(true);
         departmentRepository.saveAll(Lists.newArrayList(department, department1));

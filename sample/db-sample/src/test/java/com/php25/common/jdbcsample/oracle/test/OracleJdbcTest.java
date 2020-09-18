@@ -1,6 +1,5 @@
 package com.php25.common.jdbcsample.oracle.test;
 
-import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.php25.common.core.util.DigestUtil;
@@ -31,7 +30,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
@@ -59,7 +57,7 @@ import java.util.stream.Collectors;
 @RunWith(SpringRunner.class)
 public class OracleJdbcTest extends DbTest {
 
-    private Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
+    private final Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
 
     @ClassRule
     public static GenericContainer oracle = new GenericContainer<>("wnameless/oracle-xe-11g-r2")
@@ -80,14 +78,6 @@ public class OracleJdbcTest extends DbTest {
         oracle.withEnv("ORACLE_ALLOW_REMOTE", "true");
         oracle.withEnv("ORACLE_DISABLE_ASYNCH_IO", "true");
     }
-
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private UidGenerator uidGenerator;
-
 
     @Test
     public void query() {
@@ -236,7 +226,7 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
@@ -274,7 +264,7 @@ public class OracleJdbcTest extends DbTest {
 
         Company company = new Company();
         company.setName("test");
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
 
@@ -417,7 +407,7 @@ public class OracleJdbcTest extends DbTest {
     public void save() {
         //新增
         Company company = new Company();
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setName("baidu");
         company.setEnable(1);
         company.setCreateTime(new Date());
@@ -543,13 +533,13 @@ public class OracleJdbcTest extends DbTest {
     public void testManyToMany0() {
         //部门
         Department department = new Department();
-        department.setId(uidGenerator.getUID());
+        department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
         department.setNew(true);
         department = departmentRepository.save(department);
 
         Department department1 = new Department();
-        department1.setId(uidGenerator.getUID());
+        department1.setId(snowflakeIdWorker.nextId());
         department1.setName("testDepart1");
         department1.setNew(true);
         department1 = departmentRepository.save(department1);
@@ -602,12 +592,12 @@ public class OracleJdbcTest extends DbTest {
         Customer customer1 = customers.stream().filter(customer -> customer.getUsername().equals("jack0")).findAny().get();
         //部门
         Department department = new Department();
-        department.setId(uidGenerator.getUID());
+        department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
         department.setNew(true);
 
         Department department1 = new Department();
-        department1.setId(uidGenerator.getUID());
+        department1.setId(snowflakeIdWorker.nextId());
         department1.setName("testDepart1");
         department1.setNew(true);
         departmentRepository.saveAll(Lists.newArrayList(department, department1));

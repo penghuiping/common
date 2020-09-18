@@ -35,14 +35,14 @@ public class ReflectTest {
     }
 
     @Test
-    public void getCacheFieldJdk() throws Exception {
+    public void getCacheFieldJdk() {
         Class<?> cls = customer.getClass();
         Field field = ReflectUtil.getField(cls, "username");
         Assertions.assertThat(field.getName()).isEqualTo("username");
     }
 
     @Test
-    public void getCacheMethodJdk() throws Exception {
+    public void getCacheMethodJdk() {
         Method method = ReflectUtil.getMethod(customer.getClass(), "getUsername");
         Assertions.assertThat(method.getName()).isEqualTo("getUsername");
     }

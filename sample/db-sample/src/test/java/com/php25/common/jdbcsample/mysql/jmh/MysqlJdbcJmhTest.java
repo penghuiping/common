@@ -1,7 +1,5 @@
 package com.php25.common.jdbcsample.mysql.jmh;
 
-import com.baidu.fsg.uid.UidGenerator;
-import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
@@ -43,8 +41,6 @@ public class MysqlJdbcJmhTest {
     private Db db;
 
     private List<Customer> customers;
-
-    private UidGenerator uidGenerator;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
@@ -95,25 +91,11 @@ public class MysqlJdbcJmhTest {
         return db;
     }
 
-    public UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
-        return new UidGenerator() {
-            @Override
-            public long getUID() throws UidGenerateException {
-                return snowflakeIdWorker.nextId();
-            }
-
-            @Override
-            public String parseUID(long uid) {
-                return uid + "";
-            }
-        };
-    }
 
     @Setup(Level.Trial)
     public void init() {
         DataSource dataSource = druidDataSource();
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
-        this.uidGenerator = uidGenerator(snowflakeIdWorker);
         JdbcTemplate jdbcTemplate = jdbcTemplate(dataSource);
         TransactionTemplate transactionTemplate = transactionTemplate(dataSource);
         this.db = db(jdbcTemplate, transactionTemplate);
@@ -140,7 +122,7 @@ public class MysqlJdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(uidGenerator.getUID());
+            customer.setId(snowflakeIdWorker.nextId());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);

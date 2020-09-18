@@ -1,7 +1,5 @@
 package com.php25.common.jdbcsample.postgres.jmh;
 
-import com.baidu.fsg.uid.UidGenerator;
-import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
@@ -37,7 +35,6 @@ import java.util.Map;
  */
 @State(Scope.Benchmark)
 public class PostgresJdbcJmhTest {
-    private UidGenerator uidGenerator;
 
     private Db db;
 
@@ -86,25 +83,10 @@ public class PostgresJdbcJmhTest {
         return db;
     }
 
-    public UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
-        return new UidGenerator() {
-            @Override
-            public long getUID() throws UidGenerateException {
-                return snowflakeIdWorker.nextId();
-            }
-
-            @Override
-            public String parseUID(long uid) {
-                return uid + "";
-            }
-        };
-    }
-
     @Setup(Level.Trial)
     public void init() {
         DataSource dataSource = druidDataSource();
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
-        this.uidGenerator = uidGenerator(snowflakeIdWorker);
         this.db = this.db(jdbcTemplate(dataSource));
         this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer");
         this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_company");
@@ -131,7 +113,7 @@ public class PostgresJdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(uidGenerator.getUID());
+            customer.setId(snowflakeIdWorker.nextId());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);

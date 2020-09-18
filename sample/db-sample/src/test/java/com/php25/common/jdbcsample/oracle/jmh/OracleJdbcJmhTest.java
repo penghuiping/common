@@ -1,7 +1,5 @@
 package com.php25.common.jdbcsample.oracle.jmh;
 
-import com.baidu.fsg.uid.UidGenerator;
-import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
@@ -40,8 +38,6 @@ public class OracleJdbcJmhTest {
     private Db db;
 
     private List<Customer> customers;
-
-    private UidGenerator uidGenerator;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
@@ -87,27 +83,11 @@ public class OracleJdbcJmhTest {
         return db;
     }
 
-    public UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
-        return new UidGenerator() {
-            @Override
-            public long getUID() throws UidGenerateException {
-                return snowflakeIdWorker.nextId();
-            }
-
-            @Override
-            public String parseUID(long uid) {
-                return uid + "";
-            }
-        };
-    }
-
-
     @Setup(Level.Trial)
     public void init() {
         this.druidDataSource();
-        this.uidGenerator = uidGenerator(new SnowflakeIdWorker());
         this.db = this.db(new JdbcTemplate(druidDataSource()));
-
+        SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
         this.db.getJdbcPair().getJdbcOperations().execute("drop table t_customer");
         this.db.getJdbcPair().getJdbcOperations().execute("drop table t_company");
         this.db.getJdbcPair().getJdbcOperations().execute("drop table t_department");
@@ -131,7 +111,7 @@ public class OracleJdbcJmhTest {
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
-            customer.setId(uidGenerator.getUID());
+            customer.setId(snowflakeIdWorker.nextId());
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);

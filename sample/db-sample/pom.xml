@@ -22,10 +22,6 @@
             <artifactId>db</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.baidu.fsg</groupId>
-            <artifactId>uid-generator</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

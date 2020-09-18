@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.mysql.test;
 
-import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
@@ -34,10 +34,9 @@ public class ShardMysqlJdbcTest {
     private static final Logger log = LoggerFactory.getLogger(ShardMysqlJdbcTest.class);
 
     @Autowired
-    private UidGenerator uidGenerator;
-
-    @Autowired
     private ShardDepartmentRepository departmentRepository;
+
+    private SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
 
     private void initMeta() throws Exception {
@@ -71,17 +70,17 @@ public class ShardMysqlJdbcTest {
         initMeta();
 
         Department department = new Department();
-        department.setId(uidGenerator.getUID());
+        department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
         department.setNew(true);
 
         Department department1 = new Department();
-        department1.setId(uidGenerator.getUID());
+        department1.setId(snowflakeIdWorker.nextId());
         department1.setName("testDepart1");
         department1.setNew(true);
 
-        log.info("d1:{}",department.getId()%2);
-        log.info("d2:{}",department1.getId()%2);
+        log.info("d1:{}", department.getId() % 2);
+        log.info("d2:{}", department1.getId() % 2);
 
         departmentRepository.saveAll(Lists.newArrayList(department, department1));
     }
@@ -89,7 +88,7 @@ public class ShardMysqlJdbcTest {
 
     @Test
     public void query() throws Exception {
-        List<Department> departments = (List<Department>)departmentRepository.findAll();
+        List<Department> departments = (List<Department>) departmentRepository.findAll();
         log.info("部门信息:{}", JsonUtil.toJson(departments));
     }
 

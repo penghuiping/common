@@ -1,7 +1,5 @@
 package com.php25.common.jdbcsample.postgres.config;
 
-import com.baidu.fsg.uid.UidGenerator;
-import com.baidu.fsg.uid.exception.UidGenerateException;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
@@ -19,7 +17,7 @@ import javax.sql.DataSource;
  * Created by penghuiping on 2018/5/1.
  */
 @Configuration
-public class DruidConfig {
+public class DbConfig {
 
     @Bean
     public DataSource druidDataSource() {
@@ -61,20 +59,5 @@ public class DruidConfig {
     @Bean
     SnowflakeIdWorker snowflakeIdWorker() {
         return new SnowflakeIdWorker(1, 1);
-    }
-
-    @Bean
-    UidGenerator uidGenerator(SnowflakeIdWorker snowflakeIdWorker) {
-        return new UidGenerator() {
-            @Override
-            public long getUID() throws UidGenerateException {
-                return snowflakeIdWorker.nextId();
-            }
-
-            @Override
-            public String parseUID(long uid) {
-                return uid + "";
-            }
-        };
     }
 }

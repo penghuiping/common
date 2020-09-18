@@ -1,8 +1,8 @@
 package com.php25.common.jdbcsample.oracle.test;
 
-import com.baidu.fsg.uid.UidGenerator;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
+import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;
@@ -36,13 +36,12 @@ public class DbTest {
     IdGenerator idGeneratorService;
 
     @Autowired
-    UidGenerator uidGenerator;
-
-    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Autowired
     Db db;
+
+    SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     List<Customer> customers = Lists.newArrayList();
 
@@ -90,7 +89,7 @@ public class DbTest {
 
         Company company = new Company();
         company.setName("Google");
-        company.setId(uidGenerator.getUID());
+        company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
         cndJdbcCompany.insert(company);
