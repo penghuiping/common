@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter;
 import com.php25.common.core.exception.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -18,8 +16,6 @@ import java.util.TimeZone;
  * @date: 2018/8/15 10:12
  */
 public abstract class XmlUtil {
-    private static final Logger log = LoggerFactory.getLogger(XmlUtil.class);
-
     private static final XmlMapper xmlMapper = new XmlMapper();
 
     private static final PrettyPrinter PRETTY_PRINTER = new DefaultXmlPrettyPrinter();

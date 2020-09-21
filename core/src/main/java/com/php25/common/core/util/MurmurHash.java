@@ -1,9 +1,9 @@
 package com.php25.common.core.util;
 
-import com.google.common.base.Charsets;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Murmur3 32bit、64bit、128bit 哈希算法实现<br>
@@ -39,7 +39,7 @@ abstract class MurmurHash implements Serializable {
     private static final int N2 = 0x38495ab5;
 
     private static final int DEFAULT_SEED = 0;
-    private static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     /**
      * Murmur3 32-bit Hash值计算

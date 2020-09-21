@@ -1,11 +1,10 @@
 package com.php25.common.coresample;
 
-import com.php25.common.core.util.HttpClientUtil;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.RandomUtil;
 import com.php25.common.coresample.dto.Person;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +30,8 @@ import java.util.concurrent.Executors;
 
 public class ReactorTest {
     private static final Logger log = LoggerFactory.getLogger(ReactorTest.class);
+
+    private static final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).version(HttpClient.Version.HTTP_1_1).build();
 
     @Test
     public void test() throws Exception {
@@ -92,15 +99,17 @@ public class ReactorTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         for (int i = 0; i < 1; i++) {
             Mono.fromCallable(() -> {
-                String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(), "http://www.baidu.com", null);
-                return resp;
+                HttpRequest request = HttpRequest.newBuilder().GET()
+                        .uri(URI.create("http://www.baidu.com"))
+                        .timeout(Duration.ofMinutes(2))
+                        .build();
+                HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                return resp.body();
             }).subscribeOn(Schedulers.fromExecutor(executorService)).subscribe(s -> {
-                Assert.assertTrue(s.contains("STATUS OK"));
+                Assertions.assertThat(s).contains("百度一下，你就知道");
             }, throwable -> {
                 log.error("出错啦", throwable);
-            }, () -> {
-                countDownLatch.countDown();
-            });
+            }, countDownLatch::countDown);
         }
         countDownLatch.await();
         log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
@@ -110,8 +119,12 @@ public class ReactorTest {
     public void testHttp() throws Exception {
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {
-            String resp = HttpClientUtil.httpGet(HttpClientUtil.getClient(), "http://www.baidu.com", null);
-            Assert.assertTrue(resp.contains("STATUS OK"));
+            HttpRequest request = HttpRequest.newBuilder().GET()
+                    .uri(URI.create("http://www.baidu.com"))
+                    .timeout(Duration.ofMinutes(2))
+                    .build();
+            HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            Assertions.assertThat(resp.body()).contains("百度一下，你就知道");
         }
         log.info("耗时:{}ms", System.currentTimeMillis() - startTime);
     }

@@ -1,8 +1,9 @@
 package com.php25.common.core.mess;
 
-import com.google.common.base.Charsets;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author: penghuiping
@@ -18,7 +19,7 @@ public class StringBloomFilter {
      * @param fpp                误报包含某个元素的概率(falsePositiveProbability )
      */
     public StringBloomFilter(int expectedInsertions, double fpp) {
-        Funnel<String> strFunnel = (Funnel<String>) (str, into) -> into.putString(str, Charsets.UTF_8);
+        Funnel<String> strFunnel = (Funnel<String>) (str, into) -> into.putString(str, StandardCharsets.UTF_8);
         this.filter = BloomFilter.create(strFunnel, expectedInsertions, fpp);
     }
 

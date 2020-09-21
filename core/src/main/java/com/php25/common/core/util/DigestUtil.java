@@ -1,12 +1,8 @@
 package com.php25.common.core.util;
 
 import com.php25.common.core.exception.Exceptions;
-import org.slf4j.LoggerFactory;
 
-import javax.crypto.Cipher;
 import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -28,7 +24,6 @@ public abstract class DigestUtil {
      */
     private static final char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
             'e', 'f'};
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(DigestUtil.class);
 
     /**
      * MD5加密
