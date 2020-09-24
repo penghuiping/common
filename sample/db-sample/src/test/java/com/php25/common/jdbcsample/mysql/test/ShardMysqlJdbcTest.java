@@ -3,6 +3,9 @@ package com.php25.common.jdbcsample.mysql.test;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.db.Db;
+import com.php25.common.db.repository.shard.TransactionCallback;
+import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.repository.ShardDepartmentRepository;
@@ -36,6 +39,12 @@ public class ShardMysqlJdbcTest {
     @Autowired
     private ShardDepartmentRepository departmentRepository;
 
+    @Autowired
+    private TwoPhaseCommitTransaction twoPhaseCommitTransaction;
+
+    @Autowired
+    private List<Db> dbList;
+
     private SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
 
@@ -68,7 +77,6 @@ public class ShardMysqlJdbcTest {
     @Before
     public void before() throws Exception {
         initMeta();
-
         Department department = new Department();
         department.setId(snowflakeIdWorker.nextId());
         department.setName("testDepart");
@@ -90,6 +98,45 @@ public class ShardMysqlJdbcTest {
     public void query() throws Exception {
         List<Department> departments = (List<Department>) departmentRepository.findAll();
         log.info("部门信息:{}", JsonUtil.toJson(departments));
+    }
+
+    @Test
+    public void twoPhaseTransactionTest() throws Exception {
+        TransactionCallback<Department> transactionCallback0 = new TransactionCallback<Department>() {
+            @Override
+            public Department doInTransaction() {
+                Department department = new Department();
+                department.setId(snowflakeIdWorker.nextId());
+                department.setName("testDepart11");
+                department.setNew(true);
+                getDb().cndJdbc(Department.class).insert(department);
+                return department;
+            }
+
+            @Override
+            public Db getDb() {
+                return dbList.get(0);
+            }
+        };
+
+        TransactionCallback<Department> transactionCallback1 = new TransactionCallback<Department>() {
+            @Override
+            public Department doInTransaction() {
+                Department department = new Department();
+                department.setId(snowflakeIdWorker.nextId());
+                department.setName("testDepart12");
+                department.setNew(true);
+                getDb().cndJdbc(Department.class).insert(department);
+                return department;
+            }
+
+            @Override
+            public Db getDb() {
+                return dbList.get(1);
+            }
+        };
+        List<Department> departments = twoPhaseCommitTransaction.execute(Lists.newArrayList(transactionCallback0, transactionCallback1));
+        log.info("departemnts:{}", JsonUtil.toJson(departments));
     }
 
 

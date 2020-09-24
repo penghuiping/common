@@ -7,13 +7,27 @@ package com.php25.common.core.mess;
  * id生成器
  */
 public interface IdGenerator {
+
     /**
-     * 实体类主键生产器 生成字符串主键
+     * java自带的生成uuid
      *
-     * @return string
+     * @return
      */
     public String getUUID();
 
+    /**
+     * 根据时间与网卡生成uuid
+     *
+     * @return
+     */
     public String getJUID();
+
+
+    /**
+     * 获取雪花算法id
+     *
+     * @return
+     */
+    public Long getSnowflakeId();
 
 }

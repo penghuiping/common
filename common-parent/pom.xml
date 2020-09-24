@@ -35,7 +35,7 @@
         <hibernate-validator>6.1.5.Final</hibernate-validator>
         <oracle>11.2.0.3</oracle>
         <testcontainer>1.12.2</testcontainer>
-        <java-uuid-generator>3.2.0</java-uuid-generator>
+        <java-uuid-generator>4.0.1</java-uuid-generator>
         <mysql-testcontainer>1.12.3</mysql-testcontainer>
         <postgres-testcontainer>1.12.3</postgres-testcontainer>
         <oracle-testcontainer>1.12.3</oracle-testcontainer>

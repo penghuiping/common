@@ -1,5 +1,6 @@
 package com.php25.common.db.repository.shard;
 
+import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.manager.JdbcModelManager;
@@ -7,11 +8,13 @@ import com.php25.common.db.repository.JdbcDbRepository;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +22,7 @@ import java.util.Optional;
  * @author penghuiping
  * @date 2020/9/9 16:46
  */
-public class JdbcShardDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
+public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<?>> implements JdbcDbRepository<T, ID> {
 
     protected List<Db> dbList;
 
@@ -83,6 +86,31 @@ public class JdbcShardDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID>
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
+        int dbNumber = dbList.size();
+        int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
+        int offset = page[0];
+
+        //这次使用二次查询法实现分布式分页
+        int perDbOffset = offset / dbNumber;
+
+        T min = null;
+        for (Db db : dbList) {
+            CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+            Sort sort = pageable.getSort();
+            Iterator<Sort.Order> iterator = sort.iterator();
+            while (iterator.hasNext()) {
+                Sort.Order order = iterator.next();
+                if (order.getDirection().isAscending()) {
+                    cnd.asc(order.getProperty());
+                } else {
+                    cnd.desc(order.getProperty());
+                }
+            }
+            List<T> list = cnd.limit(perDbOffset, page[1]).select();
+            min = list.get(0);
+        }
+
+
         return null;
     }
 

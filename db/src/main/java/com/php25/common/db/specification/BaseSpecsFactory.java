@@ -23,11 +23,11 @@ public class BaseSpecsFactory {
 
     private static final Logger log = LoggerFactory.getLogger(BaseSpecsFactory.class);
 
-    private static ConcurrentHashMap<String, BaseSpecs> concurrentHashMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, BaseSpecs<?>> concurrentHashMap = new ConcurrentHashMap<>();
 
-    public static <T> BaseSpecs<T> getInstance(Class<? extends BaseSpecs> cls) {
+    public static <T> BaseSpecs<T> getInstance(Class<? extends BaseSpecs<?>> cls) {
         try {
-            BaseSpecs result = concurrentHashMap.get(cls.getName());
+            BaseSpecs<?> result = concurrentHashMap.get(cls.getName());
             if (null == result) {
                 result = cls.newInstance();
                 concurrentHashMap.put(cls.getName(), result);

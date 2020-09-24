@@ -5,6 +5,7 @@ import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.JdbcPair;
 import com.php25.common.db.repository.shard.ShardRule;
+import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -126,5 +127,10 @@ public class DbConfig1 {
     @Bean
     SnowflakeIdWorker snowflakeIdWorker() {
         return new SnowflakeIdWorker(1, 1);
+    }
+
+    @Bean
+    TwoPhaseCommitTransaction twoPhaseCommitTransaction() {
+        return new TwoPhaseCommitTransaction();
     }
 }

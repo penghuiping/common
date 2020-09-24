@@ -3,6 +3,8 @@ package com.php25.common.core.mess;
 
 import com.fasterxml.uuid.EthernetAddress;
 import com.fasterxml.uuid.Generators;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -16,6 +18,11 @@ import java.util.UUID;
 @Service("idGeneratorImpl")
 public class IdGeneratorImpl implements IdGenerator {
 
+    @Lazy
+    @Autowired
+    private SnowflakeIdWorker snowflakeIdWorker;
+
+
     @Override
     public String getUUID() {
         return UUID.randomUUID().toString().replace("-", "");
@@ -26,4 +33,8 @@ public class IdGeneratorImpl implements IdGenerator {
         return Generators.timeBasedGenerator(EthernetAddress.fromInterface()).generate().toString().replaceAll("-", "");
     }
 
+    @Override
+    public Long getSnowflakeId() {
+        return snowflakeIdWorker.nextId();
+    }
 }

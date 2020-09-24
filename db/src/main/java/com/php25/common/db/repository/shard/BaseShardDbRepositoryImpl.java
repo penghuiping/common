@@ -8,31 +8,26 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Persistable;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
  * @author penghuiping
  * @date 2020/9/9 16:51
  */
-public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcShardDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
+public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<?>> extends JdbcShardDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseShardDbRepositoryImpl.class);
 
+    private TwoPhaseCommitTransaction twoPhaseCommitTransaction;
 
-    public BaseShardDbRepositoryImpl(List<Db> dbList, ShardRule shardRule) {
+    public BaseShardDbRepositoryImpl(List<Db> dbList, ShardRule shardRule, TwoPhaseCommitTransaction twoPhaseCommitTransaction) {
         super(dbList, shardRule);
+        this.twoPhaseCommitTransaction = twoPhaseCommitTransaction;
     }
 
     @NotNull
@@ -53,19 +48,10 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID> extends Jd
     @NotNull
     @Override
     public <S extends T> Iterable<S> saveAll(@NotNull Iterable<S> iterable) {
-        AtomicInteger error = new AtomicInteger(0);
-        CountDownLatch countDownLatch = new CountDownLatch(dbList.size());
-        List<LinkedBlockingQueue<Integer>> queues = new ArrayList<>();
-
-        for (Db db : dbList) {
-            TransactionTemplate transactionTemplate = db.getJdbcPair().getTransactionTemplate();
-            PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
-            LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
-            queues.add(queue);
-            ForkJoinPool.commonPool().submit(() -> {
-                TransactionStatus transactionStatus = transactionManager.getTransaction(transactionTemplate);
-                try {
-
+        List<TransactionCallback<List<S>>> list = this.dbList.stream().map(db -> {
+            return new TransactionCallback<List<S>>() {
+                @Override
+                public List<S> doInTransaction() {
                     List<S> models = Lists.newArrayList(iterable).stream()
                             .filter(id -> db.equals(shardRule.shardPrimaryKey(dbList, id)))
                             .collect(Collectors.toList());
@@ -77,54 +63,16 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID> extends Jd
                             db.cndJdbc(model).updateBatch(models);
                         }
                     }
-                } catch (Exception e) {
-                    log.error("执行保存操作失败", e);
-                    error.addAndGet(1);
-                } finally {
-                    countDownLatch.countDown();
+                    return models;
                 }
-
-                try {
-                    Integer value = queue.poll(30, TimeUnit.SECONDS);
-                    if (value != null && value > 0) {
-                        transactionManager.commit(transactionStatus);
-                    }
-                    //超过30秒还没收到回滚或者提交指令，直接回滚
-                    transactionManager.rollback(transactionStatus);
-                } catch (InterruptedException e) {
-                    //收到中断错误,直接回滚
-                    transactionManager.rollback(transactionStatus);
+                @Override
+                public Db getDb() {
+                    return db;
                 }
-            });
-        }
-
-        try {
-            boolean result = countDownLatch.await(20, TimeUnit.SECONDS);
-            if (result) {
-                if (error.get() > 0) {
-                    for (LinkedBlockingQueue<Integer> queue : queues) {
-                        //回滚
-                        queue.offer(0);
-                    }
-                } else {
-                    for (LinkedBlockingQueue<Integer> queue : queues) {
-                        //提交
-                        queue.offer(1);
-                    }
-                }
-            } else {
-                for (LinkedBlockingQueue<Integer> queue : queues) {
-                    //回滚
-                    queue.offer(0);
-                }
-            }
-        } catch (InterruptedException e) {
-            for (LinkedBlockingQueue<Integer> queue : queues) {
-                //回滚
-                queue.offer(0);
-            }
-        }
-        return iterable;
+            };
+        }).collect(Collectors.toList());
+        List<List<S>> result = twoPhaseCommitTransaction.execute(list);
+        return result.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @NotNull
