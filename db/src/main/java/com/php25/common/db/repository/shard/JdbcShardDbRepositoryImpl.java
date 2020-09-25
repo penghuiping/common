@@ -3,10 +3,12 @@ package com.php25.common.db.repository.shard;
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.repository.JdbcDbRepository;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
@@ -14,15 +16,16 @@ import org.springframework.data.domain.Sort;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author penghuiping
  * @date 2020/9/9 16:46
  */
-public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<?>> implements JdbcDbRepository<T, ID> {
+public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<ID>> implements JdbcDbRepository<T, ID> {
 
     protected List<Db> dbList;
 
@@ -86,7 +89,12 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
+        if (!pageable.getSort().isUnsorted()) {
+            throw new DbException("暂不支持排序操作");
+        }
+
         int dbNumber = dbList.size();
+        String pk = JdbcModelManager.getPrimaryKeyFieldName(model);
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
         int offset = page[0];
 
@@ -94,29 +102,39 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         int perDbOffset = offset / dbNumber;
 
         T min = null;
+        List<List<T>> lists = new ArrayList<>();
         for (Db db : dbList) {
             CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
-            Sort sort = pageable.getSort();
-            Iterator<Sort.Order> iterator = sort.iterator();
-            while (iterator.hasNext()) {
-                Sort.Order order = iterator.next();
-                if (order.getDirection().isAscending()) {
-                    cnd.asc(order.getProperty());
-                } else {
-                    cnd.desc(order.getProperty());
+            List<T> list = cnd.limit(perDbOffset, pageable.getPageSize()).select();
+            lists.add(list);
+            if (null != list && !list.isEmpty()) {
+                T localMin = list.get(0);
+                if (null == min || (min.getId().compareTo(localMin.getId()) > 0)) {
+                    min = list.get(0);
                 }
             }
-            List<T> list = cnd.limit(perDbOffset, page[1]).select();
-            min = list.get(0);
         }
-
-
-        return null;
+        long globalOffset = 0L;
+        List<List<T>> lists1 = new ArrayList<>();
+        for (int i = 0; i < dbList.size(); i++) {
+            List<T> tmp = lists.get(i);
+            Db db = dbList.get(i);
+            List<T> list = db.cndJdbc(model).andBetween(pk, min.getId(), tmp.get(tmp.size() - 1).getId()).select();
+            lists1.add(list);
+            globalOffset = globalOffset + perDbOffset + list.size() - tmp.size();
+        }
+        List<T> result = lists1.stream().flatMap(Collection::stream).sorted((o1, o2) -> o1.getId().compareTo(o2.getId())).collect(Collectors.toList());
+        int index = (int) (offset - globalOffset);
+        int toIndex = index + pageable.getPageSize();
+        result = result.subList(index, Math.min(toIndex, result.size()));
+        long total = this.count(searchParamBuilder);
+        return new PageImpl<T>(result, pageable, total);
     }
+
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
-        return null;
+        throw new DbException("暂不支持排序操作");
     }
 
     @Override

@@ -6,6 +6,9 @@ import com.php25.common.core.util.JsonUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.repository.shard.TransactionCallback;
 import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
+import com.php25.common.db.specification.Operator;
+import com.php25.common.db.specification.SearchParam;
+import com.php25.common.db.specification.SearchParamBuilder;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.repository.ShardDepartmentRepository;
@@ -17,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -57,22 +62,29 @@ public class ShardMysqlJdbcTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        Department department = new Department();
-        department.setId(snowflakeIdWorker.nextId());
-        department.setName("testDepart");
-        department.setNew(true);
-
-        Department department1 = new Department();
-        department1.setId(snowflakeIdWorker.nextId());
-        department1.setName("testDepart1");
-        department1.setNew(true);
-
-        log.info("d1:{}", department.getId() % 2);
-        log.info("d2:{}", department1.getId() % 2);
-
-        departmentRepository.saveAll(Lists.newArrayList(department, department1));
+        Department department = new Department(snowflakeIdWorker.nextId(), "testDepart", true);
+        Department department1 = new Department(snowflakeIdWorker.nextId(), "testDepart1", true);
+        Department department2 = new Department(snowflakeIdWorker.nextId(), "testDepart2", true);
+        Department department3 = new Department(snowflakeIdWorker.nextId(), "testDepart23", true);
+        Department department4 = new Department(snowflakeIdWorker.nextId(), "testDepart24", true);
+        Department department5 = new Department(snowflakeIdWorker.nextId(), "testDepart25", true);
+        Department department6 = new Department(snowflakeIdWorker.nextId(), "testDepart26", true);
+        Department department7 = new Department(snowflakeIdWorker.nextId(), "testDepart7", true);
+        Department department8 = new Department(snowflakeIdWorker.nextId(), "testDepart8", true);
+        departmentRepository.saveAll(Lists.newArrayList(department, department1,
+                department2, department3, department4, department5, department6, department7, department8));
     }
 
+
+    @Test
+    public void queryPage() throws Exception {
+        SearchParamBuilder builder = SearchParamBuilder.builder().append(SearchParam.of("name", Operator.LIKE, "testDepart2%"));
+        Page<Department> result1 = departmentRepository.findAll(builder, PageRequest.of(2, 3));
+        log.info("部门分页信息:{}", JsonUtil.toJson(result1.getContent()));
+        Assertions.assertThat(result1.getContent().get(0).getName()).isEqualTo("testDepart25");
+        Assertions.assertThat(result1.getContent().get(1).getName()).isEqualTo("testDepart26");
+
+    }
 
     @Test
     public void query() throws Exception {

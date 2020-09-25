@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @author penghuiping
  * @date 2020/9/9 16:51
  */
-public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<?>> extends JdbcShardDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
+public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Comparable<ID>> extends JdbcShardDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseShardDbRepositoryImpl.class);
 

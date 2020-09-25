@@ -24,6 +24,14 @@ public class Department implements Persistable<Long> {
     @Transient
     private boolean isNew;
 
+    public Department() {
+    }
+
+    public Department(Long id, String name, boolean isNew) {
+        this.id = id;
+        this.name = name;
+        this.isNew = isNew;
+    }
 
     public void setId(Long id) {
         this.id = id;
