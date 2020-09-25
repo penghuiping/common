@@ -16,13 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -48,25 +44,14 @@ public class DbTest {
     List<CustomerDto> customerDtos = Lists.newArrayList();
 
     private void initMeta() throws Exception {
-        Class cls = Class.forName("com.mysql.cj.jdbc.Driver");
-        Driver driver = (Driver) cls.newInstance();
-        Properties properties = new Properties();
-        properties.setProperty("user","root");
-        properties.setProperty("password","root");
-        Connection connection = driver.connect("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false", properties);
-        Statement statement = connection.createStatement();
-        statement.execute("drop table if exists t_customer");
-        statement.execute("drop table if exists t_company");
-        statement.execute("drop table if exists t_department");
-        statement.execute("drop table if exists t_customer_department");
-
-        statement.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        statement.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-        statement.execute("create table t_department (id bigint primary key,name varchar(20))");
-        statement.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
-
-        statement.close();
-        connection.close();
+        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer");
+        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_company");
+        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
+        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer_department");
+        db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        db.getJdbcPair().getJdbcOperations().execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+        db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
+        db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
     }
 
     @Before

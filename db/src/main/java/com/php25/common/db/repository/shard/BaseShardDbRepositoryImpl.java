@@ -23,7 +23,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     private static final Logger log = LoggerFactory.getLogger(BaseShardDbRepositoryImpl.class);
 
-    private TwoPhaseCommitTransaction twoPhaseCommitTransaction;
+    private final TwoPhaseCommitTransaction twoPhaseCommitTransaction;
 
     public BaseShardDbRepositoryImpl(List<Db> dbList, ShardRule shardRule, TwoPhaseCommitTransaction twoPhaseCommitTransaction) {
         super(dbList, shardRule);
@@ -48,29 +48,32 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @NotNull
     @Override
     public <S extends T> Iterable<S> saveAll(@NotNull Iterable<S> iterable) {
-        List<TransactionCallback<List<S>>> list = this.dbList.stream().map(db -> {
-            return new TransactionCallback<List<S>>() {
-                @Override
-                public List<S> doInTransaction() {
-                    List<S> models = Lists.newArrayList(iterable).stream()
-                            .filter(id -> db.equals(shardRule.shardPrimaryKey(dbList, id)))
-                            .collect(Collectors.toList());
-                    if (!models.isEmpty()) {
-                        S s = models.iterator().next();
-                        if (s.isNew()) {
-                            db.cndJdbc(model).insertBatch(models);
-                        } else {
-                            db.cndJdbc(model).updateBatch(models);
+        List<TransactionCallback<List<S>>> list = new ArrayList<>();
+        Lists.newArrayList(iterable).stream()
+                .collect(Collectors.groupingBy(s -> shardRule.shardPrimaryKey(dbList, s.getId())))
+                .forEach((db, models) -> {
+                    TransactionCallback<List<S>> tmp = new TransactionCallback<>() {
+                        @Override
+                        public List<S> doInTransaction() {
+                            if (!models.isEmpty()) {
+                                S s = models.iterator().next();
+                                if (s.isNew()) {
+                                    db.cndJdbc(model).insertBatch(models);
+                                } else {
+                                    db.cndJdbc(model).updateBatch(models);
+                                }
+                            }
+                            return models;
                         }
-                    }
-                    return models;
-                }
-                @Override
-                public Db getDb() {
-                    return db;
-                }
-            };
-        }).collect(Collectors.toList());
+
+                        @Override
+                        public Db getDb() {
+                            return db;
+                        }
+                    };
+                    list.add(tmp);
+                });
+
         List<List<S>> result = twoPhaseCommitTransaction.execute(list);
         return result.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -109,13 +112,12 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public Iterable<T> findAllById(@NotNull Iterable<ID> iterable) {
         List<T> result = new ArrayList<>();
-        for (Db db : dbList) {
-            List<ID> ids = Lists.newArrayList(iterable).stream()
-                    .filter(id -> db.hashCode() == shardRule.shardPrimaryKey(dbList, id).hashCode())
-                    .collect(Collectors.toList());
-            List<T> tmp = db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select();
-            result.addAll(tmp);
-        }
+        Lists.newArrayList(iterable).stream()
+                .collect(Collectors.groupingBy(id -> shardRule.shardPrimaryKey(dbList, id)))
+                .forEach((db, ids) -> {
+                    List<T> tmp = db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select();
+                    result.addAll(tmp);
+                });
         return result;
     }
 
@@ -143,20 +145,47 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     @Override
     public void deleteAll(@NotNull Iterable<? extends T> iterable) {
-        for (Db db : dbList) {
-            List<ID> ids = Lists.newArrayList(iterable).stream()
-                    .filter(model -> db.hashCode() == shardRule.shardPrimaryKey(dbList, model.getId()).hashCode())
-                    .map(T::getId)
-                    .collect(Collectors.toList());
-            String pkName = JdbcModelManager.getPrimaryKeyColName(model);
-            db.cndJdbc(model).whereIn(pkName, ids).delete();
-        }
+        String pkName = JdbcModelManager.getPrimaryKeyColName(model);
+        List<TransactionCallback<Void>> list1 = new ArrayList<>();
+        Lists.newArrayList(iterable).stream()
+                .collect(Collectors.groupingBy(s -> shardRule.shardPrimaryKey(dbList, s.getId())))
+                .forEach((db, list) -> {
+                    TransactionCallback<Void> tmp = new TransactionCallback<Void>() {
+                        @Override
+                        public Void doInTransaction() {
+                            List<ID> ids = list.stream().map(Persistable::getId).collect(Collectors.toList());
+                            db.cndJdbc(model).whereIn(pkName, ids).delete();
+                            return null;
+                        }
+
+                        @Override
+                        public Db getDb() {
+                            return db;
+                        }
+                    };
+                    list1.add(tmp);
+                });
+        twoPhaseCommitTransaction.execute(list1);
     }
 
     @Override
     public void deleteAll() {
+        List<TransactionCallback<Void>> list = new ArrayList<>();
         for (Db db : dbList) {
-            db.cndJdbc(model).delete();
+            TransactionCallback<Void> tmp = new TransactionCallback<>() {
+                @Override
+                public Void doInTransaction() {
+                    db.cndJdbc(model).delete();
+                    return null;
+                }
+
+                @Override
+                public Db getDb() {
+                    return db;
+                }
+            };
+            list.add(tmp);
         }
+        twoPhaseCommitTransaction.execute(list);
     }
 }

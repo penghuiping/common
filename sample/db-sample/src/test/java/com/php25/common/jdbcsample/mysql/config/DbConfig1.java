@@ -110,7 +110,8 @@ public class DbConfig1 {
             @Override
             public Db shardPrimaryKey(List<Db> dbs, Object pkValue) {
                 if (pkValue instanceof Long || pkValue instanceof Integer) {
-                    return dbs.get(Integer.parseInt(pkValue.toString()) % dbs.size());
+                    long value = Long.parseLong(pkValue.toString()) % dbs.size();
+                    return dbs.get((int) value);
                 } else if (pkValue instanceof String) {
                     char[] values = pkValue.toString().toCharArray();
                     int v = 0;

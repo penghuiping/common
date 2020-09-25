@@ -27,6 +27,8 @@ public class TwoPhaseCommitTransaction {
 
     private static final Logger log = LoggerFactory.getLogger(TwoPhaseCommitTransaction.class);
 
+    private static final int timeout = 20;
+
     private final ExecutorService executor;
 
     public TwoPhaseCommitTransaction() {
@@ -34,7 +36,6 @@ public class TwoPhaseCommitTransaction {
     }
 
     public <T> List<T> execute(List<TransactionCallback<T>> transactionCallbacks) {
-
         AtomicInteger error = new AtomicInteger(0);
         CountDownLatch countDownLatch = new CountDownLatch(transactionCallbacks.size());
         List<LinkedBlockingQueue<Integer>> queues = new ArrayList<>();
@@ -58,7 +59,7 @@ public class TwoPhaseCommitTransaction {
                     countDownLatch.countDown();
                 }
                 try {
-                    Integer value = queue.poll(30, TimeUnit.SECONDS);
+                    Integer value = queue.poll(timeout, TimeUnit.SECONDS);
                     if (value != null && value > 0) {
                         transactionManager.commit(transactionStatus);
                         return result;
@@ -75,7 +76,7 @@ public class TwoPhaseCommitTransaction {
 
         //判断是否全部执行成功，成功提交事务，否则回滚
         try {
-            boolean result = countDownLatch.await(20, TimeUnit.SECONDS);
+            boolean result = countDownLatch.await(timeout, TimeUnit.SECONDS);
             if (result) {
                 if (error.get() <= 0) {
                     for (LinkedBlockingQueue<Integer> queue : queues) {

@@ -1,5 +1,6 @@
 package com.php25.common.jdbcsample.mysql.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.php25.common.db.cnd.annotation.Column;
 import com.php25.common.db.cnd.annotation.Table;
 import org.springframework.data.annotation.Id;
@@ -19,6 +20,7 @@ public class Department implements Persistable<Long> {
     @Column
     private String name;
 
+    @JsonIgnore
     @Transient
     private boolean isNew;
 

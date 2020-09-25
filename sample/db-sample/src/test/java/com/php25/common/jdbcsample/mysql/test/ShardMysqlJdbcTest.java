@@ -9,6 +9,7 @@ import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.repository.ShardDepartmentRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,11 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.Statement;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author penghuiping
@@ -45,33 +42,16 @@ public class ShardMysqlJdbcTest {
     @Autowired
     private List<Db> dbList;
 
-    private SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
+    private final SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
 
     private void initMeta() throws Exception {
-        Class<?> cls = Class.forName("com.mysql.cj.jdbc.Driver");
-        Driver driver = (Driver) cls.getConstructors()[0].newInstance();
-        Properties properties = new Properties();
-        properties.setProperty("user", "root");
-        properties.setProperty("password", "root");
-        Connection connection = driver.connect("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false", properties);
-        Statement statement = connection.createStatement();
-        statement.execute("drop table if exists t_department");
-        statement.execute("create table t_department (id bigint primary key,name varchar(20))");
-        statement.close();
-        connection.close();
-
-        Class<?> cls1 = Class.forName("com.mysql.cj.jdbc.Driver");
-        Driver driver1 = (Driver) cls1.getConstructors()[0].newInstance();
-        Properties properties1 = new Properties();
-        properties1.setProperty("user", "root");
-        properties1.setProperty("password", "root");
-        Connection connection1 = driver1.connect("jdbc:mysql://localhost:3307/test?useUnicode=true&characterEncoding=utf-8&useSSL=false", properties);
-        Statement statement1 = connection1.createStatement();
-        statement1.execute("drop table if exists t_department");
-        statement1.execute("create table t_department (id bigint primary key,name varchar(20))");
-        statement1.close();
-        connection1.close();
+        Db db = dbList.get(0);
+        Db db1 = dbList.get(1);
+        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
+        db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
+        db1.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
+        db1.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
     }
 
     @Before
@@ -98,6 +78,7 @@ public class ShardMysqlJdbcTest {
     public void query() throws Exception {
         List<Department> departments = (List<Department>) departmentRepository.findAll();
         log.info("部门信息:{}", JsonUtil.toJson(departments));
+        Assertions.assertThat(departments.size()).isEqualTo(2);
     }
 
     @Test
@@ -136,7 +117,56 @@ public class ShardMysqlJdbcTest {
             }
         };
         List<Department> departments = twoPhaseCommitTransaction.execute(Lists.newArrayList(transactionCallback0, transactionCallback1));
-        log.info("departemnts:{}", JsonUtil.toJson(departments));
+        log.info("部门信息:{}", JsonUtil.toJson(departments));
+
+        departments = (List<Department>) departmentRepository.findAll();
+        log.info("部门信息:{}", JsonUtil.toJson(departments));
+        Assertions.assertThat(departments.size()).isEqualTo(4);
+    }
+
+
+    @Test
+    public void twoPhaseTransactionTest1() throws Exception {
+        TransactionCallback<Department> transactionCallback0 = new TransactionCallback<Department>() {
+            @Override
+            public Department doInTransaction() {
+                Department department = new Department();
+                department.setId(snowflakeIdWorker.nextId());
+                department.setName("testDepart11");
+                department.setNew(true);
+                int i = 1 / 0;
+                getDb().cndJdbc(Department.class).insert(department);
+                return department;
+            }
+
+            @Override
+            public Db getDb() {
+                return dbList.get(0);
+            }
+        };
+
+        TransactionCallback<Department> transactionCallback1 = new TransactionCallback<Department>() {
+            @Override
+            public Department doInTransaction() {
+                Department department = new Department();
+                department.setId(snowflakeIdWorker.nextId());
+                department.setName("testDepart12");
+                department.setNew(true);
+                getDb().cndJdbc(Department.class).insert(department);
+                return department;
+            }
+
+            @Override
+            public Db getDb() {
+                return dbList.get(1);
+            }
+        };
+        List<Department> departments = twoPhaseCommitTransaction.execute(Lists.newArrayList(transactionCallback0, transactionCallback1));
+        log.info("部门信息:{}", JsonUtil.toJson(departments));
+
+        departments = (List<Department>) departmentRepository.findAll();
+        log.info("部门信息:{}", JsonUtil.toJson(departments));
+        Assertions.assertThat(departments.size()).isEqualTo(2);
     }
 
 
