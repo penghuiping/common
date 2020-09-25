@@ -34,7 +34,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public <S extends T> S save(S s) {
         ID id = s.getId();
-        Db db = shardRule.shardPrimaryKey(this.dbList, id);
+        Db db = shardRule.shard(this.dbList, id);
         if (s.isNew()) {
             //新增
             db.cndJdbc(model).ignoreCollection(false).insert(s);
@@ -50,7 +50,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public <S extends T> Iterable<S> saveAll(@NotNull Iterable<S> iterable) {
         List<TransactionCallback<List<S>>> list = new ArrayList<>();
         Lists.newArrayList(iterable).stream()
-                .collect(Collectors.groupingBy(s -> shardRule.shardPrimaryKey(dbList, s.getId())))
+                .collect(Collectors.groupingBy(s -> shardRule.shard(dbList, s.getId())))
                 .forEach((db, models) -> {
                     TransactionCallback<List<S>> tmp = new TransactionCallback<>() {
                         @Override
@@ -81,7 +81,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @NotNull
     @Override
     public Optional<T> findById(@NotNull ID id) {
-        Db db = shardRule.shardPrimaryKey(this.dbList, id);
+        Db db = shardRule.shard(this.dbList, id);
         T t = db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).single();
         if (null != t) {
             return Optional.of(t);
@@ -91,7 +91,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     @Override
     public boolean existsById(@NotNull ID id) {
-        Db db = shardRule.shardPrimaryKey(this.dbList, id);
+        Db db = shardRule.shard(this.dbList, id);
         return db.cndJdbc(model).whereEq(pkName, id).count() > 0;
     }
 
@@ -113,7 +113,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public Iterable<T> findAllById(@NotNull Iterable<ID> iterable) {
         List<T> result = new ArrayList<>();
         Lists.newArrayList(iterable).stream()
-                .collect(Collectors.groupingBy(id -> shardRule.shardPrimaryKey(dbList, id)))
+                .collect(Collectors.groupingBy(id -> shardRule.shard(dbList, id)))
                 .forEach((db, ids) -> {
                     List<T> tmp = db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select();
                     result.addAll(tmp);
@@ -132,14 +132,14 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     @Override
     public void deleteById(@NotNull ID id) {
-        Db db = shardRule.shardPrimaryKey(this.dbList, id);
+        Db db = shardRule.shard(this.dbList, id);
         T obj = db.cndJdbc(model).whereEq(pkName, id).single();
         this.delete(obj);
     }
 
     @Override
     public void delete(T t) {
-        Db db = shardRule.shardPrimaryKey(this.dbList, t.getId());
+        Db db = shardRule.shard(this.dbList, t.getId());
         db.cndJdbc(model).ignoreCollection(false).delete(t);
     }
 
@@ -148,7 +148,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         String pkName = JdbcModelManager.getPrimaryKeyColName(model);
         List<TransactionCallback<Void>> list1 = new ArrayList<>();
         Lists.newArrayList(iterable).stream()
-                .collect(Collectors.groupingBy(s -> shardRule.shardPrimaryKey(dbList, s.getId())))
+                .collect(Collectors.groupingBy(s -> shardRule.shard(dbList, s.getId())))
                 .forEach((db, list) -> {
                     TransactionCallback<Void> tmp = new TransactionCallback<Void>() {
                         @Override

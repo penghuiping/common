@@ -14,7 +14,7 @@ import java.util.List;
  * SearchParamBuilder builder = new SearchParamBuilder().and(new SearchParam.Builder().fieldName("username").operator(Operator.EQ).fieldName("小明").build());
  */
 public class SearchParamBuilder {
-    private List<SearchParam> searchParamList;
+    private final List<SearchParam> searchParamList;
 
     public SearchParamBuilder() {
         this.searchParamList = new ArrayList<>();
@@ -30,9 +30,7 @@ public class SearchParamBuilder {
     }
 
     public SearchParamBuilder append(List<SearchParam> searchParams) {
-        for (SearchParam searchParam : searchParams) {
-            searchParamList.add(searchParam);
-        }
+        searchParamList.addAll(searchParams);
         return this;
     }
 

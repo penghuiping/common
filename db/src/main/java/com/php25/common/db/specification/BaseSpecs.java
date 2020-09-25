@@ -33,7 +33,7 @@ public abstract class BaseSpecs<T> {
     /**
      * 通过SearchParamBuilder构建查询条件
      *
-     * @param searchParamBuilder
+     * @param searchParamBuilder 查询条件
      * @return
      */
     public abstract T getSpecs(final SearchParamBuilder searchParamBuilder);

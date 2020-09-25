@@ -13,9 +13,9 @@ public interface ShardRule {
     /**
      * 根据主键值进行shard
      *
-     * @param dbs
-     * @param pkValue
-     * @return
+     * @param dbs         所有的需要分片的db
+     * @param shardingKey 分片键
+     * @return 返回
      */
-    Db shardPrimaryKey(List<Db> dbs, Object pkValue);
+    Db shard(List<Db> dbs, Object shardingKey);
 }

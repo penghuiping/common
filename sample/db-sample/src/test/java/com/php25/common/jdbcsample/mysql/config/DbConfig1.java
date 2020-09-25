@@ -4,6 +4,7 @@ import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
 import com.php25.common.db.cnd.JdbcPair;
+import com.php25.common.db.repository.shard.DefaultShardRule;
 import com.php25.common.db.repository.shard.ShardRule;
 import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.zaxxer.hikari.HikariDataSource;
@@ -17,7 +18,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
-import java.util.List;
 
 /**
  * Created by penghuiping on 2018/5/1.
@@ -106,23 +106,7 @@ public class DbConfig1 {
 
     @Bean
     ShardRule shardRule() {
-        return new ShardRule() {
-            @Override
-            public Db shardPrimaryKey(List<Db> dbs, Object pkValue) {
-                if (pkValue instanceof Long || pkValue instanceof Integer) {
-                    long value = Long.parseLong(pkValue.toString()) % dbs.size();
-                    return dbs.get((int) value);
-                } else if (pkValue instanceof String) {
-                    char[] values = pkValue.toString().toCharArray();
-                    int v = 0;
-                    for (char c : values) {
-                        v = v + c;
-                    }
-                    return dbs.get(v % dbs.size());
-                }
-                return dbs.get(pkValue.hashCode() % dbs.size());
-            }
-        };
+        return new DefaultShardRule();
     }
 
     @Bean

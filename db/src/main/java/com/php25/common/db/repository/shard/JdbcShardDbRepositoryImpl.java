@@ -53,7 +53,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        Db db = shardRule.shardPrimaryKey(this.dbList, id);
+        Db db = shardRule.shard(this.dbList, id);
         return Optional.of(db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).andEq("enable", 1).single());
     }
 
