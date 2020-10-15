@@ -670,7 +670,9 @@ public abstract class CndJdbc extends AbstractQuery implements Query {
                 }
             }
             params1.add(pkValue);
-            params1.add(versionValue);
+            if (versionFieldOptional.isPresent()) {
+                params1.add(versionValue);
+            }
             batchParams.add(params1.toArray());
         }
         try {
