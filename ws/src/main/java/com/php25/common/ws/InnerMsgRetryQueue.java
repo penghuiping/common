@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -9,8 +10,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
 
-    private DelayQueue<BaseRetryMsg> delayQueue = new DelayQueue<>();
+    private final DelayQueue<BaseRetryMsg> delayQueue = new DelayQueue<>();
 
-    private BlockingQueue<BaseRetryMsg> noDelayQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<BaseRetryMsg> noDelayQueue = new LinkedBlockingQueue<>();
 
-    private ConcurrentHashMap<String, BaseRetryMsg> msgs = new ConcurrentHashMap<>(8196);
+    private final ConcurrentHashMap<String, BaseRetryMsg> msgs = new ConcurrentHashMap<>(8196);
 
     private ExecutorService singleThreadExecutor;
     private ExecutorService singleThreadExecutorNoDelay;
@@ -57,11 +58,11 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
     }
 
     public void run() {
-        this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
-            Thread thread = new Thread(r);
-            thread.setName("cpicwx-healthy-delay-queue-subscriber");
-            return thread;
-        });
+        this.singleThreadExecutor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("ws-delay-queue-subscriber-%d")
+                        .build());
 
         this.singleThreadExecutor.execute(() -> {
             while (true) {
@@ -82,11 +83,11 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
             }
         });
 
-        this.singleThreadExecutorNoDelay = Executors.newSingleThreadExecutor(r -> {
-            Thread thread = new Thread(r);
-            thread.setName("cpicwx-healthy-delay-queue-nodelay-subscriber");
-            return thread;
-        });
+        this.singleThreadExecutorNoDelay = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("ws-delay-queue-nodelay-subscriber-%d")
+                        .build());
 
         this.singleThreadExecutorNoDelay.execute(() -> {
             while (true) {

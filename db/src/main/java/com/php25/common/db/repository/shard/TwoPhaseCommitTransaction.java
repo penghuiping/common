@@ -1,5 +1,6 @@
 package com.php25.common.db.repository.shard;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -10,9 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -32,7 +34,10 @@ public class TwoPhaseCommitTransaction {
     private final ExecutorService executor;
 
     public TwoPhaseCommitTransaction() {
-        this.executor = Executors.newCachedThreadPool();
+        this.executor = new ThreadPoolExecutor(0, 20,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(), new ThreadFactoryBuilder().setNameFormat("tow-phase-commit-transaction-%d")
+                .build());
     }
 
     public <T> List<T> execute(List<TransactionCallback<T>> transactionCallbacks) {
@@ -42,7 +47,7 @@ public class TwoPhaseCommitTransaction {
         List<Future<T>> futures = new ArrayList<>();
 
         //分发任务
-        for (TransactionCallback<T> callback: transactionCallbacks) {
+        for (TransactionCallback<T> callback : transactionCallbacks) {
             TransactionTemplate transactionTemplate = callback.getDb().getJdbcPair().getTransactionTemplate();
             PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
             LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();

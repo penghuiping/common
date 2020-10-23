@@ -7,7 +7,8 @@ import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,9 +40,13 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
     }
 
     public void run() {
-        this.singleThreadExecutor = Executors
-                .newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("cpicwx-healthy-heartbeat-worker-%d")
+
+        this.singleThreadExecutor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("ws-heartbeat-worker-%d")
                         .build());
+
         this.singleThreadExecutor.submit(() -> {
             log.info("heart beat thread start...");
             while (true) {

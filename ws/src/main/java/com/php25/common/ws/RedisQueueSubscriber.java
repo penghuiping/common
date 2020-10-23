@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RedisManager;
@@ -12,7 +13,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,15 +27,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
-    private RedisManager redisService;
+    private final RedisManager redisService;
 
-    private String serverId;
+    private final String serverId;
 
-    private InnerMsgRetryQueue innerMsgRetryQueue;
+    private final InnerMsgRetryQueue innerMsgRetryQueue;
 
     private ExecutorService singleThreadExecutor;
 
-    private AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public RedisQueueSubscriber(RedisManager redisService, String serverId,InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
@@ -57,18 +59,18 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
     }
 
     public void run() {
-        this.singleThreadExecutor = Executors.newFixedThreadPool(1,r -> {
-            Thread thread = new Thread(r);
-            thread.setName("cpicwx-healthy-redis-queue-subscriber");
-            return thread;
-        });
+        this.singleThreadExecutor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("ws-redis-queue-subscriber-%d")
+                        .build());
 
         this.singleThreadExecutor.execute(() -> {
             RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
             while (isRunning.get()) {
                 try {
                     BoundListOperations<String, String> boundListOperations = redisSpringBootService.getRedisTemplate().boundListOps(Constants.prefix + this.serverId);
-                    String msg = boundListOperations.rightPop(1,TimeUnit.SECONDS);
+                    String msg = boundListOperations.rightPop(1, TimeUnit.SECONDS);
                     if (!StringUtil.isBlank(msg)) {
                         BaseRetryMsg baseRetry = JsonUtil.fromJson(msg, BaseRetryMsg.class);
                         innerMsgRetryQueue.put(baseRetry);
