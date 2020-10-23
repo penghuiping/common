@@ -21,7 +21,7 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
         <spring-cloud-dependencies>Hoxton.SR6</spring-cloud-dependencies>
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>30.0-android</guava.version>
         <jackson.version>2.11.1</jackson.version>
         <okhttp.version>4.8.0</okhttp.version>
         <druid.version>1.1.21</druid.version>
