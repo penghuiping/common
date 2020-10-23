@@ -67,9 +67,13 @@ public class BaseRetryMsg implements Delayed {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-       BaseRetryMsg that = (BaseRetryMsg) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
+        BaseRetryMsg that = (BaseRetryMsg) o;
         return Objects.equal(msgId, that.msgId) &&
                 Objects.equal(action, that.action);
     }

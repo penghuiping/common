@@ -16,9 +16,14 @@ public enum ApiErrorCode {
     input_params_error("1"),
 
     /**
+     * 不支持的http方法
+     */
+    http_method_not_support("2"),
+
+    /**
      * 服务器错误
      */
-    unknown_error("2");
+    unknown_error("3");
 
     public String value;
 

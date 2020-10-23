@@ -36,19 +36,19 @@ public class IdcardUtil {
     /**
      * 每位加权因子
      */
-    private static final int power[] = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+    private static final int[] power = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
     /**
      * 省市代码表
      */
-    private static Map<String, String> cityCodes = new HashMap<String, String>();
+    private static final Map<String, String> cityCodes = new HashMap<String, String>();
     /**
      * 台湾身份首字母对应数字
      */
-    private static Map<String, Integer> twFirstCode = new HashMap<String, Integer>();
+    private static final Map<String, Integer> twFirstCode = new HashMap<String, Integer>();
     /**
      * 香港身份首字母对应数字
      */
-    private static Map<String, Integer> hkFirstCode = new HashMap<String, Integer>();
+    private static final Map<String, Integer> hkFirstCode = new HashMap<String, Integer>();
 
     static {
         cityCodes.put("11", "北京");
@@ -149,7 +149,7 @@ public class IdcardUtil {
                 sYear -= 100;
             }
             idCard18 = new StringBuilder();
-            idCard18.append(idCard.substring(0, 6)).append(sYear).append(idCard.substring(8));
+            idCard18.append(idCard, 0, 6).append(sYear).append(idCard.substring(8));
             // 获取校验位
             char sVal = getCheckCode18(idCard18.toString());
             idCard18.append(sVal);
@@ -175,11 +175,7 @@ public class IdcardUtil {
                 return isvalidCard15(idCard);
             case 10: {// 10位身份证，港澳台地区
                 String[] cardval = isValidCard10(idCard);
-                if (null != cardval && cardval[2].equals("true")) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return null != cardval && "true".equals(cardval[2]);
             }
             default:
                 return false;
@@ -234,9 +230,7 @@ public class IdcardUtil {
         if (Validator.isNumber(code17)) {
             // 获取校验位
             char val = getCheckCode18(code17);
-            if (val == code18) {
-                return true;
-            }
+            return val == code18;
         }
         return false;
     }
@@ -259,13 +253,10 @@ public class IdcardUtil {
             }
 
             //校验生日（两位年份，补充为19XX）
-            if (false == Validator.isBirthday("19" + idCard.substring(6, 12))) {
-                return false;
-            }
+            return false != Validator.isBirthday("19" + idCard.substring(6, 12));
         } else {
             return false;
         }
-        return true;
     }
 
     /**
@@ -289,9 +280,9 @@ public class IdcardUtil {
         if (idCard.matches("^[a-zA-Z][0-9]{9}$")) { // 台湾
             info[0] = "台湾";
             String char2 = idCard.substring(1, 2);
-            if (char2.equals("1")) {
+            if ("1".equals(char2)) {
                 info[1] = "M";
-            } else if (char2.equals("2")) {
+            } else if ("2".equals(char2)) {
                 info[1] = "F";
             } else {
                 info[1] = "N";
@@ -336,7 +327,7 @@ public class IdcardUtil {
             sum += Integer.valueOf(String.valueOf(c)) * iflag;
             iflag--;
         }
-        return (sum % 10 == 0 ? 0 : (10 - sum % 10)) == Integer.valueOf(end) ? true : false;
+        return (sum % 10 == 0 ? 0 : (10 - sum % 10)) == Integer.valueOf(end);
     }
 
     /**
@@ -373,7 +364,7 @@ public class IdcardUtil {
         } else {
             sum += Integer.valueOf(end);
         }
-        return (sum % 11 == 0) ? true : false;
+        return sum % 11 == 0;
     }
 
     /**
@@ -436,7 +427,7 @@ public class IdcardUtil {
         Date birthDay = TimeUtil.parseDate(birth, DateTimeFormatter.ofPattern("yyyyMMdd"));
         LocalDateTime birthDay1 = TimeUtil.toLocalDateTime(birthDay);
         LocalDateTime dateToCompare1 = TimeUtil.toLocalDateTime(dateToCompare);
-        return new Long(birthDay1.until(dateToCompare1, ChronoUnit.YEARS)).intValue();
+        return Long.valueOf(birthDay1.until(dateToCompare1, ChronoUnit.YEARS)).intValue();
 
     }
 

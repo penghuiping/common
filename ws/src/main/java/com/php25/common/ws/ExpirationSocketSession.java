@@ -46,9 +46,13 @@ public class ExpirationSocketSession implements Delayed {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-       ExpirationSocketSession that = (ExpirationSocketSession) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ExpirationSocketSession that = (ExpirationSocketSession) o;
         return Objects.equal(sessionId, that.sessionId);
     }
 
@@ -76,7 +80,7 @@ public class ExpirationSocketSession implements Delayed {
     }
 
     public void stop() {
-       isRunning.set(false);
+        isRunning.set(false);
     }
 
     public void put(BaseRetryMsg baseRetryMsg) {

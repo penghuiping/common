@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,13 +17,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class HeartBeatWorker implements InitializingBean, DisposableBean {
 
-    private Long interval;
+    private final Long interval;
 
-    private GlobalSession globalSession;
+    private final GlobalSession globalSession;
 
     private ExecutorService singleThreadExecutor;
 
-    public HeartBeatWorker(Long interval,GlobalSession globalSession) {
+    public HeartBeatWorker(Long interval, GlobalSession globalSession) {
         this.interval = interval;
         this.globalSession = globalSession;
     }
@@ -38,23 +39,20 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
     }
 
     public void run() {
-        this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
-            Thread thread = new Thread(r);
-            thread.setName("cpicwx-healthy-heartbeat-worker");
-            return thread;
-        });
-
+        this.singleThreadExecutor = Executors
+                .newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("cpicwx-healthy-heartbeat-worker-%d")
+                        .build());
         this.singleThreadExecutor.submit(() -> {
             log.info("heart beat thread start...");
             while (true) {
                 DelayQueue<ExpirationSocketSession> delayQueue = globalSession.getAllExpirationSessions();
                 while (true) {
                     try {
-                       ExpirationSocketSession expirationSocketSession = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
+                        ExpirationSocketSession expirationSocketSession = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
                         if (null == expirationSocketSession) {
                             break;
                         }
-                       ConnectionClose connectionClose = new ConnectionClose();
+                        ConnectionClose connectionClose = new ConnectionClose();
                         connectionClose.setCount(1);
                         connectionClose.setMsgId(globalSession.generateUUID());
                         connectionClose.setSessionId(expirationSocketSession.getSessionId());

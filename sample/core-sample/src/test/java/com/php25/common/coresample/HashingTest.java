@@ -5,7 +5,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.php25.common.core.mess.ConsistentHashing;
 import com.php25.common.core.mess.ConsistentHashingImpl;
-import com.php25.common.core.util.HashUtil;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,8 +41,10 @@ public class HashingTest {
     }
 
 
+    @Test
     public void crc32() {
-
+        HashCode hashCode = Hashing.crc32().hashUnencodedChars("hello world");
+        log.info("guava:{}", hashCode.asInt());
     }
 
     @Test
@@ -51,7 +52,6 @@ public class HashingTest {
         String hello = "hello";
         long value1 = Hashing.murmur3_128().hashBytes(hello.getBytes(Charsets.UTF_8)).asLong();
         log.info("guava:{},{}", (int) value1, (int) (value1 >>> 32));
-        log.info("hashUtil:{}", HashUtil.murmur128(hello.getBytes(Charsets.UTF_8)));
     }
 
 

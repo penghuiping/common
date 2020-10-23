@@ -227,6 +227,8 @@ public class RSA {
                     throw new NullPointerException("Public key must not null when use it !");
                 }
                 return this.publicKey;
+            default:
+                break;
         }
         throw Exceptions.throwIllegalStateException("Uknown key type: " + type);
     }
