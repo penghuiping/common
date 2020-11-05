@@ -15,7 +15,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
 
     private final InnerMsgRetryQueue innerMsgRetryQueue;
 
-    public WebsocketHandler(GlobalSession globalSession,InnerMsgRetryQueue innerMsgRetryQueue) {
+    public WebsocketHandler(GlobalSession globalSession, InnerMsgRetryQueue innerMsgRetryQueue) {
         this.globalSession = globalSession;
         this.innerMsgRetryQueue = innerMsgRetryQueue;
     }
@@ -23,29 +23,30 @@ public class WebsocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-       BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload,BaseRetryMsg.class);
-        baseRetryMsg.setSessionId(session.getId());
-        baseRetryMsg.setCount(0);
+        BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload, BaseRetryMsg.class);
+        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        baseRetryMsg.setSessionId(expirationSocketSession.getSessionId());
         innerMsgRetryQueue.put(baseRetryMsg);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-       ConnectionClose connectionClose = new ConnectionClose();
-        connectionClose.setCount(1);
+        ConnectionClose connectionClose = new ConnectionClose();
         connectionClose.setMsgId(globalSession.generateUUID());
-        connectionClose.setSessionId(session.getId());
+        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        connectionClose.setSessionId(expirationSocketSession.getSessionId());
         globalSession.send(connectionClose);
     }
 
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        //websocket连接建立
         globalSession.create(session);
-       ConnectionCreate connectionCreate = new ConnectionCreate();
-        connectionCreate.setCount(1);
+        ConnectionCreate connectionCreate = new ConnectionCreate();
         connectionCreate.setMsgId(globalSession.generateUUID());
-        connectionCreate.setSessionId(session.getId());
+        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        connectionCreate.setSessionId(expirationSocketSession.getSessionId());
         globalSession.send(connectionCreate);
     }
 

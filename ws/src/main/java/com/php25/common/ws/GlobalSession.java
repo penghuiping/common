@@ -17,7 +17,11 @@ import java.util.concurrent.ExecutorService;
 
 @Slf4j
 public class GlobalSession {
+    //此session缓存用于缓存自定义的sessionId与WebSocket对应关系
     private final ConcurrentHashMap<String, ExpirationSocketSession> sessions = new ConcurrentHashMap<>(1024);
+
+    //此session缓存用于缓存原来的sessionId与WebSocket对应关系
+    private final ConcurrentHashMap<String, ExpirationSocketSession> _sessions = new ConcurrentHashMap<>(1024);
 
     private final DelayQueue<ExpirationSocketSession> expireSessionQueue = new DelayQueue<>();
 
@@ -61,13 +65,14 @@ public class GlobalSession {
     }
 
     protected void init(SidUid sidUid) {
-        //先判断uid原来是否存在，存在就无法创建新连接
+        //先判断uid原来是否存在，存在就关闭原有连接，使用新的连接
         SidUid sidUid1 = redisService.string().get(Constants.prefix + sidUid.getUserId(), SidUid.class);
         if (sidUid1 != null) {
-            throw new IllegalStateException("已存在以后连接无法创建新连接");
+            clean(sidUid1.getSessionId());
+            close(sidUid1.getSessionId());
         }
-        redisService.string().set(Constants.prefix + sidUid.getUserId(), sidUid, 3600 * 24L);
-        redisService.string().set(Constants.prefix + sidUid.getSessionId(), sidUid, 3600 * 24L);
+        redisService.string().set(Constants.prefix + sidUid.getUserId(), sidUid, 3600L);
+        redisService.string().set(Constants.prefix + sidUid.getSessionId(), sidUid, 3600L);
     }
 
     protected void clean(String sid) {
@@ -94,10 +99,11 @@ public class GlobalSession {
         ExpirationSocketSession expirationSocketSession = new ExpirationSocketSession();
         expirationSocketSession.setTimestamp(System.currentTimeMillis());
         expirationSocketSession.setWebSocketSession(webSocketSession);
-        expirationSocketSession.setSessionId(webSocketSession.getId());
+        expirationSocketSession.setSessionId(generateUUID());
         expirationSocketSession.setExecutorService(executorService);
         expirationSocketSession.setMsgDispatcher(msgDispatcher);
-        sessions.put(webSocketSession.getId(), expirationSocketSession);
+        sessions.put(expirationSocketSession.getSessionId(), expirationSocketSession);
+        _sessions.put(webSocketSession.getId(), expirationSocketSession);
         expireSessionQueue.put(expirationSocketSession);
     }
 
@@ -105,8 +111,9 @@ public class GlobalSession {
     protected void close(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.remove(sid);
         expirationSocketSession.setSessionId(sid);
-        expireSessionQueue.remove(expirationSocketSession);
         expirationSocketSession.stop();
+        expireSessionQueue.remove(expirationSocketSession);
+        _sessions.remove(expirationSocketSession.getWebSocketSession().getId());
     }
 
 
@@ -120,6 +127,10 @@ public class GlobalSession {
 
     protected ExpirationSocketSession getExpirationSocketSession(String sid) {
         return sessions.get(sid);
+    }
+
+    protected ExpirationSocketSession getExpirationSocketSession(WebSocketSession webSocketSession) {
+        return _sessions.get(webSocketSession.getId());
     }
 
 
@@ -191,5 +202,11 @@ public class GlobalSession {
 
     protected String generateUUID() {
         return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public void stats() {
+        log.info("globalSession sessions:{}", sessions.size());
+        log.info("globalSession _sessions:{}", sessions.size());
+        log.info("expireSessionQueue:{}", expireSessionQueue.size());
     }
 }

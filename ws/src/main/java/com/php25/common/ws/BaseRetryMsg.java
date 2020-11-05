@@ -1,6 +1,5 @@
 package com.php25.common.ws;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -26,21 +25,18 @@ public class BaseRetryMsg implements Delayed {
     /**
      * 重发间隔,单位毫秒,默认0秒
      */
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     protected Integer interval = 0;
-
-    /**
-     * 最大重发次数，默认5次
-     */
-    @JsonIgnore
-    private Integer maxRetry = 5;
-
-
     /**
      * 当前重发次数
      */
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     protected Integer count = 0;
+    /**
+     * 最大重发次数，默认5次
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer maxRetry = 5;
 
     /**
      * websocket sessionId

@@ -106,5 +106,13 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
         redisService.expire(Constants.prefix + serverId, 2L, TimeUnit.HOURS);
     }
 
+    /**
+     * 每分钟打印一次统计信息
+     */
+    @Scheduled(cron = "0 * * * * ? ")
+    public void logStatus() {
+        innerMsgRetryQueue.stats();
+        innerMsgRetryQueue.getGlobalSession().stats();
+    }
 
 }

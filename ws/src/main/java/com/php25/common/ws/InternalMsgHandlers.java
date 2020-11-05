@@ -13,21 +13,21 @@ import org.springframework.web.socket.WebSocketSession;
 public class InternalMsgHandlers {
 
     @WsAction(Ack.ACTION0)
-    public void ackHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
-       Ack ack = (Ack) msg;
+    public void ackHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+        Ack ack = (Ack) msg;
         log.info("ack...;msgid:{},reply_action:{}", ack.getMsgId(), ack.getReplyAction());
-       BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
+        BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
         session.dispatchAck(ack.getReplyAction(), srcMsg);
-       BaseRetryMsg baseRetryMsg = new BaseRetryMsg();
+        BaseRetryMsg baseRetryMsg = new BaseRetryMsg();
         baseRetryMsg.setMsgId(msg.getMsgId());
         baseRetryMsg.setAction(ack.getReplyAction());
         session.revokeRetry(baseRetryMsg);
     }
 
     @WsAction(ConnectionClose.ACTION0)
-    public void connectionCloseHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void connectionCloseHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("ConnectionCloseHandler...");
-       ConnectionClose requestClose = (ConnectionClose) msg;
+        ConnectionClose requestClose = (ConnectionClose) msg;
         WebSocketSession webSocketSession = session.get(msg.getSessionId());
         if (null != webSocketSession && webSocketSession.isOpen()) {
             webSocketSession.close();
@@ -37,12 +37,11 @@ public class InternalMsgHandlers {
     }
 
     @WsAction(ConnectionCreate.ACTION0)
-    public void connectionCreateHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void connectionCreateHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("ConnectionCreateHandler...");
-       ConnectionCreate connectionCreate = (ConnectionCreate) msg;
+        ConnectionCreate connectionCreate = (ConnectionCreate) msg;
         //发送身份认证请求
         RequestAuthInfo requestAuthInfo = new RequestAuthInfo();
-        requestAuthInfo.setCount(0);
         requestAuthInfo.setMsgId(connectionCreate.getMsgId());
         requestAuthInfo.setSessionId(msg.getSessionId());
         requestAuthInfo.setInterval(5000);
@@ -51,11 +50,11 @@ public class InternalMsgHandlers {
     }
 
     @WsAction(Ping.ACTION0)
-    public void pingHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void pingHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("心跳ping:{}", JsonUtil.toJson(msg));
-       Ping ping = (Ping) msg;
+        Ping ping = (Ping) msg;
         session.updateExpireTime(ping.getSessionId());
-       Pong pong = new Pong();
+        Pong pong = new Pong();
         pong.setMsgId(ping.getMsgId());
         pong.setSessionId(ping.getSessionId());
         pong.setMaxRetry(1);
@@ -63,7 +62,7 @@ public class InternalMsgHandlers {
     }
 
     @WsAction(ReplyAuthInfo.ACTION0)
-    public void replyAuthInfoHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void replyAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         ReplyAuthInfo replyAuthInfo = (ReplyAuthInfo) msg;
         replyAuthInfo.setCount(replyAuthInfo.getCount() + 1);
         replyAuthInfo.setInterval(5000);
@@ -71,15 +70,14 @@ public class InternalMsgHandlers {
     }
 
     @WsAction(RequestAuthInfo.ACTION0)
-    public void requestAuthInfoHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void requestAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("RequestAuthInfoHandler...");
         RequestAuthInfo requestAuthInfo = (RequestAuthInfo) msg;
         requestAuthInfo.setCount(requestAuthInfo.getCount() + 1);
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
         requestAuthInfo.setInterval(5000);
         if (requestAuthInfo.getCount() > 3) {
-           ConnectionClose connectionClose = new ConnectionClose();
-            connectionClose.setCount(1);
+            ConnectionClose connectionClose = new ConnectionClose();
             connectionClose.setMsgId(session.generateUUID());
             connectionClose.setSessionId(msg.sessionId);
             session.send(connectionClose);
@@ -89,11 +87,11 @@ public class InternalMsgHandlers {
     }
 
     @WsAction(SubmitAuthInfo.ACTION0)
-    public void submitAuthInfoHandler(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void submitAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("SubmitAuthInfoHandler...");
         SubmitAuthInfo submitAuthInfo = (SubmitAuthInfo) msg;
         String uid = session.authenticate(submitAuthInfo.getToken());
-       SidUid sidUid = new SidUid();
+        SidUid sidUid = new SidUid();
         sidUid.setServerId(session.getServerId());
         sidUid.setSessionId(msg.getSessionId());
         sidUid.setUserId(uid);
@@ -105,7 +103,6 @@ public class InternalMsgHandlers {
 
         ReplyAuthInfo replyAuthInfo = new ReplyAuthInfo();
         replyAuthInfo.setInterval(5000);
-        replyAuthInfo.setCount(1);
         replyAuthInfo.setMsgId(msg.getMsgId());
         replyAuthInfo.setSessionId(msg.getSessionId());
         replyAuthInfo.setUid(uid);

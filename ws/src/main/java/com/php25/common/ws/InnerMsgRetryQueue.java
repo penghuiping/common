@@ -1,13 +1,15 @@
 package com.php25.common.ws;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,7 +32,7 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
 
     private final BlockingQueue<BaseRetryMsg> noDelayQueue = new LinkedBlockingQueue<>();
 
-    private final ConcurrentHashMap<String, BaseRetryMsg> msgs = new ConcurrentHashMap<>(8196);
+    private final Cache<String, BaseRetryMsg> msgs;
 
     private ExecutorService singleThreadExecutor;
     private ExecutorService singleThreadExecutorNoDelay;
@@ -39,10 +41,17 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
     private GlobalSession globalSession;
 
     public InnerMsgRetryQueue() {
+        msgs = CacheBuilder.newBuilder().initialCapacity(8196)
+                .expireAfterWrite(Duration.ofMinutes(1))
+                .build();
     }
 
     public void setGlobalSession(GlobalSession globalSession) {
         this.globalSession = globalSession;
+    }
+
+    public GlobalSession getGlobalSession() {
+        return globalSession;
     }
 
 
@@ -70,7 +79,7 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
                 try {
                     msg = delayQueue.poll(2, TimeUnit.SECONDS);
                     if (null != msg) {
-                        if (msg.getCount() < msg.getMaxRetry()) {
+                        if (msg.getCount() <= msg.getMaxRetry()) {
                             ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(msg.getSessionId());
                             if (null != expirationSocketSession) {
                                 expirationSocketSession.put(msg);
@@ -95,7 +104,7 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
                 try {
                     msg = noDelayQueue.poll(2, TimeUnit.SECONDS);
                     if (null != msg) {
-                        if (msg.getCount() < msg.getMaxRetry()) {
+                        if (msg.getCount() <= msg.getMaxRetry()) {
                             ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(msg.getSessionId());
                             if (null != expirationSocketSession) {
                                 expirationSocketSession.put(msg);
@@ -116,17 +125,26 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
         } else {
             noDelayQueue.offer(baseRetry);
         }
-        msgs.put(baseRetry.getMsgId() + baseRetry.getAction(), baseRetry);
+
+        if (!(baseRetry instanceof Ping || baseRetry instanceof Pong)) {
+            msgs.put(baseRetry.getMsgId() + baseRetry.getAction(), baseRetry);
+        }
     }
 
     public void remove(BaseRetryMsg baseRetry) {
         if (baseRetry.getInterval() > 0) {
             delayQueue.remove(baseRetry);
         }
-        msgs.remove(baseRetry.getMsgId() + baseRetry.getAction());
+        msgs.invalidate(baseRetry.getMsgId() + baseRetry.getAction());
     }
 
     public BaseRetryMsg get(String msgId, String action) {
-        return msgs.get(msgId + action);
+        return msgs.getIfPresent(msgId + action);
+    }
+
+    public void stats() {
+        log.info("InnerMsgRetryQueue delayQueue:{}", delayQueue.size());
+        log.info("InnerMsgRetryQueue noDelayQueue:{}", noDelayQueue.size());
+        log.info("InnerMsgRetryQueue msgs:{}", msgs.size());
     }
 }
