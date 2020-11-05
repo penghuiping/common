@@ -1,5 +1,9 @@
 package com.php25.common.ws;
 
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.databind.jsontype.SubtypeResolver;
+import com.php25.common.core.util.JsonUtil;
+import com.php25.common.core.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
@@ -33,6 +37,7 @@ public class RegisterHandlerConfig {
 
     public void scanPackage(String... basePackages) {
         List<Class<?>> cls = new ArrayList<>();
+        List<Class<?>> clsMessage = new ArrayList<>();
         for (String basePackage : basePackages) {
             try {
                 String packageSearchPath = CLASSPATH_ALL_URL_PREFIX +
@@ -47,6 +52,10 @@ public class RegisterHandlerConfig {
                         if (class0.isAnnotationPresent(WsController.class)) {
                             cls.add(class0);
                         }
+
+                        if (class0.isAnnotationPresent(WsMsg.class)) {
+                            clsMessage.add(class0);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -54,6 +63,7 @@ public class RegisterHandlerConfig {
             }
         }
         load(cls);
+        loadMessage(clsMessage);
     }
 
     private ResourcePatternResolver getResourcePatternResolver() {
@@ -70,17 +80,37 @@ public class RegisterHandlerConfig {
                 Object obj = applicationContext.getBean(cls);
                 Method[] methods = cls.getDeclaredMethods();
                 for (Method method : methods) {
-                   WsAction wsAction = method.getDeclaredAnnotation(WsAction.class);
+                    WsAction wsAction = method.getDeclaredAnnotation(WsAction.class);
                     if (null != wsAction) {
                         //是需要找的方法
                         String action = wsAction.value();
                         if (!wsAction.isReplyACK()) {
-                           ProxyMsgHandler proxyMsgHandler = new ProxyMsgHandler(obj, method, cls);
+                            ProxyMsgHandler proxyMsgHandler = new ProxyMsgHandler(obj, method, cls);
                             msgDispatcher.registerHandler(action, proxyMsgHandler);
                         } else {
-                           ProxyReplyAckHandler proxyReplyAckHandler = new ProxyReplyAckHandler(obj, method);
+                            ProxyReplyAckHandler proxyReplyAckHandler = new ProxyReplyAckHandler(obj, method);
                             msgDispatcher.registerAckHandler(action, proxyReplyAckHandler);
                         }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new WsException("ws在扫包时出错", e);
+        }
+    }
+
+
+    private void loadMessage(List<Class<?>> classes) {
+        try {
+            SubtypeResolver subtypeResolver = JsonUtil.getObjectMapper().getSubtypeResolver();
+            subtypeResolver.registerSubtypes(BaseRetryMsg.class);
+            for (Class<?> cls : classes) {
+                Class<?> superCls = cls.getSuperclass();
+                if (superCls.equals(BaseRetryMsg.class)) {
+                    WsMsg wsMsg = cls.getDeclaredAnnotation(WsMsg.class);
+                    String action = wsMsg.action();
+                    if (!StringUtil.isBlank(action)) {
+                        subtypeResolver.registerSubtypes(new NamedType(cls, wsMsg.action()));
                     }
                 }
             }

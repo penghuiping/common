@@ -12,11 +12,14 @@ import org.springframework.web.socket.WebSocketSession;
 @WsController
 public class InternalMsgHandlers {
 
-    @WsAction(Ack.ACTION0)
+    @WsAction("ack")
     public void ackHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         Ack ack = (Ack) msg;
         log.info("ack...;msgid:{},reply_action:{}", ack.getMsgId(), ack.getReplyAction());
         BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
+        if (null != srcMsg) {
+            return;
+        }
         session.dispatchAck(ack.getReplyAction(), srcMsg);
         BaseRetryMsg baseRetryMsg = new BaseRetryMsg();
         baseRetryMsg.setMsgId(msg.getMsgId());
@@ -24,7 +27,7 @@ public class InternalMsgHandlers {
         session.revokeRetry(baseRetryMsg);
     }
 
-    @WsAction(ConnectionClose.ACTION0)
+    @WsAction("connection_close")
     public void connectionCloseHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("ConnectionCloseHandler...");
         ConnectionClose requestClose = (ConnectionClose) msg;
@@ -36,7 +39,7 @@ public class InternalMsgHandlers {
         session.clean(msg.getSessionId());
     }
 
-    @WsAction(ConnectionCreate.ACTION0)
+    @WsAction("connection_create")
     public void connectionCreateHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("ConnectionCreateHandler...");
         ConnectionCreate connectionCreate = (ConnectionCreate) msg;
@@ -49,7 +52,7 @@ public class InternalMsgHandlers {
         session.send(requestAuthInfo);
     }
 
-    @WsAction(Ping.ACTION0)
+    @WsAction("ping")
     public void pingHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("心跳ping:{}", JsonUtil.toJson(msg));
         Ping ping = (Ping) msg;
@@ -61,7 +64,7 @@ public class InternalMsgHandlers {
         session.send(pong, false);
     }
 
-    @WsAction(ReplyAuthInfo.ACTION0)
+    @WsAction("reply_auth_info")
     public void replyAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         ReplyAuthInfo replyAuthInfo = (ReplyAuthInfo) msg;
         replyAuthInfo.setCount(replyAuthInfo.getCount() + 1);
@@ -69,7 +72,7 @@ public class InternalMsgHandlers {
         session.send(replyAuthInfo);
     }
 
-    @WsAction(RequestAuthInfo.ACTION0)
+    @WsAction("request_auth_info")
     public void requestAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("RequestAuthInfoHandler...");
         RequestAuthInfo requestAuthInfo = (RequestAuthInfo) msg;
@@ -86,7 +89,7 @@ public class InternalMsgHandlers {
         session.send(requestAuthInfo);
     }
 
-    @WsAction(SubmitAuthInfo.ACTION0)
+    @WsAction("submit_auth_info")
     public void submitAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         log.info("SubmitAuthInfoHandler...");
         SubmitAuthInfo submitAuthInfo = (SubmitAuthInfo) msg;

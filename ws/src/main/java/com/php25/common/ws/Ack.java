@@ -10,14 +10,8 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@WsMsg(action = "ack")
 public class Ack extends BaseRetryMsg {
-
-    public static final String ACTION0 = "ack";
-
     @JsonProperty("reply_action")
     private String replyAction;
-
-    public Ack() {
-        this.action = ACTION0;
-    }
 }

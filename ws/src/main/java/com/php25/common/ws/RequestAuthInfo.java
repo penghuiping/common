@@ -9,13 +9,6 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@WsMsg(action = "request_auth_info")
 public class RequestAuthInfo extends BaseRetryMsg {
-
-    public static final String ACTION0 = "request_auth_info";
-
-    public RequestAuthInfo() {
-        this.action = ACTION0;
-    }
-
-
 }

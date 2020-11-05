@@ -9,15 +9,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@WsMsg(action = "reply_auth_info")
 public class ReplyAuthInfo extends BaseRetryMsg {
-
-    public static final String ACTION0 = "reply_auth_info";
-
     private String uid;
-
-    public ReplyAuthInfo() {
-        this.action = ACTION0;
-    }
-
-
 }

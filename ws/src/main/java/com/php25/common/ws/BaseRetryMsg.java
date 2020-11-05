@@ -61,6 +61,13 @@ public class BaseRetryMsg implements Delayed {
      */
     protected Long timestamp = System.currentTimeMillis();
 
+    public BaseRetryMsg() {
+        WsMsg wsMsg = this.getClass().getDeclaredAnnotation(WsMsg.class);
+        if (null != wsMsg) {
+            this.setAction(wsMsg.action());
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -2,7 +2,6 @@ package com.php25.common.core.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -49,6 +48,9 @@ public abstract class JsonUtil {
         objectMapper.registerModule(timeModule);
     }
 
+    public static ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
 
     public static <T> T fromJson(String json, Class<T> cls) {
         if (StringUtil.isBlank(json)) {
@@ -131,7 +133,7 @@ public abstract class JsonUtil {
     //时间戳反序列化时间
     public static class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
         @Override
-        public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+        public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             Long timestamp = jsonParser.getLongValue();
             return LocalDateTime.ofEpochSecond(timestamp / 1000, 0, ZoneOffset.ofHours(8));
         }
