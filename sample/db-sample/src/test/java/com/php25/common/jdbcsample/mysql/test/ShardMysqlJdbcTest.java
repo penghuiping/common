@@ -128,7 +128,7 @@ public class ShardMysqlJdbcTest {
                 return dbList.get(1);
             }
         };
-        List<Department> departments = twoPhaseCommitTransaction.execute(Lists.newArrayList(transactionCallback0, transactionCallback1));
+        List<Department> departments = twoPhaseCommitTransaction.execute(transactionCallback0, transactionCallback1);
         log.info("部门信息:{}", JsonUtil.toJson(departments));
 
         departments = (List<Department>) departmentRepository.findAll();

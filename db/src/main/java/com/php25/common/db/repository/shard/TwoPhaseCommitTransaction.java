@@ -1,5 +1,6 @@
 package com.php25.common.db.repository.shard;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,10 @@ public class TwoPhaseCommitTransaction {
                 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<Runnable>(), new ThreadFactoryBuilder().setNameFormat("tow-phase-commit-transaction-%d")
                 .build());
+    }
+
+    public <T> List<T> execute(TransactionCallback<T>... transactionCallbacks) {
+        return this.execute(Lists.newArrayList(transactionCallbacks));
     }
 
     public <T> List<T> execute(List<TransactionCallback<T>> transactionCallbacks) {
