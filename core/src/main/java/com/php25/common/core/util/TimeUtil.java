@@ -17,6 +17,9 @@ import java.util.GregorianCalendar;
  * @date 2018/7/2.
  */
 public abstract class TimeUtil {
+
+    public static final String STD_FORMAT = "yyyy-MM-dd hh:mm:ss";
+
     /**
      * 把日期类型的字符串，转换成日期类型
      *

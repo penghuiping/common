@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -40,9 +40,8 @@ public abstract class JsonUtil {
     static {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-
+        objectMapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+        objectMapper.setDateFormat(new SimpleDateFormat(TimeUtil.STD_FORMAT));
         JavaTimeModule timeModule = new JavaTimeModule();
         timeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
         objectMapper.registerModule(timeModule);
@@ -126,7 +125,7 @@ public abstract class JsonUtil {
     public static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
         @Override
         public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeString(TimeUtil.getTime(new Date(localDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            jsonGenerator.writeString(localDateTime.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
     }
 
@@ -135,7 +134,7 @@ public abstract class JsonUtil {
         @Override
         public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             Long timestamp = jsonParser.getLongValue();
-            return LocalDateTime.ofEpochSecond(timestamp / 1000, 0, ZoneOffset.ofHours(8));
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
         }
     }
 }

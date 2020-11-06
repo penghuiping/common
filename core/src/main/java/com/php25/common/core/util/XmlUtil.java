@@ -9,6 +9,7 @@ import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter;
 import com.php25.common.core.exception.Exceptions;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.TimeZone;
 
 /**
@@ -23,8 +24,8 @@ public abstract class XmlUtil {
     static {
         xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         xmlMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        xmlMapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        xmlMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        xmlMapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+        xmlMapper.setDateFormat(new SimpleDateFormat(TimeUtil.STD_FORMAT));
     }
 
     public static <T> T fromXml(String xml, Class<T> cls) {
