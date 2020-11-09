@@ -12,7 +12,6 @@
         <module>common-parent</module>
         <module>core</module>
         <module>db</module>
-        <module>mvc</module>
         <module>webflux</module>
         <module>redis</module>
         <module>validation</module>

@@ -1,4 +1,4 @@
-package com.php25.common.mvc;
+package com.php25.common.flux.web;
 
 import com.php25.common.core.util.ThreadLocalUtil;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 @ConditionalOnClass(HttpServletRequest.class)
 public class CommonInterceptor extends HandlerInterceptorAdapter {
-    private static Logger logger = LoggerFactory.getLogger(CommonInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommonInterceptor.class);
 
     @Value("${base_assets_url:null}")
     private String baseAssetsUrl;

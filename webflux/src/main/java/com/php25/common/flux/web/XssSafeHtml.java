@@ -1,4 +1,4 @@
-package com.php25.common.mvc;
+package com.php25.common.flux.web;
 
 import org.hibernate.validator.constraints.SafeHtml;
 
@@ -10,9 +10,9 @@ import java.lang.annotation.Annotation;
  * @date 2020/4/16 13:41
  */
 public class XssSafeHtml implements SafeHtml {
-    private WhiteListType whiteListType;
+    private final WhiteListType whiteListType;
 
-    private String[] additionalTags;
+    private final String[] additionalTags;
 
     public XssSafeHtml() {
         this.whiteListType = WhiteListType.BASIC;
