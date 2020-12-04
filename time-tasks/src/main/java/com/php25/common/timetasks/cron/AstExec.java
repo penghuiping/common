@@ -1,7 +1,7 @@
 package com.php25.common.timetasks.cron;
 
+import com.php25.common.core.util.TimeUtil;
 import com.php25.common.timetasks.exception.CronException;
-import com.php25.common.timetasks.util.TimeUtil;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

@@ -13,7 +13,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.ClassUtils;
 
 /**
- *
  * @author penghuiping
  * @date 2018-08-23
  */
@@ -22,7 +21,7 @@ public class Db {
 
     private JdbcPair jdbcPair;
 
-    private DbType dbType;
+    private final DbType dbType;
 
     public DbType getDbType() {
         return dbType;
@@ -44,7 +43,7 @@ public class Db {
     private static final String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
 
-    public void scanPackage(String ...basePackages) {
+    public void scanPackage(String... basePackages) {
         for (String basePackage : basePackages) {
             try {
                 String packageSearchPath = CLASSPATH_ALL_URL_PREFIX +
@@ -76,18 +75,18 @@ public class Db {
     /**
      * 获取一个关系型数据库 新条件
      *
-     * @return
+     * @return 新条件
      */
-    public CndJdbc cndJdbc(Class cls) {
+    public CndJdbc cndJdbc(Class<?> cls) {
         return CndJdbc.of(cls, null, dbType, this.jdbcPair.getJdbcOperations());
     }
 
     /**
      * 获取一个关系型数据库 新条件
      *
-     * @return
+     * @return 新条件
      */
-    public CndJdbc cndJdbc(Class cls, String alias) {
+    public CndJdbc cndJdbc(Class<?> cls, String alias) {
         return CndJdbc.of(cls, alias, dbType, this.jdbcPair.getJdbcOperations());
     }
 

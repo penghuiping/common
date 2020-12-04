@@ -1,11 +1,15 @@
 package com.php25.common.timetasks.cron;
 
 import org.junit.Test;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,7 +17,7 @@ import java.util.List;
  * @date 2020/5/18 14:03
  */
 public class CronTest {
-    private Logger log = LoggerFactory.getLogger(CronTest.class);
+    private final Logger log = LoggerFactory.getLogger(CronTest.class);
 
     @Test
     public void cronParser() {
@@ -271,7 +275,7 @@ public class CronTest {
     }
 
     @Test
-    public void cronNextExecTime3() {
+    public void cronNextExecTime3() throws Exception {
         LocalDateTime now = null;
         String cron0 = null;
         LocalDateTime time0 = null;
@@ -283,5 +287,8 @@ public class CronTest {
         log.info("{}", time0.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
 
+        CronExpression expression = new CronExpression("0/1 * * * * ? 2020");
+        Date date = expression.getNextValidTimeAfter(Date.from(now.plusSeconds(5).toInstant(ZoneOffset.ofHours(8))));
+        log.info("{}", date.toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }
