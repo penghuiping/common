@@ -1,6 +1,6 @@
 package com.php25.common.db.cnd;
 
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -9,21 +9,21 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JdbcPair {
 
-    private JdbcOperations jdbcOperations;
+    private JdbcTemplate jdbcTemplate;
 
     private TransactionTemplate transactionTemplate;
 
-    public JdbcPair(JdbcOperations jdbcOperations, TransactionTemplate transactionTemplate) {
-        this.jdbcOperations = jdbcOperations;
+    public JdbcPair(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 
-    public JdbcOperations getJdbcOperations() {
-        return jdbcOperations;
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
     }
 
-    public void setJdbcOperations(JdbcOperations jdbcOperations) {
-        this.jdbcOperations = jdbcOperations;
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public TransactionTemplate getTransactionTemplate() {

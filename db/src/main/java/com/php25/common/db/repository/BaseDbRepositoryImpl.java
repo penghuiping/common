@@ -27,10 +27,10 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public <S extends T> S save(S s) {
         if (s.isNew()) {
             //新增
-            db.cndJdbc(model).ignoreCollection(false).insert(s);
+            db.getBaseSqlExecute().insert(db.cndJdbc(model).insert(s));
         } else {
             //更新
-            db.cndJdbc(model).ignoreCollection(false).update(s);
+            db.getBaseSqlExecute().update(db.cndJdbc(model).update(s));
         }
         return s;
     }
@@ -41,9 +41,9 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public <S extends T> Iterable<S> saveAll(Iterable<S> objs) {
         S s = objs.iterator().next();
         if (s.isNew()) {
-            db.cndJdbc(model).insertBatch(Lists.newArrayList(objs));
+            db.getBaseSqlExecute().insertBatch(db.cndJdbc(model).insertBatch(Lists.newArrayList(objs)));
         } else {
-            db.cndJdbc(model).updateBatch(Lists.newArrayList(objs));
+            db.getBaseSqlExecute().updateBatch(db.cndJdbc(model).updateBatch(Lists.newArrayList(objs)));
         }
         return objs;
     }
@@ -51,7 +51,7 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     @NotNull
     @Override
     public Optional<T> findById(@NotNull ID id) {
-        T t = db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).single();
+        T t = db.getBaseSqlExecute().single(db.cndJdbc(model).whereEq(pkName, id).single());
         if (null == t) {
             return Optional.empty();
         } else {
@@ -61,37 +61,37 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
 
     @Override
     public boolean existsById(@NotNull ID id) {
-        return db.cndJdbc(model).whereEq(pkName, id).count() > 0;
+        return db.getBaseSqlExecute().count(db.cndJdbc(model).whereEq(pkName, id).count()) > 0;
     }
 
     @NotNull
     @Override
     public Iterable<T> findAll() {
-        return db.cndJdbc(model).select();
+        return db.getBaseSqlExecute().select(db.cndJdbc(model).select());
     }
 
     @NotNull
     @Override
     public Iterable<T> findAllById(@NotNull Iterable<ID> ids) {
-        return db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select();
+        return db.getBaseSqlExecute().select(db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select());
     }
 
     @Override
     public long count() {
-        return db.cndJdbc(model).count();
+        return db.getBaseSqlExecute().count(db.cndJdbc(model).count());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(@NotNull ID id) {
-        T obj = db.cndJdbc(model).whereEq(pkName, id).single();
+        T obj = db.getBaseSqlExecute().single(db.cndJdbc(model).whereEq(pkName, id).single());
         this.delete(obj);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(@NotNull T t) {
-        db.cndJdbc(model).ignoreCollection(false).delete(t);
+        db.getBaseSqlExecute().delete(db.cndJdbc(model).delete(t));
     }
 
     @Override
@@ -99,12 +99,12 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public void deleteAll(@NotNull Iterable<? extends T> objs) {
         List<Object> ids = Lists.newArrayList(objs).stream().map(o -> JdbcModelManager.getPrimaryKeyValue(model, o)).collect(Collectors.toList());
         String pkName = JdbcModelManager.getPrimaryKeyColName(model);
-        db.cndJdbc(model).whereIn(pkName, ids).delete();
+        db.getBaseSqlExecute().delete(db.cndJdbc(model).whereIn(pkName, ids).delete());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll() {
-        db.cndJdbc(model).delete();
+        db.getBaseSqlExecute().delete(db.cndJdbc(model).delete());
     }
 }

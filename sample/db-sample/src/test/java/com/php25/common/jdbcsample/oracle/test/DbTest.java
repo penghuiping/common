@@ -5,7 +5,7 @@ import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.sql.BaseQuery;
 import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
@@ -84,15 +84,15 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
+        BaseQuery cndJdbc = db.cndJdbc(Customer.class);
+        BaseQuery cndJdbcCompany = db.cndJdbc(Company.class);
 
         Company company = new Company();
         company.setName("Google");
         company.setId(snowflakeIdWorker.nextId());
         company.setCreateTime(new Date());
         company.setEnable(1);
-        cndJdbcCompany.insert(company);
+        db.getBaseSqlExecute().insert(cndJdbcCompany.insert(company));
 
 
         for (int i = 0; i < 3; i++) {
@@ -106,7 +106,7 @@ public class DbTest {
             customer.setUpdateTime(LocalDateTime.now());
             customer.setScore(BigDecimal.valueOf(1000L));
             customers.add(customer);
-            cndJdbc.insert(customer);
+            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
             Assert.assertNotNull(customer.getId());
         }
 
@@ -120,7 +120,7 @@ public class DbTest {
             customer.setCompanyId(company.getId());
             customer.setScore(BigDecimal.valueOf(1000L));
             customers.add(customer);
-            cndJdbc.insert(customer);
+            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
             Assert.assertNotNull(customer.getId());
         }
 

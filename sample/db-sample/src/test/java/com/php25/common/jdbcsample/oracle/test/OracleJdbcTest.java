@@ -1,10 +1,8 @@
 package com.php25.common.jdbcsample.oracle.test;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.specification.Operator;
 import com.php25.common.db.specification.SearchParam;
 import com.php25.common.db.specification.SearchParamBuilder;
@@ -82,92 +80,91 @@ public class OracleJdbcTest extends DbTest {
     @Test
     public void query() {
         //like
-        List<Customer> customers = db.cndJdbc(Customer.class)
-                .whereLike("username", "jack%").asc("id").select();
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class)
+                .whereLike("username", "jack%").asc("id").select());
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
 
         //not like
-        customers = db.cndJdbc(Customer.class)
-                .whereNotLike("username", "jack%").asc("id").select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class)
+                .whereNotLike("username", "jack%").asc("id").select());
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
 
         //eq
-        Company company = db.cndJdbc(Company.class).whereEq("name", "Google").single();
+        Company company = db.getBaseSqlExecute().single(db.cndJdbc(Company.class).whereEq("name", "Google").single());
         Assertions.assertThat(company).isNotNull();
 
         //not eq
-        company = db.cndJdbc(Company.class).whereNotEq("name", "Google").single();
+        company = db.getBaseSqlExecute().single(db.cndJdbc(Company.class).whereNotEq("name", "Google").single());
         Assertions.assertThat(company).isNull();
 
         //between...and..
-        customers = db.cndJdbc(Customer.class).whereBetween("age", 20, 50).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereBetween("age", 20, 50).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
 
         //not between...and..
-        customers = db.cndJdbc(Customer.class).whereNotBetween("age", 20, 50).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereNotBetween("age", 20, 50).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
 
         //in
-        customers = db.cndJdbc(Customer.class).whereIn("age", Lists.newArrayList(20, 40)).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereIn("age", Lists.newArrayList(20, 40)).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
 
         //not in
-        customers = db.cndJdbc(Customer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
 
         //great
-        customers = db.cndJdbc(Customer.class).whereGreat("age", 40).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereGreat("age", 40).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() > 40).count());
 
         //great equal
-        customers = db.cndJdbc(Customer.class).whereGreatEq("age", 40).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereGreatEq("age", 40).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 40).count());
 
         //less
-        customers = db.cndJdbc(Customer.class).whereLess("age", 0).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereLess("age", 0).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 0).count());
 
         //less equal
-        customers = db.cndJdbc(Customer.class).whereLessEq("age", 0).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereLessEq("age", 0).select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() <= 0).count());
 
         //is null
-        customers = db.cndJdbc(Customer.class).whereIsNull("updateTime").select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereIsNull("updateTime").select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //is not null
-        customers = db.cndJdbc(Customer.class).whereIsNotNull("updateTime").select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereIsNotNull("updateTime").select());
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        customers = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").select(Customer.class);
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").select(Customer.class));
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
-        List<Company> companies = db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class, "Company.id", "Company.name", "Company.enable", "Company.createTime", "Company.updateTime");
+        List<Company> companies = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).join(Company.class).on("Customer.companyId", "Company.id").whereEq("Company.name", "Google").select(Company.class, "Company.id", "Company.name", "Company.enable", "Company.createTime", "Company.updateTime"));
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
         //alias
-        customers = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").select(Customer.class);
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").select(Customer.class));
         Assertions.assertThat(customers.size()).isEqualTo(6);
-        companies = db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime");
+        companies = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime"));
         Assertions.assertThat(companies.size()).isEqualTo(6);
     }
 
     @Test
     public void or() {
-        CndJdbc cnd = db.cndJdbc(Customer.class);
         List<Customer> customers =
-                cnd.where(cnd.clone().andEq("age", 0).andEq("username", "jack0"))
-                        .or(cnd.clone().andEq("age", 0).andEq("username", "mary0"))
-                        .select();
+                db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).where(db.cndJdbc(Customer.class).andEq("age", 0).andEq("username", "jack0"))
+                        .or(db.cndJdbc(Customer.class).andEq("age", 0).andEq("username", "mary0"))
+                        .select());
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(2);
 
-        customers = cnd.clone().whereEq("age", 0).orEq("age", 10).select();
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).whereEq("age", 0).orEq("age", 10).select());
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(3);
     }
@@ -175,8 +172,8 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void orderBy() {
-        List<Customer> customers = db.cndJdbc(Customer.class).orderBy("age asc").select();
-        List<Customer> customers1 = db.cndJdbc(Customer.class).asc("age").select();
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).orderBy("age asc").select());
+        List<Customer> customers1 = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).asc("age").select());
         Assertions.assertThat(customers.size()).isEqualTo(customers1.size());
         for (int i = 0; i < customers.size(); i++) {
             Assertions.assertThat(customers.get(i).getAge()).isEqualTo(customers1.get(i).getAge());
@@ -185,8 +182,7 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void groupBy() {
-        CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        List<Map> customers1 = cndJdbc.groupBy("enable").having("avg(age)>1").mapSelect("avg(age) avg_age", "enable");
+        List<Map> customers1 = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).groupBy("enable").having("avg(age)>1").select(Map.class, "avg(age) avg_age", "enable"));
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(customers1).isNotNull();
@@ -201,28 +197,28 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void findAll() {
-        List<Customer> customers = db.cndJdbc(Customer.class).select();
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).select());
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.size());
     }
 
     @Test
     public void findOne() {
-        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customer).isNotNull();
         Assertions.assertThat("jack0").isEqualTo(customer.getUsername());
     }
 
     @Test
     public void count() {
-        Long count = db.cndJdbc(Customer.class).whereEq("enable", 1).count();
+        Long count = db.getBaseSqlExecute().count(db.cndJdbc(Customer.class).whereEq("enable", 1).count());
         Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long) count);
     }
 
     @Test
     public void insert() throws Exception {
-        db.cndJdbc(Company.class).delete();
-        db.cndJdbc(Customer.class).delete();
+        db.getBaseSqlExecute().delete(db.cndJdbc(Company.class).delete());
+        db.getBaseSqlExecute().delete(db.cndJdbc(Customer.class).delete());
 
         Company company = new Company();
         company.setName("test");
@@ -239,7 +235,7 @@ public class OracleJdbcTest extends DbTest {
         customer.setScore(BigDecimal.valueOf(1000L));
         customer.setEnable(1);
         customer.setCompanyId(company.getId());
-        db.cndJdbc(Customer.class).insert(customer);
+        db.getBaseSqlExecute().insert(db.cndJdbc(Customer.class).insert(customer));
 
         Customer customer1 = new Customer();
         customer1.setUsername("perter");
@@ -249,18 +245,18 @@ public class OracleJdbcTest extends DbTest {
         customer1.setScore(BigDecimal.valueOf(1000L));
         customer1.setEnable(1);
         customer1.setCompanyId(company.getId());
-        db.cndJdbc(Customer.class).insert(customer1);
+        db.getBaseSqlExecute().insert(db.cndJdbc(Customer.class).insert(customer1));
 
         company.setCustomers(Lists.newArrayList(customer, customer1));
-        db.cndJdbc(Company.class).insert(company);
-        Assertions.assertThat(2).isEqualTo(db.cndJdbc(Customer.class).count());
-        Assertions.assertThat(1).isEqualTo(db.cndJdbc(Company.class).count());
+        db.getBaseSqlExecute().insert(db.cndJdbc(Company.class).insert(company));
+        Assertions.assertThat(2).isEqualTo(db.getBaseSqlExecute().count(db.cndJdbc(Customer.class).count()));
+        Assertions.assertThat(1).isEqualTo(db.getBaseSqlExecute().count(db.cndJdbc(Company.class).count()));
     }
 
     @Test
     public void batchInsert() throws Exception {
-        db.cndJdbc(Company.class).delete();
-        db.cndJdbc(Customer.class).delete();
+        db.getBaseSqlExecute().delete(db.cndJdbc(Company.class).delete());
+        db.getBaseSqlExecute().delete(db.cndJdbc(Customer.class).delete());
 
         Company company = new Company();
         company.setName("test");
@@ -286,33 +282,33 @@ public class OracleJdbcTest extends DbTest {
         customer1.setEnable(1);
         customer1.setCompanyId(company.getId());
 
-        db.cndJdbc(Company.class).insertBatch(Lists.newArrayList(company));
-        db.cndJdbc(Customer.class).insertBatch(Lists.newArrayList(customer, customer1));
+        db.getBaseSqlExecute().insertBatch(db.cndJdbc(Company.class).insertBatch(Lists.newArrayList(company)));
+        db.getBaseSqlExecute().insertBatch(db.cndJdbc(Customer.class).insertBatch(Lists.newArrayList(customer, customer1)));
 
-        Assertions.assertThat(2).isEqualTo(db.cndJdbc(Customer.class).count());
-        Assertions.assertThat(1).isEqualTo(db.cndJdbc(Company.class).count());
+        Assertions.assertThat(2).isEqualTo(db.getBaseSqlExecute().count(db.cndJdbc(Customer.class).count()));
+        Assertions.assertThat(1).isEqualTo(db.getBaseSqlExecute().count(db.cndJdbc(Company.class).count()));
     }
 
     @Test
     public void update() {
-        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         customer.setUsername("jack-0");
-        db.cndJdbc(Customer.class).update(customer);
-        customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        db.getBaseSqlExecute().update(db.cndJdbc(Customer.class).update(customer));
+        customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customer).isNull();
-        customer = db.cndJdbc(Customer.class).whereEq("username", "jack-0").single();
+        customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack-0").single());
         Assertions.assertThat(customer).isNotNull();
     }
 
     @Test
     public void batchUpdate() {
-        List<Customer> customers = db.cndJdbc(Customer.class).select();
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).select());
         customers = customers.stream().map(a -> {
             a.setUsername(a.getUsername().replace("jack", "tom"));
             return a;
         }).collect(Collectors.toList());
-        int[] arr = db.cndJdbc(Customer.class).updateBatch(customers);
-        customers = db.cndJdbc(Customer.class).select();
+        int[] arr = db.getBaseSqlExecute().updateBatch(db.cndJdbc(Customer.class).updateBatch(customers));
+        customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).select());
         List<Customer> customers1 = customers.stream().filter(customer -> customer.getUsername().startsWith("tom")).collect(Collectors.toList());
         Assertions.assertThat(customers1.size()).isEqualTo(3);
     }
@@ -327,9 +323,9 @@ public class OracleJdbcTest extends DbTest {
         List<Callable<Object>> runnables = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             runnables.add(() -> {
-                Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+                Customer customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
                 customer.setScore(customer.getScore().subtract(BigDecimal.valueOf(1)));
-                int rows = db.cndJdbc(Customer.class).update(customer);
+                int rows = db.getBaseSqlExecute().update(db.cndJdbc(Customer.class).update(customer));
                 if (rows > 0) {
                     atomicInteger.addAndGet(1);
                 }
@@ -341,7 +337,7 @@ public class OracleJdbcTest extends DbTest {
 
         countDownLatch1.await();
         System.out.println("===========>更新成功的数量:" + atomicInteger.get());
-        Customer customer = db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        Customer customer = db.getBaseSqlExecute().single(db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(1000L - customer.getScore().longValue()).isEqualTo(atomicInteger.get());
         Assertions.assertThat(customer.getVersion()).isEqualTo(atomicInteger.get());
     }
@@ -349,16 +345,16 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void delete() {
-        db.cndJdbc(Customer.class).whereLike("username", "jack%").delete();
-        List<Customer> customers = db.cndJdbc(Customer.class).select();
+        db.getBaseSqlExecute().delete(db.cndJdbc(Customer.class).whereLike("username", "jack%").delete());
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).select());
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
 
     @Test
     public void deleteAlias() {
-        db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class, "a").whereLike("a.username", "jack%").delete();
-        List<com.php25.common.jdbcsample.mysql.model.Customer> customers = db.cndJdbc(com.php25.common.jdbcsample.mysql.model.Customer.class).select();
+        db.getBaseSqlExecute().delete(db.cndJdbc(Customer.class, "a").whereLike("a.username", "jack%").delete());
+        List<Customer> customers = db.getBaseSqlExecute().select(db.cndJdbc(Customer.class).select());
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
     }
@@ -531,6 +527,7 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void testManyToMany0() {
+        //新增操作
         //部门
         Department department = new Department();
         department.setId(snowflakeIdWorker.nextId());
@@ -552,31 +549,35 @@ public class OracleJdbcTest extends DbTest {
         customer.setAge(10);
         customer.setNew(true);
         customer.setEnable(1);
+        customer = customerRepository.save(customer);
+        Assertions.assertThat(customer.getId()).isNotNull();
 
-        //新增操作
+        //部门与人员关系
         DepartmentRef departmentRef = new DepartmentRef();
         departmentRef.setDepartmentId(department.getId());
-
-        customer.setDepartments(Sets.newHashSet(departmentRef));
-        customer = customerRepository.save(customer);
+        departmentRef.setCustomerId(customer.getId());
+        departmentRefRepository.deleteByCustomerIds(Lists.newArrayList(customer.getId()));
+        departmentRefRepository.save(Lists.newArrayList(departmentRef));
 
         Department _department = departmentRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("name", Operator.EQ, "testDepart"))).get();
         Assertions.assertThat(department.getId()).isEqualTo(_department.getId());
 
         Customer _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
         Assertions.assertThat(_customer.getId()).isEqualTo(customer.getId());
-        Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(1);
+        List<DepartmentRef> departmentRefs = departmentRefRepository.findByCustomerId(_customer.getId());
+        Assertions.assertThat(departmentRefs.size()).isEqualTo(1);
 
         //更新操作
+        //更新部门与人员关系
         DepartmentRef departmentRef1 = new DepartmentRef();
         departmentRef1.setDepartmentId(department1.getId());
-
-        customer.setDepartments(Sets.newHashSet(departmentRef, departmentRef1));
-        customer.setNew(false);
-        customer = customerRepository.save(customer);
+        departmentRef1.setCustomerId(customer.getId());
+        departmentRefRepository.deleteByCustomerIds(Lists.newArrayList(customer.getId()));
+        departmentRefRepository.save(Lists.newArrayList(departmentRef, departmentRef1));
 
         _customer = customerRepository.findOne(SearchParamBuilder.builder().append(SearchParam.of("username", Operator.EQ, "jack12313"))).get();
-        Assertions.assertThat(_customer.getDepartments().size()).isEqualTo(2);
+        departmentRefs = departmentRefRepository.findByCustomerId(_customer.getId());
+        Assertions.assertThat(departmentRefs.size()).isEqualTo(2);
 
         //删除操作
         customerRepository.delete(customer);
@@ -586,7 +587,7 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void testManyToMany1() {
-        List<Customer> customers = (List<Customer>) customerRepository.findAllEnabled();
+        List<Customer> customers = customerRepository.findAllEnabled();
         Assertions.assertThat(customers.size()).isEqualTo(3);
 
         Customer customer1 = customers.stream().filter(customer -> customer.getUsername().equals("jack0")).findAny().get();

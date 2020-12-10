@@ -1,7 +1,14 @@
 package com.php25.common.db;
 
-import com.php25.common.db.cnd.CndJdbc;
 import com.php25.common.db.cnd.JdbcPair;
+import com.php25.common.db.cnd.execute.BaseSqlExecute;
+import com.php25.common.db.cnd.execute.MysqlSqlExecute;
+import com.php25.common.db.cnd.execute.OracleSqlExecute;
+import com.php25.common.db.cnd.execute.PostgresSqlExecute;
+import com.php25.common.db.cnd.sql.BaseQuery;
+import com.php25.common.db.cnd.sql.MysqlQuery;
+import com.php25.common.db.cnd.sql.OracleQuery;
+import com.php25.common.db.cnd.sql.PostgresQuery;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
 import org.slf4j.Logger;
@@ -11,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.ClassUtils;
+
 
 /**
  * @author penghuiping
@@ -72,23 +80,62 @@ public class Db {
         return ClassUtils.convertClassNameToResourcePath(new StandardEnvironment().resolveRequiredPlaceholders(basePackage));
     }
 
-    /**
-     * 获取一个关系型数据库 新条件
-     *
-     * @return 新条件
-     */
-    public CndJdbc cndJdbc(Class<?> cls) {
-        return CndJdbc.of(cls, null, dbType, this.jdbcPair.getJdbcOperations());
+
+    public BaseQuery cndJdbc(Class<?> cls) {
+        BaseQuery query = null;
+        switch (dbType) {
+            case MYSQL:
+                query = new MysqlQuery(cls);
+                break;
+            case ORACLE:
+                query = new OracleQuery(cls);
+                break;
+            case POSTGRES:
+                query = new PostgresQuery(cls);
+                break;
+            default:
+                query = new MysqlQuery(cls);
+                break;
+        }
+        return query;
     }
 
-    /**
-     * 获取一个关系型数据库 新条件
-     *
-     * @return 新条件
-     */
-    public CndJdbc cndJdbc(Class<?> cls, String alias) {
-        return CndJdbc.of(cls, alias, dbType, this.jdbcPair.getJdbcOperations());
+
+    public BaseQuery cndJdbc(Class<?> cls, String alias) {
+        BaseQuery query = null;
+        switch (dbType) {
+            case MYSQL:
+                query = new MysqlQuery(cls, alias);
+                break;
+            case ORACLE:
+                query = new OracleQuery(cls, alias);
+                break;
+            case POSTGRES:
+                query = new PostgresQuery(cls, alias);
+                break;
+            default:
+                query = new MysqlQuery(cls, alias);
+                break;
+        }
+        return query;
     }
 
-
+    public BaseSqlExecute getBaseSqlExecute() {
+        BaseSqlExecute baseSqlExecute = null;
+        switch (dbType) {
+            case MYSQL:
+                baseSqlExecute = new MysqlSqlExecute(this.jdbcPair.getJdbcTemplate());
+                break;
+            case ORACLE:
+                baseSqlExecute = new OracleSqlExecute(this.jdbcPair.getJdbcTemplate());
+                break;
+            case POSTGRES:
+                baseSqlExecute = new PostgresSqlExecute(this.jdbcPair.getJdbcTemplate());
+                break;
+            default:
+                baseSqlExecute = new MysqlSqlExecute(this.jdbcPair.getJdbcTemplate());
+                break;
+        }
+        return baseSqlExecute;
+    }
 }

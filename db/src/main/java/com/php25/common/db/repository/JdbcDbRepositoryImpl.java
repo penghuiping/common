@@ -2,7 +2,7 @@ package com.php25.common.db.repository;
 
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.sql.BaseQuery;
 import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
@@ -39,63 +39,64 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public List<T> findAllEnabled() {
-        return db.cndJdbc(model).whereEq("enable", 1).select();
+        return db.getBaseSqlExecute().select(db.cndJdbc(model).whereEq("enable", 1).select());
     }
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        return Optional.of(db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).andEq("enable", 1).single());
+        return Optional.of(db.getBaseSqlExecute().single(
+                db.cndJdbc(model).whereEq(pkName, id).andEq("enable", 1).single()));
     }
 
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
-        CndJdbc cnd = db.cndJdbc(model).ignoreCollection(false).andSearchParamBuilder(searchParamBuilder);
-        return Optional.ofNullable(cnd.single());
+        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        return Optional.ofNullable(db.getBaseSqlExecute().single(query.single()));
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder) {
-        CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
-        return cnd.select();
+        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        return db.getBaseSqlExecute().select(query.select());
     }
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
-        CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
         Sort sort = pageable.getSort();
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
             if (order.getDirection().isAscending()) {
-                cnd.asc(order.getProperty());
+                query.asc(order.getProperty());
             } else {
-                cnd.desc(order.getProperty());
+                query.desc(order.getProperty());
             }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
-        List<T> list = cnd.limit(page[0], page[1]).select();
-        long total = cnd.clone().andSearchParamBuilder(searchParamBuilder).count();
+        List<T> list = db.getBaseSqlExecute().select(query.limit(page[0], page[1]).select());
+        long total = db.getBaseSqlExecute().count(db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder).count());
         return new PageImpl<T>(list, pageable, total);
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
-        CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
             if (order.getDirection().isAscending()) {
-                cnd.asc(order.getProperty());
+                query.asc(order.getProperty());
             } else {
-                cnd.desc(order.getProperty());
+                query.desc(order.getProperty());
             }
         }
-        return cnd.select();
+        return db.getBaseSqlExecute().select(query.select());
     }
 
     @Override
     public long count(SearchParamBuilder searchParamBuilder) {
-        CndJdbc cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
-        return cnd.count();
+        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        return db.getBaseSqlExecute().count(query.count());
     }
 }

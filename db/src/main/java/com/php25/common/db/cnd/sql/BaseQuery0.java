@@ -30,7 +30,6 @@ public abstract class BaseQuery0 implements Query {
     protected long startRow = -1, pageSize = -1;
     protected OrderBy orderBy = null;
     protected GroupBy groupBy = null;
-    protected boolean ignoreCollection = true;
 
     protected Class<?> clazz;
 

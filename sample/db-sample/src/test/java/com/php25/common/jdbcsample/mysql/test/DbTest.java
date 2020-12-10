@@ -5,7 +5,7 @@ import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.sql.BaseQuery;
 import com.php25.common.jdbcsample.mysql.dto.CustomerDto;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
@@ -37,28 +37,28 @@ public class DbTest {
     @Autowired
     Db db;
 
-    SnowflakeIdWorker snowflakeIdWorker=new SnowflakeIdWorker();
+    SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     List<Customer> customers = Lists.newArrayList();
 
     List<CustomerDto> customerDtos = Lists.newArrayList();
 
     private void initMeta() throws Exception {
-        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer");
-        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_company");
-        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
-        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer_department");
-        db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        db.getJdbcPair().getJdbcOperations().execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-        db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
-        db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer");
+        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_company");
+        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
+        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_department");
+        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        db.getJdbcPair().getJdbcTemplate().execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+        db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
+        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
     }
 
     @Before
     public void before() throws Exception {
         initMeta();
-        CndJdbc cndJdbc = db.cndJdbc(Customer.class);
-        CndJdbc cndJdbcCompany = db.cndJdbc(Company.class);
+        BaseQuery cndJdbc = db.cndJdbc(Customer.class);
+        BaseQuery cndJdbcCompany = db.cndJdbc(Company.class);
 
         Company company = new Company();
         company.setId(snowflakeIdWorker.nextId());
@@ -66,7 +66,8 @@ public class DbTest {
         company.setCreateTime(new Date());
         company.setNew(true);
         company.setEnable(1);
-        cndJdbcCompany.insert(company);
+
+        db.getBaseSqlExecute().insert(cndJdbcCompany.insert(company));
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -80,7 +81,7 @@ public class DbTest {
             customer.setScore(BigDecimal.valueOf(1000L));
             customer.setNew(true);
             customers.add(customer);
-            cndJdbc.insert(customer);
+            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
             Assert.assertNotNull(customer.getId());
         }
 
@@ -95,7 +96,7 @@ public class DbTest {
             customer.setScore(BigDecimal.valueOf(1000L));
             customer.setNew(true);
             customers.add(customer);
-            cndJdbc.insert(customer);
+            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
             Assert.assertNotNull(customer.getId());
         }
 

@@ -53,10 +53,10 @@ public class ShardMysqlJdbcTest {
     private void initMeta() throws Exception {
         Db db = dbList.get(0);
         Db db1 = dbList.get(1);
-        db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
-        db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
-        db1.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
-        db1.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
+        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
+        db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
+        db1.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
+        db1.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
     }
 
     @Before

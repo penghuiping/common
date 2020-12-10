@@ -65,7 +65,7 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
 
     @Override
     public List<TimeTask> findByExecuteTimeScope(LocalDateTime start, LocalDateTime end) {
-        List<TimeTaskDb> timeTaskDbs = db.cndJdbc(TimeTaskDb.class).whereBetween("executeTime", start, end).select();
+        List<TimeTaskDb> timeTaskDbs = db.getBaseSqlExecute().select(db.cndJdbc(TimeTaskDb.class).whereBetween("executeTime", start, end).select());
         List<TimeTask> timeTasks = timeTaskDbs.stream().map(timeTaskDb -> {
             try {
                 Class<?> cls = Class.forName(timeTaskDb.getClassName());

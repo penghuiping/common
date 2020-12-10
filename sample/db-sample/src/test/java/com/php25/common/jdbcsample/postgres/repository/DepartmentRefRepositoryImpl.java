@@ -19,18 +19,18 @@ public class DepartmentRefRepositoryImpl implements DepartmentRefRepository {
 
     @Override
     public List<DepartmentRef> findByCustomerId(Long customerId) {
-        return db.cndJdbc(DepartmentRef.class).whereEq("customer_id", customerId).select();
+        return db.getBaseSqlExecute().select(db.cndJdbc(DepartmentRef.class).whereEq("customerId", customerId).select());
     }
 
     @Override
     public void save(List<DepartmentRef> departmentRefs) {
-        db.cndJdbc(DepartmentRef.class).insertBatch(departmentRefs);
+        db.getBaseSqlExecute().insertBatch(db.cndJdbc(DepartmentRef.class).insertBatch(departmentRefs));
     }
 
 
     @Override
     public void deleteByCustomerIds(List<Long> customerIds) {
-        db.cndJdbc(DepartmentRef.class).whereIn("customer_id", customerIds).delete();
+        db.getBaseSqlExecute().delete(db.cndJdbc(DepartmentRef.class).whereIn("customerId", customerIds).delete());
     }
 
 }

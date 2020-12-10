@@ -5,7 +5,7 @@ import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.sql.BaseQuery;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 import com.zaxxer.hikari.HikariDataSource;
@@ -78,7 +78,7 @@ public class OracleJdbcJmhTest {
 
     public Db db(JdbcTemplate jdbcTemplate) {
         Db db = new Db(DbType.ORACLE);
-        db.getJdbcPair().setJdbcOperations(jdbcTemplate);
+        db.getJdbcPair().setJdbcTemplate(jdbcTemplate);
         db.scanPackage("com.php25.common.jdbcsample.oracle.model");
         return db;
     }
@@ -88,19 +88,19 @@ public class OracleJdbcJmhTest {
         this.druidDataSource();
         this.db = this.db(new JdbcTemplate(druidDataSource()));
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_customer");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_company");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_department");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table t_customer_department");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop SEQUENCE SEQ_ID");
-        this.db.getJdbcPair().getJdbcOperations().execute("CREATE SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table t_customer");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table t_company");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table t_department");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table t_customer_department");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_customer (id number(38,0) primary key,username nvarchar2(20),password nvarchar2(50),age integer ,create_time date,update_time date,version number(38,0),company_id number(38,0),score number(32,0),enable number(1,0))");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_company (id number(38,0) primary key,name nvarchar2(20),create_time date,update_time date,enable number(1,0))");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id number(38,0) primary key,name nvarchar2(20))");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department (customer_id number(38,0),department_id number(38,0))");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcTemplate().execute("CREATE SEQUENCE SEQ_ID");
 
 
-        CndJdbc cndJpa = this.db.cndJdbc(Customer.class);
+        BaseQuery cndJpa = this.db.cndJdbc(Customer.class);
 
         Company company = new Company();
         company.setName("test");
@@ -119,7 +119,7 @@ public class OracleJdbcJmhTest {
             customer.setEnable(1);
             customer.setCompanyId(company.getId());
             this.customers.add(customer);
-            cndJpa.insert(customer);
+            this.db.getBaseSqlExecute().insert(cndJpa.insert(customer));
         }
 
     }
@@ -130,33 +130,33 @@ public class OracleJdbcJmhTest {
         customer1.setId(1L);
         customer1.setUsername("jack-0");
         customer1.setVersion(0L);
-        this.db.cndJdbc(Customer.class).update(customer1);
+        this.db.getBaseSqlExecute().update(this.db.cndJdbc(Customer.class).update(customer1));
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void update0() throws Exception {
-        this.db.getJdbcPair().getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
+        this.db.getJdbcPair().getJdbcTemplate().update("update t_customer set username=? where id=?", "jack-0", 1);
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete() throws Exception {
-        this.db.cndJdbc(Customer.class).whereEq("id", 1).delete();
+        this.db.getBaseSqlExecute().delete(this.db.cndJdbc(Customer.class).whereEq("id", 1).delete());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete0() throws Exception {
-        this.db.getJdbcPair().getJdbcOperations().update("delete from t_customer where id=1");
+        this.db.getJdbcPair().getJdbcTemplate().update("delete from t_customer where id=1");
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        Customer customers1 = this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customers1.getId()).isEqualTo(customers.get(0).getId());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcTemplate().queryForMap("select * from t_customer where username = ?", "jack0");
         Assertions.assertThat(map.get("id").toString()).isEqualTo(customers.get(0).getId().toString());
     }
 }

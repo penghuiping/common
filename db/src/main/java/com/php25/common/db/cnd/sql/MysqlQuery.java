@@ -2,6 +2,7 @@ package com.php25.common.db.cnd.sql;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.cnd.GenerationType;
 import com.php25.common.db.cnd.annotation.GeneratedValue;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
@@ -39,6 +40,8 @@ public class MysqlQuery extends BaseQuery {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
 
+        GenerationType generationType = GenerationType.AUTO;
+
         //判断主键属性上是否有@GeneratedValue注解
         Optional<GeneratedValue> generatedValueOptional = JdbcModelManager.getAnnotationGeneratedValue(clazz);
         if (generatedValueOptional.isPresent()) {
@@ -51,9 +54,9 @@ public class MysqlQuery extends BaseQuery {
                 case TABLE:
                     throw new DbException("抱歉!mysql不支持这种模式");
                 case IDENTITY:
+                    generationType = GenerationType.IDENTITY;
                     //获取id column名
                     String id = JdbcModelManager.getPrimaryKeyColName(clazz);
-
                     //由于使用了mysql auto-increment 所以直接移除id
                     pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(id)).collect(Collectors.toList());
                     break;
@@ -100,6 +103,32 @@ public class MysqlQuery extends BaseQuery {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setGenerationType(generationType);
+        sqlParams.setModel(model);
+        this.clear();
+        return sqlParams;
+    }
+
+    @Override
+    public SqlParams delete() {
+        StringBuilder sb = new StringBuilder("DELETE");
+        if (!StringUtil.isBlank(clazzAlias)) {
+            //存在别名
+            sb.append(" ").append(clazzAlias);
+            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(clazzAlias);
+        } else {
+            //不存在别名
+            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+        }
+        sb.append(" ").append(getSql());
+        this.setSql(sb);
+        String targetSql = this.getSql().toString();
+        log.info("sql语句为:{}", targetSql);
+        SqlParams sqlParams = new SqlParams();
+        sqlParams.setSql(targetSql);
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setParams(this.getParams());
         this.clear();
         return sqlParams;
     }

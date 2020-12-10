@@ -1,5 +1,8 @@
 package com.php25.common.db.cnd.sql;
 
+import com.google.common.collect.Lists;
+import com.php25.common.db.cnd.GenerationType;
+
 import java.util.List;
 
 /**
@@ -10,9 +13,19 @@ public class SqlParams {
 
     private String sql;
 
-    private List<Object> params;
+    private List<Object> params = Lists.newArrayList();
 
     private List<Object[]> batchParams;
+
+    private Class<?> clazz;
+
+    private Object model;
+
+    private GenerationType generationType;
+
+    private Class<?> resultType;
+
+    private String[] columns;
 
     public String getSql() {
         return sql;
@@ -36,5 +49,45 @@ public class SqlParams {
 
     public void setBatchParams(List<Object[]> batchParams) {
         this.batchParams = batchParams;
+    }
+
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<?> clazz) {
+        this.clazz = clazz;
+    }
+
+    public GenerationType getGenerationType() {
+        return generationType;
+    }
+
+    public void setGenerationType(GenerationType generationType) {
+        this.generationType = generationType;
+    }
+
+    public Object getModel() {
+        return model;
+    }
+
+    public void setModel(Object model) {
+        this.model = model;
+    }
+
+    public Class<?> getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(Class<?> resultType) {
+        this.resultType = resultType;
+    }
+
+    public String[] getColumns() {
+        return columns;
+    }
+
+    public void setColumns(String[] columns) {
+        this.columns = columns;
     }
 }

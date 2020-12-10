@@ -37,10 +37,10 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         Db db = shardRule.shard(this.dbList, id);
         if (s.isNew()) {
             //新增
-            db.cndJdbc(model).ignoreCollection(false).insert(s);
+            db.getBaseSqlExecute().insert(db.cndJdbc(model).insert(s));
         } else {
             //更新
-            db.cndJdbc(model).ignoreCollection(false).update(s);
+            db.getBaseSqlExecute().update(db.cndJdbc(model).update(s));
         }
         return s;
     }
@@ -58,9 +58,9 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
                             if (!models.isEmpty()) {
                                 S s = models.iterator().next();
                                 if (s.isNew()) {
-                                    db.cndJdbc(model).insertBatch(models);
+                                    db.getBaseSqlExecute().insertBatch(db.cndJdbc(model).insertBatch(models));
                                 } else {
-                                    db.cndJdbc(model).updateBatch(models);
+                                    db.getBaseSqlExecute().updateBatch(db.cndJdbc(model).updateBatch(models));
                                 }
                             }
                             return models;
@@ -82,7 +82,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public Optional<T> findById(@NotNull ID id) {
         Db db = shardRule.shard(this.dbList, id);
-        T t = db.cndJdbc(model).ignoreCollection(false).whereEq(pkName, id).single();
+        T t = db.getBaseSqlExecute().single(db.cndJdbc(model).whereEq(pkName, id).single());
         if (null != t) {
             return Optional.of(t);
         }
@@ -92,7 +92,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public boolean existsById(@NotNull ID id) {
         Db db = shardRule.shard(this.dbList, id);
-        return db.cndJdbc(model).whereEq(pkName, id).count() > 0;
+        return db.getBaseSqlExecute().count(db.cndJdbc(model).whereEq(pkName, id).count()) > 0;
     }
 
     @NotNull
@@ -100,7 +100,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public Iterable<T> findAll() {
         List<T> result = new ArrayList<>();
         for (Db db : dbList) {
-            List<T> tmp = db.cndJdbc(model).select();
+            List<T> tmp = db.getBaseSqlExecute().select(db.cndJdbc(model).select());
             if (null != tmp && !tmp.isEmpty()) {
                 result.addAll(tmp);
             }
@@ -115,7 +115,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         Lists.newArrayList(iterable).stream()
                 .collect(Collectors.groupingBy(id -> shardRule.shard(dbList, id)))
                 .forEach((db, ids) -> {
-                    List<T> tmp = db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select();
+                    List<T> tmp = db.getBaseSqlExecute().select(db.cndJdbc(model).whereIn(pkName, Lists.newArrayList(ids)).select());
                     result.addAll(tmp);
                 });
         return result;
@@ -125,7 +125,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public long count() {
         long count = 0L;
         for (Db db : dbList) {
-            count = count + db.cndJdbc(model).count();
+            count = count + db.getBaseSqlExecute().count(db.cndJdbc(model).count());
         }
         return count;
     }
@@ -133,14 +133,14 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public void deleteById(@NotNull ID id) {
         Db db = shardRule.shard(this.dbList, id);
-        T obj = db.cndJdbc(model).whereEq(pkName, id).single();
+        T obj = db.getBaseSqlExecute().single(db.cndJdbc(model).whereEq(pkName, id).single());
         this.delete(obj);
     }
 
     @Override
     public void delete(T t) {
         Db db = shardRule.shard(this.dbList, t.getId());
-        db.cndJdbc(model).ignoreCollection(false).delete(t);
+        db.getBaseSqlExecute().delete(db.cndJdbc(model).delete(t));
     }
 
     @Override
@@ -154,7 +154,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
                         @Override
                         public Void doInTransaction() {
                             List<ID> ids = list.stream().map(Persistable::getId).collect(Collectors.toList());
-                            db.cndJdbc(model).whereIn(pkName, ids).delete();
+                            db.getBaseSqlExecute().delete(db.cndJdbc(model).whereIn(pkName, ids).delete());
                             return null;
                         }
 
@@ -175,7 +175,7 @@ public class BaseShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
             TransactionCallback<Void> tmp = new TransactionCallback<>() {
                 @Override
                 public Void doInTransaction() {
-                    db.cndJdbc(model).delete();
+                    db.getBaseSqlExecute().delete(db.cndJdbc(model).delete());
                     return null;
                 }
 

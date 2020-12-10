@@ -6,6 +6,8 @@ import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
+import com.php25.common.db.specification.SearchParam;
+import com.php25.common.db.specification.SearchParamBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +54,13 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
         log.info("sql语句为:" + targetSql);
-        this.clear();
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setColumns(columns);
+        sqlParams.setResultType(model);
+        sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        this.clear();
         return sqlParams;
     }
 
@@ -152,6 +158,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setClazz(this.clazz);
         this.clear();
         return sqlParams;
     }
@@ -168,7 +175,62 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
 
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
-        return null;
+        //泛型获取类所有的属性
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append(pairList.get(i).getLeft());
+            } else {
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
+        }
+        stringBuilder.append(" ) VALUES ( ");
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append("?");
+            } else {
+                stringBuilder.append("?,");
+            }
+        }
+        stringBuilder.append(" )");
+        String targetSql = stringBuilder.toString();
+        log.info("sql语句为:{}", targetSql);
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < models.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(models.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                } else {
+                    params.add(paramConvert(tmp.get(i).getRight()));
+                }
+            }
+            batchParams.add(params.toArray());
+        }
+        SqlParams sqlParams = new SqlParams();
+        sqlParams.setSql(targetSql);
+        sqlParams.setBatchParams(batchParams);
+        sqlParams.setClazz(this.clazz);
+        this.clear();
+        return sqlParams;
     }
 
     @Override
@@ -183,10 +245,6 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
 
     @Override
     public <M> SqlParams updateBatch(List<M> models) {
-        //实体类中存在集合属性的情况
-        if (!ignoreCollection && JdbcModelManager.existCollectionAttribute(clazz)) {
-            log.warn("此实体类中存在集合属性，批量更新操作不支持集合属性,对于集合属性将直接忽略");
-        }
         M model = models.get(0);
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(model.getClass())).append(" SET ");
@@ -256,33 +314,16 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
-        this.clear();
-        return sqlParams;
-    }
-
-    @Override
-    public SqlParams delete() {
-        StringBuilder sb = new StringBuilder("DELETE");
-        if (!StringUtil.isBlank(clazzAlias)) {
-            //存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(clazzAlias);
-        } else {
-            //不存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
-        }
-        sb.append(" ").append(getSql());
-        this.setSql(sb);
-        String targetSql = this.getSql().toString();
-        log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
-        sqlParams.setSql(targetSql);
+        sqlParams.setClazz(this.clazz);
         this.clear();
         return sqlParams;
     }
 
     @Override
     public <M> SqlParams delete(M model) {
-        return this.delete();
+        Object id = JdbcModelManager.getPrimaryKeyValue(clazz, model);
+        String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
+        return this.whereEq(pkName, id).delete();
     }
 
     @Override
@@ -298,6 +339,8 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         log.info("sql语句为:{}", targetSql);
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setParams(this.getParams());
         this.clear();
         return sqlParams;
     }
@@ -343,5 +386,44 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
                 throw new DbException("此orm框架中model中不支持Collection类型的属性");
             }
         }
+    }
+
+
+    /**
+     * 通过searchParamBuilder来构造查询条件
+     *
+     * @param searchParamBuilder
+     * @return
+     */
+    public BaseQuery andSearchParamBuilder(SearchParamBuilder searchParamBuilder) {
+        List<SearchParam> searchParams = searchParamBuilder.build();
+        for (SearchParam searchParam : searchParams) {
+            searchParam.getFieldName();
+            String operator = searchParam.getOperator().name();
+            if (!StringUtil.isBlank(operator)) {
+                if ("eq".equals(operator.toLowerCase())) {
+                    this.andEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("ne".equals(operator.toLowerCase())) {
+                    this.andNotEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("like".equals(operator.toLowerCase())) {
+                    this.andLike(searchParam.getFieldName(), (String) searchParam.getValue());
+                } else if ("gt".equals(operator.toLowerCase())) {
+                    this.andGreat(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("lt".equals(operator.toLowerCase())) {
+                    this.andLess(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("gte".equals(operator.toLowerCase())) {
+                    this.andGreatEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("lte".equals(operator.toLowerCase())) {
+                    this.andLessEq(searchParam.getFieldName(), searchParam.getValue());
+                } else if ("in".equals(operator.toLowerCase())) {
+                    this.andIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
+                } else if ("nin".equals(operator.toLowerCase())) {
+                    this.andNotIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
+                } else {
+                    this.andEq(searchParam.getFieldName(), searchParam.getValue());
+                }
+            }
+        }
+        return this;
     }
 }

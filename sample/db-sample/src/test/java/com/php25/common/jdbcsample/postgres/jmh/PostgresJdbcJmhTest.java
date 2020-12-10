@@ -5,7 +5,7 @@ import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.CndJdbc;
+import com.php25.common.db.cnd.sql.BaseQuery;
 import com.php25.common.jdbcsample.postgres.model.Company;
 import com.php25.common.jdbcsample.postgres.model.Customer;
 import com.zaxxer.hikari.HikariDataSource;
@@ -78,7 +78,7 @@ public class PostgresJdbcJmhTest {
 
     public Db db(JdbcTemplate jdbcTemplate) {
         Db db = new Db(DbType.POSTGRES);
-        db.getJdbcPair().setJdbcOperations(jdbcTemplate);
+        db.getJdbcPair().setJdbcTemplate(jdbcTemplate);
         db.scanPackage("com.php25.common.jdbcsample.postgres.model");
         return db;
     }
@@ -88,27 +88,27 @@ public class PostgresJdbcJmhTest {
         DataSource dataSource = druidDataSource();
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
         this.db = this.db(jdbcTemplate(dataSource));
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_company");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_department");
-        this.db.getJdbcPair().getJdbcOperations().execute("drop table if exists t_customer_department");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_company");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_department");
 
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_department (id bigint primary key,name varchar(20))");
-        this.db.getJdbcPair().getJdbcOperations().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_customer (id bigint primary key,username varchar(20),password varchar(50),age integer ,create_time timestamp,update_time timestamp,version bigint,company_id bigint,score bigint,enable integer)");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_company (id bigint primary key,name varchar(20),create_time timestamp,update_time timestamp,enable integer)");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
 
-        this.db.getJdbcPair().getJdbcOperations().execute("drop SEQUENCE if exists SEQ_ID");
-        this.db.getJdbcPair().getJdbcOperations().execute("create SEQUENCE SEQ_ID");
+        this.db.getJdbcPair().getJdbcTemplate().execute("drop SEQUENCE if exists SEQ_ID");
+        this.db.getJdbcPair().getJdbcTemplate().execute("create SEQUENCE SEQ_ID");
 
-        CndJdbc cndJdbc = this.db.cndJdbc(Customer.class);
+        BaseQuery cndJdbc = this.db.cndJdbc(Customer.class);
 
         Company company = new Company();
         company.setName("test");
         company.setId(1L);
         company.setCreateTime(new Date());
         company.setEnable(1);
-        db.cndJdbc(Company.class).insert(company);
+        db.getBaseSqlExecute().insert(db.cndJdbc(Company.class).insert(company));
 
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
@@ -121,7 +121,7 @@ public class PostgresJdbcJmhTest {
             customer.setEnable(1);
             customer.setCompanyId(company.getId());
             this.customers.add(customer);
-            cndJdbc.insert(customer);
+            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
         }
 
     }
@@ -132,47 +132,47 @@ public class PostgresJdbcJmhTest {
         customer1.setId(1L);
         customer1.setUsername("jack-0");
         customer1.setVersion(0L);
-        this.db.cndJdbc(Customer.class).update(customer1);
+        db.getBaseSqlExecute().update(this.db.cndJdbc(Customer.class).update(customer1));
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void update0() throws Exception {
-        this.db.getJdbcPair().getJdbcOperations().update("update t_customer set username=? where id=?", "jack-0", 1);
+        this.db.getJdbcPair().getJdbcTemplate().update("update t_customer set username=? where id=?", "jack-0", 1);
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete() throws Exception {
-        this.db.cndJdbc(Customer.class).whereEq("id", 1).delete();
+        db.getBaseSqlExecute().delete(this.db.cndJdbc(Customer.class).whereEq("id", 1).delete());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete0() throws Exception {
-        this.db.getJdbcPair().getJdbcOperations().update("delete from t_customer where id=1");
+        this.db.getJdbcPair().getJdbcTemplate().update("delete from t_customer where id=1");
     }
 
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        Customer customers1 = this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single();
+        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customers1.getId()).isEqualTo(customers.get(0).getId());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where username = ?", new Object[]{"jack0"});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcTemplate().queryForMap("select * from t_customer where username = ?", "jack0");
         Assertions.assertThat(map.get("id")).isEqualTo(customers.get(0).getId());
     }
 
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryById() throws Exception {
-        Customer customer = this.db.cndJdbc(Customer.class).whereEq("id", customers.get(0).getId()).single();
+        Customer customer = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("id", customers.get(0).getId()).single());
         Assertions.assertThat(customer.getId()).isEqualTo(customers.get(0).getId());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryById0() throws Exception {
-        Map<String, Object> map = this.db.getJdbcPair().getJdbcOperations().queryForMap("select * from t_customer where id =?", new Object[]{customers.get(0).getId()});
+        Map<String, Object> map = this.db.getJdbcPair().getJdbcTemplate().queryForMap("select * from t_customer where id =?", customers.get(0).getId());
         Assertions.assertThat(map.get("id")).isEqualTo(customers.get(0).getId());
     }
 }

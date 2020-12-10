@@ -1,6 +1,8 @@
 package com.php25.common.db.cnd.sql;
 
 import com.google.common.collect.Lists;
+import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.cnd.GenerationType;
 import com.php25.common.db.cnd.annotation.GeneratedValue;
 import com.php25.common.db.cnd.annotation.SequenceGenerator;
 import com.php25.common.db.exception.DbException;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +25,18 @@ import java.util.stream.Collectors;
 public class OracleQuery extends BaseQuery {
     private static final Logger log = LoggerFactory.getLogger(OracleQuery.class);
 
+    public OracleQuery(Class<?> model) {
+        this.clazz = model;
+    }
+
+    public OracleQuery(Class<?> model, String alias) {
+        this(model);
+        if (!StringUtil.isBlank(alias)) {
+            aliasMap.put(alias, model);
+            clazzAlias = alias;
+        }
+    }
+
     @Override
     protected <M> SqlParams insert(M model, boolean ignoreNull) {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
@@ -29,6 +44,8 @@ public class OracleQuery extends BaseQuery {
 
         //获取主键名
         String id = JdbcModelManager.getPrimaryKeyColName(clazz);
+
+        GenerationType generationType = GenerationType.AUTO;
 
         //是否是使用了sequence的情况
         boolean flag = false;
@@ -47,6 +64,7 @@ public class OracleQuery extends BaseQuery {
                 case IDENTITY:
                     throw new DbException("抱歉!oracle不支持这种模式");
                 case SEQUENCE:
+                    generationType = GenerationType.SEQUENCE;
                     flag = true;
                     Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
                     if (!sequenceGeneratorOptional.isPresent()) {
@@ -131,6 +149,169 @@ public class OracleQuery extends BaseQuery {
         SqlParams sqlParams = new SqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setGenerationType(generationType);
+        sqlParams.setModel(model);
+        this.clear();
+        return sqlParams;
+    }
+
+    @Override
+    public <M> SqlParams insertBatch(List<M> models) {
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
+
+        //获取主键名
+        String id = JdbcModelManager.getPrimaryKeyColName(clazz);
+
+        //是否是使用了sequence的情况
+        boolean flag = false;
+
+        //判断主键属性上是否有@GeneratedValue注解
+        Optional<GeneratedValue> generatedValueOptional = JdbcModelManager.getAnnotationGeneratedValue(clazz);
+        if (generatedValueOptional.isPresent()) {
+            //判断策略
+            GeneratedValue generatedValue = generatedValueOptional.get();
+            switch (generatedValue.strategy()) {
+                case AUTO:
+                    //程序指定,什么也不需要做
+                    break;
+                case TABLE:
+                    throw new DbException("抱歉!oracle不支持这种模式");
+                case IDENTITY:
+                    throw new DbException("抱歉!oracle不支持这种模式");
+                case SEQUENCE:
+                    flag = true;
+                    Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
+                    if (!sequenceGeneratorOptional.isPresent()) {
+                        throw new DbException("@SequenceGenerator注解不存在");
+                    } else {
+                        SequenceGenerator sequenceGenerator = sequenceGeneratorOptional.get();
+                        String sequenceName = sequenceGenerator.sequenceName();
+                        Assert.hasText(sequenceName, "sequenceGenerator.sequenceName不能为空");
+
+                        pairList = pairList.stream().map(pair -> {
+                            if (pair.getLeft().equals(id)) {
+                                //替换id的值为
+                                return new ImmutablePair<String, Object>(pair.getLeft(), sequenceName + ".nextval");
+                            } else {
+                                return pair;
+                            }
+                        }).collect(Collectors.toList());
+                    }
+                    break;
+                default:
+                    //程序指定,什么也不需要做
+                    break;
+            }
+        }
+
+
+        //判断是否有@version注解
+        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        String versionColumnName = null;
+        if (versionFieldOptional.isPresent()) {
+            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+        }
+
+        //拼装sql语句
+        for (int i = 0; i < pairList.size(); i++) {
+            if (i == (pairList.size() - 1)) {
+                stringBuilder.append(pairList.get(i).getLeft());
+            } else {
+                stringBuilder.append(pairList.get(i).getLeft() + ",");
+            }
+        }
+        stringBuilder.append(" ) VALUES ( ");
+
+
+        if (flag) {
+            //sequence情况
+            for (int i = 0; i < pairList.size(); i++) {
+                if (i == (pairList.size() - 1)) {
+                    if (pairList.get(i).getLeft().equals(id)) {
+                        stringBuilder.append(pairList.get(i).getRight());
+                    } else {
+                        stringBuilder.append("?");
+                    }
+                } else {
+                    if (pairList.get(i).getLeft().equals(id)) {
+                        stringBuilder.append(pairList.get(i).getRight()).append(",");
+                    } else {
+                        stringBuilder.append("?,");
+                    }
+                }
+            }
+        } else {
+            //非sequence情况
+            for (int i = 0; i < pairList.size(); i++) {
+                if (i == (pairList.size() - 1)) {
+                    stringBuilder.append("?");
+                } else {
+                    stringBuilder.append("?,");
+                }
+
+            }
+        }
+
+        stringBuilder.append(" )");
+        String targetSql = stringBuilder.toString();
+        log.info("sql语句为:{}", targetSql);
+
+        //拼装参数
+        List<Object[]> batchParams = new ArrayList<>();
+        for (int j = 0; j < models.size(); j++) {
+            List<Object> params = new ArrayList<>();
+            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(models.get(j), false);
+            for (int i = 0; i < tmp.size(); i++) {
+
+                if (flag) {
+                    //sequence情况
+                    //判断是否是id
+                    if (tmp.get(i).getLeft().equals(id)) {
+                        continue;
+                    }
+                }
+
+                //判断是否有@version注解，如果有默认给0
+                if (versionFieldOptional.isPresent()) {
+                    if (tmp.get(i).getLeft().equals(versionColumnName)) {
+                        params.add(0);
+                    } else {
+                        params.add(paramConvert(tmp.get(i).getRight()));
+                    }
+                } else {
+                    params.add(paramConvert(tmp.get(i).getRight()));
+                }
+            }
+            batchParams.add(params.toArray());
+        }
+        SqlParams sqlParams = new SqlParams();
+        sqlParams.setSql(targetSql);
+        sqlParams.setBatchParams(batchParams);
+        sqlParams.setClazz(this.clazz);
+        this.clear();
+        return sqlParams;
+    }
+
+    @Override
+    public SqlParams delete() {
+        StringBuilder sb = new StringBuilder("DELETE");
+        if (!StringUtil.isBlank(clazzAlias)) {
+            //存在别名
+            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(clazzAlias);
+        } else {
+            //不存在别名
+            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+        }
+        sb.append(" ").append(getSql());
+        this.setSql(sb);
+        String targetSql = this.getSql().toString();
+        log.info("sql语句为:{}", targetSql);
+        SqlParams sqlParams = new SqlParams();
+        sqlParams.setSql(targetSql);
+        sqlParams.setClazz(this.clazz);
+        sqlParams.setParams(this.getParams());
         this.clear();
         return sqlParams;
     }
