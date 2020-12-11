@@ -1,6 +1,5 @@
 package com.php25.common.db.cnd.sql;
 
-import com.google.common.collect.Lists;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.cnd.GenerationType;
 import com.php25.common.db.cnd.annotation.GeneratedValue;
@@ -100,9 +99,9 @@ public class MysqlQuery extends BaseQuery {
         String targetSql = stringBuilder.toString();
         log.info("sql语句为:{}", targetSql);
 
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
-        sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setParams(params);
         sqlParams.setClazz(this.clazz);
         sqlParams.setGenerationType(generationType);
         sqlParams.setModel(model);
@@ -125,7 +124,7 @@ public class MysqlQuery extends BaseQuery {
         this.setSql(sb);
         String targetSql = this.getSql().toString();
         log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());

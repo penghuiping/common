@@ -3,6 +3,8 @@ package com.php25.common.db.cnd.execute;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.cnd.JdbcModelRowMapper;
+import com.php25.common.db.cnd.sql.BatchSqlParams;
+import com.php25.common.db.cnd.sql.DefaultSqlParams;
 import com.php25.common.db.cnd.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
@@ -35,9 +37,10 @@ public abstract class BaseSqlExecute implements SqlExecute {
 
     @Override
     public <T> List<T> select(SqlParams sqlParams) {
-        String targetSql = sqlParams.getSql();
-        Object[] paras = sqlParams.getParams().toArray();
-        Class<?> resultType = sqlParams.getResultType();
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        String targetSql = defaultSqlParams.getSql();
+        Object[] paras = defaultSqlParams.getParams().toArray();
+        Class<?> resultType = defaultSqlParams.getResultType();
         List<T> list = null;
         if (resultType.isAssignableFrom(Map.class)) {
             list = (List<T>) this.jdbcTemplate.query(targetSql, paras, new ColumnMapRowMapper());
@@ -87,14 +90,16 @@ public abstract class BaseSqlExecute implements SqlExecute {
 
     @Override
     public List<Map> mapSelect(SqlParams sqlParams) {
-        sqlParams.setModel(Map.class);
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        defaultSqlParams.setModel(Map.class);
         return this.select(sqlParams);
     }
 
 
     @Override
     public Map mapSingle(SqlParams sqlParams) {
-        sqlParams.setModel(Map.class);
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        defaultSqlParams.setModel(Map.class);
         List<Map> result = this.select(sqlParams);
         if (null != result && !result.isEmpty()) {
             return result.get(0);
@@ -115,7 +120,8 @@ public abstract class BaseSqlExecute implements SqlExecute {
     @Override
     public int update(SqlParams sqlParams) {
         try {
-            return this.jdbcTemplate.update(sqlParams.getSql(), sqlParams.getParams().toArray());
+            DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+            return this.jdbcTemplate.update(defaultSqlParams.getSql(), defaultSqlParams.getParams().toArray());
         } catch (Exception e) {
             throw new DbException("更新操作失败", e);
         }
@@ -124,7 +130,8 @@ public abstract class BaseSqlExecute implements SqlExecute {
     @Override
     public int[] updateBatch(SqlParams sqlParams) {
         try {
-            return this.jdbcTemplate.batchUpdate(sqlParams.getSql(), sqlParams.getBatchParams());
+            BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
+            return this.jdbcTemplate.batchUpdate(batchSqlParams.getSql(), batchSqlParams.getBatchParams());
         } catch (Exception e) {
             throw new DbException("批量更新操作失败", e);
         }
@@ -133,7 +140,8 @@ public abstract class BaseSqlExecute implements SqlExecute {
     @Override
     public int[] insertBatch(SqlParams sqlParams) {
         try {
-            return this.jdbcTemplate.batchUpdate(sqlParams.getSql(), sqlParams.getBatchParams());
+            BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
+            return this.jdbcTemplate.batchUpdate(batchSqlParams.getSql(), batchSqlParams.getBatchParams());
         } catch (Exception e) {
             throw new DbException("插入操作失败", e);
         }
@@ -141,12 +149,14 @@ public abstract class BaseSqlExecute implements SqlExecute {
 
     @Override
     public int delete(SqlParams sqlParams) {
-        return this.jdbcTemplate.update(sqlParams.getSql(), sqlParams.getParams().toArray());
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        return this.jdbcTemplate.update(defaultSqlParams.getSql(), defaultSqlParams.getParams().toArray());
     }
 
     @Override
     public long count(SqlParams sqlParams) {
-        Long result = this.jdbcTemplate.queryForObject(sqlParams.getSql(), sqlParams.getParams().toArray(), Long.class);
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        Long result = this.jdbcTemplate.queryForObject(defaultSqlParams.getSql(), defaultSqlParams.getParams().toArray(), Long.class);
         if (null == result) {
             result = -1L;
         }

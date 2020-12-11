@@ -3,6 +3,7 @@ package com.php25.common.db.cnd.execute;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.cnd.GenerationType;
+import com.php25.common.db.cnd.sql.DefaultSqlParams;
 import com.php25.common.db.cnd.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.manager.JdbcModelManager;
@@ -27,11 +28,12 @@ public class MysqlSqlExecute extends BaseSqlExecute {
 
     @Override
     public int insert(SqlParams sqlParams) {
-        Class<?> clazz = sqlParams.getClazz();
-        String targetSql = sqlParams.getSql();
-        List<Object> params = sqlParams.getParams();
-        GenerationType generationType = sqlParams.getGenerationType();
-        Object model = sqlParams.getModel();
+        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        Class<?> clazz = defaultSqlParams.getClazz();
+        String targetSql = defaultSqlParams.getSql();
+        List<Object> params = defaultSqlParams.getParams();
+        GenerationType generationType = defaultSqlParams.getGenerationType();
+        Object model = defaultSqlParams.getModel();
         try {
             if (GenerationType.IDENTITY.equals(generationType)) {
                 //自增操作

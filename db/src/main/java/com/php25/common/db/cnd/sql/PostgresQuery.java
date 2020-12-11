@@ -1,6 +1,5 @@
 package com.php25.common.db.cnd.sql;
 
-import com.google.common.collect.Lists;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.cnd.GenerationType;
 import com.php25.common.db.cnd.annotation.GeneratedValue;
@@ -147,8 +146,8 @@ public class PostgresQuery extends BaseQuery {
         stringBuilder.append(" )");
         String targetSql = stringBuilder.toString();
         log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
-        sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        sqlParams.setParams(params);
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setGenerationType(generationType);
@@ -289,7 +288,7 @@ public class PostgresQuery extends BaseQuery {
             batchParams.add(params.toArray());
         }
 
-        SqlParams sqlParams = new SqlParams();
+        BatchSqlParams sqlParams = new BatchSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
@@ -311,7 +310,7 @@ public class PostgresQuery extends BaseQuery {
         this.setSql(sb);
         String targetSql = this.getSql().toString();
         log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());

@@ -54,7 +54,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
         log.info("sql语句为:" + targetSql);
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setColumns(columns);
@@ -155,9 +155,9 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         }
         String targetSql = stringBuilder.toString();
         log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
-        sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setParams(this.params);
         sqlParams.setClazz(this.clazz);
         this.clear();
         return sqlParams;
@@ -225,7 +225,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             }
             batchParams.add(params.toArray());
         }
-        SqlParams sqlParams = new SqlParams();
+        BatchSqlParams sqlParams = new BatchSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
@@ -311,7 +311,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             }
             batchParams.add(params1.toArray());
         }
-        SqlParams sqlParams = new SqlParams();
+        BatchSqlParams sqlParams = new BatchSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
@@ -337,7 +337,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         this.setSql(sb);
         String targetSql = this.getSql().toString();
         log.info("sql语句为:{}", targetSql);
-        SqlParams sqlParams = new SqlParams();
+        DefaultSqlParams sqlParams = new DefaultSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());
