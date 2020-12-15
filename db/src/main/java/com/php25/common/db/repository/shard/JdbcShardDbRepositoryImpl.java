@@ -2,9 +2,9 @@ package com.php25.common.db.repository.shard;
 
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.sql.BaseQuery;
+import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.sql.BaseQuery;
 import com.php25.common.db.exception.DbException;
-import com.php25.common.db.manager.JdbcModelManager;
 import com.php25.common.db.repository.JdbcDbRepository;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;

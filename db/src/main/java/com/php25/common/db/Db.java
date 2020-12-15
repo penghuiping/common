@@ -1,16 +1,16 @@
 package com.php25.common.db;
 
-import com.php25.common.db.cnd.JdbcPair;
-import com.php25.common.db.cnd.execute.BaseSqlExecute;
-import com.php25.common.db.cnd.execute.MysqlSqlExecute;
-import com.php25.common.db.cnd.execute.OracleSqlExecute;
-import com.php25.common.db.cnd.execute.PostgresSqlExecute;
-import com.php25.common.db.cnd.sql.BaseQuery;
-import com.php25.common.db.cnd.sql.MysqlQuery;
-import com.php25.common.db.cnd.sql.OracleQuery;
-import com.php25.common.db.cnd.sql.PostgresQuery;
+import com.php25.common.db.core.JdbcPair;
+import com.php25.common.db.core.execute.BaseSqlExecute;
+import com.php25.common.db.core.execute.MysqlSqlExecute;
+import com.php25.common.db.core.execute.OracleSqlExecute;
+import com.php25.common.db.core.execute.PostgresSqlExecute;
+import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.core.sql.MysqlQuery;
+import com.php25.common.db.core.sql.OracleQuery;
+import com.php25.common.db.core.sql.PostgresQuery;
 import com.php25.common.db.exception.DbException;
-import com.php25.common.db.manager.JdbcModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.StandardEnvironment;

@@ -1,8 +1,8 @@
 package com.php25.common.jdbcsample.mysql.sql;
 
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.db.cnd.sql.MysqlQuery;
-import com.php25.common.db.cnd.sql.SqlParams;
+import com.php25.common.db.core.sql.MysqlQuery;
+import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
 import org.junit.Test;

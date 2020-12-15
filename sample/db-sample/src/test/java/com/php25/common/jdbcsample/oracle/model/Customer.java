@@ -1,10 +1,10 @@
 package com.php25.common.jdbcsample.oracle.model;
 
-import com.php25.common.db.cnd.GenerationType;
-import com.php25.common.db.cnd.annotation.Column;
-import com.php25.common.db.cnd.annotation.GeneratedValue;
-import com.php25.common.db.cnd.annotation.SequenceGenerator;
-import com.php25.common.db.cnd.annotation.Table;
+import com.php25.common.db.core.GenerationType;
+import com.php25.common.db.core.annotation.Column;
+import com.php25.common.db.core.annotation.GeneratedValue;
+import com.php25.common.db.core.annotation.SequenceGenerator;
+import com.php25.common.db.core.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;

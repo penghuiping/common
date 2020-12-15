@@ -5,7 +5,7 @@ import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.sql.BaseQuery;
+import com.php25.common.db.core.sql.BaseQuery;
 import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;

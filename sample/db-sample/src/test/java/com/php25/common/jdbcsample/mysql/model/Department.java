@@ -1,8 +1,8 @@
 package com.php25.common.jdbcsample.mysql.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.php25.common.db.cnd.annotation.Column;
-import com.php25.common.db.cnd.annotation.Table;
+import com.php25.common.db.core.annotation.Column;
+import com.php25.common.db.core.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;

@@ -2,8 +2,8 @@ package com.php25.common.db.repository;
 
 import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.Db;
-import com.php25.common.db.cnd.sql.BaseQuery;
-import com.php25.common.db.manager.JdbcModelManager;
+import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.sql.BaseQuery;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

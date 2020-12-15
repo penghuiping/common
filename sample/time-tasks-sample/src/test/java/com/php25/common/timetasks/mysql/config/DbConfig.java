@@ -5,7 +5,7 @@ import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.JdbcPair;
+import com.php25.common.db.core.JdbcPair;
 import com.php25.common.timetasks.repository.TimeTaskDbRepository;
 import com.php25.common.timetasks.repository.TimeTaskDbRepositoryImpl;
 import com.zaxxer.hikari.HikariDataSource;

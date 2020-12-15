@@ -2,7 +2,7 @@ package com.php25.common.db.repository.shard;
 
 import com.google.common.collect.Lists;
 import com.php25.common.db.Db;
-import com.php25.common.db.manager.JdbcModelManager;
+import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.repository.BaseDbRepository;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

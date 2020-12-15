@@ -3,7 +3,7 @@ package com.php25.common.jdbcsample.mysql.config;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.JdbcPair;
+import com.php25.common.db.core.JdbcPair;
 import com.php25.common.db.repository.shard.DefaultShardRule;
 import com.php25.common.db.repository.shard.ShardRule;
 import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;

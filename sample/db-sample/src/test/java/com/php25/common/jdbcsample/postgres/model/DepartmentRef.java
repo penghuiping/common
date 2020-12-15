@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.postgres.model;
 
-import com.php25.common.db.cnd.annotation.Column;
-import com.php25.common.db.cnd.annotation.Table;
+import com.php25.common.db.core.annotation.Column;
+import com.php25.common.db.core.annotation.Table;
 
 /**
  * @author penghuiping

@@ -3,7 +3,7 @@ package com.php25.common.jdbcsample.oracle.config;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.cnd.JdbcPair;
+import com.php25.common.db.core.JdbcPair;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

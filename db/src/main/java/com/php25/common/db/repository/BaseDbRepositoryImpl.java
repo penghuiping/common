@@ -2,7 +2,7 @@ package com.php25.common.db.repository;
 
 import com.google.common.collect.Lists;
 import com.php25.common.db.Db;
-import com.php25.common.db.manager.JdbcModelManager;
+import com.php25.common.db.core.manager.JdbcModelManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Persistable;
 import org.springframework.transaction.annotation.Transactional;
