@@ -48,7 +48,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public List<T> findAllEnabled() {
         List<T> result = new ArrayList<>();
         for (Db db : dbList) {
-            List<T> tmp = db.getBaseSqlExecute().select(db.cndJdbc(model).whereEq("enable", 1).select());
+            List<T> tmp = db.getBaseSqlExecute().select(db.from(model).whereEq("enable", 1).select());
             result.addAll(tmp);
         }
         return result;
@@ -57,14 +57,14 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     @Override
     public Optional<T> findByIdEnable(ID id) {
         Db db = shardRule.shard(this.dbList, id);
-        return Optional.of(db.getBaseSqlExecute().single(db.cndJdbc(model).whereEq(pkName, id).andEq("enable", 1).single()));
+        return Optional.of(db.getBaseSqlExecute().single(db.from(model).whereEq(pkName, id).andEq("enable", 1).single()));
     }
 
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
         T result = null;
         for (Db db : dbList) {
-            BaseQuery cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+            BaseQuery cnd = db.from(model).andSearchParamBuilder(searchParamBuilder);
             T tmp = db.getBaseSqlExecute().single(cnd.single());
             if (tmp != null) {
                 result = tmp;
@@ -78,7 +78,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public List<T> findAll(SearchParamBuilder searchParamBuilder) {
         List<T> result = new ArrayList<>();
         for (Db db : dbList) {
-            BaseQuery cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+            BaseQuery cnd = db.from(model).andSearchParamBuilder(searchParamBuilder);
             List<T> tmp = db.getBaseSqlExecute().select(cnd.select());
             if (tmp != null && !tmp.isEmpty()) {
                 result.addAll(tmp);
@@ -104,7 +104,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         T min = null;
         List<List<T>> lists = new ArrayList<>();
         for (Db db : dbList) {
-            BaseQuery cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+            BaseQuery cnd = db.from(model).andSearchParamBuilder(searchParamBuilder);
             List<T> list = db.getBaseSqlExecute().select(cnd.limit(perDbOffset, pageable.getPageSize()).select());
             lists.add(list);
             if (null != list && !list.isEmpty()) {
@@ -119,7 +119,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
         for (int i = 0; i < dbList.size(); i++) {
             List<T> tmp = lists.get(i);
             Db db = dbList.get(i);
-            List<T> list = db.getBaseSqlExecute().select(db.cndJdbc(model).andBetween(pk, min.getId(), tmp.get(tmp.size() - 1).getId()).select());
+            List<T> list = db.getBaseSqlExecute().select(db.from(model).andBetween(pk, min.getId(), tmp.get(tmp.size() - 1).getId()).select());
             lists1.add(list);
             globalOffset = globalOffset + perDbOffset + list.size() - tmp.size();
         }
@@ -141,7 +141,7 @@ public class JdbcShardDbRepositoryImpl<T extends Persistable<ID>, ID extends Com
     public long count(SearchParamBuilder searchParamBuilder) {
         long count = 0L;
         for (Db db : dbList) {
-            BaseQuery cnd = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+            BaseQuery cnd = db.from(model).andSearchParamBuilder(searchParamBuilder);
             count = count + db.getBaseSqlExecute().count(cnd.count());
         }
         return count;

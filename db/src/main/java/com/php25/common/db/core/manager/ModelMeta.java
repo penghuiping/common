@@ -13,7 +13,9 @@ import java.util.List;
  */
 public class ModelMeta {
 
-    private String dbTableName;
+    private String logicalTableName;
+
+    private String[] physicalTableNames;
 
     private String dbPkName;
 
@@ -54,12 +56,20 @@ public class ModelMeta {
         this.dbColumns = dbColumns;
     }
 
-    public String getDbTableName() {
-        return dbTableName;
+    public String getLogicalTableName() {
+        return logicalTableName;
     }
 
-    public void setDbTableName(String dbTableName) {
-        this.dbTableName = dbTableName;
+    public void setLogicalTableName(String logicalTableName) {
+        this.logicalTableName = logicalTableName;
+    }
+
+    public String[] getPhysicalTableNames() {
+        return physicalTableNames;
+    }
+
+    public void setPhysicalTableNames(String[] physicalTableNames) {
+        this.physicalTableNames = physicalTableNames;
     }
 
     public String getDbPkName() {

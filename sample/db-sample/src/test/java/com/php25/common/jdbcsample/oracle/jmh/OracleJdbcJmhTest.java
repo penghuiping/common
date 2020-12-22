@@ -100,7 +100,7 @@ public class OracleJdbcJmhTest {
         this.db.getJdbcPair().getJdbcTemplate().execute("CREATE SEQUENCE SEQ_ID");
 
 
-        BaseQuery cndJpa = this.db.cndJdbc(Customer.class);
+        BaseQuery cndJpa = this.db.from(Customer.class);
 
         Company company = new Company();
         company.setName("test");
@@ -130,7 +130,7 @@ public class OracleJdbcJmhTest {
         customer1.setId(1L);
         customer1.setUsername("jack-0");
         customer1.setVersion(0L);
-        this.db.getBaseSqlExecute().update(this.db.cndJdbc(Customer.class).update(customer1));
+        this.db.getBaseSqlExecute().update(this.db.from(Customer.class).update(customer1));
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -140,7 +140,7 @@ public class OracleJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete() throws Exception {
-        this.db.getBaseSqlExecute().delete(this.db.cndJdbc(Customer.class).whereEq("id", 1).delete());
+        this.db.getBaseSqlExecute().delete(this.db.from(Customer.class).whereEq("id", 1).delete());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -150,7 +150,7 @@ public class OracleJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
+        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.from(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customers1.getId()).isEqualTo(customers.get(0).getId());
     }
 

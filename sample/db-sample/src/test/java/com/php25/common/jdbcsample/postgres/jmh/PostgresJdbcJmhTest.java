@@ -101,14 +101,14 @@ public class PostgresJdbcJmhTest {
         this.db.getJdbcPair().getJdbcTemplate().execute("drop SEQUENCE if exists SEQ_ID");
         this.db.getJdbcPair().getJdbcTemplate().execute("create SEQUENCE SEQ_ID");
 
-        BaseQuery cndJdbc = this.db.cndJdbc(Customer.class);
+        BaseQuery from = this.db.from(Customer.class);
 
         Company company = new Company();
         company.setName("test");
         company.setId(1L);
         company.setCreateTime(new Date());
         company.setEnable(1);
-        db.getBaseSqlExecute().insert(db.cndJdbc(Company.class).insert(company));
+        db.getBaseSqlExecute().insert(db.from(Company.class).insert(company));
 
         this.customers = Lists.newArrayList();
         for (int i = 0; i < 3; i++) {
@@ -121,7 +121,7 @@ public class PostgresJdbcJmhTest {
             customer.setEnable(1);
             customer.setCompanyId(company.getId());
             this.customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            db.getBaseSqlExecute().insert(from.insert(customer));
         }
 
     }
@@ -132,7 +132,7 @@ public class PostgresJdbcJmhTest {
         customer1.setId(1L);
         customer1.setUsername("jack-0");
         customer1.setVersion(0L);
-        db.getBaseSqlExecute().update(this.db.cndJdbc(Customer.class).update(customer1));
+        db.getBaseSqlExecute().update(this.db.from(Customer.class).update(customer1));
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -142,7 +142,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void delete() throws Exception {
-        db.getBaseSqlExecute().delete(this.db.cndJdbc(Customer.class).whereEq("id", 1).delete());
+        db.getBaseSqlExecute().delete(this.db.from(Customer.class).whereEq("id", 1).delete());
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -153,7 +153,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername() throws Exception {
-        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("username", "jack0").single());
+        Customer customers1 = this.db.getBaseSqlExecute().single(this.db.from(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customers1.getId()).isEqualTo(customers.get(0).getId());
     }
 
@@ -166,7 +166,7 @@ public class PostgresJdbcJmhTest {
 
     @org.openjdk.jmh.annotations.Benchmark
     public void queryById() throws Exception {
-        Customer customer = this.db.getBaseSqlExecute().single(this.db.cndJdbc(Customer.class).whereEq("id", customers.get(0).getId()).single());
+        Customer customer = this.db.getBaseSqlExecute().single(this.db.from(Customer.class).whereEq("id", customers.get(0).getId()).single());
         Assertions.assertThat(customer.getId()).isEqualTo(customers.get(0).getId());
     }
 

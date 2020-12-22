@@ -38,7 +38,7 @@ public class OracleQuery extends BaseQuery {
 
     @Override
     protected <M> SqlParams insert(M model, boolean ignoreNull) {
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
 
         //获取主键名
@@ -157,7 +157,7 @@ public class OracleQuery extends BaseQuery {
 
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
 
         //获取主键名
@@ -298,10 +298,10 @@ public class OracleQuery extends BaseQuery {
         StringBuilder sb = new StringBuilder("DELETE");
         if (!StringUtil.isBlank(clazzAlias)) {
             //存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(clazzAlias);
+            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz)).append(" ").append(clazzAlias);
         } else {
             //不存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz));
         }
         sb.append(" ").append(getSql());
         this.setSql(sb);

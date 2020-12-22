@@ -57,8 +57,8 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        BaseQuery cndJdbc = db.cndJdbc(Customer.class);
-        BaseQuery cndJdbcCompany = db.cndJdbc(Company.class);
+        BaseQuery cndJdbc = db.from(Customer.class);
+        BaseQuery cndJdbcCompany = db.from(Company.class);
 
         Company company = new Company();
         company.setId(snowflakeIdWorker.nextId());

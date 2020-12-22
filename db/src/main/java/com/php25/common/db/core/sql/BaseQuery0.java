@@ -77,9 +77,9 @@ public abstract class BaseQuery0 implements Query {
             if (StringUtil.isBlank(alias)) {
                 //没有使用别名
                 if (!clazz.equals(modelClass)) {
-                    return String.format(" %s.%s ", JdbcModelManager.getTableName(modelClass), JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
+                    return String.format(" %s.%s ", JdbcModelManager.getLogicalTableName(modelClass), JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
                 } else {
-                    return String.format(" %s.%s ", JdbcModelManager.getTableName(this.clazz), JdbcModelManager.getDbColumnByClassColumn(this.clazz, name));
+                    return String.format(" %s.%s ", JdbcModelManager.getLogicalTableName(this.clazz), JdbcModelManager.getDbColumnByClassColumn(this.clazz, name));
                 }
             } else {
                 //使用了别名
@@ -537,7 +537,7 @@ public abstract class BaseQuery0 implements Query {
 
     @Override
     public BaseQuery0 join(Class<?> model, String alias) {
-        String tableB = JdbcModelManager.getTableName(model);
+        String tableB = JdbcModelManager.getLogicalTableName(model);
         this.setSql(this.getSql().append(String.format("JOIN %s  ", tableB)));
 
         if (!StringUtil.isBlank(alias)) {
@@ -554,7 +554,7 @@ public abstract class BaseQuery0 implements Query {
 
     @Override
     public BaseQuery0 leftJoin(Class<?> model, String alias) {
-        String tableB = JdbcModelManager.getTableName(model);
+        String tableB = JdbcModelManager.getLogicalTableName(model);
         this.setSql(this.getSql().append(String.format("LEFT JOIN %s  ", tableB)));
 
         if (!StringUtil.isBlank(alias)) {

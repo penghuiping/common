@@ -24,21 +24,44 @@ public class JdbcModelManager {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcModelManager.class);
 
-    private static final ConcurrentReferenceHashMap<String, ModelMeta> modelMetas = new ConcurrentReferenceHashMap<>();
+    private static final ConcurrentReferenceHashMap<String, ModelMeta> modelMetas = new ConcurrentReferenceHashMap<>(512);
 
-    private static final ConcurrentReferenceHashMap<String, Class<?>> modelNameToClass = new ConcurrentReferenceHashMap<>();
+    private static final ConcurrentReferenceHashMap<String, Class<?>> modelNameToClass = new ConcurrentReferenceHashMap<>(512);
 
     /****
-     * 根据实体class获取表名
-     * @param cls
-     * @return
+     * 根据实体class获取逻辑表名
+     * @param cls 实体类
+     * @return 逻辑表名
      */
-    public static String getTableName(Class<?> cls) {
+    public static String getLogicalTableName(Class<?> cls) {
         ModelMeta modelMeta = modelMetas.get(cls.getName());
         if (null != modelMeta) {
-            return modelMeta.getDbTableName();
+            return modelMeta.getLogicalTableName();
         } else {
-            return JdbcModelManagerHelper.getTableName(cls);
+            if (JdbcModelManagerHelper.isShardTable(cls)) {
+                return JdbcModelManagerHelper.getShardTableName(cls).getLeft();
+            } else {
+                return JdbcModelManagerHelper.getTableName(cls);
+            }
+        }
+    }
+
+    /**
+     * 根据实体class获取物理表名
+     *
+     * @param cls 实体类
+     * @return 物理表名
+     */
+    public static String[] getPhysicalTableName(Class<?> cls) {
+        ModelMeta modelMeta = modelMetas.get(cls.getName());
+        if (null != modelMeta) {
+            return modelMeta.getPhysicalTableNames();
+        } else {
+            if (JdbcModelManagerHelper.isShardTable(cls)) {
+                return JdbcModelManagerHelper.getShardTableName(cls).getRight();
+            } else {
+                return new String[]{JdbcModelManagerHelper.getTableName(cls)};
+            }
         }
     }
 

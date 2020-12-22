@@ -9,6 +9,7 @@ import com.php25.common.db.core.annotation.DbSchema;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
 import com.php25.common.db.core.annotation.Table;
+import com.php25.common.db.core.shard.TableShard;
 import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -39,7 +40,15 @@ class JdbcModelManagerHelper {
 
     protected static ModelMeta getModelMeta(Class<?> cls) {
         ModelMeta modelMeta = new ModelMeta();
-        modelMeta.setDbTableName(getTableName(cls));
+        if (isShardTable(cls)) {
+            ImmutablePair<String, String[]> pair = getShardTableName(cls);
+            modelMeta.setLogicalTableName(pair.getLeft());
+            modelMeta.setPhysicalTableNames(pair.getRight());
+        } else {
+            String tableName = getTableName(cls);
+            modelMeta.setLogicalTableName(tableName);
+            modelMeta.setPhysicalTableNames(new String[]{tableName});
+        }
         Field[] fields = cls.getDeclaredFields();
         List<String> dbColumns = new ArrayList<>();
         List<String> classColumns = new ArrayList<>();
@@ -106,7 +115,7 @@ class JdbcModelManagerHelper {
 
         Table table = cls.getAnnotation(Table.class);
         if (null == table) {
-            throw new IllegalArgumentException(cls.getName() + ":没有Table注解");
+            throw new DbException(cls.getName() + ":没有Table注解");
         }
 
         DbSchema schema = cls.getAnnotation(DbSchema.class);
@@ -125,6 +134,24 @@ class JdbcModelManagerHelper {
         } else {
             return tableName;
         }
+    }
+
+    /**
+     * 获取分区表信息
+     *
+     * @param cls 实体类
+     * @return <逻辑表名:物理表名>
+     */
+    protected static ImmutablePair<String, String[]> getShardTableName(Class<?> cls) {
+        Assert.notNull(cls, "class不能为null");
+        TableShard table = cls.getAnnotation(TableShard.class);
+        if (null == table) {
+            throw new DbException(cls.getName() + ":没有TableShard注解");
+        }
+        //获取表名
+        String logicName = table.logicName();
+        String[] physicalNames = table.physicName();
+        return new ImmutablePair<>(logicName, physicalNames);
     }
 
     /**
@@ -371,5 +398,18 @@ class JdbcModelManagerHelper {
         Field[] fields = cls.getDeclaredFields();
         Optional<Field> fieldOptional = Lists.newArrayList(fields).stream().filter(field -> (null == field.getAnnotation(Transient.class)) && (Collection.class.isAssignableFrom(field.getType()))).findAny();
         return fieldOptional.isPresent();
+    }
+
+    protected static Boolean isShardTable(Class<?> cls) {
+        TableShard tableShard = cls.getAnnotation(TableShard.class);
+        if (null != tableShard) {
+            return true;
+        }
+        Table table = cls.getAnnotation(Table.class);
+        if (null != table) {
+            return false;
+        }
+
+        throw new DbException(cls.getName() + ":没有Table注解或TableShard注解");
     }
 }

@@ -81,7 +81,7 @@ public class Db {
     }
 
 
-    public BaseQuery cndJdbc(Class<?> cls) {
+    public BaseQuery from(Class<?> cls) {
         BaseQuery query = null;
         switch (dbType) {
             case MYSQL:
@@ -101,7 +101,7 @@ public class Db {
     }
 
 
-    public BaseQuery cndJdbc(Class<?> cls, String alias) {
+    public BaseQuery from(Class<?> cls, String alias) {
         BaseQuery query = null;
         switch (dbType) {
             case MYSQL:

@@ -44,7 +44,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         } else {
             sb = new StringBuilder("SELECT *");
         }
-        sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+        sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz));
 
         if (!StringUtil.isBlank(clazzAlias)) {
             sb.append(" ").append(clazzAlias);
@@ -97,7 +97,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
      */
     private <M> SqlParams update(M model, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(clazz)).append(" SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getLogicalTableName(clazz)).append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
@@ -176,7 +176,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
 
         //判断是否有@version注解
@@ -247,7 +247,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     public <M> SqlParams updateBatch(List<M> models) {
         M model = models.get(0);
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getTableName(model.getClass())).append(" SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getLogicalTableName(model.getClass())).append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, false);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
@@ -329,7 +329,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     @Override
     public SqlParams count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) as num_count FROM ");
-        sb.append(JdbcModelManager.getTableName(clazz));
+        sb.append(JdbcModelManager.getLogicalTableName(clazz));
         if (!StringUtil.isBlank(clazzAlias)) {
             sb.append(" ").append(clazzAlias);
         }

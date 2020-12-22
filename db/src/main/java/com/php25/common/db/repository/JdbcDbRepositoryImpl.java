@@ -39,30 +39,30 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public List<T> findAllEnabled() {
-        return db.getBaseSqlExecute().select(db.cndJdbc(model).whereEq("enable", 1).select());
+        return db.getBaseSqlExecute().select(db.from(model).whereEq("enable", 1).select());
     }
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
         return Optional.of(db.getBaseSqlExecute().single(
-                db.cndJdbc(model).whereEq(pkName, id).andEq("enable", 1).single()));
+                db.from(model).whereEq(pkName, id).andEq("enable", 1).single()));
     }
 
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
         return Optional.ofNullable(db.getBaseSqlExecute().single(query.single()));
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
         return db.getBaseSqlExecute().select(query.select());
     }
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
-        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
         Sort sort = pageable.getSort();
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
@@ -75,13 +75,13 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
         List<T> list = db.getBaseSqlExecute().select(query.limit(page[0], page[1]).select());
-        long total = db.getBaseSqlExecute().count(db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder).count());
+        long total = db.getBaseSqlExecute().count(db.from(model).andSearchParamBuilder(searchParamBuilder).count());
         return new PageImpl<T>(list, pageable, total);
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
-        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
@@ -96,7 +96,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public long count(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.cndJdbc(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
         return db.getBaseSqlExecute().count(query.count());
     }
 }

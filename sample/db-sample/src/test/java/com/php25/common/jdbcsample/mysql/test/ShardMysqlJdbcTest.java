@@ -102,7 +102,7 @@ public class ShardMysqlJdbcTest {
                 department.setId(snowflakeIdWorker.nextId());
                 department.setName("testDepart11");
                 department.setNew(true);
-                getDb().cndJdbc(Department.class).insert(department);
+                getDb().from(Department.class).insert(department);
                 return department;
             }
 
@@ -119,7 +119,7 @@ public class ShardMysqlJdbcTest {
                 department.setId(snowflakeIdWorker.nextId());
                 department.setName("testDepart12");
                 department.setNew(true);
-                getDb().cndJdbc(Department.class).insert(department);
+                getDb().from(Department.class).insert(department);
                 return department;
             }
 
@@ -147,7 +147,7 @@ public class ShardMysqlJdbcTest {
                 department.setName("testDepart11");
                 department.setNew(true);
                 int i = 1 / 0;
-                getDb().cndJdbc(Department.class).insert(department);
+                getDb().from(Department.class).insert(department);
                 return department;
             }
 
@@ -164,7 +164,7 @@ public class ShardMysqlJdbcTest {
                 department.setId(snowflakeIdWorker.nextId());
                 department.setName("testDepart12");
                 department.setNew(true);
-                getDb().cndJdbc(Department.class).insert(department);
+                getDb().from(Department.class).insert(department);
                 return department;
             }
 

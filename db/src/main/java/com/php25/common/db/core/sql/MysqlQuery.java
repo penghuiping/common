@@ -36,7 +36,7 @@ public class MysqlQuery extends BaseQuery {
     @Override
     protected <M> SqlParams insert(M model, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
 
         GenerationType generationType = GenerationType.AUTO;
@@ -115,10 +115,10 @@ public class MysqlQuery extends BaseQuery {
         if (!StringUtil.isBlank(clazzAlias)) {
             //存在别名
             sb.append(" ").append(clazzAlias);
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz)).append(" ").append(clazzAlias);
+            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz)).append(" ").append(clazzAlias);
         } else {
             //不存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getTableName(clazz));
+            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz));
         }
         sb.append(" ").append(getSql());
         this.setSql(sb);
