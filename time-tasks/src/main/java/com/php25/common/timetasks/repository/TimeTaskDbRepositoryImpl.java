@@ -60,12 +60,12 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
 
     @Override
     public void deleteAllInvalidJob() {
-        db.cndJdbc(TimeTaskDb.class, "a").whereLess("a.executeTime", LocalDateTime.now()).delete();
+        db.from(TimeTaskDb.class, "a").whereLess("a.executeTime", LocalDateTime.now()).delete();
     }
 
     @Override
     public List<TimeTask> findByExecuteTimeScope(LocalDateTime start, LocalDateTime end) {
-        List<TimeTaskDb> timeTaskDbs = db.getBaseSqlExecute().select(db.cndJdbc(TimeTaskDb.class).whereBetween("executeTime", start, end).select());
+        List<TimeTaskDb> timeTaskDbs = db.getBaseSqlExecute().select(db.from(TimeTaskDb.class).whereBetween("executeTime", start, end).select());
         List<TimeTask> timeTasks = timeTaskDbs.stream().map(timeTaskDb -> {
             try {
                 Class<?> cls = Class.forName(timeTaskDb.getClassName());

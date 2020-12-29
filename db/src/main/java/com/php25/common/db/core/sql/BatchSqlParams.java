@@ -1,7 +1,5 @@
 package com.php25.common.db.core.sql;
 
-import com.php25.common.db.core.GenerationType;
-
 import java.util.List;
 
 /**
@@ -11,57 +9,9 @@ import java.util.List;
 public class BatchSqlParams extends SqlParams {
 
     /**
-     * 需要执行的sql
-     */
-    private String sql;
-
-    /**
      * 参数,用于批量sql操作
      */
     private List<Object[]> batchParams;
-
-    /**
-     * 实体对象的类
-     */
-    private Class<?> clazz;
-
-    /**
-     * 实体对象
-     */
-    private Object model;
-
-    /**
-     * id生成方式
-     */
-    private GenerationType generationType;
-
-    /**
-     * 映射成的类型
-     */
-    private Class<?> resultType;
-
-    /**
-     * 需要映射的字段
-     */
-    private String[] columns;
-
-    /**
-     * 逻辑表名
-     */
-    private String logicTableName;
-
-    /**
-     * 物理表名
-     */
-    private String[] physicTableNames;
-
-    public String getSql() {
-        return sql;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
 
     public List<Object[]> getBatchParams() {
         return batchParams;
@@ -69,61 +19,5 @@ public class BatchSqlParams extends SqlParams {
 
     public void setBatchParams(List<Object[]> batchParams) {
         this.batchParams = batchParams;
-    }
-
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
-    public void setClazz(Class<?> clazz) {
-        this.clazz = clazz;
-    }
-
-    public Object getModel() {
-        return model;
-    }
-
-    public void setModel(Object model) {
-        this.model = model;
-    }
-
-    public GenerationType getGenerationType() {
-        return generationType;
-    }
-
-    public void setGenerationType(GenerationType generationType) {
-        this.generationType = generationType;
-    }
-
-    public Class<?> getResultType() {
-        return resultType;
-    }
-
-    public void setResultType(Class<?> resultType) {
-        this.resultType = resultType;
-    }
-
-    public String[] getColumns() {
-        return columns;
-    }
-
-    public void setColumns(String[] columns) {
-        this.columns = columns;
-    }
-
-    public String getLogicTableName() {
-        return logicTableName;
-    }
-
-    public void setLogicTableName(String logicTableName) {
-        this.logicTableName = logicTableName;
-    }
-
-    public String[] getPhysicTableNames() {
-        return physicTableNames;
-    }
-
-    public void setPhysicTableNames(String[] physicTableNames) {
-        this.physicTableNames = physicTableNames;
     }
 }

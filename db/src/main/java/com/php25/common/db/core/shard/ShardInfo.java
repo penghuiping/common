@@ -1,6 +1,8 @@
 package com.php25.common.db.core.shard;
 
-import com.php25.common.db.Db;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
 
 /**
  * @author penghuiping
@@ -8,17 +10,11 @@ import com.php25.common.db.Db;
  */
 public class ShardInfo {
 
-    private Db db;
+    private List<JdbcTemplate> dbs;
+
+    private JdbcTemplate shardingDb;
 
     private String physicTableName;
-
-    public Db getDb() {
-        return db;
-    }
-
-    public void setDb(Db db) {
-        this.db = db;
-    }
 
     public String getPhysicTableName() {
         return physicTableName;
@@ -26,5 +22,21 @@ public class ShardInfo {
 
     public void setPhysicTableName(String physicTableName) {
         this.physicTableName = physicTableName;
+    }
+
+    public List<JdbcTemplate> getDbs() {
+        return dbs;
+    }
+
+    public void setDbs(List<JdbcTemplate> dbs) {
+        this.dbs = dbs;
+    }
+
+    public JdbcTemplate getShardingDb() {
+        return shardingDb;
+    }
+
+    public void setShardingDb(JdbcTemplate shardingDb) {
+        this.shardingDb = shardingDb;
     }
 }

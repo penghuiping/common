@@ -9,6 +9,7 @@ import com.php25.common.db.core.annotation.DbSchema;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
 import com.php25.common.db.core.annotation.Table;
+import com.php25.common.db.core.shard.ShardingKey;
 import com.php25.common.db.core.shard.TableShard;
 import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -78,10 +79,9 @@ class JdbcModelManagerHelper {
         modelMeta.setExistCollectionAttribute(existCollectionAttribute(cls));
         Optional<Field> versionOptional = getVersionField(cls);
         versionOptional.ifPresent(modelMeta::setVersionField);
-        Optional<GeneratedValue> generatedValueOptional = getAnnotationGeneratedValue(cls);
-        generatedValueOptional.ifPresent(modelMeta::setGeneratedValue);
-        Optional<SequenceGenerator> sequenceGeneratorOptional = getAnnotationSequenceGenerator(cls);
-        sequenceGeneratorOptional.ifPresent(modelMeta::setSequenceGenerator);
+        getAnnotationGeneratedValue(cls).ifPresent(modelMeta::setGeneratedValue);
+        getAnnotationSequenceGenerator(cls).ifPresent(modelMeta::setSequenceGenerator);
+        getAnnotationShardingKey(cls).ifPresent(modelMeta::setShardingKey);
         return modelMeta;
     }
 
@@ -91,7 +91,7 @@ class JdbcModelManagerHelper {
      * @param cls model类对的class
      * @return model类反射对应的 version field
      */
-    protected static Optional<Field> getVersionField(Class cls) {
+    protected static Optional<Field> getVersionField(Class<?> cls) {
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         Field versionField = null;
@@ -160,7 +160,7 @@ class JdbcModelManagerHelper {
      * @param cls model类对的class
      * @return model类反射对应的主键field
      */
-    protected static Field getPrimaryKeyField(Class cls) {
+    protected static Field getPrimaryKeyField(Class<?> cls) {
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         Field primaryKeyField = null;
@@ -181,7 +181,7 @@ class JdbcModelManagerHelper {
      * @param cls
      * @return
      */
-    protected static String getPrimaryKeyColName(Class cls) {
+    protected static String getPrimaryKeyColName(Class<?> cls) {
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         Field primaryKeyField = null;
@@ -212,7 +212,7 @@ class JdbcModelManagerHelper {
      * @param cls
      * @return
      */
-    protected static Optional<GeneratedValue> getAnnotationGeneratedValue(Class cls) {
+    protected static Optional<GeneratedValue> getAnnotationGeneratedValue(Class<?> cls) {
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         GeneratedValue generatedValue = null;
@@ -231,7 +231,7 @@ class JdbcModelManagerHelper {
      * @param cls
      * @return
      */
-    protected static Optional<SequenceGenerator> getAnnotationSequenceGenerator(Class cls) {
+    protected static Optional<SequenceGenerator> getAnnotationSequenceGenerator(Class<?> cls) {
 
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
@@ -251,7 +251,7 @@ class JdbcModelManagerHelper {
      * @param cls
      * @return
      */
-    protected static String getPrimaryKeyFieldName(Class cls) {
+    protected static String getPrimaryKeyFieldName(Class<?> cls) {
         AssertUtil.notNull(cls, "class不能为null");
         Field[] fields = cls.getDeclaredFields();
         Field primaryKeyField = null;
@@ -276,7 +276,7 @@ class JdbcModelManagerHelper {
      * @param name
      * @return
      */
-    protected static String getDbColumnByClassColumn(Class cls, String name) {
+    protected static String getDbColumnByClassColumn(Class<?> cls, String name) {
         AssertUtil.notNull(cls, "class不能为null");
         AssertUtil.hasText(name, "name不能为空");
         Field[] fields = cls.getDeclaredFields();
@@ -301,7 +301,7 @@ class JdbcModelManagerHelper {
      * @param name
      * @return
      */
-    protected static String getClassColumnByDbColumn(Class cls, String name) {
+    protected static String getClassColumnByDbColumn(Class<?> cls, String name) {
         AssertUtil.notNull(cls, "class不能为null");
         AssertUtil.hasText(name, "name不能为空");
         Field[] fields = cls.getDeclaredFields();
@@ -393,7 +393,7 @@ class JdbcModelManagerHelper {
         return pairList;
     }
 
-    protected static Boolean existCollectionAttribute(Class cls) {
+    protected static Boolean existCollectionAttribute(Class<?> cls) {
         AssertUtil.notNull(cls, "cls不能为null");
         Field[] fields = cls.getDeclaredFields();
         Optional<Field> fieldOptional = Lists.newArrayList(fields).stream().filter(field -> (null == field.getAnnotation(Transient.class)) && (Collection.class.isAssignableFrom(field.getType()))).findAny();
@@ -409,7 +409,21 @@ class JdbcModelManagerHelper {
         if (null != table) {
             return false;
         }
-
         throw new DbException(cls.getName() + ":没有Table注解或TableShard注解");
     }
+
+    protected static Optional<ShardingKey> getAnnotationShardingKey(Class<?> modelClass) {
+        AssertUtil.notNull(modelClass, "modelClass不能为null");
+        Field[] fields = modelClass.getDeclaredFields();
+        ShardingKey shardingKey = null;
+        for (Field field : fields) {
+            shardingKey = field.getAnnotation(ShardingKey.class);
+            if (shardingKey != null) {
+                break;
+            }
+        }
+        return Optional.ofNullable(shardingKey);
+    }
+
+
 }

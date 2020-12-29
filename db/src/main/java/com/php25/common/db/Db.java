@@ -2,7 +2,9 @@ package com.php25.common.db;
 
 import com.php25.common.db.core.JdbcPair;
 import com.php25.common.db.core.execute.BaseSqlExecute;
+import com.php25.common.db.core.execute.BaseSqlShardExecute;
 import com.php25.common.db.core.execute.MysqlSqlExecute;
+import com.php25.common.db.core.execute.MysqlSqlShardExecute;
 import com.php25.common.db.core.execute.OracleSqlExecute;
 import com.php25.common.db.core.execute.PostgresSqlExecute;
 import com.php25.common.db.core.manager.JdbcModelManager;
@@ -134,6 +136,19 @@ public class Db {
                 break;
             default:
                 baseSqlExecute = new MysqlSqlExecute(this.jdbcPair.getJdbcTemplate());
+                break;
+        }
+        return baseSqlExecute;
+    }
+
+    public BaseSqlShardExecute getShardSqlExecute() {
+        BaseSqlShardExecute baseSqlExecute = null;
+        switch (dbType) {
+            case MYSQL:
+                baseSqlExecute = new MysqlSqlShardExecute();
+                break;
+            default:
+                baseSqlExecute = new MysqlSqlShardExecute();
                 break;
         }
         return baseSqlExecute;

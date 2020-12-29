@@ -1,9 +1,11 @@
 package com.php25.common.db.core.manager;
 
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
+import com.php25.common.db.core.shard.ShardingKey;
 import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -297,5 +299,65 @@ public class JdbcModelManager {
             log.warn("existCollectionAttribute 没有使用缓存");
             return JdbcModelManagerHelper.existCollectionAttribute(cls);
         }
+    }
+
+    /**
+     * 判断model是否是分片表
+     *
+     * @param cls model类
+     * @return true:是分片表 false:不是分片表
+     */
+    public static Boolean isShardTable(Class<?> cls) {
+        ModelMeta modelMeta = modelMetas.get(cls.getName());
+        if (null != modelMeta) {
+            return null != modelMeta.getPhysicalTableNames() && modelMeta.getPhysicalTableNames().length > 1;
+        } else {
+            log.warn("existCollectionAttribute 没有使用缓存");
+            return JdbcModelManagerHelper.isShardTable(cls);
+        }
+    }
+
+    public static Optional<ShardingKey> getAnnotationShardingKey(Class<?> modelClass) {
+        ModelMeta modelMeta = modelMetas.get(modelClass.getName());
+        if (null != modelMeta) {
+            return Optional.ofNullable(modelMeta.getShardingKey());
+        } else {
+            log.warn("getAnnotationShardingKey 没有使用缓存");
+            return JdbcModelManagerHelper.getAnnotationShardingKey(modelClass);
+        }
+    }
+
+    /**
+     * 获取shardingKey的值
+     *
+     * @param modelClass 实体对象类
+     * @param model      实体对象
+     * @return shardingKey的值
+     */
+    public static Object getShardingKeyValue(Class<?> modelClass, Object model) {
+        AssertUtil.notNull(modelClass, "modelClass不能为null");
+        AssertUtil.notNull(model, "model不能为null");
+        Field[] fields = modelClass.getDeclaredFields();
+        Field shardingKeyField = null;
+        ShardingKey shardingKey = null;
+        Object shardingKeyValue = null;
+        for (Field field : fields) {
+            shardingKey = field.getAnnotation(ShardingKey.class);
+            if (shardingKey != null) {
+                shardingKeyField = field;
+                break;
+            }
+        }
+        if (null == shardingKeyField) {
+            return null;
+        }
+
+        //获取shardingKey的值
+        try {
+            shardingKeyValue = ReflectUtil.getMethod(modelClass, "get" + StringUtil.capitalizeFirstLetter(shardingKeyField.getName())).invoke(model);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new DbException(e.getMessage(), e);
+        }
+        return shardingKeyValue;
     }
 }

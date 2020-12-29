@@ -27,7 +27,7 @@ import java.util.Map;
  * @date 2020/12/4 22:33
  */
 public abstract class BaseSqlExecute implements SqlExecute {
-    private static final Logger log = LoggerFactory.getLogger(BaseSqlExecute.class);
+    protected static final Logger log = LoggerFactory.getLogger(BaseSqlExecute.class);
 
     protected final JdbcTemplate jdbcTemplate;
 

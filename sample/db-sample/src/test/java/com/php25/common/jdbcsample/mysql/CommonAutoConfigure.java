@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
  * Created by penghuiping on 2018/3/21.
  */
 @EnableAutoConfiguration(exclude = {JdbcRepositoriesAutoConfiguration.class})
-@ComponentScan
+@ComponentScan({"com.php25.common.core", "com.php25.common.jdbcsample.mysql"})
 public class CommonAutoConfigure {
 
     @Bean

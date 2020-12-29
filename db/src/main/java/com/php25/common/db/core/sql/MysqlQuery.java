@@ -105,6 +105,7 @@ public class MysqlQuery extends BaseQuery {
         sqlParams.setClazz(this.clazz);
         sqlParams.setGenerationType(generationType);
         sqlParams.setModel(model);
+        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -128,6 +129,7 @@ public class MysqlQuery extends BaseQuery {
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());
+        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }

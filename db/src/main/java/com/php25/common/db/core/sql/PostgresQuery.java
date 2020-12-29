@@ -152,6 +152,7 @@ public class PostgresQuery extends BaseQuery {
         sqlParams.setClazz(this.clazz);
         sqlParams.setGenerationType(generationType);
         sqlParams.setModel(model);
+        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -292,6 +293,7 @@ public class PostgresQuery extends BaseQuery {
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
+        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -314,6 +316,7 @@ public class PostgresQuery extends BaseQuery {
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());
+        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }

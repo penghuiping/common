@@ -269,6 +269,7 @@ public interface QueryCondition {
      */
     Query andNotBetween(String column, Object value1, Object value2);
 
+
     /**
      * where ... or column = value
      *

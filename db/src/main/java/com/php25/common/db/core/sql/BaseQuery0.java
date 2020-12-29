@@ -30,11 +30,8 @@ public abstract class BaseQuery0 implements Query {
     protected long startRow = -1, pageSize = -1;
     protected OrderBy orderBy = null;
     protected GroupBy groupBy = null;
-
     protected Class<?> clazz;
-
     protected String clazzAlias;
-
     protected Map<String, Class<?>> aliasMap = new HashMap<>(8);
 
 
@@ -581,7 +578,6 @@ public abstract class BaseQuery0 implements Query {
         this.pageSize = pageSize;
         return this;
     }
-
 
     private OrderBy getOrderBy() {
         if (this.orderBy == null) {

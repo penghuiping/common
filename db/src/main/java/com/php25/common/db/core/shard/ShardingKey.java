@@ -15,7 +15,5 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ShardingKey {
 
-    String value() default "";
-
-    Class<?> shardRule() default ShardRuleHashBased.class;
+    Class<? extends ShardRule> shardRule() default ShardRuleHashBased.class;
 }
