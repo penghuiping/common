@@ -1,16 +1,10 @@
 package com.php25.common.db.core.sql;
 
 import com.google.common.collect.Lists;
-import com.php25.common.core.exception.Exceptions;
-import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.manager.JdbcModelManager;
-import com.php25.common.db.core.manager.ModelMeta;
-import com.php25.common.db.core.shard.ShardInfo;
-import com.php25.common.db.core.shard.ShardRule;
-import com.php25.common.db.core.shard.ShardingKey;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.specification.SearchParam;
 import com.php25.common.db.specification.SearchParamBuilder;
@@ -59,14 +53,12 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         this.setSql(sb);
         addAdditionalPartSql();
         String targetSql = this.getSql().toString();
-        log.info("sql语句为:" + targetSql);
-        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setColumns(columns);
         sqlParams.setResultType(model);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
-        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -161,12 +153,11 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             }
         }
         String targetSql = stringBuilder.toString();
-        log.info("sql语句为:{}", targetSql);
-        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setParams(this.params);
         sqlParams.setClazz(this.clazz);
-        addShardInfo(sqlParams);
+        sqlParams.setModel(model);
         this.clear();
         return sqlParams;
     }
@@ -237,7 +228,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
-        addShardInfo(sqlParams);
+        sqlParams.setModels((List<Object>) models);
         this.clear();
         return sqlParams;
     }
@@ -324,7 +315,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
-        addShardInfo(sqlParams);
+        sqlParams.setModels((List<Object>) models);
         this.clear();
         return sqlParams;
     }
@@ -347,11 +338,10 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         this.setSql(sb);
         String targetSql = this.getSql().toString();
         log.info("sql语句为:{}", targetSql);
-        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());
-        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -436,29 +426,5 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             }
         }
         return this;
-    }
-
-    protected void addShardInfo(SqlParams sqlParams) {
-        ModelMeta modelMeta = JdbcModelManager.getModelMeta(sqlParams.getClazz());
-        if (JdbcModelManager.isShardTable(sqlParams.getClazz())) {
-            if (null == sqlParams.getShardingKeyValue()) {
-                if (null != sqlParams.getModel()) {
-                    Object shardingKeyValue = JdbcModelManager.getShardingKeyValue(sqlParams.getClass(), sqlParams);
-                    sqlParams.setShardingKeyValue(shardingKeyValue);
-                }
-            }
-
-            Optional<ShardingKey> shardingKeyOptional = JdbcModelManager.getAnnotationShardingKey(sqlParams.getClazz());
-            if (!shardingKeyOptional.isPresent()) {
-                throw Exceptions.throwImpossibleException();
-            }
-            try {
-                ShardRule shardRule = SpringContextHolder.getBean0(shardingKeyOptional.get().shardRule());
-                ShardInfo shardInfo = shardRule.shard(modelMeta.getLogicalTableName(), modelMeta.getPhysicalTableNames(), sqlParams.getShardingKeyValue());
-                sqlParams.setShardInfo(shardInfo);
-            } catch (Exception e) {
-                throw new DbException("ShardRule出错", e);
-            }
-        }
     }
 }

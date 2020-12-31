@@ -4,7 +4,7 @@ import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.GenerationType;
 import com.php25.common.db.core.manager.JdbcModelManager;
-import com.php25.common.db.core.sql.DefaultSqlParams;
+import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,12 +28,13 @@ public class PostgresSqlExecute extends BaseSqlExecute {
 
     @Override
     public int insert(SqlParams sqlParams) {
-        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         Class<?> clazz = defaultSqlParams.getClazz();
         String targetSql = defaultSqlParams.getSql();
         List<Object> params = defaultSqlParams.getParams();
         GenerationType generationType = defaultSqlParams.getGenerationType();
         Object model = defaultSqlParams.getModel();
+        log.info("sql语句为:{}", targetSql);
         try {
             if (GenerationType.SEQUENCE.equals(generationType)) {
                 //sequence情况

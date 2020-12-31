@@ -8,7 +8,12 @@ import java.util.List;
  * @author penghuiping
  * @date 2020/12/11 15:24
  */
-public class DefaultSqlParams extends SqlParams {
+public class SingleSqlParams extends SqlParams {
+
+    /**
+     * 实体对象
+     */
+    private Object model;
 
     /**
      * 参数
@@ -22,5 +27,13 @@ public class DefaultSqlParams extends SqlParams {
 
     public void setParams(List<Object> params) {
         this.params = params;
+    }
+
+    public Object getModel() {
+        return model;
+    }
+
+    public void setModel(Object model) {
+        this.model = model;
     }
 }

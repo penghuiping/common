@@ -145,14 +145,12 @@ public class PostgresQuery extends BaseQuery {
 
         stringBuilder.append(" )");
         String targetSql = stringBuilder.toString();
-        log.info("sql语句为:{}", targetSql);
-        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setParams(params);
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setGenerationType(generationType);
         sqlParams.setModel(model);
-        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -258,7 +256,6 @@ public class PostgresQuery extends BaseQuery {
         stringBuilder.append(" )");
 
         String targetSql = stringBuilder.toString();
-        log.info("sql语句为:{}", targetSql);
 
         //拼装参数
         List<Object[]> batchParams = new ArrayList<>();
@@ -293,7 +290,6 @@ public class PostgresQuery extends BaseQuery {
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
         sqlParams.setClazz(this.clazz);
-        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }
@@ -311,12 +307,10 @@ public class PostgresQuery extends BaseQuery {
         sb.append(" ").append(getSql());
         this.setSql(sb);
         String targetSql = this.getSql().toString();
-        log.info("sql语句为:{}", targetSql);
-        DefaultSqlParams sqlParams = new DefaultSqlParams();
+        SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
         sqlParams.setParams(this.getParams());
-        addShardInfo(sqlParams);
         this.clear();
         return sqlParams;
     }

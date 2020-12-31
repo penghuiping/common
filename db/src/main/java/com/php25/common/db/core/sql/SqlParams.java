@@ -1,7 +1,6 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.shard.ShardInfo;
 
 
 /**
@@ -20,10 +19,6 @@ public abstract class SqlParams {
      */
     private Class<?> clazz;
 
-    /**
-     * 实体对象
-     */
-    private Object model;
 
     /**
      * id生成方式
@@ -40,16 +35,6 @@ public abstract class SqlParams {
      */
     private String[] columns;
 
-    /**
-     * 分区表信息
-     */
-    private ShardInfo shardInfo;
-
-    /**
-     * 分区键值
-     */
-    private Object shardingKeyValue;
-
     public String getSql() {
         return sql;
     }
@@ -64,14 +49,6 @@ public abstract class SqlParams {
 
     public void setClazz(Class<?> clazz) {
         this.clazz = clazz;
-    }
-
-    public Object getModel() {
-        return model;
-    }
-
-    public void setModel(Object model) {
-        this.model = model;
     }
 
     public GenerationType getGenerationType() {
@@ -96,21 +73,5 @@ public abstract class SqlParams {
 
     public void setColumns(String[] columns) {
         this.columns = columns;
-    }
-
-    public ShardInfo getShardInfo() {
-        return shardInfo;
-    }
-
-    public void setShardInfo(ShardInfo shardInfo) {
-        this.shardInfo = shardInfo;
-    }
-
-    public Object getShardingKeyValue() {
-        return shardingKeyValue;
-    }
-
-    public void setShardingKeyValue(Object shardingKeyValue) {
-        this.shardingKeyValue = shardingKeyValue;
     }
 }

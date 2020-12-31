@@ -1,19 +1,24 @@
 package com.php25.common.db.core.manager;
 
+import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.Db;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
+import com.php25.common.db.core.shard.ShardRule;
 import com.php25.common.db.core.shard.ShardingKey;
 import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -327,6 +332,15 @@ public class JdbcModelManager {
         }
     }
 
+    public static ShardRule getShardRule(Class<?> modelClass) {
+        Optional<ShardingKey> shardingKeyOptional = JdbcModelManager.getAnnotationShardingKey(modelClass);
+        if (!shardingKeyOptional.isPresent()) {
+            throw new DbException("分片表实体必须需要@ShardingKey注解");
+        }
+        ShardRule shardRule = SpringContextHolder.getBean0(shardingKeyOptional.get().shardRule());
+        return shardRule;
+    }
+
     /**
      * 获取shardingKey的值
      *
@@ -359,5 +373,19 @@ public class JdbcModelManager {
             throw new DbException(e.getMessage(), e);
         }
         return shardingKeyValue;
+    }
+
+    public static List<JdbcTemplate> getAllShardingDbs(Class<?> modelClass) {
+        ModelMeta modelMeta = JdbcModelManager.getModelMeta(modelClass);
+        String[] physicNames = modelMeta.getPhysicalTableNames();
+        List<JdbcTemplate> dbs = new ArrayList<>();
+        for (int i = 0; i < physicNames.length; i++) {
+            String physicName = physicNames[i];
+            String[] physicNameSplit = physicName.split("\\.");
+            String dbBeanName = physicNameSplit[0];
+            Db db = (Db) SpringContextHolder.getApplicationContext().getBean(dbBeanName);
+            dbs.add(db.getJdbcPair().getJdbcTemplate());
+        }
+        return dbs;
     }
 }

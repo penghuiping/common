@@ -2,10 +2,6 @@ package com.php25.common.db.core.shard;
 
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.db.Db;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 使用通过shardingKey的hashcode取模方式进行计算分区信息
@@ -17,16 +13,6 @@ public class ShardRuleHashBased implements ShardRule {
     @Override
     public ShardInfo shard(String logicName, String[] physicNames, Object shardingKey) {
         ShardInfo shardInfo = new ShardInfo();
-        List<JdbcTemplate> dbs = new ArrayList<>();
-        for (int i = 0; i < physicNames.length; i++) {
-            String physicName = physicNames[i];
-            String[] physicNameSplit = physicName.split("\\.");
-            String dbBeanName = physicNameSplit[0];
-            Db db = (Db) SpringContextHolder.getApplicationContext().getBean(dbBeanName);
-            dbs.add(db.getJdbcPair().getJdbcTemplate());
-        }
-        shardInfo.setDbs(dbs);
-
         if (null != shardingKey) {
             int size = physicNames.length;
             int index = -1;

@@ -7,7 +7,8 @@ import com.php25.common.db.core.GenerationType;
 import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.manager.ModelMeta;
 import com.php25.common.db.core.shard.ShardInfo;
-import com.php25.common.db.core.sql.DefaultSqlParams;
+import com.php25.common.db.core.shard.ShardRule;
+import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
 import org.slf4j.Logger;
@@ -26,9 +27,10 @@ import java.sql.Statement;
 public class MysqlSqlShardExecute extends BaseSqlShardExecute {
     private static final Logger log = LoggerFactory.getLogger(MysqlSqlShardExecute.class);
 
+
     @Override
     public int insert(SqlParams sqlParams) {
-        DefaultSqlParams defaultSqlParams = (DefaultSqlParams) sqlParams;
+        SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         if (!JdbcModelManager.isShardTable(defaultSqlParams.getClazz())) {
             throw Exceptions.throwImpossibleException();
         }
@@ -36,9 +38,13 @@ public class MysqlSqlShardExecute extends BaseSqlShardExecute {
         String targetSql = defaultSqlParams.getSql();
         Object[] paras = defaultSqlParams.getParams().toArray();
         ModelMeta modelMeta = JdbcModelManager.getModelMeta(defaultSqlParams.getClazz());
-        ShardInfo shardInfo = defaultSqlParams.getShardInfo();
         //逻辑表名替换成对应的物理表名
         String logicalTableName = modelMeta.getLogicalTableName();
+        String[] physicalTableNames = modelMeta.getPhysicalTableNames();
+        ShardRule shardRule = JdbcModelManager.getShardRule(sqlParams.getClazz());
+        Object shardingKeyValue = JdbcModelManager.getShardingKeyValue(defaultSqlParams.getClazz(), defaultSqlParams.getModel());
+        ShardInfo shardInfo = shardRule
+                .shard(logicalTableName, physicalTableNames, shardingKeyValue);
         String physicalTableName = shardInfo.getPhysicTableName();
         targetSql = targetSql.replace(logicalTableName, physicalTableName);
         GenerationType generationType = defaultSqlParams.getGenerationType();
