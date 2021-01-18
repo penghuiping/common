@@ -1,17 +1,17 @@
 package com.php25.common.jdbcsample.mysql.config;
 
 import com.php25.common.core.mess.SnowflakeIdWorker;
-import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.core.JdbcPair;
+import com.php25.common.db.EntitiesScan;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
@@ -43,17 +43,18 @@ public class DbConfig {
     }
 
     @Bean
-    public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-        return new TransactionTemplate(transactionManager);
+    public DbType dbType() {
+        return DbType.MYSQL;
     }
 
     @Bean
-    Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-        Db db = new Db(DbType.MYSQL);
-        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate, transactionTemplate);
-        db.setJdbcPair(jdbcPair);
-        db.scanPackage("com.php25.common.jdbcsample.mysql.model");
-        return db;
+    public TransactionTemplate transactionTemplate(DataSource dataSource) {
+        return new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+    }
+
+    @PostConstruct
+    public void init() {
+        new EntitiesScan().scanPackage("com.php25.common.jdbcsample.mysql.model");
     }
 
     @Bean

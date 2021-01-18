@@ -4,8 +4,9 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.db.Db;
-import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
+import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.jdbcsample.mysql.dto.CustomerDto;
 import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.Customer;
@@ -34,9 +35,6 @@ public class DbTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    Db db;
-
     SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     List<Customer> customers = Lists.newArrayList();
@@ -44,21 +42,19 @@ public class DbTest {
     List<CustomerDto> customerDtos = Lists.newArrayList();
 
     private void initMeta() throws Exception {
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_company");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_department");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+        jdbcTemplate.execute("drop table if exists t_customer");
+        jdbcTemplate.execute("drop table if exists t_company");
+        jdbcTemplate.execute("drop table if exists t_department");
+        jdbcTemplate.execute("drop table if exists t_customer_department");
+        jdbcTemplate.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        jdbcTemplate.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+        jdbcTemplate.execute("create table t_department (id bigint primary key,name varchar(20))");
+        jdbcTemplate.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
     }
 
     @Before
     public void before() throws Exception {
         initMeta();
-        BaseQuery cndJdbc = db.from(Customer.class);
-        BaseQuery cndJdbcCompany = db.from(Company.class);
 
         Company company = new Company();
         company.setId(snowflakeIdWorker.nextId());
@@ -66,8 +62,8 @@ public class DbTest {
         company.setCreateTime(new Date());
         company.setNew(true);
         company.setEnable(1);
-
-        db.getBaseSqlExecute().insert(cndJdbcCompany.insert(company));
+        SqlParams sqlParams = Queries.mysql().from(Company.class).insert(company);
+        QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).insert(sqlParams);
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -81,7 +77,8 @@ public class DbTest {
             customer.setScore(BigDecimal.valueOf(1000L));
             customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.mysql().from(Customer.class).insert(customer);
+            QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 
@@ -96,7 +93,8 @@ public class DbTest {
             customer.setScore(BigDecimal.valueOf(1000L));
             customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.mysql().from(Customer.class).insert(customer);
+            QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 

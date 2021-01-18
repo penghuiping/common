@@ -4,10 +4,11 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.db.Db;
-import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
+import com.php25.common.db.core.sql.SqlParams;
+import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.postgres.dto.CustomerDto;
-import com.php25.common.jdbcsample.postgres.model.Company;
 import com.php25.common.jdbcsample.postgres.model.Customer;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,9 +38,6 @@ public class DbTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    Db db;
 
     SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
@@ -75,16 +73,15 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        BaseQuery cndJdbc = db.from(Customer.class);
-        BaseQuery cndJdbcCompany = db.from(Company.class);
 
         Company company = new Company();
-        company.setName("Google");
         company.setId(snowflakeIdWorker.nextId());
+        company.setName("Google");
         company.setCreateTime(new Date());
+        company.setNew(true);
         company.setEnable(1);
-        db.getBaseSqlExecute().insert(cndJdbcCompany.insert(company));
-
+        SqlParams sqlParams = Queries.postgres().from(Company.class).insert(company);
+        QueriesExecute.postgres().singleJdbc().with(jdbcTemplate).insert(sqlParams);
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -96,8 +93,10 @@ public class DbTest {
             customer.setCompanyId(company.getId());
             customer.setUpdateTime(LocalDateTime.now());
             customer.setScore(BigDecimal.valueOf(1000L));
+            customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.postgres().from(Customer.class).insert(customer);
+            QueriesExecute.postgres().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 
@@ -110,8 +109,10 @@ public class DbTest {
             customer.setEnable(0);
             customer.setCompanyId(company.getId());
             customer.setScore(BigDecimal.valueOf(1000L));
+            customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.postgres().from(Customer.class).insert(customer);
+            QueriesExecute.postgres().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 

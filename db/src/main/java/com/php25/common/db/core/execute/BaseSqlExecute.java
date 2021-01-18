@@ -20,10 +20,11 @@ import java.util.Map;
 public abstract class BaseSqlExecute implements SqlExecute {
     protected static final Logger log = LoggerFactory.getLogger(BaseSqlExecute.class);
 
-    protected final JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
-    public BaseSqlExecute(JdbcTemplate jdbcTemplate) {
+    public BaseSqlExecute with(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        return this;
     }
 
     @Override

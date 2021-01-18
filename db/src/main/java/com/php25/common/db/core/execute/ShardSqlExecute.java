@@ -11,18 +11,6 @@ import java.util.Map;
  */
 public interface ShardSqlExecute {
 
-    <T> List<T> select(SqlParams sqlParams, Object shardingKeyValue);
-
-    <M> M single(SqlParams sqlParams, Object shardingKeyValue);
-
-    List<Map> mapSelect(SqlParams sqlParams, Object shardingKeyValue);
-
-    Map mapSingle(SqlParams sqlParams, Object shardingKeyValue);
-
-    int delete(SqlParams sqlParams, Object shardingKeyValue);
-
-    long count(SqlParams sqlParams, Object shardingKeyValueø);
-
     <T> List<T> select(SqlParams sqlParams);
 
     <M> M single(SqlParams sqlParams);
@@ -33,11 +21,7 @@ public interface ShardSqlExecute {
 
     int update(SqlParams sqlParams);
 
-    int[] updateBatch(SqlParams sqlParams);
-
     int insert(SqlParams sqlParams);
-
-    int[] insertBatch(SqlParams sqlParams);
 
     int delete(SqlParams sqlParams);
 

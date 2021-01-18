@@ -2,7 +2,6 @@ package com.php25.common.db.core.manager;
 
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.core.shard.ShardingKey;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -15,8 +14,6 @@ import java.util.List;
 public class ModelMeta {
 
     private String logicalTableName;
-
-    private String[] physicalTableNames;
 
     private String dbPkName;
 
@@ -35,8 +32,6 @@ public class ModelMeta {
     private GeneratedValue generatedValue;
 
     private SequenceGenerator sequenceGenerator;
-
-    private ShardingKey shardingKey;
 
     /**
      * 是否存在集合属性
@@ -67,13 +62,7 @@ public class ModelMeta {
         this.logicalTableName = logicalTableName;
     }
 
-    public String[] getPhysicalTableNames() {
-        return physicalTableNames;
-    }
 
-    public void setPhysicalTableNames(String[] physicalTableNames) {
-        this.physicalTableNames = physicalTableNames;
-    }
 
     public String getDbPkName() {
         return dbPkName;
@@ -121,14 +110,6 @@ public class ModelMeta {
 
     public void setSequenceGenerator(SequenceGenerator sequenceGenerator) {
         this.sequenceGenerator = sequenceGenerator;
-    }
-
-    public ShardingKey getShardingKey() {
-        return shardingKey;
-    }
-
-    public void setShardingKey(ShardingKey shardingKey) {
-        this.shardingKey = shardingKey;
     }
 
     public List<Class> getColumnTypes() {

@@ -1,5 +1,9 @@
 package com.php25.common.db.core.shard;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
+
 /**
  * 按照时间戳字段进行分区
  *
@@ -8,7 +12,7 @@ package com.php25.common.db.core.shard;
  */
 public class ShardRuleTimeBased implements ShardRule {
     @Override
-    public ShardInfo shard(String logicName, String[] physicNames, Object shardingKey) {
+    public ShardInfo shard(String logicName, List<JdbcTemplate> jdbcTemplates, List<String> physicNames, Object shardingKey) {
         return null;
     }
 }

@@ -1,6 +1,6 @@
 package com.php25.common.db.repository.shard;
 
-import com.php25.common.db.Db;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author penghuiping
@@ -20,5 +20,5 @@ public interface TransactionCallback<T> {
      *
      * @return 需要写入的数据库
      */
-    Db getDb();
+    TransactionTemplate getTransactionTemplate();
 }

@@ -1,14 +1,18 @@
 package com.php25.common.db.repository;
 
 import com.php25.common.core.util.PageUtil;
-import com.php25.common.db.Db;
+import com.php25.common.db.DbType;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
 import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -23,46 +27,52 @@ import java.util.Optional;
  */
 public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
-    protected Db db;
+    protected JdbcTemplate jdbcTemplate;
+
+    protected DbType dbType;
 
     protected Class<?> model;
 
     protected String pkName;
 
-    public JdbcDbRepositoryImpl(Db db) {
+    public JdbcDbRepositoryImpl(JdbcTemplate jdbcTemplate, DbType dbType) {
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         this.model = (Class<?>) params[0];
         this.pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
-        this.db = db;
+        this.jdbcTemplate = jdbcTemplate;
+        this.dbType = dbType;
     }
 
     @Override
     public List<T> findAllEnabled() {
-        return db.getBaseSqlExecute().select(db.from(model).whereEq("enable", 1).select());
+        SqlParams sqlParams = Queries.of(this.dbType).from(model).whereEq("enable", 1).select();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
     }
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        return Optional.of(db.getBaseSqlExecute().single(
-                db.from(model).whereEq(pkName, id).andEq("enable", 1).single()));
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(pkName, id).andEq("enable", 1).single();
+        T result = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
+        return Optional.ofNullable(result);
     }
 
     @Override
     public Optional<T> findOne(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
-        return Optional.ofNullable(db.getBaseSqlExecute().single(query.single()));
+        SqlParams sqlParams = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder).single();
+        T result = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
+        return Optional.ofNullable(result);
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
-        return db.getBaseSqlExecute().select(query.select());
+        SqlParams sqlParams = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder).select();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
     }
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
-        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
         Sort sort = pageable.getSort();
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
@@ -74,14 +84,16 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
             }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
-        List<T> list = db.getBaseSqlExecute().select(query.limit(page[0], page[1]).select());
-        long total = db.getBaseSqlExecute().count(db.from(model).andSearchParamBuilder(searchParamBuilder).count());
+        SqlParams sqlParams = query.limit(page[0], page[1]).select();
+        List<T> list = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
+        SqlParams sqlParams1 = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder).count();
+        long total = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(sqlParams1);
         return new PageImpl<T>(list, pageable, total);
     }
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
-        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
+        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
@@ -91,12 +103,12 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
                 query.desc(order.getProperty());
             }
         }
-        return db.getBaseSqlExecute().select(query.select());
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(query.select());
     }
 
     @Override
     public long count(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = db.from(model).andSearchParamBuilder(searchParamBuilder);
-        return db.getBaseSqlExecute().count(query.count());
+        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(query.count());
     }
 }

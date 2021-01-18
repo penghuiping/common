@@ -4,8 +4,9 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.db.Db;
-import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
+import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.jdbcsample.oracle.dto.CustomerDto;
 import com.php25.common.jdbcsample.oracle.model.Company;
 import com.php25.common.jdbcsample.oracle.model.Customer;
@@ -38,9 +39,6 @@ public class DbTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    Db db;
-
     SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     List<Customer> customers = Lists.newArrayList();
@@ -48,7 +46,6 @@ public class DbTest {
     List<CustomerDto> customerDtos = Lists.newArrayList();
 
     private static boolean isFirst = true;
-
 
     private void initMeta() throws Exception {
         Class cls = Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -84,16 +81,15 @@ public class DbTest {
     @Before
     public void before() throws Exception {
         initMeta();
-        BaseQuery cndJdbc = db.from(Customer.class);
-        BaseQuery cndJdbcCompany = db.from(Company.class);
 
         Company company = new Company();
-        company.setName("Google");
         company.setId(snowflakeIdWorker.nextId());
+        company.setName("Google");
         company.setCreateTime(new Date());
+        company.setNew(true);
         company.setEnable(1);
-        db.getBaseSqlExecute().insert(cndJdbcCompany.insert(company));
-
+        SqlParams sqlParams = Queries.oracle().from(Company.class).insert(company);
+        QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).insert(sqlParams);
 
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
@@ -105,8 +101,10 @@ public class DbTest {
             customer.setCompanyId(company.getId());
             customer.setUpdateTime(LocalDateTime.now());
             customer.setScore(BigDecimal.valueOf(1000L));
+            customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.oracle().from(Customer.class).insert(customer);
+            QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 
@@ -119,8 +117,10 @@ public class DbTest {
             customer.setEnable(0);
             customer.setCompanyId(company.getId());
             customer.setScore(BigDecimal.valueOf(1000L));
+            customer.setNew(true);
             customers.add(customer);
-            db.getBaseSqlExecute().insert(cndJdbc.insert(customer));
+            SqlParams sqlParams1 = Queries.oracle().from(Customer.class).insert(customer);
+            QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
         }
 

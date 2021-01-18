@@ -1,8 +1,9 @@
 package com.php25.common.jdbcsample.oracle.repository;
 
-import com.php25.common.db.Db;
+import com.php25.common.db.DbType;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.common.jdbcsample.oracle.model.Customer;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class CustomerRepositoryImpl extends BaseDbRepositoryImpl<Customer, Long> implements CustomerRepository {
-    public CustomerRepositoryImpl(Db db) {
-        super(db);
+
+    public CustomerRepositoryImpl(JdbcTemplate jdbcTemplate, DbType dbType) {
+        super(jdbcTemplate, dbType);
     }
 }

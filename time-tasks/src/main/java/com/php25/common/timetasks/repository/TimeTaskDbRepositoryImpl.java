@@ -1,7 +1,7 @@
 package com.php25.common.timetasks.repository;
 
 import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.db.Db;
+import com.php25.common.db.EntitiesScan;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.common.timetasks.exception.TimeTasksException;
 import com.php25.common.timetasks.model.TimeTaskDb;
@@ -23,7 +23,7 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
     @Autowired
     private IdGenerator idGenerator;
 
-    public TimeTaskDbRepositoryImpl(Db db) {
+    public TimeTaskDbRepositoryImpl(EntitiesScan db) {
         super(db);
     }
 

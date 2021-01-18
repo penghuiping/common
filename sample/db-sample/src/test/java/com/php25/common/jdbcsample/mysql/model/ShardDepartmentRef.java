@@ -1,20 +1,18 @@
 package com.php25.common.jdbcsample.mysql.model;
 
 import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.shard.ShardingKey;
-import com.php25.common.db.core.shard.TableShard;
+import com.php25.common.db.core.annotation.Table;
 
 /**
  * @author penghuiping
  * @date 2020/1/15 09:58
  */
-@TableShard(logicName = "ShardDepartmentRef", physicName = {"db.t_customer_department_0", "db.t_customer_department_1"})
+@Table
 public class ShardDepartmentRef {
 
     @Column("department_id")
     private Long departmentId;
 
-    @ShardingKey
     @Column("customer_id")
     private Long customerId;
 

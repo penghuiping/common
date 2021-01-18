@@ -1,25 +1,19 @@
 package com.php25.common.db.core.manager;
 
-import com.php25.common.core.mess.SpringContextHolder;
-import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.Db;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.core.shard.ShardRule;
-import com.php25.common.db.core.shard.ShardingKey;
 import com.php25.common.db.exception.DbException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,9 +25,9 @@ public class JdbcModelManager {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcModelManager.class);
 
-    private static final ConcurrentReferenceHashMap<String, ModelMeta> modelMetas = new ConcurrentReferenceHashMap<>(512);
+    private static final Map<String, ModelMeta> modelMetas = new HashMap<>(128);
 
-    private static final ConcurrentReferenceHashMap<String, Class<?>> modelNameToClass = new ConcurrentReferenceHashMap<>(512);
+    private static final Map<String, Class<?>> modelNameToClass = new HashMap<>(128);
 
     /****
      * 根据实体class获取逻辑表名
@@ -45,30 +39,7 @@ public class JdbcModelManager {
         if (null != modelMeta) {
             return modelMeta.getLogicalTableName();
         } else {
-            if (JdbcModelManagerHelper.isShardTable(cls)) {
-                return JdbcModelManagerHelper.getShardTableName(cls).getLeft();
-            } else {
-                return JdbcModelManagerHelper.getTableName(cls);
-            }
-        }
-    }
-
-    /**
-     * 根据实体class获取物理表名
-     *
-     * @param cls 实体类
-     * @return 物理表名
-     */
-    public static String[] getPhysicalTableName(Class<?> cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
-        if (null != modelMeta) {
-            return modelMeta.getPhysicalTableNames();
-        } else {
-            if (JdbcModelManagerHelper.isShardTable(cls)) {
-                return JdbcModelManagerHelper.getShardTableName(cls).getRight();
-            } else {
-                return new String[]{JdbcModelManagerHelper.getTableName(cls)};
-            }
+            return JdbcModelManagerHelper.getTableName(cls);
         }
     }
 
@@ -288,104 +259,5 @@ public class JdbcModelManager {
             throw new DbException(String.format("%s类%s方法反射调用出错", clazz.getName(), "get" + StringUtil.capitalizeFirstLetter(idField)));
         }
         return id;
-    }
-
-    /**
-     * 判断model是否存在集合属性
-     *
-     * @param cls
-     * @return
-     */
-    public static Boolean existCollectionAttribute(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
-        if (null != modelMeta && null != modelMeta.getExistCollectionAttribute()) {
-            return modelMeta.getExistCollectionAttribute();
-        } else {
-            log.warn("existCollectionAttribute 没有使用缓存");
-            return JdbcModelManagerHelper.existCollectionAttribute(cls);
-        }
-    }
-
-    /**
-     * 判断model是否是分片表
-     *
-     * @param cls model类
-     * @return true:是分片表 false:不是分片表
-     */
-    public static Boolean isShardTable(Class<?> cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
-        if (null != modelMeta) {
-            return null != modelMeta.getPhysicalTableNames() && modelMeta.getPhysicalTableNames().length > 1;
-        } else {
-            log.warn("existCollectionAttribute 没有使用缓存");
-            return JdbcModelManagerHelper.isShardTable(cls);
-        }
-    }
-
-    public static Optional<ShardingKey> getAnnotationShardingKey(Class<?> modelClass) {
-        ModelMeta modelMeta = modelMetas.get(modelClass.getName());
-        if (null != modelMeta) {
-            return Optional.ofNullable(modelMeta.getShardingKey());
-        } else {
-            log.warn("getAnnotationShardingKey 没有使用缓存");
-            return JdbcModelManagerHelper.getAnnotationShardingKey(modelClass);
-        }
-    }
-
-    public static ShardRule getShardRule(Class<?> modelClass) {
-        Optional<ShardingKey> shardingKeyOptional = JdbcModelManager.getAnnotationShardingKey(modelClass);
-        if (!shardingKeyOptional.isPresent()) {
-            throw new DbException("分片表实体必须需要@ShardingKey注解");
-        }
-        ShardRule shardRule = SpringContextHolder.getBean0(shardingKeyOptional.get().shardRule());
-        return shardRule;
-    }
-
-    /**
-     * 获取shardingKey的值
-     *
-     * @param modelClass 实体对象类
-     * @param model      实体对象
-     * @return shardingKey的值
-     */
-    public static Object getShardingKeyValue(Class<?> modelClass, Object model) {
-        AssertUtil.notNull(modelClass, "modelClass不能为null");
-        AssertUtil.notNull(model, "model不能为null");
-        Field[] fields = modelClass.getDeclaredFields();
-        Field shardingKeyField = null;
-        ShardingKey shardingKey = null;
-        Object shardingKeyValue = null;
-        for (Field field : fields) {
-            shardingKey = field.getAnnotation(ShardingKey.class);
-            if (shardingKey != null) {
-                shardingKeyField = field;
-                break;
-            }
-        }
-        if (null == shardingKeyField) {
-            return null;
-        }
-
-        //获取shardingKey的值
-        try {
-            shardingKeyValue = ReflectUtil.getMethod(modelClass, "get" + StringUtil.capitalizeFirstLetter(shardingKeyField.getName())).invoke(model);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new DbException(e.getMessage(), e);
-        }
-        return shardingKeyValue;
-    }
-
-    public static List<JdbcTemplate> getAllShardingDbs(Class<?> modelClass) {
-        ModelMeta modelMeta = JdbcModelManager.getModelMeta(modelClass);
-        String[] physicNames = modelMeta.getPhysicalTableNames();
-        List<JdbcTemplate> dbs = new ArrayList<>();
-        for (int i = 0; i < physicNames.length; i++) {
-            String physicName = physicNames[i];
-            String[] physicNameSplit = physicName.split("\\.");
-            String dbBeanName = physicNameSplit[0];
-            Db db = (Db) SpringContextHolder.getApplicationContext().getBean(dbBeanName);
-            dbs.add(db.getJdbcPair().getJdbcTemplate());
-        }
-        return dbs;
     }
 }

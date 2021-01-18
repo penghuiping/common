@@ -7,7 +7,6 @@ import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -21,10 +20,6 @@ import java.util.List;
  * @date 2020/12/7 14:05
  */
 public class MysqlSqlExecute extends BaseSqlExecute {
-
-    public MysqlSqlExecute(JdbcTemplate jdbcTemplate) {
-        super(jdbcTemplate);
-    }
 
     @Override
     public int insert(SqlParams sqlParams) {

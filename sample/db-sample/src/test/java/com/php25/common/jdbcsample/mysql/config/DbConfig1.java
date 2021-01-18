@@ -1,11 +1,8 @@
 package com.php25.common.jdbcsample.mysql.config;
 
 import com.php25.common.core.mess.SnowflakeIdWorker;
-import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
-import com.php25.common.db.core.JdbcPair;
-import com.php25.common.db.repository.shard.DefaultShardRule;
-import com.php25.common.db.repository.shard.ShardRule;
+import com.php25.common.db.EntitiesScan;
 import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
@@ -52,17 +50,13 @@ public class DbConfig1 {
     }
 
     @Bean
-    public Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-        Db db = new Db(DbType.MYSQL);
-        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate, transactionTemplate);
-        db.setJdbcPair(jdbcPair);
-        db.scanPackage("com.php25.common.jdbcsample.mysql.model");
-        return db;
+    public DbType dbType() {
+        return DbType.MYSQL;
     }
 
-    @Bean
-    ShardRule shardRule() {
-        return new DefaultShardRule();
+    @PostConstruct
+    public void init() {
+        new EntitiesScan().scanPackage("com.php25.common.jdbcsample.mysql.model");
     }
 
     @Bean

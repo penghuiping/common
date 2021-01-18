@@ -1,10 +1,14 @@
 package com.php25.common.db.repository;
 
 import com.google.common.collect.Lists;
-import com.php25.common.db.Db;
+import com.php25.common.db.DbType;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
 import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.sql.SqlParams;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Persistable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,8 +21,8 @@ import java.util.stream.Collectors;
  */
 public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbRepositoryImpl<T, ID> implements BaseDbRepository<T, ID> {
 
-    public BaseDbRepositoryImpl(Db db) {
-        super(db);
+    public BaseDbRepositoryImpl(JdbcTemplate jdbcTemplate, DbType dbType) {
+        super(jdbcTemplate, dbType);
     }
 
     @NotNull
@@ -27,10 +31,12 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public <S extends T> S save(S s) {
         if (s.isNew()) {
             //新增
-            db.getBaseSqlExecute().insert(db.from(model).insert(s));
+            SqlParams sqlParams = Queries.of(dbType).from(model).insert(s);
+            QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).insert(sqlParams);
         } else {
             //更新
-            db.getBaseSqlExecute().update(db.from(model).update(s));
+            SqlParams sqlParams = Queries.of(dbType).from(model).update(s);
+            QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).update(sqlParams);
         }
         return s;
     }
@@ -41,9 +47,11 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public <S extends T> Iterable<S> saveAll(Iterable<S> objs) {
         S s = objs.iterator().next();
         if (s.isNew()) {
-            db.getBaseSqlExecute().insertBatch(db.from(model).insertBatch(Lists.newArrayList(objs)));
+            SqlParams sqlParams = Queries.of(dbType).from(model).insertBatch(Lists.newArrayList(objs));
+            QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).insertBatch(sqlParams);
         } else {
-            db.getBaseSqlExecute().updateBatch(db.from(model).updateBatch(Lists.newArrayList(objs)));
+            SqlParams sqlParams = Queries.of(dbType).from(model).updateBatch(Lists.newArrayList(objs));
+            QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).updateBatch(sqlParams);
         }
         return objs;
     }
@@ -51,7 +59,8 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     @NotNull
     @Override
     public Optional<T> findById(@NotNull ID id) {
-        T t = db.getBaseSqlExecute().single(db.from(model).whereEq(pkName, id).single());
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(pkName, id).single();
+        T t = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
         if (null == t) {
             return Optional.empty();
         } else {
@@ -61,37 +70,43 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
 
     @Override
     public boolean existsById(@NotNull ID id) {
-        return db.getBaseSqlExecute().count(db.from(model).whereEq(pkName, id).count()) > 0;
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(pkName, id).count();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(sqlParams) > 0;
     }
 
     @NotNull
     @Override
     public Iterable<T> findAll() {
-        return db.getBaseSqlExecute().select(db.from(model).select());
+        SqlParams sqlParams = Queries.of(dbType).from(model).select();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
     }
 
     @NotNull
     @Override
     public Iterable<T> findAllById(@NotNull Iterable<ID> ids) {
-        return db.getBaseSqlExecute().select(db.from(model).whereIn(pkName, Lists.newArrayList(ids)).select());
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereIn(pkName, Lists.newArrayList(ids)).select();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
     }
 
     @Override
     public long count() {
-        return db.getBaseSqlExecute().count(db.from(model).count());
+        SqlParams sqlParams = Queries.of(dbType).from(model).count();
+        return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(sqlParams);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(@NotNull ID id) {
-        T obj = db.getBaseSqlExecute().single(db.from(model).whereEq(pkName, id).single());
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(pkName, id).single();
+        T obj = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
         this.delete(obj);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(@NotNull T t) {
-        db.getBaseSqlExecute().delete(db.from(model).delete(t));
+        SqlParams sqlParams = Queries.of(dbType).from(model).delete(t);
+        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).delete(sqlParams);
     }
 
     @Override
@@ -99,12 +114,14 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
     public void deleteAll(@NotNull Iterable<? extends T> objs) {
         List<Object> ids = Lists.newArrayList(objs).stream().map(o -> JdbcModelManager.getPrimaryKeyValue(model, o)).collect(Collectors.toList());
         String pkName = JdbcModelManager.getPrimaryKeyColName(model);
-        db.getBaseSqlExecute().delete(db.from(model).whereIn(pkName, ids).delete());
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereIn(pkName, ids).delete();
+        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).delete(sqlParams);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll() {
-        db.getBaseSqlExecute().delete(db.from(model).delete());
+        SqlParams sqlParams = Queries.of(dbType).from(model).delete();
+        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).delete(sqlParams);
     }
 }

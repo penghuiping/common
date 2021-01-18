@@ -1,7 +1,7 @@
 package com.php25.common.auditlog.repository;
 
 import com.php25.common.auditlog.model.DbAuditLog;
-import com.php25.common.db.Db;
+import com.php25.common.db.EntitiesScan;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 
 /**
@@ -11,7 +11,7 @@ import com.php25.common.db.repository.BaseDbRepositoryImpl;
 public class AuditLogRepositoryImpl extends BaseDbRepositoryImpl<DbAuditLog, String> implements AuditLogRepository {
 
 
-    public AuditLogRepositoryImpl(Db db) {
+    public AuditLogRepositoryImpl(EntitiesScan db) {
         super(db);
     }
 }

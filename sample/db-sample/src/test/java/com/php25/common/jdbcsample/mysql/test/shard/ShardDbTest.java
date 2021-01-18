@@ -4,10 +4,16 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
-import com.php25.common.db.Db;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
+import com.php25.common.db.core.shard.ShardRule;
+import com.php25.common.db.core.shard.ShardRuleHashBased;
+import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SqlParams;
-import com.php25.common.jdbcsample.mysql.model.Company;
 import com.php25.common.jdbcsample.mysql.model.ShardCustomer;
+import com.php25.common.jdbcsample.mysql.model.ShardDepartment;
+import com.php25.common.jdbcsample.mysql.model.ShardDepartmentRef;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +21,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,52 +28,49 @@ import java.util.List;
  * @date 2020/12/24 17:15
  */
 public class ShardDbTest {
-
     @Autowired
     IdGenerator idGeneratorService;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    Db db;
-
     SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     List<ShardCustomer> customers = Lists.newArrayList();
 
     private void initMeta() throws Exception {
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_0");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_1");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_company");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_department");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_department_0");
-        db.getJdbcPair().getJdbcTemplate().execute("drop table if exists t_customer_department_1");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_0 (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_1 (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_department (id bigint primary key,name varchar(20))");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department_0 (customer_id bigint,department_id bigint)");
-        db.getJdbcPair().getJdbcTemplate().execute("create table t_customer_department_1 (customer_id bigint,department_id bigint)");
+        jdbcTemplate.execute("drop table if exists t_customer_0");
+        jdbcTemplate.execute("drop table if exists t_customer_1");
+        jdbcTemplate.execute("drop table if exists t_department");
+        jdbcTemplate.execute("drop table if exists t_customer_department_0");
+        jdbcTemplate.execute("drop table if exists t_customer_department_1");
+        jdbcTemplate.execute("create table t_customer_0 (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        jdbcTemplate.execute("create table t_customer_1 (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        jdbcTemplate.execute("create table t_department (id bigint primary key,name varchar(20))");
+        jdbcTemplate.execute("create table t_customer_department_0 (customer_id bigint,department_id bigint)");
+        jdbcTemplate.execute("create table t_customer_department_1 (customer_id bigint,department_id bigint)");
     }
 
     @Before
     public void before() throws Exception {
         initMeta();
+        //ShardDepartment
+        ShardDepartment shardDepartment = new ShardDepartment();
+        shardDepartment.setId(1L);
+        shardDepartment.setName("it");
+        SqlParams sqlParams0 = Queries.mysql().from(ShardDepartment.class).insert(shardDepartment);
+        QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).insert(sqlParams0);
 
-        Company company = new Company();
-        company.setId(snowflakeIdWorker.nextId());
-        company.setName("Google");
-        company.setCreateTime(new Date());
-        company.setNew(true);
-        company.setEnable(1);
-        db.getBaseSqlExecute().insert(db.from(Company.class).insert(company));
-
+        //shardCustomers
         long id = 1;
+        List<JdbcTemplate> jdbcTemplates = Lists.newArrayList(jdbcTemplate, jdbcTemplate);
+        List<String> physicalTableNames = Lists.newArrayList("t_customer_0", "t_customer_1");
+        ShardRule shardRule = new ShardRuleHashBased();
+        List<String> physicalTableNames1 = Lists.newArrayList("t_customer_department_0", "t_customer_department_1");
 
         for (int i = 0; i < 3; i++) {
             ShardCustomer customer = new ShardCustomer();
-            customer.setId(id++);
+            customer.setId(id);
             customer.setUsername("jack" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setAge(i * 10);
@@ -76,30 +78,53 @@ public class ShardDbTest {
             customer.setEnable(1);
             customer.setUpdateTime(LocalDateTime.now());
             customer.setScore(BigDecimal.valueOf(1000L));
-            customer.setCompanyId(company.getId());
             customer.setNew(true);
             customers.add(customer);
-            SqlParams sqlParams = db.from(ShardCustomer.class).insert(customer);
-            db.getShardSqlExecute().insert(sqlParams);
+            SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).insert(customer);
+            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames).shardRule(shardRule, id)).insert(sqlParams);
             Assert.assertNotNull(customer.getId());
 
+            //ShardDepartmentRef
+            ShardDepartmentRef shardDepartmentRef = new ShardDepartmentRef();
+            shardDepartmentRef.setCustomerId(id);
+            shardDepartmentRef.setDepartmentId(shardDepartment.getId());
+            SqlParams sqlParams1 = Queries.mysql().from(ShardDepartmentRef.class).insert(shardDepartmentRef);
+            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1).shardRule(shardRule, id)).insert(sqlParams1);
+            id++;
         }
 
         for (int i = 0; i < 3; i++) {
             ShardCustomer customer = new ShardCustomer();
-            customer.setId(id++);
+            customer.setId(id);
             customer.setUsername("mary" + i);
             customer.setPassword(DigestUtil.MD5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
-            customer.setAge(i * 20);
+            customer.setAge(i * 10);
             customer.setEnable(0);
             customer.setScore(BigDecimal.valueOf(1000L));
-            customer.setCompanyId(company.getId());
             customer.setNew(true);
             customers.add(customer);
-            SqlParams sqlParams1 = db.from(ShardCustomer.class).insert(customer);
-            db.getShardSqlExecute().insert(sqlParams1);
+            SqlParams sqlParams1 = Queries.mysql().from(ShardCustomer.class).insert(customer);
+            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames).shardRule(shardRule, id)).insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
+
+            //ShardDepartmentRef
+            ShardDepartmentRef shardDepartmentRef = new ShardDepartmentRef();
+            shardDepartmentRef.setCustomerId(id);
+            shardDepartmentRef.setDepartmentId(shardDepartment.getId());
+            SqlParams sqlParams2 = Queries.mysql().from(ShardDepartmentRef.class).insert(shardDepartmentRef);
+            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1).shardRule(shardRule, id)).insert(sqlParams2);
+
+            id++;
         }
+
+        System.out.println();
+        System.out.println("==========================start=============================");
+    }
+
+    @After
+    public void end() {
+        System.out.println("==========================end=============================");
+        System.out.println();
     }
 }

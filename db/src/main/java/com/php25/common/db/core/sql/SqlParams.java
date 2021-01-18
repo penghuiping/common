@@ -1,6 +1,9 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.db.core.GenerationType;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 
 /**
@@ -34,6 +37,16 @@ public abstract class SqlParams {
      * 需要映射的字段
      */
     private String[] columns;
+
+    /**
+     * 排序
+     */
+    private List<Pair<String, String>> orders;
+
+    /**
+     * 分组
+     */
+    private List<String> groupBys;
 
     public String getSql() {
         return sql;
@@ -73,5 +86,21 @@ public abstract class SqlParams {
 
     public void setColumns(String[] columns) {
         this.columns = columns;
+    }
+
+    public List<Pair<String, String>> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Pair<String, String>> orders) {
+        this.orders = orders;
+    }
+
+    public List<String> getGroupBys() {
+        return groupBys;
+    }
+
+    public void setGroupBys(List<String> groupBys) {
+        this.groupBys = groupBys;
     }
 }

@@ -53,7 +53,7 @@ public class TwoPhaseCommitTransaction {
 
         //分发任务
         for (TransactionCallback<T> callback : transactionCallbacks) {
-            TransactionTemplate transactionTemplate = callback.getDb().getJdbcPair().getTransactionTemplate();
+            TransactionTemplate transactionTemplate = callback.getTransactionTemplate();
             PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
             LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
             queues.add(queue);

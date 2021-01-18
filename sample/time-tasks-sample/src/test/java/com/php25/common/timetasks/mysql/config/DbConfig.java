@@ -3,8 +3,8 @@ package com.php25.common.timetasks.mysql.config;
 import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.core.mess.SnowflakeIdWorker;
-import com.php25.common.db.Db;
 import com.php25.common.db.DbType;
+import com.php25.common.db.EntitiesScan;
 import com.php25.common.db.core.JdbcPair;
 import com.php25.common.timetasks.repository.TimeTaskDbRepository;
 import com.php25.common.timetasks.repository.TimeTaskDbRepositoryImpl;
@@ -50,9 +50,9 @@ public class DbConfig {
     }
 
     @Bean
-    public Db db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-        Db db = new Db(DbType.MYSQL);
-        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate,transactionTemplate);
+    public EntitiesScan db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        EntitiesScan db = new EntitiesScan(DbType.MYSQL);
+        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate, transactionTemplate);
         db.setJdbcPair(jdbcPair);
         db.scanPackage("com.php25.common.timetasks.model");
         return db;
@@ -69,7 +69,7 @@ public class DbConfig {
     }
 
     @Bean
-    public TimeTaskDbRepository timeTaskDbRepository(Db db) {
+    public TimeTaskDbRepository timeTaskDbRepository(EntitiesScan db) {
         return new TimeTaskDbRepositoryImpl(db);
     }
 }
