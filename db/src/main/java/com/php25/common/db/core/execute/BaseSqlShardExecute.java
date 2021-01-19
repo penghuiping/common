@@ -61,24 +61,30 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
             List<T> list0 = shardInfo.getShardingDb().query(targetSql0, paras, new JdbcModelRowMapper<>((Class<T>) resultType));
             list.addAll(list0);
         } else {
-            for (int i = 0; i < jdbcTemplates.size(); i++) {
-                //todo 没处理分页情况
-                //逻辑表名替换成对应的物理表名
-                String targetSql0 = targetSql;
-                for (Map.Entry<String, ShardTableInfo> entry : this.shardTableInfos.entrySet()) {
-                    ShardTableInfo shardTableInfo1 = entry.getValue();
-                    ModelMeta modelMeta1 = JdbcModelManager.getModelMeta(shardTableInfo1.getModelClass());
-                    String logicalTableName1 = modelMeta1.getLogicalTableName();
-                    List<String> physicalTableNames1 = shardTableInfo1.getPhysicalTableNames();
-                    String physicalTableName1 = physicalTableNames1.get(i);
-                    targetSql0 = targetSql0.replace(logicalTableName1, physicalTableName1);
-                }
-                log.info("sql语句为:{}", targetSql0);
-                List<T> list0 = jdbcTemplates.get(i).query(targetSql0, paras, new JdbcModelRowMapper<T>((Class<T>) resultType));
+            if (null != sqlParams.getLimit()) {
+                //处理分页逻辑
+                List<T> list0 = this.selectWithLimit(sqlParams);
                 list.addAll(list0);
+            } else {
+                for (int i = 0; i < jdbcTemplates.size(); i++) {
+                    //逻辑表名替换成对应的物理表名
+                    String targetSql0 = targetSql;
+                    for (Map.Entry<String, ShardTableInfo> entry : this.shardTableInfos.entrySet()) {
+                        ShardTableInfo shardTableInfo1 = entry.getValue();
+                        ModelMeta modelMeta1 = JdbcModelManager.getModelMeta(shardTableInfo1.getModelClass());
+                        String logicalTableName1 = modelMeta1.getLogicalTableName();
+                        List<String> physicalTableNames1 = shardTableInfo1.getPhysicalTableNames();
+                        String physicalTableName1 = physicalTableNames1.get(i);
+                        targetSql0 = targetSql0.replace(logicalTableName1, physicalTableName1);
+                    }
+                    log.info("sql语句为:{}", targetSql0);
+                    List<T> list0 = jdbcTemplates.get(i).query(targetSql0, paras, new JdbcModelRowMapper<T>((Class<T>) resultType));
+                    list.addAll(list0);
+                }
             }
 
-            //进行order by排序操作
+            //多表中的子表已经完成局部order by排序
+            //需要完成全局order by排序操作
             final List<Pair<String, String>> pairs = sqlParams.getOrders();
             if (null != pairs && pairs.size() > 0) {
                 list = list.stream().sorted((o1, o2) -> {
@@ -115,6 +121,8 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
         }
         return list;
     }
+
+    protected abstract <T> List<T> selectWithLimit(SqlParams sqlParams);
 
     @Override
     public <M> M single(SqlParams sqlParams) {

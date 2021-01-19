@@ -1,8 +1,9 @@
 package com.php25.common.auditlog.repository;
 
 import com.php25.common.auditlog.model.DbAuditLog;
-import com.php25.common.db.EntitiesScan;
+import com.php25.common.db.DbType;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author penghuiping
@@ -11,7 +12,7 @@ import com.php25.common.db.repository.BaseDbRepositoryImpl;
 public class AuditLogRepositoryImpl extends BaseDbRepositoryImpl<DbAuditLog, String> implements AuditLogRepository {
 
 
-    public AuditLogRepositoryImpl(EntitiesScan db) {
-        super(db);
+    public AuditLogRepositoryImpl(JdbcTemplate jdbcTemplate, DbType dbType) {
+        super(jdbcTemplate, dbType);
     }
 }

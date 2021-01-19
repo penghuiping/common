@@ -14,6 +14,7 @@ import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.model.ShardCustomer;
 import com.php25.common.jdbcsample.mysql.model.ShardDepartmentRef;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,9 +54,16 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         mysql.withEnv("MYSQL_DATABASE", "test");
     }
 
-    private final List<JdbcTemplate> jdbcTemplates = Lists.newArrayList(jdbcTemplate, jdbcTemplate);
-    private final List<String> physicalTableNames = Lists.newArrayList("t_customer_0", "t_customer_1");
-    private final List<String> physicalTableNames1 = Lists.newArrayList("t_customer_department_0", "t_customer_department_1");
+    private List<JdbcTemplate> jdbcTemplates;
+    private List<String> physicalTableNames;
+    private List<String> physicalTableNames1;
+
+    @Before
+    public void before1() {
+        jdbcTemplates = Lists.newArrayList(jdbcTemplate, jdbcTemplate);
+        physicalTableNames = Lists.newArrayList("t_customer_0", "t_customer_1");
+        physicalTableNames1 = Lists.newArrayList("t_customer_department_0", "t_customer_department_1");
+    }
 
     @Test
     public void query() {
@@ -152,6 +160,16 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
                 .with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1))
                 .select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(6);
+    }
+
+    @Test
+    public void limit() {
+        SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).asc("id").limit(2, 2).select();
+        List<ShardCustomer> result = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        log.info("结果为:{}", JsonUtil.toPrettyJson(result));
+        Assertions.assertThat(result.size()).isEqualTo(2);
+        Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
+        Assertions.assertThat(result.get(1).getId()).isEqualTo(4);
     }
 
     @Test

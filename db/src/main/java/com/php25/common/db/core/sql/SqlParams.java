@@ -48,6 +48,11 @@ public abstract class SqlParams {
      */
     private List<String> groupBys;
 
+    /**
+     * 分页
+     */
+    private int[] limit;
+
     public String getSql() {
         return sql;
     }
@@ -102,5 +107,13 @@ public abstract class SqlParams {
 
     public void setGroupBys(List<String> groupBys) {
         this.groupBys = groupBys;
+    }
+
+    public int[] getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int[] limit) {
+        this.limit = limit;
     }
 }

@@ -146,6 +146,15 @@ public class MysqlJdbcTest extends DbTest {
     }
 
     @Test
+    public void limit() {
+        SqlParams sqlParams = Queries.mysql().from(Customer.class).asc("id").limit(2, 2).select();
+        List<Customer> result = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
+        Assertions.assertThat(result.size()).isEqualTo(2);
+        Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
+        Assertions.assertThat(result.get(1).getId()).isEqualTo(4);
+    }
+
+    @Test
     public void or() {
         //todo 子条件语句不够精简 Queries.mysql().group().andEq("age", 0).andEq("username", "jack0");
         SqlParams sqlParams = Queries.mysql().from(Customer.class)
