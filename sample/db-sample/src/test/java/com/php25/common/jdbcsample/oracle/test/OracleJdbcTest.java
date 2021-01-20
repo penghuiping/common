@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @RunWith(SpringRunner.class)
 public class OracleJdbcTest extends DbTest {
 
-    private final Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
+    private final static Logger log = LoggerFactory.getLogger(OracleJdbcTest.class);
 
     @ClassRule
     public static GenericContainer oracle = new GenericContainer<>("wnameless/oracle-xe-11g-r2")
@@ -157,6 +157,16 @@ public class OracleJdbcTest extends DbTest {
         sqlParams = Queries.oracle().from(Customer.class, "a").join(Company.class, "b").on("a.companyId", "b.id").whereEq("b.name", "Google").select(Company.class, "b.id", "b.name", "b.enable", "b.createTime", "b.updateTime");
         companies = QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(companies.size()).isEqualTo(6);
+    }
+
+    @Test
+    public void limit() {
+        SqlParams sqlParams = Queries.oracle().from(Customer.class).asc("id").limit(2, 2).select();
+        List<Customer> result = QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).select(sqlParams);
+        log.info(JsonUtil.toPrettyJson(result));
+        Assertions.assertThat(result.size()).isEqualTo(2);
+        Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
+        Assertions.assertThat(result.get(1).getId()).isEqualTo(4);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.core.Constants;
 import com.php25.common.db.core.GenerationType;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
@@ -327,7 +328,7 @@ public class PostgresQuery extends BaseQuery {
         }
         // 增加翻页
         if (this.startRow != -1) {
-            sb.append(String.format("limit %s offset %s", pageSize, startRow)).append(" ");
+            sb.append(String.format("limit ${%s} offset ${%s}", Constants.PAGE_SIZE, Constants.START_ROW)).append(" ");
         }
     }
 }

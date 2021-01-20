@@ -2,6 +2,7 @@ package com.php25.common.db.core.execute;
 
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.core.Constants;
 import com.php25.common.db.core.JdbcModelRowMapper;
 import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.manager.ModelMeta;
@@ -11,6 +12,7 @@ import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,26 +63,29 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
             List<T> list0 = shardInfo.getShardingDb().query(targetSql0, paras, new JdbcModelRowMapper<>((Class<T>) resultType));
             list.addAll(list0);
         } else {
-            if (null != sqlParams.getLimit()) {
-                //处理分页逻辑
-                List<T> list0 = this.selectWithLimit(sqlParams);
-                list.addAll(list0);
-            } else {
-                for (int i = 0; i < jdbcTemplates.size(); i++) {
-                    //逻辑表名替换成对应的物理表名
-                    String targetSql0 = targetSql;
-                    for (Map.Entry<String, ShardTableInfo> entry : this.shardTableInfos.entrySet()) {
-                        ShardTableInfo shardTableInfo1 = entry.getValue();
-                        ModelMeta modelMeta1 = JdbcModelManager.getModelMeta(shardTableInfo1.getModelClass());
-                        String logicalTableName1 = modelMeta1.getLogicalTableName();
-                        List<String> physicalTableNames1 = shardTableInfo1.getPhysicalTableNames();
-                        String physicalTableName1 = physicalTableNames1.get(i);
-                        targetSql0 = targetSql0.replace(logicalTableName1, physicalTableName1);
-                    }
-                    log.info("sql语句为:{}", targetSql0);
-                    List<T> list0 = jdbcTemplates.get(i).query(targetSql0, paras, new JdbcModelRowMapper<T>((Class<T>) resultType));
-                    list.addAll(list0);
+
+            if (sqlParams.getStartRow() >= 0) {
+                //TODO 处理分页逻辑,随着分页深度越深，性能越差,需要优化...
+                Map<String, Object> params = new HashMap<>(16);
+                params.put(Constants.START_ROW, 0);
+                params.put(Constants.PAGE_SIZE, sqlParams.getStartRow() + sqlParams.getPageSize());
+                targetSql = new StringFormatter(targetSql).format(params);
+            }
+
+            for (int i = 0; i < jdbcTemplates.size(); i++) {
+                //逻辑表名替换成对应的物理表名
+                String targetSql0 = targetSql;
+                for (Map.Entry<String, ShardTableInfo> entry : this.shardTableInfos.entrySet()) {
+                    ShardTableInfo shardTableInfo1 = entry.getValue();
+                    ModelMeta modelMeta1 = JdbcModelManager.getModelMeta(shardTableInfo1.getModelClass());
+                    String logicalTableName1 = modelMeta1.getLogicalTableName();
+                    List<String> physicalTableNames1 = shardTableInfo1.getPhysicalTableNames();
+                    String physicalTableName1 = physicalTableNames1.get(i);
+                    targetSql0 = targetSql0.replace(logicalTableName1, physicalTableName1);
                 }
+                log.info("sql语句为:{}", targetSql0);
+                List<T> list0 = jdbcTemplates.get(i).query(targetSql0, paras, new JdbcModelRowMapper<T>((Class<T>) resultType));
+                list.addAll(list0);
             }
 
             //多表中的子表已经完成局部order by排序
@@ -118,11 +123,11 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
                     return res;
                 }).collect(Collectors.toList());
             }
+
+            list = list.subList(sqlParams.getStartRow(), sqlParams.getStartRow() + sqlParams.getPageSize());
         }
         return list;
     }
-
-    protected abstract <T> List<T> selectWithLimit(SqlParams sqlParams);
 
     @Override
     public <M> M single(SqlParams sqlParams) {

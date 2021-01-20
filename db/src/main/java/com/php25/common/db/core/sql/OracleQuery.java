@@ -1,6 +1,7 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.db.core.Constants;
 import com.php25.common.db.core.GenerationType;
 import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
@@ -324,7 +325,7 @@ public class OracleQuery extends BaseQuery {
         }
         // 增加翻页
         if (this.startRow != -1) {
-            String result = String.format("SELECT * FROM ( SELECT A.*, ROWNUM RN FROM (%s) A WHERE ROWNUM <= %s) WHERE RN >= %s", sb.toString(), pageSize, startRow);
+            String result = String.format("SELECT * FROM ( SELECT A.*, ROWNUM RN FROM (%s) A WHERE ROWNUM <= (${%s}+${%s})) WHERE RN > ${%s}", sb.toString(), Constants.START_ROW, Constants.PAGE_SIZE, Constants.START_ROW);
             this.setSql(new StringBuilder(result));
         }
     }

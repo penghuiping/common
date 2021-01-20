@@ -59,6 +59,8 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         sqlParams.setColumns(columns);
         sqlParams.setResultType(model);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
+        sqlParams.setStartRow((int) this.startRow);
+        sqlParams.setPageSize((int) this.pageSize);
         sqlParams.setOrders(null != this.orderBy ? this.orderBy.getOrders() : null);
         this.clear();
         return sqlParams;

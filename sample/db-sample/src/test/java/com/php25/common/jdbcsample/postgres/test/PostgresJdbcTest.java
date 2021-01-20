@@ -152,6 +152,15 @@ public class PostgresJdbcTest extends DbTest {
     }
 
     @Test
+    public void limit() {
+        SqlParams sqlParams = Queries.postgres().from(Customer.class).asc("id").limit(2, 2).select();
+        List<Customer> result = QueriesExecute.postgres().singleJdbc().with(jdbcTemplate).select(sqlParams);
+        Assertions.assertThat(result.size()).isEqualTo(2);
+        Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
+        Assertions.assertThat(result.get(1).getId()).isEqualTo(4);
+    }
+
+    @Test
     public void or() {
         //todo 子条件语句不够精简 Queries.postgres().group().andEq("age", 0).andEq("username", "jack0");
         SqlParams sqlParams = Queries.postgres().from(Customer.class)

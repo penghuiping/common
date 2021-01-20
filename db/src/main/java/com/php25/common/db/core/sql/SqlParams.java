@@ -51,7 +51,12 @@ public abstract class SqlParams {
     /**
      * 分页
      */
-    private int[] limit;
+    private int startRow;
+
+    /**
+     * 分页
+     */
+    private int pageSize;
 
     public String getSql() {
         return sql;
@@ -109,11 +114,19 @@ public abstract class SqlParams {
         this.groupBys = groupBys;
     }
 
-    public int[] getLimit() {
-        return limit;
+    public int getStartRow() {
+        return startRow;
     }
 
-    public void setLimit(int[] limit) {
-        this.limit = limit;
+    public void setStartRow(int startRow) {
+        this.startRow = startRow;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
 }

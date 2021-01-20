@@ -13,6 +13,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -40,6 +42,8 @@ import java.util.stream.Collectors;
 @ActiveProfiles(profiles = {"single_db"})
 @RunWith(SpringRunner.class)
 public class MysqlJdbcTest extends DbTest {
+
+    private final static Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 
     @ClassRule
     public static GenericContainer mysql = new GenericContainer<>("mysql:5.7").withExposedPorts(3306);
@@ -149,6 +153,7 @@ public class MysqlJdbcTest extends DbTest {
     public void limit() {
         SqlParams sqlParams = Queries.mysql().from(Customer.class).asc("id").limit(2, 2).select();
         List<Customer> result = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
+        log.info(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(result.size()).isEqualTo(2);
         Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
         Assertions.assertThat(result.get(1).getId()).isEqualTo(4);

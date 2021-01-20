@@ -1,15 +1,18 @@
 package com.php25.common.db.core.execute;
 
+import com.php25.common.db.core.Constants;
 import com.php25.common.db.core.JdbcModelRowMapper;
 import com.php25.common.db.core.sql.BatchSqlParams;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.util.StringFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +37,13 @@ public abstract class BaseSqlExecute implements SqlExecute {
         Object[] paras = defaultSqlParams.getParams().toArray();
         Class<?> resultType = defaultSqlParams.getResultType();
         List<T> list = null;
+        if (sqlParams.getStartRow() >= 0) {
+            StringFormatter stringFormatter = new StringFormatter(targetSql);
+            Map<String, Object> params = new HashMap<>(16);
+            params.put(Constants.START_ROW, sqlParams.getStartRow());
+            params.put(Constants.PAGE_SIZE, sqlParams.getPageSize());
+            targetSql = stringFormatter.format(params);
+        }
         log.info("sql语句为:{}", targetSql);
         if (resultType.isAssignableFrom(Map.class)) {
             list = (List<T>) this.jdbcTemplate.query(targetSql, paras, new ColumnMapRowMapper());
