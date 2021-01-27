@@ -1,15 +1,16 @@
 package com.php25.common.db.core.execute;
 
+import com.google.common.collect.ImmutableMap;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.GenerationType;
 import com.php25.common.db.core.manager.JdbcModelManager;
-import com.php25.common.db.core.manager.ModelMeta;
 import com.php25.common.db.core.shard.ShardInfo;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.util.StringFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,20 +35,20 @@ public class MysqlSqlShardExecute extends BaseSqlShardExecute {
         Class<?> clazz = defaultSqlParams.getClazz();
         String targetSql = defaultSqlParams.getSql();
         Object[] paras = defaultSqlParams.getParams().toArray();
-        ModelMeta modelMeta = JdbcModelManager.getModelMeta(defaultSqlParams.getClazz());
-        //逻辑表名替换成对应的物理表名
-        String logicalTableName = modelMeta.getLogicalTableName();
+
+        //分区信息
         ShardTableInfo shardTableInfo = shardTableInfos.get(clazz.getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
         List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
         ShardInfo shardInfo = shardTableInfo.getShardRule()
-                .shard(logicalTableName, jdbcTemplates, physicalTableNames, shardingKeyValue);
+                .shard(jdbcTemplates, physicalTableNames, shardingKeyValue);
         String physicalTableName = shardInfo.getPhysicTableName();
-        targetSql = targetSql.replace(logicalTableName, physicalTableName);
+
+        //替换成物理表名
+        targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(defaultSqlParams.getClazz().getSimpleName(), physicalTableName));
         GenerationType generationType = defaultSqlParams.getGenerationType();
         Object model = defaultSqlParams.getModel();
-
         final String targetSql0 = targetSql;
         log.info("sql语句为:{}", targetSql0);
         try {

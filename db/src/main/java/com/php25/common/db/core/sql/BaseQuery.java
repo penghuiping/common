@@ -8,6 +8,7 @@ import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.exception.DbException;
 import com.php25.common.db.specification.SearchParam;
 import com.php25.common.db.specification.SearchParamBuilder;
+import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,10 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         } else {
             sb = new StringBuilder("SELECT *");
         }
-        sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz));
+        sb.append(" FROM ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX);
 
         if (!StringUtil.isBlank(clazzAlias)) {
             sb.append(" ").append(clazzAlias);
@@ -56,6 +60,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
+        sqlParams.setJoinClazz(this.joinClazz);
         sqlParams.setColumns(columns);
         sqlParams.setResultType(model);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
@@ -100,7 +105,11 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
      */
     private <M> SqlParams update(M model, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getLogicalTableName(clazz)).append(" SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                .append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
@@ -179,7 +188,11 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                .append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
 
         //判断是否有@version注解
@@ -207,7 +220,6 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         }
         stringBuilder.append(" )");
         String targetSql = stringBuilder.toString();
-        log.info("sql语句为:{}", targetSql);
 
         //拼装参数
         List<Object[]> batchParams = new ArrayList<>();
@@ -251,7 +263,11 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     public <M> SqlParams updateBatch(List<M> models) {
         M model = models.get(0);
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(JdbcModelManager.getLogicalTableName(model.getClass())).append(" SET ");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                .append(" SET ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, false);
         //获取主键id
         String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
@@ -284,7 +300,6 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         }
 
         String targetSql = stringBuilder.toString();
-        log.info("sql语句为:{}", targetSql);
 
         //拼装参数
         List<Object[]> batchParams = new ArrayList<>();
@@ -334,14 +349,15 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
     @Override
     public SqlParams count() {
         StringBuilder sb = new StringBuilder("SELECT COUNT(1) as num_count FROM ");
-        sb.append(JdbcModelManager.getLogicalTableName(clazz));
+        sb.append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX);
         if (!StringUtil.isBlank(clazzAlias)) {
             sb.append(" ").append(clazzAlias);
         }
         sb.append(" ").append(getSql());
         this.setSql(sb);
         String targetSql = this.getSql().toString();
-        log.info("sql语句为:{}", targetSql);
         SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ShardRuleTimeBased implements ShardRule {
     @Override
-    public ShardInfo shard(String logicName, List<JdbcTemplate> jdbcTemplates, List<String> physicNames, Object shardingKey) {
+    public ShardInfo shard(List<JdbcTemplate> jdbcTemplates, List<String> physicNames, Object shardingKey) {
         return null;
     }
 }

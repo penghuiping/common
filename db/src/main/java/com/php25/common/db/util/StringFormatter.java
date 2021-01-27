@@ -11,9 +11,9 @@ import java.util.Map;
  */
 public class StringFormatter {
 
-    private static final String KEY_WRAPPER_PREFIX = "${";
+    public static final String KEY_WRAPPER_PREFIX = "${";
 
-    private static final String KEY_WRAPPER_SUFFIX = "}";
+    public static final String KEY_WRAPPER_SUFFIX = "}";
 
     private String value;
 

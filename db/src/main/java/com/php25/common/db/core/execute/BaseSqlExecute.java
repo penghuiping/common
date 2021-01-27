@@ -1,7 +1,9 @@
 package com.php25.common.db.core.execute;
 
+import com.google.common.collect.ImmutableMap;
 import com.php25.common.db.core.Constants;
 import com.php25.common.db.core.JdbcModelRowMapper;
+import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.BatchSqlParams;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
@@ -36,14 +38,25 @@ public abstract class BaseSqlExecute implements SqlExecute {
         String targetSql = defaultSqlParams.getSql();
         Object[] paras = defaultSqlParams.getParams().toArray();
         Class<?> resultType = defaultSqlParams.getResultType();
+        Class<?> clazz = defaultSqlParams.getClazz();
         List<T> list = null;
         if (sqlParams.getStartRow() >= 0) {
-            StringFormatter stringFormatter = new StringFormatter(targetSql);
-            Map<String, Object> params = new HashMap<>(16);
-            params.put(Constants.START_ROW, sqlParams.getStartRow());
-            params.put(Constants.PAGE_SIZE, sqlParams.getPageSize());
-            targetSql = stringFormatter.format(params);
+            targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(Constants.START_ROW, sqlParams.getStartRow(),
+                    Constants.PAGE_SIZE, sqlParams.getPageSize()));
         }
+
+        Map<String, Object> map = new HashMap<>(16);
+        map.put(clazz.getSimpleName(), JdbcModelManager.getLogicalTableName(clazz));
+        //join格式化
+        List<Class<?>> joinClazz = defaultSqlParams.getJoinClazz();
+        if (null != joinClazz && joinClazz.size() > 0) {
+            for (Class<?> cls : joinClazz) {
+                map.put(cls.getSimpleName(), JdbcModelManager.getLogicalTableName(cls));
+            }
+        }
+        targetSql = new StringFormatter(targetSql).format(map);
+
+
         log.info("sql语句为:{}", targetSql);
         if (resultType.isAssignableFrom(Map.class)) {
             list = (List<T>) this.jdbcTemplate.query(targetSql, paras, new ColumnMapRowMapper());
@@ -87,6 +100,9 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
             String targetSql = defaultSqlParams.getSql();
+            targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
+                    sqlParams.getClazz().getSimpleName(),
+                    JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
             log.info("sql语句为:{}", targetSql);
             return this.jdbcTemplate.update(targetSql, defaultSqlParams.getParams().toArray());
         } catch (Exception e) {
@@ -99,6 +115,9 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
             String targetSql = batchSqlParams.getSql();
+            targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
+                    sqlParams.getClazz().getSimpleName(),
+                    JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
             log.info("sql语句为:{}", targetSql);
             return this.jdbcTemplate.batchUpdate(targetSql, batchSqlParams.getBatchParams());
         } catch (Exception e) {
@@ -111,8 +130,11 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
             String targetSql = batchSqlParams.getSql();
+            targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
+                    sqlParams.getClazz().getSimpleName(),
+                    JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
             log.info("sql语句为:{}", targetSql);
-            return this.jdbcTemplate.batchUpdate(batchSqlParams.getSql(), batchSqlParams.getBatchParams());
+            return this.jdbcTemplate.batchUpdate(targetSql, batchSqlParams.getBatchParams());
         } catch (Exception e) {
             throw new DbException("插入操作失败", e);
         }
@@ -122,14 +144,20 @@ public abstract class BaseSqlExecute implements SqlExecute {
     public int delete(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
+                sqlParams.getClazz().getSimpleName(),
+                JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
         log.info("sql语句为:{}", targetSql);
-        return this.jdbcTemplate.update(defaultSqlParams.getSql(), defaultSqlParams.getParams().toArray());
+        return this.jdbcTemplate.update(targetSql, defaultSqlParams.getParams().toArray());
     }
 
     @Override
     public long count(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
+                sqlParams.getClazz().getSimpleName(),
+                JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
         log.info("sql语句为:{}", targetSql);
         Long result = this.jdbcTemplate.queryForObject(targetSql, defaultSqlParams.getParams().toArray(), Long.class);
         if (null == result) {

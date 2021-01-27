@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ShardRuleHashBased implements ShardRule {
     @Override
-    public ShardInfo shard(String logicName, List<JdbcTemplate> jdbcTemplates, List<String> physicNames, Object shardingKey) {
+    public ShardInfo shard(List<JdbcTemplate> jdbcTemplates, List<String> physicNames, Object shardingKey) {
         ShardInfo shardInfo = new ShardInfo();
         if (null != shardingKey) {
             int size = physicNames.size();

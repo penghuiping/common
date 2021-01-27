@@ -60,12 +60,12 @@ public class DbConfig1 {
     }
 
     @Bean
-    SnowflakeIdWorker snowflakeIdWorker() {
+    public SnowflakeIdWorker snowflakeIdWorker() {
         return new SnowflakeIdWorker(1, 1);
     }
 
     @Bean
-    TwoPhaseCommitTransaction twoPhaseCommitTransaction() {
+    public TwoPhaseCommitTransaction twoPhaseCommitTransaction() {
         return new TwoPhaseCommitTransaction();
     }
 }

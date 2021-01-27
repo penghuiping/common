@@ -7,6 +7,7 @@ import com.php25.common.db.core.annotation.GeneratedValue;
 import com.php25.common.db.core.annotation.SequenceGenerator;
 import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,11 @@ public class PostgresQuery extends BaseQuery {
     @Override
     protected <M> SqlParams insert(M model, boolean ignoreNull) {
         //泛型获取类所有的属性
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                .append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
 
         //获取主键名
@@ -158,7 +163,11 @@ public class PostgresQuery extends BaseQuery {
 
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
-        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ").append(JdbcModelManager.getLogicalTableName(clazz)).append("( ");
+        StringBuilder stringBuilder = new StringBuilder("INSERT INTO ")
+                .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                .append(clazz.getSimpleName())
+                .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                .append("( ");
         List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
 
         //获取主键名
@@ -300,10 +309,17 @@ public class PostgresQuery extends BaseQuery {
         StringBuilder sb = new StringBuilder("DELETE");
         if (!StringUtil.isBlank(clazzAlias)) {
             //存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz)).append(" ").append(clazzAlias);
+            sb.append(" FROM ")
+                    .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                    .append(clazz.getSimpleName())
+                    .append(StringFormatter.KEY_WRAPPER_SUFFIX)
+                    .append(" ").append(clazzAlias);
         } else {
             //不存在别名
-            sb.append(" FROM ").append(JdbcModelManager.getLogicalTableName(clazz));
+            sb.append(" FROM ")
+                    .append(StringFormatter.KEY_WRAPPER_PREFIX)
+                    .append(clazz.getSimpleName())
+                    .append(StringFormatter.KEY_WRAPPER_SUFFIX);
         }
         sb.append(" ").append(getSql());
         this.setSql(sb);

@@ -9,6 +9,7 @@ import com.php25.common.db.core.shard.ShardRule;
 import com.php25.common.db.core.shard.ShardRuleHashBased;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SqlParams;
+import com.php25.common.db.repository.shard.TransactionCallback;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.model.ShardCustomer;
@@ -24,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.GenericContainer;
 
 import java.math.BigDecimal;
@@ -224,8 +226,7 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         List<Map> customers1 = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).mapSelect(sqlParams);
         log.info("实际结果为:{}", JsonUtil.toPrettyJson(customers1));
         Assertions.assertThat(customers1).isNotNull();
-        Assertions.assertThat(customers1.size()).isEqualTo(3);
-
+        Assertions.assertThat(customers1.size()).isEqualTo(6);
 //        Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(ShardCustomer::getAge, Collectors.averagingInt(ShardCustomer::getScore)));
 //        log.info("预期结果为:{}", JsonUtil.toPrettyJson(result));
 //
@@ -363,5 +364,30 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack0").single();
         customer = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
+    }
+
+    @Test
+    public void twoPhaseCommitTransaction() {
+        twoPhaseCommitTransaction.execute(new TransactionCallback<Object>() {
+            @Override
+            public Object doInTransaction() {
+                return null;
+            }
+
+            @Override
+            public TransactionTemplate getTransactionTemplate() {
+                return ShardMysqlJdbcTest.this.transactionTemplate;
+            }
+        }, new TransactionCallback<Object>() {
+            @Override
+            public Object doInTransaction() {
+                return null;
+            }
+
+            @Override
+            public TransactionTemplate getTransactionTemplate() {
+                return ShardMysqlJdbcTest.this.transactionTemplate;
+            }
+        });
     }
 }

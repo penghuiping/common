@@ -22,6 +22,10 @@ public abstract class SqlParams {
      */
     private Class<?> clazz;
 
+    /**
+     * 关联实体对象类
+     */
+    private List<Class<?>> joinClazz;
 
     /**
      * id生成方式
@@ -42,11 +46,6 @@ public abstract class SqlParams {
      * 排序
      */
     private List<Pair<String, String>> orders;
-
-    /**
-     * 分组
-     */
-    private List<String> groupBys;
 
     /**
      * 分页
@@ -106,14 +105,6 @@ public abstract class SqlParams {
         this.orders = orders;
     }
 
-    public List<String> getGroupBys() {
-        return groupBys;
-    }
-
-    public void setGroupBys(List<String> groupBys) {
-        this.groupBys = groupBys;
-    }
-
     public int getStartRow() {
         return startRow;
     }
@@ -128,5 +119,13 @@ public abstract class SqlParams {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public List<Class<?>> getJoinClazz() {
+        return joinClazz;
+    }
+
+    public void setJoinClazz(List<Class<?>> joinClazz) {
+        this.joinClazz = joinClazz;
     }
 }

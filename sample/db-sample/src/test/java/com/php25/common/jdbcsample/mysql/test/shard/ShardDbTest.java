@@ -2,7 +2,6 @@ package com.php25.common.jdbcsample.mysql.test.shard;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
@@ -10,6 +9,7 @@ import com.php25.common.db.core.shard.ShardRule;
 import com.php25.common.db.core.shard.ShardRuleHashBased;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SqlParams;
+import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.php25.common.jdbcsample.mysql.model.ShardCustomer;
 import com.php25.common.jdbcsample.mysql.model.ShardDepartment;
 import com.php25.common.jdbcsample.mysql.model.ShardDepartmentRef;
@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,7 +35,11 @@ public class ShardDbTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
+    @Autowired
+    TwoPhaseCommitTransaction twoPhaseCommitTransaction;
+
+    @Autowired
+    TransactionTemplate transactionTemplate;
 
     List<ShardCustomer> customers = Lists.newArrayList();
 
