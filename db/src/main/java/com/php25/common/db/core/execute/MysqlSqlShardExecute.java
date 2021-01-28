@@ -13,7 +13,6 @@ import com.php25.common.db.exception.DbException;
 import com.php25.common.db.util.StringFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -35,12 +34,12 @@ public class MysqlSqlShardExecute extends BaseSqlShardExecute {
         Class<?> clazz = defaultSqlParams.getClazz();
         String targetSql = defaultSqlParams.getSql();
         Object[] paras = defaultSqlParams.getParams().toArray();
+        log.debug("替换前sql语句为:{}", targetSql);
 
         //分区信息
         ShardTableInfo shardTableInfo = shardTableInfos.get(clazz.getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
         ShardInfo shardInfo = shardTableInfo.getShardRule()
                 .shard(jdbcTemplates, physicalTableNames, shardingKeyValue);
         String physicalTableName = shardInfo.getPhysicTableName();

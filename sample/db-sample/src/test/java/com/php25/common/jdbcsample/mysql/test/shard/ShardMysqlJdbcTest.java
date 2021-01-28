@@ -9,7 +9,6 @@ import com.php25.common.db.core.shard.ShardRule;
 import com.php25.common.db.core.shard.ShardRuleHashBased;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SqlParams;
-import com.php25.common.db.repository.shard.TransactionCallback;
 import com.php25.common.jdbcsample.mysql.CommonAutoConfigure;
 import com.php25.common.jdbcsample.mysql.model.Department;
 import com.php25.common.jdbcsample.mysql.model.ShardCustomer;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.GenericContainer;
 
 import java.math.BigDecimal;
@@ -72,14 +70,18 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         //like
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).whereLike("username", "jack%").asc("id").select();
         List<ShardCustomer> customers = QueriesExecute.mysql()
-                .shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .select(sqlParams);
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
 
         //not like
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereNotLike("username", "jack%").asc("id").select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
 
@@ -95,61 +97,84 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
 
         //between...and..
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereBetween("age", 20, 50).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
 
         //not between...and..
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereNotBetween("age", 20, 50).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
 
         //in
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereIn("age", Lists.newArrayList(20, 40)).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
 
         //not in
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereNotIn("age", Lists.newArrayList(0, 10)).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
 
         //great
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereGreat("age", 40).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() > 40).count());
 
         //great equal
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereGreatEq("age", 40).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 40).count());
 
         //less
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereLess("age", 0).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 0).count());
 
         //less equal
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereLessEq("age", 0).select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() <= 0).count());
 
         //is null
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereIsNull("updateTime").select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //is not null
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereIsNotNull("updateTime").select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
-        sqlParams = Queries.mysql().from(ShardCustomer.class).join(ShardDepartmentRef.class).on("ShardCustomer.id", "ShardDepartmentRef.customerId").select(ShardCustomer.class);
+        sqlParams = Queries.mysql().from(ShardCustomer.class).join(ShardDepartmentRef.class)
+                .on("ShardCustomer.id", "ShardDepartmentRef.customerId")
+                .select(ShardCustomer.class);
         customers = QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
-                .with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
+                .with(ShardTableInfo.of(ShardDepartmentRef.class, physicalTableNames1))
                 .select(sqlParams);
 
         System.out.println(JsonUtil.toPrettyJson(customers));
@@ -158,8 +183,9 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         //alias
         sqlParams = Queries.mysql().from(ShardCustomer.class, "a").join(ShardDepartmentRef.class, "b").on("a.id", "b.customerId").select(ShardCustomer.class);
         customers = QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
-                .with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
+                .with(ShardTableInfo.of(ShardDepartmentRef.class, physicalTableNames1))
                 .select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(6);
     }
@@ -167,7 +193,9 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     @Test
     public void limit() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).asc("id").limit(2, 2).select();
-        List<ShardCustomer> result = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        List<ShardCustomer> result = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         log.info("结果为:{}", JsonUtil.toPrettyJson(result));
         Assertions.assertThat(result.size()).isEqualTo(2);
         Assertions.assertThat(result.get(0).getId()).isEqualTo(3);
@@ -181,12 +209,16 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
                 .or(Queries.mysql().from(ShardCustomer.class).andEq("age", 0).andEq("username", "mary0")).asc("id")
                 .select();
         List<ShardCustomer> customers =
-                QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+                QueriesExecute.mysql().shardJdbc()
+                        .with(jdbcTemplates)
+                        .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(2);
 
         SqlParams sqlParams1 = Queries.mysql().from(ShardCustomer.class).whereEq("age", 0).orEq("age", 10).asc("id").select();
-        customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams1);
+        customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams1);
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(4);
     }
@@ -194,9 +226,13 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     @Test
     public void orderBy() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).orderBy("age asc").orderBy("id asc").select();
-        List<ShardCustomer> customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        List<ShardCustomer> customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         sqlParams = Queries.mysql().from(ShardCustomer.class).asc("age").asc("id").select();
-        List<ShardCustomer> customers1 = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        List<ShardCustomer> customers1 = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
 
         this.customers = this.customers.stream().sorted((o1, o2) -> {
             int res = o1.getAge() - o2.getAge();
@@ -223,7 +259,9 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     public void groupBy() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).groupBy("age").having("sum_score>100")
                 .select(Map.class, "sum(score) as sum_score", "age");
-        List<Map> customers1 = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).mapSelect(sqlParams);
+        List<Map> customers1 = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).mapSelect(sqlParams);
         log.info("实际结果为:{}", JsonUtil.toPrettyJson(customers1));
         Assertions.assertThat(customers1).isNotNull();
         Assertions.assertThat(customers1.size()).isEqualTo(6);
@@ -238,7 +276,9 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     @Test
     public void findAll() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).select();
-        List<ShardCustomer> customers = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).select(sqlParams);
+        List<ShardCustomer> customers = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).select(sqlParams);
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.size());
     }
@@ -246,7 +286,9 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     @Test
     public void findOne() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack0").single();
-        ShardCustomer customer = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).single(sqlParams);
+        ShardCustomer customer = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
         Assertions.assertThat("jack0").isEqualTo(customer.getUsername());
     }
@@ -256,8 +298,8 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         ShardRule shardRule = new ShardRuleHashBased();
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("id", 1L).single();
         ShardCustomer customer = QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo
-                        .of(ShardCustomer.class, jdbcTemplates, physicalTableNames)
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)
                         .shardRule(shardRule, 1L))
                 .single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
@@ -265,8 +307,8 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
 
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("id", 2L).single();
         customer = QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo
-                        .of(ShardCustomer.class, jdbcTemplates, physicalTableNames)
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)
                         .shardRule(shardRule, 2L))
                 .single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
@@ -278,7 +320,8 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
     public void count() {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("enable", "1").count();
         Long count = QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .count(sqlParams);
         Assertions.assertThat(this.customers.stream().filter(a -> a.getEnable() == 1).count()).isEqualTo((long) count);
     }
@@ -291,7 +334,8 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).delete();
         QueriesExecute.mysql()
                 .shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .delete(sqlParams);
 
         ShardCustomer customer = new ShardCustomer();
@@ -305,7 +349,8 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         sqlParams = Queries.mysql().from(ShardCustomer.class).insert(customer);
         QueriesExecute.mysql()
                 .shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)
                         .shardRule(shardRule, customer.getId()))
                 .insert(sqlParams);
 
@@ -320,14 +365,16 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         sqlParams = Queries.mysql().from(ShardCustomer.class).insert(customer1);
         QueriesExecute.mysql()
                 .shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)
                         .shardRule(shardRule, customer1.getId()))
                 .insert(sqlParams);
 
         sqlParams = Queries.mysql().from(ShardCustomer.class).count();
         Assertions.assertThat(2)
                 .isEqualTo(QueriesExecute.mysql().shardJdbc()
-                        .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                        .with(jdbcTemplates)
+                        .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                         .count(sqlParams));
     }
 
@@ -337,57 +384,41 @@ public class ShardMysqlJdbcTest extends ShardDbTest {
         SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack0").single();
         ShardCustomer customer = QueriesExecute.mysql()
                 .shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .single(sqlParams);
 
         customer.setUsername("jack-0");
         sqlParams = Queries.mysql().from(ShardCustomer.class).update(customer);
         QueriesExecute.mysql().shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .update(sqlParams);
 
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack0").single();
         customer = QueriesExecute.mysql()
                 .shardJdbc()
-                .with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .single(sqlParams);
         Assertions.assertThat(customer).isNull();
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack-0").single();
-        customer = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames))
+        customer = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames))
                 .single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
 
         ShardCustomer customer1 = new ShardCustomer();
         customer1.setUsername("jack0");
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack-0").update(customer1);
-        QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).update(sqlParams);
+        QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).update(sqlParams);
         sqlParams = Queries.mysql().from(ShardCustomer.class).whereEq("username", "jack0").single();
-        customer = QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames)).single(sqlParams);
+        customer = QueriesExecute.mysql().shardJdbc()
+                .with(jdbcTemplates)
+                .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames)).single(sqlParams);
         Assertions.assertThat(customer).isNotNull();
-    }
-
-    @Test
-    public void twoPhaseCommitTransaction() {
-        twoPhaseCommitTransaction.execute(new TransactionCallback<Object>() {
-            @Override
-            public Object doInTransaction() {
-                return null;
-            }
-
-            @Override
-            public TransactionTemplate getTransactionTemplate() {
-                return ShardMysqlJdbcTest.this.transactionTemplate;
-            }
-        }, new TransactionCallback<Object>() {
-            @Override
-            public Object doInTransaction() {
-                return null;
-            }
-
-            @Override
-            public TransactionTemplate getTransactionTemplate() {
-                return ShardMysqlJdbcTest.this.transactionTemplate;
-            }
-        });
     }
 }

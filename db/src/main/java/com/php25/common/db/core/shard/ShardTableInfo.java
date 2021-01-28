@@ -1,7 +1,5 @@
 package com.php25.common.db.core.shard;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.util.List;
 
 /**
@@ -9,7 +7,6 @@ import java.util.List;
  * @date 2021/1/14 09:01
  */
 public class ShardTableInfo {
-    private List<JdbcTemplate> jdbcTemplates;
 
     private List<String> physicalTableNames;
 
@@ -22,9 +19,8 @@ public class ShardTableInfo {
     private ShardTableInfo() {
     }
 
-    public static ShardTableInfo of(Class<?> modelClass, List<JdbcTemplate> jdbcTemplates, List<String> physicalTableNames) {
+    public static ShardTableInfo of(Class<?> modelClass, List<String> physicalTableNames) {
         ShardTableInfo shardTableInfo = new ShardTableInfo();
-        shardTableInfo.jdbcTemplates = jdbcTemplates;
         shardTableInfo.modelClass = modelClass;
         shardTableInfo.physicalTableNames = physicalTableNames;
         return shardTableInfo;
@@ -34,10 +30,6 @@ public class ShardTableInfo {
         this.shardRule = shardRule;
         this.shardingKeyValue = shardingKeyValue;
         return this;
-    }
-
-    public List<JdbcTemplate> getJdbcTemplates() {
-        return jdbcTemplates;
     }
 
     public List<String> getPhysicalTableNames() {

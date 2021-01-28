@@ -86,7 +86,10 @@ public class ShardDbTest {
             customer.setNew(true);
             customers.add(customer);
             SqlParams sqlParams = Queries.mysql().from(ShardCustomer.class).insert(customer);
-            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames).shardRule(shardRule, id)).insert(sqlParams);
+            QueriesExecute.mysql().shardJdbc()
+                    .with(jdbcTemplates)
+                    .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames).shardRule(shardRule, id))
+                    .insert(sqlParams);
             Assert.assertNotNull(customer.getId());
 
             //ShardDepartmentRef
@@ -94,7 +97,10 @@ public class ShardDbTest {
             shardDepartmentRef.setCustomerId(id);
             shardDepartmentRef.setDepartmentId(shardDepartment.getId());
             SqlParams sqlParams1 = Queries.mysql().from(ShardDepartmentRef.class).insert(shardDepartmentRef);
-            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1).shardRule(shardRule, id)).insert(sqlParams1);
+            QueriesExecute.mysql().shardJdbc()
+                    .with(jdbcTemplates)
+                    .with(ShardTableInfo.of(ShardDepartmentRef.class, physicalTableNames1).shardRule(shardRule, id))
+                    .insert(sqlParams1);
             id++;
         }
 
@@ -110,7 +116,10 @@ public class ShardDbTest {
             customer.setNew(true);
             customers.add(customer);
             SqlParams sqlParams1 = Queries.mysql().from(ShardCustomer.class).insert(customer);
-            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardCustomer.class, jdbcTemplates, physicalTableNames).shardRule(shardRule, id)).insert(sqlParams1);
+            QueriesExecute.mysql().shardJdbc()
+                    .with(jdbcTemplates)
+                    .with(ShardTableInfo.of(ShardCustomer.class, physicalTableNames).shardRule(shardRule, id))
+                    .insert(sqlParams1);
             Assert.assertNotNull(customer.getId());
 
             //ShardDepartmentRef
@@ -118,7 +127,10 @@ public class ShardDbTest {
             shardDepartmentRef.setCustomerId(id);
             shardDepartmentRef.setDepartmentId(shardDepartment.getId());
             SqlParams sqlParams2 = Queries.mysql().from(ShardDepartmentRef.class).insert(shardDepartmentRef);
-            QueriesExecute.mysql().shardJdbc().with(ShardTableInfo.of(ShardDepartmentRef.class, jdbcTemplates, physicalTableNames1).shardRule(shardRule, id)).insert(sqlParams2);
+            QueriesExecute.mysql().shardJdbc()
+                    .with(jdbcTemplates)
+                    .with(ShardTableInfo.of(ShardDepartmentRef.class, physicalTableNames1).shardRule(shardRule, id))
+                    .insert(sqlParams2);
 
             id++;
         }

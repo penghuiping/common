@@ -30,7 +30,7 @@ public class OracleSqlExecute extends BaseSqlExecute {
         List<Object> params = defaultSqlParams.getParams();
         GenerationType generationType = defaultSqlParams.getGenerationType();
         Object model = defaultSqlParams.getModel();
-
+        log.debug("替换前sql语句为:{}", targetSql);
         String targetSql0 = new StringFormatter(targetSql).format(ImmutableMap.of(clazz.getSimpleName(), JdbcModelManager.getLogicalTableName(clazz)));
         log.info("sql语句为:{}", targetSql0);
         try {

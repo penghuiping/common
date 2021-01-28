@@ -40,9 +40,11 @@ public abstract class BaseSqlExecute implements SqlExecute {
         Class<?> resultType = defaultSqlParams.getResultType();
         Class<?> clazz = defaultSqlParams.getClazz();
         List<T> list = null;
+        log.debug("替换前sql语句为:{}", targetSql);
         if (sqlParams.getStartRow() >= 0) {
-            targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(Constants.START_ROW, sqlParams.getStartRow(),
-                    Constants.PAGE_SIZE, sqlParams.getPageSize()));
+            targetSql = new StringFormatter(targetSql)
+                    .format(ImmutableMap.of(Constants.START_ROW, sqlParams.getStartRow(),
+                            Constants.PAGE_SIZE, sqlParams.getPageSize()));
         }
 
         Map<String, Object> map = new HashMap<>(16);
@@ -100,6 +102,7 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
             String targetSql = defaultSqlParams.getSql();
+            log.debug("替换前sql语句为:{}", targetSql);
             targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
                     sqlParams.getClazz().getSimpleName(),
                     JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
@@ -115,6 +118,7 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
             String targetSql = batchSqlParams.getSql();
+            log.debug("替换前sql语句为:{}", targetSql);
             targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
                     sqlParams.getClazz().getSimpleName(),
                     JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
@@ -130,6 +134,7 @@ public abstract class BaseSqlExecute implements SqlExecute {
         try {
             BatchSqlParams batchSqlParams = (BatchSqlParams) sqlParams;
             String targetSql = batchSqlParams.getSql();
+            log.debug("替换前sql语句为:{}", targetSql);
             targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
                     sqlParams.getClazz().getSimpleName(),
                     JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
@@ -144,6 +149,7 @@ public abstract class BaseSqlExecute implements SqlExecute {
     public int delete(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        log.debug("替换前sql语句为:{}", targetSql);
         targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
                 sqlParams.getClazz().getSimpleName(),
                 JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
@@ -155,6 +161,7 @@ public abstract class BaseSqlExecute implements SqlExecute {
     public long count(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        log.debug("替换前sql语句为:{}", targetSql);
         targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
                 sqlParams.getClazz().getSimpleName(),
                 JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));

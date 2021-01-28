@@ -33,6 +33,13 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
 
     protected Map<String, ShardTableInfo> shardTableInfos = new HashMap<>(16);
 
+    protected List<JdbcTemplate> jdbcTemplates;
+
+    public BaseSqlShardExecute with(List<JdbcTemplate> jdbcTemplates) {
+        this.jdbcTemplates = jdbcTemplates;
+        return this;
+    }
+
     public BaseSqlShardExecute with(ShardTableInfo shardTableInfo) {
         shardTableInfos.put(shardTableInfo.getModelClass().getName(), shardTableInfo);
         return this;
@@ -46,12 +53,12 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
         Object[] paras = defaultSqlParams.getParams().toArray();
         Class<?> resultType = defaultSqlParams.getResultType();
         List<T> list = new ArrayList<>();
+        log.debug("替换前sql语句为:{}", targetSql);
 
         ShardTableInfo shardTableInfo = this.shardTableInfos.get(defaultSqlParams.getClazz().getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         ShardRule shardRule = shardTableInfo.getShardRule();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
 
         if (null != shardingKeyValue && null != shardRule) {
             ShardInfo shardInfo = shardRule.shard(jdbcTemplates, physicalTableNames, shardingKeyValue);
@@ -63,6 +70,7 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
             List<T> list0 = shardInfo.getShardingDb().query(targetSql0, paras, new JdbcModelRowMapper<>((Class<T>) resultType));
             list.addAll(list0);
         } else {
+            //无shardingKey
             if (sqlParams.getStartRow() >= 0) {
                 //此实现:处理分页逻辑,随着分页深度越深,性能越差
                 targetSql = new StringFormatter(targetSql)
@@ -77,9 +85,10 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
                 for (Map.Entry<String, ShardTableInfo> entry : this.shardTableInfos.entrySet()) {
                     ShardTableInfo shardTableInfo1 = entry.getValue();
                     List<String> physicalTableNames1 = shardTableInfo1.getPhysicalTableNames();
+                    Class<?> clazz = shardTableInfo1.getModelClass();
                     String physicalTableName1 = physicalTableNames1.get(i);
                     targetSql0 = new StringFormatter(targetSql0)
-                            .format(ImmutableMap.of(defaultSqlParams.getClazz().getSimpleName(), physicalTableName1));
+                            .format(ImmutableMap.of(clazz.getSimpleName(), physicalTableName1));
                 }
                 log.info("sql语句为:{}", targetSql0);
                 List<T> list0 = jdbcTemplates.get(i).query(targetSql0, paras, new JdbcModelRowMapper<T>((Class<T>) resultType));
@@ -152,12 +161,12 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
         String targetSql = defaultSqlParams.getSql();
         Object[] paras = defaultSqlParams.getParams().toArray();
         List<Map> list = new ArrayList<>();
+        log.debug("替换前sql语句为:{}", targetSql);
 
         ShardTableInfo shardTableInfo = shardTableInfos.get(defaultSqlParams.getClazz().getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
         ShardRule shardRule = shardTableInfo.getShardRule();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
 
         if (null != shardingKeyValue && null != shardRule) {
             ShardInfo shardInfo = shardRule.shard(jdbcTemplates, physicalTableNames, shardingKeyValue);
@@ -214,12 +223,12 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
     public int update(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        log.debug("替换前sql语句为:{}", targetSql);
         Object[] paras = defaultSqlParams.getParams().toArray();
         ShardTableInfo shardTableInfo = this.shardTableInfos.get(defaultSqlParams.getClazz().getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         ShardRule shardRule = shardTableInfo.getShardRule();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
         if (null != shardingKeyValue && null != shardRule) {
             //存在分区键
             ShardInfo shardInfo = shardRule
@@ -250,12 +259,12 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
     public int delete(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        log.debug("替换前sql语句为:{}", targetSql);
         Object[] paras = defaultSqlParams.getParams().toArray();
         ShardTableInfo shardTableInfo = shardTableInfos.get(defaultSqlParams.getClazz().getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
         ShardRule shardRule = shardTableInfo.getShardRule();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
         int result = 0;
         if (null != shardingKeyValue && null != shardRule) {
             //存在分区键
@@ -284,12 +293,12 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
     public long count(SqlParams sqlParams) {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
+        log.debug("替换前sql语句为:{}", targetSql);
         Object[] paras = defaultSqlParams.getParams().toArray();
         ShardTableInfo shardTableInfo = shardTableInfos.get(defaultSqlParams.getClazz().getName());
         List<String> physicalTableNames = shardTableInfo.getPhysicalTableNames();
         Object shardingKeyValue = shardTableInfo.getShardingKeyValue();
         ShardRule shardRule = shardTableInfo.getShardRule();
-        List<JdbcTemplate> jdbcTemplates = shardTableInfo.getJdbcTemplates();
         long result = 0L;
         if (null != shardingKeyValue && null != shardRule) {
             //搜索条件中有shardingKey的情况
