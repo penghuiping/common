@@ -161,10 +161,9 @@ public class MysqlJdbcTest extends DbTest {
 
     @Test
     public void or() {
-        //todo 子条件语句不够精简 Queries.mysql().group().andEq("age", 0).andEq("username", "jack0");
-        SqlParams sqlParams = Queries.mysql().from(Customer.class)
-                .where(Queries.mysql().from(Customer.class).andEq("age", 0).andEq("username", "jack0"))
-                .or(Queries.mysql().from(Customer.class).andEq("age", 0).andEq("username", "mary0"))
+        SqlParams sqlParams = Queries.mysql().from(Customer.class, "a")
+                .where(Queries.group().andEq("a.age", 0).andEq("a.username", "jack0"))
+                .or(Queries.group().andEq("a.age", 0).andEq("a.username", "mary0"))
                 .select();
         List<Customer> customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(customers));

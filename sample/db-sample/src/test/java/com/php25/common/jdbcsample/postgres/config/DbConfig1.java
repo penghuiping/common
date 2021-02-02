@@ -3,6 +3,7 @@ package com.php25.common.jdbcsample.postgres.config;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.DbType;
 import com.php25.common.db.EntitiesScan;
+import com.php25.common.db.repository.shard.TwoPhaseCommitTransaction;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +16,12 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
- * Created by penghuiping on 2018/5/1.
+ * @author penghuiping
+ * @date 2020-12-24
  */
-@Profile(value = "single_db")
+@Profile(value = "many_db")
 @Configuration
-public class DbConfig {
-
+public class DbConfig1 {
     @Bean
     public DataSource druidDataSource() {
         HikariDataSource hikariDataSource = new HikariDataSource();
@@ -53,15 +54,18 @@ public class DbConfig {
         return DbType.POSTGRES;
     }
 
-
     @PostConstruct
     public void init() {
         new EntitiesScan().scanPackage("com.php25.common.jdbcsample.postgres.model");
     }
 
+    @Bean
+    public SnowflakeIdWorker snowflakeIdWorker() {
+        return new SnowflakeIdWorker(1, 1);
+    }
 
     @Bean
-    SnowflakeIdWorker snowflakeIdWorker() {
-        return new SnowflakeIdWorker(1, 1);
+    public TwoPhaseCommitTransaction twoPhaseCommitTransaction() {
+        return new TwoPhaseCommitTransaction();
     }
 }

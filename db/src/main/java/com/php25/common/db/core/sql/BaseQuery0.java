@@ -56,7 +56,8 @@ public abstract class BaseQuery0 implements Query {
                     //不存在 没使用别名，试试是否是类名
                     modelClass = JdbcModelManager.getClassFromModelName(parts[0]);
                     if (modelClass == null) {
-                        throw new DbException("Db Column name is illegal");
+                        //不是，则使用原来的字符串
+                        return " " + name + " ";
                     }
                     return getCol(modelClass, null, parts[1]);
                 } else {

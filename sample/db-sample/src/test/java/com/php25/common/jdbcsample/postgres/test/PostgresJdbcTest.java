@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
+@ActiveProfiles(profiles = {"single_db"})
 @RunWith(SpringRunner.class)
 public class PostgresJdbcTest extends DbTest {
 
@@ -162,10 +164,9 @@ public class PostgresJdbcTest extends DbTest {
 
     @Test
     public void or() {
-        //todo 子条件语句不够精简 Queries.postgres().group().andEq("age", 0).andEq("username", "jack0");
-        SqlParams sqlParams = Queries.postgres().from(Customer.class)
-                .where(Queries.postgres().from(Customer.class).andEq("age", 0).andEq("username", "jack0"))
-                .or(Queries.postgres().from(Customer.class).andEq("age", 0).andEq("username", "mary0"))
+        SqlParams sqlParams = Queries.postgres().from(Customer.class, "a")
+                .where(Queries.group().andEq("a.age", 0).andEq("a.username", "jack0"))
+                .or(Queries.group().andEq("a.age", 0).andEq("a.username", "mary0"))
                 .select();
         List<Customer> customers = QueriesExecute.postgres().singleJdbc().with(jdbcTemplate).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(customers));

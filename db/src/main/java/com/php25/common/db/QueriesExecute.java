@@ -6,6 +6,7 @@ import com.php25.common.db.core.execute.MysqlSqlExecute;
 import com.php25.common.db.core.execute.MysqlSqlShardExecute;
 import com.php25.common.db.core.execute.OracleSqlExecute;
 import com.php25.common.db.core.execute.PostgresSqlExecute;
+import com.php25.common.db.core.execute.PostgresSqlShardExecute;
 
 /**
  * @author penghuiping
@@ -65,6 +66,7 @@ public class QueriesExecute {
             case ORACLE:
                 break;
             case POSTGRES:
+                baseSqlExecute = new PostgresSqlShardExecute();
                 break;
             default:
                 baseSqlExecute = new MysqlSqlShardExecute();

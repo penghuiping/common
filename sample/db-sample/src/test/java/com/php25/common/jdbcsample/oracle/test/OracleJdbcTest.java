@@ -171,10 +171,9 @@ public class OracleJdbcTest extends DbTest {
 
     @Test
     public void or() {
-        //todo 子条件语句不够精简 Queries.oracle().group().andEq("age", 0).andEq("username", "jack0");
-        SqlParams sqlParams = Queries.oracle().from(Customer.class)
-                .where(Queries.oracle().from(Customer.class).andEq("age", 0).andEq("username", "jack0"))
-                .or(Queries.oracle().from(Customer.class).andEq("age", 0).andEq("username", "mary0"))
+        SqlParams sqlParams = Queries.oracle().from(Customer.class, "a")
+                .where(Queries.group().andEq("a.age", 0).andEq("a.username", "jack0"))
+                .or(Queries.group().andEq("a.age", 0).andEq("a.username", "mary0"))
                 .select();
         List<Customer> customers = QueriesExecute.oracle().singleJdbc().with(jdbcTemplate).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(customers));
