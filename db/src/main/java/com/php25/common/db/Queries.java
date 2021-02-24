@@ -7,6 +7,7 @@ import com.php25.common.db.core.sql.GroupQuery;
 import com.php25.common.db.core.sql.MysqlQuery;
 import com.php25.common.db.core.sql.OracleQuery;
 import com.php25.common.db.core.sql.PostgresQuery;
+import com.php25.common.db.core.sql.SqliteQuery;
 
 /**
  * @author penghuiping
@@ -35,6 +36,10 @@ public class Queries {
         return new Queries(DbType.POSTGRES);
     }
 
+    public static Queries sqlite() {
+        return new Queries(DbType.SQLITE);
+    }
+
 
     public static BaseQuery0 group() {
         return new GroupQuery();
@@ -51,6 +56,9 @@ public class Queries {
                 break;
             case POSTGRES:
                 query = new PostgresQuery(cls);
+                break;
+            case SQLITE:
+                query = new SqliteQuery(cls);
                 break;
             default:
                 query = new MysqlQuery(cls);
@@ -70,6 +78,9 @@ public class Queries {
                 break;
             case POSTGRES:
                 query = new PostgresQuery(cls, alias);
+                break;
+            case SQLITE:
+                query = new SqliteQuery(cls, alias);
                 break;
             default:
                 query = new MysqlQuery(cls, alias);

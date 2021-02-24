@@ -7,6 +7,7 @@ import com.php25.common.db.core.execute.MysqlSqlShardExecute;
 import com.php25.common.db.core.execute.OracleSqlExecute;
 import com.php25.common.db.core.execute.PostgresSqlExecute;
 import com.php25.common.db.core.execute.PostgresSqlShardExecute;
+import com.php25.common.db.core.execute.SqliteSqlExecute;
 
 /**
  * @author penghuiping
@@ -37,6 +38,10 @@ public class QueriesExecute {
         return new QueriesExecute(DbType.POSTGRES);
     }
 
+    public static QueriesExecute sqlite() {
+        return new QueriesExecute(DbType.SQLITE);
+    }
+
 
     public BaseSqlExecute singleJdbc() {
         BaseSqlExecute baseSqlExecute = null;
@@ -49,6 +54,9 @@ public class QueriesExecute {
                 break;
             case POSTGRES:
                 baseSqlExecute = new PostgresSqlExecute();
+                break;
+            case SQLITE:
+                baseSqlExecute = new SqliteSqlExecute();
                 break;
             default:
                 baseSqlExecute = new MysqlSqlExecute();

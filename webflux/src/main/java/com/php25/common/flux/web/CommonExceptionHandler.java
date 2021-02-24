@@ -4,6 +4,7 @@ import com.php25.common.core.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +42,20 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(WebExchangeBindException.class)
     public ResponseEntity<JSONResponse> handleWebExchangeBindException(WebExchangeBindException e) {
+        log.error("请求访问参数错误!!", e);
+        JSONResponse jsonResponse = new JSONResponse();
+        jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+        FieldError fieldError = e.getFieldError();
+        if (fieldError == null) {
+            jsonResponse.setMessage("input_params_error");
+        } else {
+            jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
+        }
+        return ResponseEntity.ok(jsonResponse);
+    }
+
+    @ExceptionHandler(value = {BindException.class})
+    public ResponseEntity<JSONResponse> handleBindException(BindException e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
         jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);

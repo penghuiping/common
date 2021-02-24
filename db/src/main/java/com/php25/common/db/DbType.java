@@ -20,4 +20,9 @@ public enum DbType {
      * 表示postgres数据库
      */
     POSTGRES,
+
+    /**
+     * 表示sqlite数据库
+     */
+    SQLITE
 }

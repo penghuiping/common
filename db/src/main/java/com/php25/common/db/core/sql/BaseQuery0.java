@@ -89,7 +89,7 @@ public abstract class BaseQuery0 implements Query {
                 }
             }
         } catch (Exception e) {
-            //"无法通过jpa注解找到对应的column,直接使用传入的名字符串"
+            //"无法通过注解找到对应的column,直接使用传入的名字符串"
             return " " + name + " ";
         }
     }

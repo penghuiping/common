@@ -69,5 +69,4 @@ public class RsaTest {
         log.info("publicKey:{}", secretKeyPair.getPublicKey());
         log.info("privateKey:{}", secretKeyPair.getPrivateKey());
     }
-
 }

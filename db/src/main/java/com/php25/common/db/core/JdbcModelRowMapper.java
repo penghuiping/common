@@ -8,6 +8,7 @@ import com.php25.common.db.core.manager.ModelMeta;
 import com.php25.common.db.exception.DbException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.NumberUtils;
 
@@ -15,7 +16,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -30,8 +33,15 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
 
     private final ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
+
     public JdbcModelRowMapper(Class<T> mapperClass) {
         this.mapperClass = mapperClass;
+        GenericConversionService genericConversionService = (GenericConversionService) conversionService;
+        genericConversionService.addConverter(Long.class, LocalDateTime.class,
+                source -> LocalDateTime.ofInstant(Instant.ofEpochMilli(source), ZoneId.systemDefault()));
+        genericConversionService.addConverter(Long.class, Date.class, source -> {
+            return Date.from(Instant.ofEpochMilli(source));
+        });
     }
 
     @Override
