@@ -10,7 +10,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,10 +61,8 @@ public class RBloomFilterImpl implements RBloomFilter {
             @Override
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[] key = RBloomFilterImpl.this.name.getBytes(Charsets.UTF_8);
-                List<Object> list = new ArrayList<>();
                 for (long index : indexes) {
-                    Boolean result = connection.getBit(key, index);
-                    list.add(result);
+                    connection.getBit(key, index);
                 }
                 return null;
             }
@@ -83,10 +80,8 @@ public class RBloomFilterImpl implements RBloomFilter {
             @Override
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[] key = RBloomFilterImpl.this.name.getBytes(Charsets.UTF_8);
-                List<Object> list = new ArrayList<>();
                 for (long index : indexes) {
-                    Boolean result = connection.setBit(key, index, true);
-                    list.add(result);
+                    connection.setBit(key, index, true);
                 }
                 return null;
             }

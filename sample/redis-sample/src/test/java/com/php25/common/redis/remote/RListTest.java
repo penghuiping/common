@@ -1,4 +1,4 @@
-package com.php25.common.redissample;
+package com.php25.common.redis.remote;
 
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
@@ -55,9 +55,9 @@ public class RListTest {
         list.leftPush(4L);
         list.leftPush(5L);
 
-        list.leftTrim(0,3);
+        list.leftTrim(0, 3);
 
-        List<Long> result = list.leftRange(0,-1);
+        List<Long> result = list.leftRange(0, -1);
         Assertions.assertThat(result.get(0)).isEqualTo(5);
         Assertions.assertThat(result.get(1)).isEqualTo(4);
         Assertions.assertThat(result.get(2)).isEqualTo(3);

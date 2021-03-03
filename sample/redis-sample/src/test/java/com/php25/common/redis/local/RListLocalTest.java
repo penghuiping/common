@@ -1,4 +1,4 @@
-package com.php25.common.redis_local;
+package com.php25.common.redis.local;
 
 /**
  * @author penghuiping

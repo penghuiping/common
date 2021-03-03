@@ -73,9 +73,9 @@ class RedisSetHandlers {
         Set<Object> set = (Set<Object>) expiredCache.getValue();
         Set<Object> set1 = (Set<Object>) expiredCache1.getValue();
 
-        set.addAll(set1);
-        flush(cache, key, set);
-        response.setResult(set);
+        Set<Object> newSet = new HashSet<>(set);
+        newSet.addAll(set1);
+        response.setResult(newSet);
     });
     static final Pair<String, RedisCmdHandler> SET_INTER = Pair.of(RedisCmd.SET_INTER, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
@@ -87,9 +87,9 @@ class RedisSetHandlers {
         Set<Object> set = (Set<Object>) expiredCache.getValue();
         Set<Object> set1 = (Set<Object>) expiredCache1.getValue();
 
-        set.retainAll(set1);
-        flush(cache, key, set);
-        response.setResult(set);
+        Set<Object> newSet = new HashSet<>(set);
+        newSet.retainAll(set1);
+        response.setResult(newSet);
 
     });
     static final Pair<String, RedisCmdHandler> SET_DIFF = Pair.of(RedisCmd.SET_DIFF, (redisManager, request, response) -> {
@@ -101,10 +101,9 @@ class RedisSetHandlers {
         ExpiredCache expiredCache1 = getCacheValue(cache, otherSetKey);
         Set<Object> set = (Set<Object>) expiredCache.getValue();
         Set<Object> set1 = (Set<Object>) expiredCache1.getValue();
-
-        set.removeAll(set1);
-        flush(cache, key, set);
-        response.setResult(set);
+        Set<Object> newSet = new HashSet<>(set);
+        newSet.removeAll(set1);
+        response.setResult(newSet);
     });
     static final Pair<String, RedisCmdHandler> SET_SIZE = Pair.of(RedisCmd.SET_SIZE, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;

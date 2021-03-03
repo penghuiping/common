@@ -1,21 +1,27 @@
-package com.php25.common.redis_local;
+package com.php25.common.redis.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.TimeUtil;
+import com.php25.common.redis.Person;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.local.LocalRedisManager;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -27,19 +33,30 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
- * @date 2021/2/25 16:08
+ * @date 2021/3/3 20:45
  */
 @SpringBootTest
 @ContextConfiguration(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class RStringLocalTest {
-
-    private static final Logger log = LoggerFactory.getLogger(RStringLocalTest.class);
+public class RStringRemoteTest {
+    private static final Logger log = LoggerFactory.getLogger(RStringRemoteTest.class);
+    @Rule
+    public GenericContainer redis = new GenericContainer<>("redis:5.0.3-alpine").withExposedPorts(6379);
     private RedisManager redisManager;
 
     @Before
-    public void before() throws Exception {
-        this.redisManager = new LocalRedisManager(1024);
+    public void before() {
+        String address = redis.getContainerIpAddress();
+        Integer port = redis.getFirstMappedPort();
+        //单机
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setDatabase(0);
+        redisConfiguration.setHostName(address);
+        redisConfiguration.setPort(port);
+        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisConfiguration);
+        lettuceConnectionFactory.afterPropertiesSet();
+        this.redisManager = new RedisManagerImpl(new StringRedisTemplate(lettuceConnectionFactory));
+
         Person jack = new Person(30, "jack");
         Person mary = new Person(31, "mary");
         this.redisManager.string().set("person_jack", jack);
@@ -67,14 +84,14 @@ public class RStringLocalTest {
     public void expire() throws Exception {
         this.redisManager.expire("person_jack", 1L, TimeUnit.HOURS);
         Long expireTime = this.redisManager.getExpire("person_jack");
-        Assertions.assertThat(expireTime).isEqualTo(3600L);
+        Assertions.assertThat(expireTime).isGreaterThan(3598L).isLessThan(3601L);
     }
 
     @Test
     public void getExpire() throws Exception {
         this.redisManager.expire("person_jack", 10L, TimeUnit.SECONDS);
         Long expireTime = this.redisManager.getExpire("person_jack");
-        Assertions.assertThat(expireTime).isEqualTo(10L);
+        Assertions.assertThat(expireTime).isGreaterThan(8L).isLessThan(11L);
     }
 
     @Test

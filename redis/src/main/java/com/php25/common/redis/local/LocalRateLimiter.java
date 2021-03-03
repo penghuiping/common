@@ -1,7 +1,11 @@
 package com.php25.common.redis.local;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import com.php25.common.redis.RRateLimiter;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
@@ -24,12 +28,14 @@ public class LocalRateLimiter implements RRateLimiter {
     }
 
     private RateLimiter getInternalRateLimiter() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.key);
-        if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, this.key, RateLimiter.create(this.rate));
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.RATE_LIMIT_GET, Lists.newArrayList(this.key, rate));
+        CmdResponse cmdResponse = new CmdResponse();
+        redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (RateLimiter) res.get();
         }
-        return (RateLimiter) expiredCache.getValue();
-
+        return null;
     }
 
 

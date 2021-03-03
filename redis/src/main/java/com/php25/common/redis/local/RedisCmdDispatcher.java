@@ -55,8 +55,10 @@ class RedisCmdDispatcher {
             while (true) {
                 try {
                     RedisCmdPair redisCmdPair = buffer.poll(1, TimeUnit.SECONDS);
-                    RedisCmdHandler redisCmdHandler = handlerMap.get(redisCmdPair.getRequest().getCmd());
-                    redisCmdHandler.handle(this.redisManager, redisCmdPair.getRequest(), redisCmdPair.getResponse());
+                    if (null != redisCmdPair) {
+                        RedisCmdHandler redisCmdHandler = handlerMap.get(redisCmdPair.getRequest().getCmd());
+                        redisCmdHandler.handle(this.redisManager, redisCmdPair.getRequest(), redisCmdPair.getResponse());
+                    }
                 } catch (Exception e) {
                     log.error("消费local redis命令时出错!", e);
                 }

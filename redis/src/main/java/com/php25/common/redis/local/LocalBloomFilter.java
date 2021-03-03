@@ -1,6 +1,5 @@
 package com.php25.common.redis.local;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.StringBloomFilter;
 import com.php25.common.redis.RBloomFilter;
@@ -55,22 +54,5 @@ public class LocalBloomFilter implements RBloomFilter {
     @Override
     public void put(String key) {
         this.bloomFilter.put(key);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        LocalBloomFilter that = (LocalBloomFilter) o;
-        return Objects.equal(bloomFilter, that.bloomFilter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(bloomFilter);
     }
 }

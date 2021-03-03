@@ -1,4 +1,4 @@
-package com.php25.common.redissample;
+package com.php25.common.redis.remote;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.mess.IdGenerator;
@@ -46,19 +46,15 @@ import java.util.concurrent.locks.Lock;
 public class RedisCommonTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCommonTest.class);
-
-    @Autowired
-    IdGenerator idGeneratorService;
-
-
-    RedisManager redisManager;
-
-    StringRedisTemplate redisTemplate;
-
-    RedisConnectionFactory redisConnectionFactory;
-
     @Rule
     public GenericContainer redis = new GenericContainer<>("redis:5.0.3-alpine").withExposedPorts(6379);
+    @Autowired
+    IdGenerator idGeneratorService;
+    RedisManager redisManager;
+    StringRedisTemplate redisTemplate;
+    RedisConnectionFactory redisConnectionFactory;
+    int count = 0;
+    Long result = 0l;
 
     @Before
     public void setUp() {
@@ -90,11 +86,6 @@ public class RedisCommonTest {
         this.redisTemplate = new StringRedisTemplate(redisConnectionFactory);
         this.redisManager = new RedisManagerImpl(redisTemplate);
     }
-
-    int count = 0;
-
-    Long result = 0l;
-
 
     @Test
     public void distributeLock() throws Exception {

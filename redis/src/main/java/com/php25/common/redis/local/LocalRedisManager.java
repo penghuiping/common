@@ -57,6 +57,7 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.GET_EXPIRE);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXPIRE);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.BLOOM_FILTER_GET);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.RATE_LIMIT_GET);
 
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_ADD);
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_REMOVE);
