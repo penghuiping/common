@@ -189,7 +189,7 @@ public class LocalRedisManager implements RedisManager {
     }
 
     @Override
-    public RRateLimiter rateLimiter(int capacity, int rate, String id) {
+    public RRateLimiter rateLimiter(int rate, String id) {
         return new LocalRateLimiter(id, rate, this);
     }
 }

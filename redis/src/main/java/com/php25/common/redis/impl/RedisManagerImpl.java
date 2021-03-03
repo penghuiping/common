@@ -122,7 +122,7 @@ public class RedisManagerImpl implements RedisManager {
     }
 
     @Override
-    public RRateLimiter rateLimiter(int capacity, int rate, String id) {
-        return new RRateLimiterImpl(redisTemplate, capacity, rate, id);
+    public RRateLimiter rateLimiter(int rate, String id) {
+        return new RRateLimiterImpl(redisTemplate, rate, rate, id);
     }
 }
