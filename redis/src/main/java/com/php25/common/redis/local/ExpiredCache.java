@@ -23,8 +23,8 @@ class ExpiredCache implements Delayed {
 
     /**
      * 缓存值
-     * 1. 对于Hash,List,Set,SortedSet,String数据结构,需要先序列化成json字符串,在存入value
-     * 2. 对于Lock,BloomFilter,RateLimiter,则直接存入value
+     * 1. 对于String数据结构,需要先序列化成json字符串,在存入value
+     * 2. 对于Lock,BloomFilter,RateLimiter,Hash,List,Set,SortedSet则直接存入value
      */
     private Object value;
 

@@ -7,10 +7,15 @@ import java.util.List;
  * @date 2021/3/2 21:11
  */
 class CmdRequest {
+    /**
+     * redis命令,参见@RedisCmd
+     */
     private String cmd;
 
+    /**
+     * redis命令后面跟的参数列表
+     */
     private List<Object> params;
-
 
     public CmdRequest(String cmd, List<Object> params) {
         this.cmd = cmd;

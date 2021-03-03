@@ -1,12 +1,11 @@
 package com.php25.common.redis.local;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.php25.common.core.util.JsonUtil;
+import com.google.common.collect.Lists;
 import com.php25.common.redis.RSet;
 
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
@@ -20,102 +19,127 @@ public class LocalSet<T> implements RSet<T> {
 
     private final Class<T> cls;
 
-    private final HashSet<T> set;
 
     public LocalSet(String setKey, Class<T> cls, LocalRedisManager redisManager) {
         this.setKey = setKey;
         this.redisManager = redisManager;
         this.cls = cls;
-        this.set = getInternalSet();
     }
 
-
-    private HashSet<T> getInternalSet() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.setKey);
-        if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, this.setKey, JsonUtil.toJson(new HashSet<>()));
-        }
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), new TypeReference<>() {
-        });
-    }
-
-    private void flush() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.setKey);
-        expiredCache.setValue(JsonUtil.toJson(this.set));
-        this.redisManager.cache.putValue(this.setKey, expiredCache);
-    }
 
     @Override
     public void add(T element) {
-        this.set.add(element);
-        this.flush();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_ADD, Lists.newArrayList(this.setKey, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public void remove(T element) {
-        this.set.remove(element);
-        this.flush();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_REMOVE, Lists.newArrayList(this.setKey, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public Set<T> members() {
-        return this.set;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_MEMBERS, Lists.newArrayList(this.setKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Boolean isMember(T element) {
-        return this.set.contains(element);
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_IS_MEMBER, Lists.newArrayList(this.setKey, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        }
+        return false;
     }
 
     @Override
     public T pop() {
-        Iterator<T> iterator = this.set.iterator();
-        if (iterator.hasNext()) {
-            T val = iterator.next();
-            this.set.remove(val);
-            this.flush();
-            return val;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_POP, Lists.newArrayList(this.setKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (T) res.get();
         }
         return null;
     }
 
     @Override
     public Set<T> union(String otherSetKey) {
-        RSet<T> rSet = this.redisManager.set(otherSetKey, cls);
-        Set<T> otherSet = rSet.members();
-        this.set.addAll(otherSet);
-        this.flush();
-        return this.set;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_UNION, Lists.newArrayList(this.setKey, otherSetKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Set<T> inter(String otherSetKey) {
-        RSet<T> rSet = this.redisManager.set(otherSetKey, cls);
-        Set<T> otherSet = rSet.members();
-        this.set.retainAll(otherSet);
-        this.flush();
-        return this.set;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_INTER, Lists.newArrayList(this.setKey, otherSetKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Set<T> diff(String otherSetKey) {
-        RSet<T> rSet = this.redisManager.set(otherSetKey, cls);
-        Set<T> otherSet = rSet.members();
-        this.set.removeAll(otherSet);
-        this.flush();
-        return this.set;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_DIFF, Lists.newArrayList(this.setKey, otherSetKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Long size() {
-        return (long) this.set.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_SIZE, Lists.newArrayList(this.setKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public T getRandomMember() {
-        Iterator<T> iterator = this.set.iterator();
-        if (iterator.hasNext()) {
-            return iterator.next();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_GET_RANDOM_MEMBER, Lists.newArrayList(this.setKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (T) res.get();
         }
         return null;
     }

@@ -29,11 +29,11 @@ public class LocalString implements RString {
         CmdResponse cmdResponse = new CmdResponse();
         redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (!res.isPresent()) {
-            return null;
+        if (res.isPresent()) {
+            ExpiredCache expiredCache = (ExpiredCache) res.get();
+            return JsonUtil.fromJson(expiredCache.getValue().toString(), cls);
         }
-        ExpiredCache expiredCache = (ExpiredCache) res.get();
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), cls);
+        return null;
     }
 
     @Override
@@ -42,11 +42,11 @@ public class LocalString implements RString {
         CmdResponse cmdResponse = new CmdResponse();
         redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (!res.isPresent()) {
-            return null;
+        if (res.isPresent()) {
+            ExpiredCache expiredCache = (ExpiredCache) res.get();
+            return JsonUtil.fromJson(expiredCache.getValue().toString(), cls);
         }
-        ExpiredCache expiredCache = (ExpiredCache) res.get();
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), cls);
+        return null;
     }
 
     @Override
@@ -85,11 +85,12 @@ public class LocalString implements RString {
         CmdResponse cmdResponse = new CmdResponse();
         redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (!res.isPresent()) {
-            return null;
+        if (res.isPresent()) {
+            ExpiredCache expiredCache = (ExpiredCache) res.get();
+            return JsonUtil.fromJson(expiredCache.getValue().toString(), Long.class);
         }
-        ExpiredCache expiredCache = (ExpiredCache) res.get();
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), Long.class);
+        return null;
+
     }
 
     @Override
@@ -98,11 +99,11 @@ public class LocalString implements RString {
         CmdResponse cmdResponse = new CmdResponse();
         redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (!res.isPresent()) {
-            return null;
+        if (res.isPresent()) {
+            ExpiredCache expiredCache = (ExpiredCache) res.get();
+            return JsonUtil.fromJson(expiredCache.getValue().toString(), Long.class);
         }
-        ExpiredCache expiredCache = (ExpiredCache) res.get();
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), Long.class);
+        return null;
     }
 
     @Override
