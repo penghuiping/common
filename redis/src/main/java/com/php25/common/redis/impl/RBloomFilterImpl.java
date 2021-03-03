@@ -1,9 +1,10 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Funnels;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
+import com.php25.common.redis.RBloomFilter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -18,22 +19,22 @@ import java.util.List;
  * @author penghuiping
  * @date 2020/1/8 13:46
  */
-public class RBloomFilterImpl implements RBloomFilter{
+public class RBloomFilterImpl implements RBloomFilter {
     /**
      * 对应于redis中的key
      */
-    private String name;
+    private final String name;
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     /**
      * bit数组长度
      */
-    private long numBits;
+    private final long numBits;
     /**
      * hash函数数量
      */
-    private int numHashFunctions;
+    private final int numHashFunctions;
 
 
     /**

@@ -5,7 +5,6 @@ import com.php25.common.core.mess.IdGeneratorImpl;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.db.DbType;
 import com.php25.common.db.EntitiesScan;
-import com.php25.common.db.core.JdbcPair;
 import com.php25.common.timetasks.repository.TimeTaskDbRepository;
 import com.php25.common.timetasks.repository.TimeTaskDbRepositoryImpl;
 import com.zaxxer.hikari.HikariDataSource;
@@ -15,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
@@ -49,13 +49,15 @@ public class DbConfig {
         return new TransactionTemplate(platformTransactionManager);
     }
 
-    @Bean
-    public EntitiesScan db(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-        EntitiesScan db = new EntitiesScan(DbType.MYSQL);
-        JdbcPair jdbcPair = new JdbcPair(jdbcTemplate, transactionTemplate);
-        db.setJdbcPair(jdbcPair);
+    @PostConstruct
+    public void init() {
+        EntitiesScan db = new EntitiesScan();
         db.scanPackage("com.php25.common.timetasks.model");
-        return db;
+    }
+
+    @Bean
+    public DbType dbType() {
+        return DbType.MYSQL;
     }
 
     @Bean
@@ -69,7 +71,7 @@ public class DbConfig {
     }
 
     @Bean
-    public TimeTaskDbRepository timeTaskDbRepository(EntitiesScan db) {
-        return new TimeTaskDbRepositoryImpl(db);
+    public TimeTaskDbRepository timeTaskDbRepository(JdbcTemplate jdbcTemplate, DbType dbType) {
+        return new TimeTaskDbRepositoryImpl(jdbcTemplate, dbType);
     }
 }

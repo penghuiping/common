@@ -1,6 +1,7 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.redis.RHyperLogLogs;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
@@ -9,9 +10,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 public class RHyperLogLogsImpl implements RHyperLogLogs {
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    private String key;
+    private final String key;
 
 
     public RHyperLogLogsImpl(StringRedisTemplate redisTemplate, String key) {

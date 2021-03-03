@@ -1,12 +1,16 @@
 package com.php25.common.timetasks.repository;
 
 import com.php25.common.core.mess.IdGenerator;
-import com.php25.common.db.EntitiesScan;
+import com.php25.common.db.DbType;
+import com.php25.common.db.Queries;
+import com.php25.common.db.QueriesExecute;
+import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.repository.BaseDbRepositoryImpl;
 import com.php25.common.timetasks.exception.TimeTasksException;
 import com.php25.common.timetasks.model.TimeTaskDb;
 import com.php25.common.timetasks.timewheel.TimeTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,8 +27,9 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
     @Autowired
     private IdGenerator idGenerator;
 
-    public TimeTaskDbRepositoryImpl(EntitiesScan db) {
-        super(db);
+
+    public TimeTaskDbRepositoryImpl(JdbcTemplate jdbcTemplate, DbType dbType) {
+        super(jdbcTemplate, dbType);
     }
 
     @Override
@@ -60,12 +65,14 @@ public class TimeTaskDbRepositoryImpl extends BaseDbRepositoryImpl<TimeTaskDb, S
 
     @Override
     public void deleteAllInvalidJob() {
-        db.from(TimeTaskDb.class, "a").whereLess("a.executeTime", LocalDateTime.now()).delete();
+        SqlParams sqlParams = Queries.of(dbType).from(TimeTaskDb.class, "a").whereLess("a.executeTime", LocalDateTime.now()).delete();
+        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).delete(sqlParams);
     }
 
     @Override
     public List<TimeTask> findByExecuteTimeScope(LocalDateTime start, LocalDateTime end) {
-        List<TimeTaskDb> timeTaskDbs = db.getBaseSqlExecute().select(db.from(TimeTaskDb.class).whereBetween("executeTime", start, end).select());
+        SqlParams sqlParams = Queries.of(dbType).from(TimeTaskDb.class).whereBetween("executeTime", start, end).select();
+        List<TimeTaskDb> timeTaskDbs = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
         List<TimeTask> timeTasks = timeTaskDbs.stream().map(timeTaskDb -> {
             try {
                 Class<?> cls = Class.forName(timeTaskDb.getClassName());

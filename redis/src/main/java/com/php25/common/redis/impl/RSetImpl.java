@@ -1,7 +1,8 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.redis.RSet;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Set;
@@ -13,11 +14,11 @@ import java.util.stream.Collectors;
  */
 public class RSetImpl<T> implements RSet<T> {
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    private String setKey;
+    private final String setKey;
 
-    private Class<T> model;
+    private final Class<T> model;
 
     public RSetImpl(StringRedisTemplate redisTemplate, String setKey, Class<T> model) {
         this.redisTemplate = redisTemplate;

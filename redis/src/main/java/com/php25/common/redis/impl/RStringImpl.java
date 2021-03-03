@@ -1,8 +1,9 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.redis.RString;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RStringImpl implements RString {
 
-    private StringRedisTemplate stringRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     public RStringImpl(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;

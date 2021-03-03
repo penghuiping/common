@@ -1,7 +1,8 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.redis.RList;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.stream.Collectors;
  */
 public class RListImpl<T> implements RList<T> {
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    private String listKey;
+    private final String listKey;
 
-    private Class<T> model;
+    private final Class<T> model;
 
     public RListImpl(StringRedisTemplate redisTemplate, String listKey, Class<T> cls) {
         this.redisTemplate = redisTemplate;

@@ -40,5 +40,21 @@ public interface LruCache<K, V> {
      */
     int size();
 
+    /**
+     * 主动移除缓存值
+     *
+     * @param key 缓存key
+     * @return true: 成功
+     */
+    boolean remove(String key);
+
+    /**
+     * 判断是否包含缓存key
+     *
+     * @param key 缓存key
+     * @return true:包含
+     */
+    boolean containsKey(String key);
+
 
 }

@@ -1,5 +1,6 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
+import com.php25.common.redis.RRateLimiter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -16,24 +17,24 @@ import java.util.List;
  */
 public class RRateLimiterImpl implements RRateLimiter {
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    private RedisScript<List<Long>> script;
+    private final RedisScript<List<Long>> script;
 
     /**
      * 令牌桶最大容量
      */
-    private int capacity;
+    private final int capacity;
 
     /**
      * 令牌增长率，单位时间内向令牌桶里添加令牌的数量
      */
-    private int rate;
+    private final int rate;
 
     /**
      * 令牌的唯一标识
      */
-    private String id;
+    private final String id;
 
     public RRateLimiterImpl(StringRedisTemplate redisTemplate, int capacity, int rate, String id) {
         this.redisTemplate = redisTemplate;

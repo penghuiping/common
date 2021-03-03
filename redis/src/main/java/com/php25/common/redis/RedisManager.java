@@ -124,5 +124,5 @@ public interface RedisManager {
      * @param id       令牌桶唯一标识
      * @return
      */
-    RRateLimiterImpl rateLimiter(int capacity, int rate, String id);
+    RRateLimiter rateLimiter(int capacity, int rate, String id);
 }

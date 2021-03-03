@@ -14,9 +14,9 @@ public class LruCacheImpl<K, V> extends LinkedHashMap<K, V> implements LruCache<
     /**
      * 缓存最大数量
      */
-    private int maxEntry;
+    private final int maxEntry;
 
-    private ReadWriteLock readWriteLock;
+    private final ReadWriteLock readWriteLock;
 
     public LruCacheImpl(int maxEntry) {
         super(16, 0.75F, true);
@@ -33,7 +33,6 @@ public class LruCacheImpl<K, V> extends LinkedHashMap<K, V> implements LruCache<
         } finally {
             lock.unlock();
         }
-
     }
 
     @Override
@@ -45,7 +44,6 @@ public class LruCacheImpl<K, V> extends LinkedHashMap<K, V> implements LruCache<
         } finally {
             lock.unlock();
         }
-
     }
 
     @Override
@@ -65,6 +63,29 @@ public class LruCacheImpl<K, V> extends LinkedHashMap<K, V> implements LruCache<
         lock.lock();
         try {
             return super.getOrDefault(key, null);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public boolean remove(String key) {
+        Lock lock = this.readWriteLock.writeLock();
+        lock.lock();
+        try {
+            super.remove(key);
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public boolean containsKey(String key) {
+        Lock lock = this.readWriteLock.readLock();
+        lock.lock();
+        try {
+            return super.containsKey(key);
         } finally {
             lock.unlock();
         }

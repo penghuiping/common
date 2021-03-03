@@ -1,7 +1,7 @@
 package com.php25.common.ws;
 
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.RedisManagerImpl;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.web.socket.TextMessage;

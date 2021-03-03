@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.RedisManagerImpl;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;

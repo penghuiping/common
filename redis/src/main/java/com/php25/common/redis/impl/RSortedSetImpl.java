@@ -1,6 +1,7 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.redis.RSortedSet;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Set;
@@ -12,11 +13,11 @@ import java.util.stream.Collectors;
  */
 public class RSortedSetImpl<T> implements RSortedSet<T> {
 
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    private String key;
+    private final String key;
 
-    private Class<T> model;
+    private final Class<T> model;
 
     public RSortedSetImpl(StringRedisTemplate redisTemplate, String key, Class<T> model) {
         this.redisTemplate = redisTemplate;

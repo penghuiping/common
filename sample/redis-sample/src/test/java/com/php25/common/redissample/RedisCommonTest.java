@@ -8,7 +8,7 @@ import com.php25.common.redis.RHyperLogLogs;
 import com.php25.common.redis.RRateLimiter;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.RedisManagerImpl;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.Before;

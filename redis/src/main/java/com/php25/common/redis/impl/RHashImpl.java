@@ -1,6 +1,7 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.redis.RHash;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
@@ -9,9 +10,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 public class RHashImpl<T> implements RHash<T> {
 
-    private StringRedisTemplate stringRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    private String hashKey;
+    private final String hashKey;
 
     private Class<T> model;
 
@@ -27,7 +28,7 @@ public class RHashImpl<T> implements RHash<T> {
     }
 
     @Override
-    public Boolean put(String key, Object value) {
+    public Boolean put(String key, T value) {
         this.stringRedisTemplate.opsForHash().put(this.hashKey, key, JsonUtil.toJson(value));
         return true;
     }
@@ -46,6 +47,11 @@ public class RHashImpl<T> implements RHash<T> {
     @Override
     public Long incr(String key) {
         return this.stringRedisTemplate.opsForHash().increment(this.hashKey, key, 1);
+    }
+
+    @Override
+    public Long decr(String key) {
+        return this.stringRedisTemplate.opsForHash().increment(this.hashKey, key, -1);
     }
 
     @Override

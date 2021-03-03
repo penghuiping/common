@@ -1,6 +1,15 @@
-package com.php25.common.redis;
+package com.php25.common.redis.impl;
 
 import com.google.common.collect.Lists;
+import com.php25.common.redis.RBloomFilter;
+import com.php25.common.redis.RHash;
+import com.php25.common.redis.RHyperLogLogs;
+import com.php25.common.redis.RList;
+import com.php25.common.redis.RRateLimiter;
+import com.php25.common.redis.RSet;
+import com.php25.common.redis.RSortedSet;
+import com.php25.common.redis.RString;
+import com.php25.common.redis.RedisManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,12 +27,12 @@ import java.util.concurrent.locks.Lock;
  * @date 2016-09-02
  */
 public class RedisManagerImpl implements RedisManager {
-    private static Logger logger = LoggerFactory.getLogger(RedisManagerImpl.class);
-    private StringRedisTemplate redisTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(RedisManagerImpl.class);
+    private final StringRedisTemplate redisTemplate;
 
-    private LockRegistry lockRegistry;
+    private final LockRegistry lockRegistry;
 
-    private RString rString;
+    private final RString rString;
 
 
     public RedisManagerImpl(StringRedisTemplate redisTemplate) {
@@ -113,7 +122,7 @@ public class RedisManagerImpl implements RedisManager {
     }
 
     @Override
-    public RRateLimiterImpl rateLimiter(int capacity, int rate, String id) {
+    public RRateLimiter rateLimiter(int capacity, int rate, String id) {
         return new RRateLimiterImpl(redisTemplate, capacity, rate, id);
     }
 }

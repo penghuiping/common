@@ -14,7 +14,7 @@ public interface RHash<T> {
      * @param value 值
      * @return true:成功 false:失败
      */
-    Boolean put(String key, Object value);
+    Boolean put(String key, T value);
 
     /**
      * 从redis的Hash结构中,根据key获取value
@@ -38,6 +38,14 @@ public interface RHash<T> {
      * @return
      */
     Long incr(String key);
+
+    /**
+     * 线程安全的改变redis的Hash结构中key对应的值，并且每调用一次值减1
+     *
+     * @param key 键
+     * @return
+     */
+    Long decr(String key);
 
 
 }
