@@ -52,6 +52,33 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_NX);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_INCR);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_DECR);
+
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_ADD);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_REMOVE);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_MEMBERS);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_IS_MEMBER);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_POP);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_UNION);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_INTER);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_DIFF);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_SIZE);
+        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_GET_RANDOM_MEMBER);
+
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_RIGHT_PUSH);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_PUSH);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_RIGHT_POP);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_POP);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_RANGE);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_TRIM);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_SIZE);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_BLOCK_LEFT_POP);
+        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_BLOCK_RIGHT_POP);
+
+        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_PUT);
+        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_GET);
+        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DELETE);
+        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_INCR);
+        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DECR);
     }
 
     @Override

@@ -93,4 +93,24 @@ class RedisStringHandlers {
         response.setResult(expiredCache);
     });
 
+    final static Pair<String, RedisCmdHandler> REMOVE = Pair.of(RedisCmd.REMOVE, (redisManager, request, response) -> {
+
+    });
+
+    final static Pair<String, RedisCmdHandler> EXISTS = Pair.of(RedisCmd.EXISTS, (redisManager, request, response) -> {
+
+    });
+
+    final static Pair<String, RedisCmdHandler> GET_EXPIRE = Pair.of(RedisCmd.GET_EXPIRE, (redisManager, request, response) -> {
+
+    });
+
+    final static Pair<String, RedisCmdHandler> EXPIRE = Pair.of(RedisCmd.EXPIRE, (redisManager, request, response) -> {
+
+    });
+
+    final static Pair<String, RedisCmdHandler> EXPIRE_AT = Pair.of(RedisCmd.EXPIRE_AT, (redisManager, request, response) -> {
+
+    });
+
 }
