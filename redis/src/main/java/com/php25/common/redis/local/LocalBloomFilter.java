@@ -1,7 +1,12 @@
 package com.php25.common.redis.local;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import com.php25.common.core.mess.StringBloomFilter;
 import com.php25.common.redis.RBloomFilter;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
@@ -32,11 +37,14 @@ public class LocalBloomFilter implements RBloomFilter {
     }
 
     private StringBloomFilter getInternalBloomFilter() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.key);
-        if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, this.key, new StringBloomFilter((int) expectedInsertions, fpp));
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.BLOOM_FILTER_GET, Lists.newArrayList(this.key, expectedInsertions, fpp));
+        CmdResponse cmdResponse = new CmdResponse();
+        redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (StringBloomFilter) res.get();
         }
-        return (StringBloomFilter) expiredCache.getValue();
+        return null;
     }
 
     @Override
@@ -47,5 +55,22 @@ public class LocalBloomFilter implements RBloomFilter {
     @Override
     public void put(String key) {
         this.bloomFilter.put(key);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LocalBloomFilter that = (LocalBloomFilter) o;
+        return Objects.equal(bloomFilter, that.bloomFilter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(bloomFilter);
     }
 }

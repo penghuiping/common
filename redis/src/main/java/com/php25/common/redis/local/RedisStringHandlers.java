@@ -1,5 +1,6 @@
 package com.php25.common.redis.local;
 
+import com.php25.common.core.mess.StringBloomFilter;
 import com.php25.common.core.util.JsonUtil;
 import org.springframework.data.util.Pair;
 
@@ -144,5 +145,18 @@ class RedisStringHandlers {
         expiredCache.setExpiredTime(Instant.now().toEpochMilli() + timeUnit.toMillis(expireTime));
         cache.putValue(key, expiredCache);
         response.setResult(true);
+    });
+
+    final static Pair<String, RedisCmdHandler> BLOOM_FILTER_GET = Pair.of(RedisCmd.BLOOM_FILTER_GET, (redisManager, request, response) -> {
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        int expectedInsertions = Integer.parseInt(request.getParams().get(1).toString());
+        double fpp = Double.parseDouble(request.getParams().get(2).toString());
+        ExpiredCache expiredCache = cache.getValue(key);
+        if (null == expiredCache) {
+            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, new StringBloomFilter(expectedInsertions, fpp));
+            cache.putValue(key, expiredCache);
+        }
+        response.setResult(expiredCache.getValue());
     });
 }

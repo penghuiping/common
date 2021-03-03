@@ -10,6 +10,8 @@ class RedisCmd {
     public static final String GET_EXPIRE = "get_expire";
     public static final String EXPIRE = "expire";
 
+    public static final String BLOOM_FILTER_GET = "bloom_filter_get";
+
     public static final String STRING_GET = "string_get";
     public static final String STRING_SET = "string_set";
     public static final String STRING_SET_NX = "string_set_nx";
