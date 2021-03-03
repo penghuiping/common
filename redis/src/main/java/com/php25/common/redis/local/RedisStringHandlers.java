@@ -3,6 +3,11 @@ package com.php25.common.redis.local;
 import com.php25.common.core.util.JsonUtil;
 import org.springframework.data.util.Pair;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * @author penghuiping
@@ -94,23 +99,50 @@ class RedisStringHandlers {
     });
 
     final static Pair<String, RedisCmdHandler> REMOVE = Pair.of(RedisCmd.REMOVE, (redisManager, request, response) -> {
-
+        LruCachePlus cache = redisManager.cache;
+        List<Object> keys = request.getParams();
+        for (Object key : keys) {
+            cache.remove(key.toString());
+        }
+        response.setResult(true);
     });
 
     final static Pair<String, RedisCmdHandler> EXISTS = Pair.of(RedisCmd.EXISTS, (redisManager, request, response) -> {
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        boolean res = cache.containsKey(key);
+        response.setResult(res);
 
+        boolean isExpire = TimeUnit.of(ChronoUnit.MILLIS).toSeconds(cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli()) <= 0;
+
+        if (res && isExpire) {
+            cache.remove(key);
+            response.setResult(false);
+            return;
+        }
+        response.setResult(true);
     });
 
     final static Pair<String, RedisCmdHandler> GET_EXPIRE = Pair.of(RedisCmd.GET_EXPIRE, (redisManager, request, response) -> {
-
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        Long expireTime = TimeUnit.of(ChronoUnit.MILLIS).toSeconds(cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli());
+        response.setResult(expireTime);
     });
 
     final static Pair<String, RedisCmdHandler> EXPIRE = Pair.of(RedisCmd.EXPIRE, (redisManager, request, response) -> {
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        Long expireTime = (Long) request.getParams().get(1);
+        TimeUnit timeUnit = (TimeUnit) request.getParams().get(2);
 
+        ExpiredCache expiredCache = cache.getValue(key);
+        if (null == expiredCache) {
+            response.setResult(false);
+            return;
+        }
+        expiredCache.setExpiredTime(Instant.now().toEpochMilli() + timeUnit.toMillis(expireTime));
+        cache.putValue(key, expiredCache);
+        response.setResult(true);
     });
-
-    final static Pair<String, RedisCmdHandler> EXPIRE_AT = Pair.of(RedisCmd.EXPIRE_AT, (redisManager, request, response) -> {
-
-    });
-
 }

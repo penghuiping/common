@@ -1,5 +1,6 @@
 package com.php25.common.redis.local;
 
+import com.google.common.collect.Lists;
 import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHash;
 import com.php25.common.redis.RHyperLogLogs;
@@ -12,9 +13,8 @@ import com.php25.common.redis.RedisManager;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,7 +42,6 @@ public class LocalRedisManager implements RedisManager {
         this.conversionService = DefaultConversionService.getSharedInstance();
         this.redisCmdDispatcher = new RedisCmdDispatcher();
         this.redisCmdDispatcher.setRedisManager(this);
-
         this.init();
     }
 
@@ -52,6 +51,11 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_NX);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_INCR);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_DECR);
+
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.REMOVE);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXISTS);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.GET_EXPIRE);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXPIRE);
 
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_ADD);
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_REMOVE);
@@ -83,50 +87,59 @@ public class LocalRedisManager implements RedisManager {
 
     @Override
     public void remove(String... keys) {
-        for (String key : keys) {
-            this.cache.remove(key);
-        }
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.REMOVE, Lists.newArrayList(keys));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public void remove(String key) {
-        this.cache.remove(key);
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.REMOVE, Lists.newArrayList(key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public Boolean exists(String key) {
-        boolean res = this.cache.containsKey(key);
-        if (res && this.getExpire(key) > 0) {
-            return true;
-        } else {
-            this.remove(key);
-            return false;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.EXISTS, Lists.newArrayList(key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (result.isPresent()) {
+            return (Boolean) result.get();
         }
+        return false;
     }
 
     @Override
     public Long getExpire(String key) {
-        return TimeUnit.of(ChronoUnit.MILLIS).toSeconds(this.cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli());
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.GET_EXPIRE, Lists.newArrayList(key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (result.isPresent()) {
+            return (Long) result.get();
+        }
+        return null;
     }
 
     @Override
     public Boolean expire(String key, Long expireTime, TimeUnit timeUnit) {
-        ExpiredCache expiredCacheObject = this.cache.getValue(key);
-        if (null == expiredCacheObject) {
-            return false;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.EXPIRE, Lists.newArrayList(key, expireTime, timeUnit));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (result.isPresent()) {
+            return (Boolean) result.get();
         }
-        expiredCacheObject.setExpiredTime(Instant.now().toEpochMilli() + timeUnit.toMillis(expireTime));
-        return true;
+        return false;
     }
 
     @Override
     public Boolean expireAt(String key, Date date) {
-        ExpiredCache expiredCacheObject = this.cache.getValue(key);
-        if (null == expiredCacheObject) {
-            return false;
-        }
-        expiredCacheObject.setExpiredTime(date.getTime());
-        return true;
+        return this.expire(key, date.getTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override
