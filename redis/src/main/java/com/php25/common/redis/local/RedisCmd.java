@@ -41,6 +41,8 @@ class RedisCmd {
     public static final String LIST_BLOCK_RIGHT_POP = "list_block_right_pop";
 
     public static final String HASH_PUT = "hash_put";
+    public static final String HASH_PUT_NX = "hash_put_nx";
+    public static final String HASH_HAS_KEY = "hash_has_key";
     public static final String HASH_GET = "hash_get";
     public static final String HASH_DELETE = "hash_delete";
     public static final String HASH_INCR = "hash_incr";

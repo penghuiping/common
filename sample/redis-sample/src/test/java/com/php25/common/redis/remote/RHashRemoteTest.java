@@ -1,18 +1,24 @@
-package com.php25.common.redis.local;
+package com.php25.common.redis.remote;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.redis.Person;
 import com.php25.common.redis.RHash;
 import com.php25.common.redis.RedisManager;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -20,19 +26,31 @@ import java.util.concurrent.Executors;
 
 /**
  * @author penghuiping
- * @date 2021/3/2 17:36
+ * @date 2021/3/4 10:32
  */
 @SpringBootTest
 @ContextConfiguration(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class RHashLocalTest {
-    private static final Logger log = LoggerFactory.getLogger(RHashLocalTest.class);
+public class RHashRemoteTest {
+    private static final Logger log = LoggerFactory.getLogger(RHashRemoteTest.class);
+    @Rule
+    public GenericContainer redis = new GenericContainer<>("redis:5.0.3-alpine").withExposedPorts(6379);
     private RHash<Person> rHash;
     private RedisManager redisManager;
 
     @Before
     public void before() throws Exception {
-        this.redisManager = new LocalRedisManager(1024);
+        String address = redis.getContainerIpAddress();
+        Integer port = redis.getFirstMappedPort();
+        //单机
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setDatabase(0);
+        redisConfiguration.setHostName(address);
+        redisConfiguration.setPort(port);
+        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisConfiguration);
+        lettuceConnectionFactory.afterPropertiesSet();
+        this.redisManager = new RedisManagerImpl(new StringRedisTemplate(lettuceConnectionFactory));
+
         this.rHash = redisManager.hash("my_hash", Person.class);
         this.rHash.put("jack", new Person(12, "jack"));
         this.rHash.put("mary", new Person(13, "mary"));

@@ -127,7 +127,7 @@ class RedisSetHandlers {
         response.setResult(null);
     });
 
-    static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
+    private static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
         ExpiredCache expiredCache = cache.getValue(key);
         if (null == expiredCache) {
             expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, new HashSet<>());
@@ -135,7 +135,7 @@ class RedisSetHandlers {
         return expiredCache;
     }
 
-    static void flush(LruCachePlus cache, String key, Object value) {
+    private static void flush(LruCachePlus cache, String key, Object value) {
         ExpiredCache expiredCache = getCacheValue(cache, key);
         expiredCache.setValue(value);
         cache.putValue(key, expiredCache);

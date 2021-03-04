@@ -1,10 +1,10 @@
 package com.php25.common.redis.local;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.php25.common.core.util.JsonUtil;
+import com.google.common.collect.Lists;
 import com.php25.common.redis.RHash;
 
-import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 模仿redis的api的本地hash实现
@@ -16,8 +16,6 @@ public class LocalHash<T> implements RHash<T> {
 
     private final String hashKey;
 
-    private final HashMap<String, Object> hashMap;
-
     private final LocalRedisManager redisManager;
 
     private final Class<T> cls;
@@ -26,69 +24,92 @@ public class LocalHash<T> implements RHash<T> {
         this.hashKey = hashKey;
         this.redisManager = redisManager;
         this.cls = cls;
-        this.hashMap = getInternalMap();
     }
 
-    private HashMap<String, Object> getInternalMap() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.hashKey);
-        if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, this.hashKey, JsonUtil.toJson(new HashMap<>()));
-        }
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), new TypeReference<>() {
-        });
-    }
-
-    private void flush() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.hashKey);
-        expiredCache.setValue(JsonUtil.toJson(this.hashMap));
-        this.redisManager.cache.putValue(this.hashKey, expiredCache);
-    }
 
     @Override
     public Boolean put(String key, T value) {
-        this.hashMap.put(key, value);
-        this.flush();
-        return true;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_PUT, Lists.newArrayList(this.hashKey, key, value));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        } else {
+            return false;
+        }
     }
 
     @Override
     public T get(String key) {
-        return (T) this.hashMap.get(key);
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_GET, Lists.newArrayList(this.hashKey, key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (T) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void delete(String key) {
-        this.hashMap.remove(key);
-        this.flush();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_DELETE, Lists.newArrayList(this.hashKey, key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public Long incr(String key) {
-        Object val = this.hashMap.get(key);
-        if (null == val) {
-            val = 1L;
-            this.hashMap.put(key, val);
-            return (Long) val;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_INCR, Lists.newArrayList(this.hashKey, key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
         }
-        Long value = (Long) val;
-        value = value + 1;
-        this.hashMap.put(key, value);
-        this.flush();
-        return value;
     }
 
     @Override
     public Long decr(String key) {
-        Object val = this.hashMap.get(key);
-        if (null == val) {
-            val = 1L;
-            this.hashMap.put(key, val);
-            return (Long) val;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_DECR, Lists.newArrayList(this.hashKey, key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
         }
-        Long value = (Long) val;
-        value = value - 1;
-        this.hashMap.put(key, value);
-        this.flush();
-        return value;
+    }
+
+    @Override
+    public Boolean putIfAbsent(String key, T value) {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_PUT_NX, Lists.newArrayList(this.hashKey, key, value));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean hasKey(String key) {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_HAS_KEY, Lists.newArrayList(this.hashKey, key));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        } else {
+            return false;
+        }
     }
 }

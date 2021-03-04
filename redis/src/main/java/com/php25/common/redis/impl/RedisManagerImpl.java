@@ -93,7 +93,7 @@ public class RedisManagerImpl implements RedisManager {
 
     @Override
     public <T> RHash<T> hash(String hashKey, Class<T> cls) {
-        return new RHashImpl<>(redisTemplate, hashKey);
+        return new RHashImpl<>(redisTemplate, hashKey, cls);
     }
 
     @Override

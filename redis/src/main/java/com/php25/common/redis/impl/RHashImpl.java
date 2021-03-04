@@ -14,17 +14,12 @@ public class RHashImpl<T> implements RHash<T> {
 
     private final String hashKey;
 
-    private Class<T> model;
+    private final Class<T> model;
 
     public RHashImpl(StringRedisTemplate stringRedisTemplate, String hashKey, Class<T> model) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.hashKey = hashKey;
         this.model = model;
-    }
-
-    public RHashImpl(StringRedisTemplate stringRedisTemplate, String hashKey) {
-        this.stringRedisTemplate = stringRedisTemplate;
-        this.hashKey = hashKey;
     }
 
     @Override
@@ -57,5 +52,15 @@ public class RHashImpl<T> implements RHash<T> {
     @Override
     public void delete(String key) {
         this.stringRedisTemplate.opsForHash().delete(this.hashKey, key);
+    }
+
+    @Override
+    public Boolean putIfAbsent(String key, T value) {
+        return this.stringRedisTemplate.opsForHash().putIfAbsent(this.hashKey, key, JsonUtil.toJson(value));
+    }
+
+    @Override
+    public Boolean hasKey(String key) {
+        return this.stringRedisTemplate.opsForHash().hasKey(this.hashKey, key);
     }
 }
