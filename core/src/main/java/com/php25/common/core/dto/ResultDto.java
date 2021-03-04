@@ -1,13 +1,11 @@
 package com.php25.common.core.dto;
 
-import java.io.Serializable;
-
 /**
  * @author: penghuiping
  * @date: 2019/1/2 14:20
  * @description:
  */
-public class ResultDto<T> implements Serializable {
+public class ResultDto<T> {
 
     /**
      * if status is true,then the object attribute of the ResultDto is valid

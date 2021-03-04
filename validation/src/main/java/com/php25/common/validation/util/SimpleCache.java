@@ -1,6 +1,5 @@
 package com.php25.common.validation.util;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -14,8 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
  * @param <V> 值类型
  * @author Looly
  */
-public class SimpleCache<K, V> implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class SimpleCache<K, V> {
 
     /**
      * 池

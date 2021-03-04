@@ -1,11 +1,10 @@
 package com.php25.common.redis.local;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.php25.common.core.util.JsonUtil;
+import com.google.common.collect.Lists;
 import com.php25.common.redis.RList;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,72 +21,96 @@ public class LocalList<T> implements RList<T> {
 
     private final Class<T> cls;
 
-    private LinkedList<T> list;
-
     public LocalList(String listKey, Class<T> cls, LocalRedisManager redisManager) {
         this.listKey = listKey;
         this.redisManager = redisManager;
         this.cls = cls;
-        this.list = getInternalList();
-    }
-
-    private LinkedList<T> getInternalList() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.listKey);
-        if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, this.listKey, JsonUtil.toJson(new LinkedList<>()));
-        }
-        return JsonUtil.fromJson(expiredCache.getValue().toString(), new TypeReference<>() {
-        });
-    }
-
-    private void flush() {
-        ExpiredCache expiredCache = this.redisManager.cache.getValue(this.listKey);
-        expiredCache.setValue(JsonUtil.toJson(this.list));
-        this.redisManager.cache.putValue(this.listKey, expiredCache);
     }
 
     @Override
     public Long rightPush(T value) {
-        this.list.addLast(value);
-        this.flush();
-        return (long) this.list.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_PUSH, Lists.newArrayList(this.listKey, value));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Long leftPush(T value) {
-        this.list.addFirst(value);
-        this.flush();
-        return (long) this.list.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_PUSH, Lists.newArrayList(this.listKey, value));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public T rightPop() {
-        T res = this.list.removeLast();
-        this.flush();
-        return res;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_POP, Lists.newArrayList(this.listKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (T) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public T leftPop() {
-        T res = this.list.removeFirst();
-        this.flush();
-        return res;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_POP, Lists.newArrayList(this.listKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (T) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public List<T> leftRange(long start, long end) {
-        return this.list.subList((int) start, (int) end);
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_RANGE, Lists.newArrayList(this.listKey, start, end));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (List<T>) res.get();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void leftTrim(long start, long end) {
-        this.list = (LinkedList<T>) this.list.subList((int) start, (int) end);
-        this.flush();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_TRIM, Lists.newArrayList(this.listKey, start, end));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
     }
 
     @Override
     public Long size() {
-        return (long) this.list.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_PUT, Lists.newArrayList(this.listKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override

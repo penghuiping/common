@@ -219,12 +219,12 @@ public class RSA {
         switch (type) {
             case PrivateKey:
                 if (null == this.privateKey) {
-                    throw new NullPointerException("Private key must not null when use it !");
+                    throw Exceptions.throwIllegalStateException("Private key must not null when use it !");
                 }
                 return this.privateKey;
             case PublicKey:
                 if (null == this.publicKey) {
-                    throw new NullPointerException("Public key must not null when use it !");
+                    throw Exceptions.throwIllegalStateException("Public key must not null when use it !");
                 }
                 return this.publicKey;
             default:

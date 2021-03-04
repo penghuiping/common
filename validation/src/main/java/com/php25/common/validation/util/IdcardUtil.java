@@ -359,7 +359,7 @@ public class IdcardUtil {
             sum = sum + Integer.valueOf(String.valueOf(c)) * iflag;
             iflag--;
         }
-        if ("A".equals(end.toUpperCase())) {
+        if ("A".equalsIgnoreCase(end)) {
             sum += 10;
         } else {
             sum += Integer.valueOf(end);
@@ -390,6 +390,9 @@ public class IdcardUtil {
             return null;
         } else if (len == CHINA_ID_MIN_LENGTH) {
             idCard = convert15To18(idCard);
+        }
+        if (StringUtil.isBlank(idCard)) {
+            return null;
         }
         return idCard.substring(6, 14);
     }
@@ -444,6 +447,9 @@ public class IdcardUtil {
         } else if (len == CHINA_ID_MIN_LENGTH) {
             idCard = convert15To18(idCard);
         }
+        if (StringUtil.isBlank(idCard)) {
+            return null;
+        }
         return Short.valueOf(idCard.substring(6, 10));
     }
 
@@ -460,6 +466,9 @@ public class IdcardUtil {
         } else if (len == CHINA_ID_MIN_LENGTH) {
             idCard = convert15To18(idCard);
         }
+        if (StringUtil.isBlank(idCard)) {
+            return null;
+        }
         return Short.valueOf(idCard.substring(10, 12));
     }
 
@@ -475,6 +484,9 @@ public class IdcardUtil {
             return null;
         } else if (len == CHINA_ID_MIN_LENGTH) {
             idCard = convert15To18(idCard);
+        }
+        if (StringUtil.isBlank(idCard)) {
+            return null;
         }
         return Short.valueOf(idCard.substring(12, 14));
     }
