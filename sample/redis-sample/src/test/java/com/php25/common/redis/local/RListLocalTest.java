@@ -1,6 +1,7 @@
 package com.php25.common.redis.local;
 
 import com.php25.common.CommonAutoConfigure;
+import com.php25.common.core.util.JsonUtil;
 import com.php25.common.redis.Person;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 /**
  * @author penghuiping
@@ -55,27 +58,52 @@ public class RListLocalTest {
 
     @Test
     public void rightPop() throws Exception {
-
+        Person right = this.rList.rightPop();
+        Person jack = new Person(12, "jack");
+        Assertions.assertThat(right).isEqualTo(jack);
     }
 
     @Test
     public void leftPop() throws Exception {
-
+        Person right = this.rList.leftPop();
+        Person mary = new Person(13, "mary");
+        Assertions.assertThat(right).isEqualTo(mary);
     }
 
     @Test
     public void leftRange() throws Exception {
+        //alice tom mary jack
+        Person tom = new Person(11, "tom");
+        this.rList.leftPush(tom);
+        Person alice = new Person(10, "alice");
+        this.rList.leftPush(alice);
 
+        List<Person> list = this.rList.leftRange(1, rList.size());
+        log.info("list:{}", JsonUtil.toJson(list));
+        Assertions.assertThat(list.size()).isEqualTo(3);
+        Assertions.assertThat(list.contains(alice)).isFalse();
+        Assertions.assertThat(list.contains(tom)).isTrue();
+        Assertions.assertThat(this.rList.size()).isEqualTo(4);
     }
 
     @Test
     public void leftTrim() throws Exception {
+        //alice tom mary jack
+        Person tom = new Person(11, "tom");
+        this.rList.leftPush(tom);
+        Person alice = new Person(10, "alice");
+        this.rList.leftPush(alice);
 
+        this.rList.leftTrim(1, rList.size());
+        Assertions.assertThat(this.rList.size()).isEqualTo(3);
+        List<Person> list = this.rList.leftRange(0, rList.size());
+        Assertions.assertThat(list.contains(alice)).isFalse();
+        Assertions.assertThat(list.contains(tom)).isTrue();
     }
 
     @Test
     public void size() throws Exception {
-
+        Assertions.assertThat(this.rList.size()).isEqualTo(2);
     }
 
     public void blockLeftPop() throws Exception {

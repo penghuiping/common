@@ -102,7 +102,7 @@ public class LocalList<T> implements RList<T> {
 
     @Override
     public Long size() {
-        CmdRequest cmdRequest = new CmdRequest(RedisCmd.HASH_PUT, Lists.newArrayList(this.listKey));
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_SIZE, Lists.newArrayList(this.listKey));
         CmdResponse cmdResponse = new CmdResponse();
         this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);

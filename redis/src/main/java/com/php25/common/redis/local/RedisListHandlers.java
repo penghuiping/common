@@ -55,8 +55,8 @@ public class RedisListHandlers {
     static final Pair<String, RedisCmdHandler> LIST_LEFT_RANGE = Pair.of(RedisCmd.LIST_LEFT_RANGE, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
-        int start = (int) request.getParams().get(1);
-        int end = (int) request.getParams().get(2);
+        int start = Integer.parseInt(request.getParams().get(1).toString());
+        int end = Integer.parseInt(request.getParams().get(2).toString());
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
         response.setResult(list.subList(start, end));
@@ -65,11 +65,12 @@ public class RedisListHandlers {
     static final Pair<String, RedisCmdHandler> LIST_LEFT_TRIM = Pair.of(RedisCmd.LIST_LEFT_TRIM, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
-        int start = (int) request.getParams().get(1);
-        int end = (int) request.getParams().get(2);
+        int start = Integer.parseInt(request.getParams().get(1).toString());
+        int end = Integer.parseInt(request.getParams().get(2).toString());
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
-        flush(cache, key, list.subList(start, end));
+        flush(cache, key, new LinkedList<>(list.subList(start, end)));
+        response.setResult(null);
     });
 
 
