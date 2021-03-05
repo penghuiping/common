@@ -23,7 +23,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -99,7 +98,7 @@ public class RStringRemoteTest {
         Date date = TimeUtil.getEndTimeOfDay(new Date());
         this.redisManager.expireAt("person_jack", date);
         Long expireTime = this.redisManager.getExpire("person_jack");
-        Long expireTime1 = TimeUnit.of(ChronoUnit.MILLIS).toSeconds(date.getTime() - System.currentTimeMillis());
+        Long expireTime1 = TimeUnit.MILLISECONDS.toSeconds(date.getTime() - System.currentTimeMillis());
         Assertions.assertThat(expireTime).isEqualTo(expireTime1);
     }
 

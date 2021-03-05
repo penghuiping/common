@@ -6,7 +6,6 @@ import com.php25.common.core.util.JsonUtil;
 import org.springframework.data.util.Pair;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -115,7 +114,7 @@ class RedisStringHandlers {
         boolean res = cache.containsKey(key);
         response.setResult(res);
 
-        boolean isExpire = TimeUnit.of(ChronoUnit.MILLIS).toSeconds(cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli()) <= 0;
+        boolean isExpire = (cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli()) <= 0;
 
         if (res && isExpire) {
             cache.remove(key);
@@ -128,7 +127,7 @@ class RedisStringHandlers {
     final static Pair<String, RedisCmdHandler> GET_EXPIRE = Pair.of(RedisCmd.GET_EXPIRE, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
-        Long expireTime = TimeUnit.of(ChronoUnit.MILLIS).toSeconds(cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli());
+        Long expireTime = TimeUnit.MILLISECONDS.toSeconds(cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli());
         response.setResult(expireTime);
     });
 
