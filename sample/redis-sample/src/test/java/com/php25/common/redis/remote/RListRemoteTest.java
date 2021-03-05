@@ -133,7 +133,7 @@ public class RListRemoteTest {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Thread producer = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
-                this.rList.leftPush(new Person(1, RandomUtil.randomUUID()));
+                this.rList.leftPush(new Person(i, RandomUtil.randomUUID()));
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
@@ -170,7 +170,7 @@ public class RListRemoteTest {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Thread producer = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
-                this.rList.leftPush(new Person(1, RandomUtil.randomUUID()));
+                this.rList.leftPush(new Person(i, RandomUtil.randomUUID()));
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {

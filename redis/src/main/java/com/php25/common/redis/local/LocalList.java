@@ -131,10 +131,10 @@ public class LocalList<T> implements RList<T> {
         long expiredTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         //轮训等待
         while (System.currentTimeMillis() < expiredTime) {
-            CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_POP, Lists.newArrayList(this.listKey));
-            CmdResponse cmdResponse = new CmdResponse();
             lock.lock();
             try {
+                CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_POP, Lists.newArrayList(this.listKey));
+                CmdResponse cmdResponse = new CmdResponse();
                 this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
                 Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
                 if (res.isPresent()) {
@@ -159,10 +159,10 @@ public class LocalList<T> implements RList<T> {
         //轮训等待
         long expiredTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         while (System.currentTimeMillis() < expiredTime) {
-            CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_POP, Lists.newArrayList(this.listKey));
-            CmdResponse cmdResponse = new CmdResponse();
             lock.lock();
             try {
+                CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_POP, Lists.newArrayList(this.listKey));
+                CmdResponse cmdResponse = new CmdResponse();
                 this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
                 Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
                 if (res.isPresent()) {

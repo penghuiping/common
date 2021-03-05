@@ -127,11 +127,11 @@ public class RListLocalTest {
 
         AtomicLong count = new AtomicLong();
 
-        //hold 2秒
+        //hold 5秒
         Thread consumer = new Thread(() -> {
-            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2L);
+            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
             while (System.currentTimeMillis() < expiredTime) {
-                Person person = this.rList.blockLeftPop(500, TimeUnit.MILLISECONDS);
+                Person person = this.rList.blockLeftPop(1, TimeUnit.SECONDS);
                 if (person == null) {
                     log.info("无结果1秒超时释放");
                 } else {
@@ -149,39 +149,38 @@ public class RListLocalTest {
 
     @Test
     public void blockRightPop() throws Exception {
-        CountDownLatch countDownLatch1 = new CountDownLatch(2);
-        Thread producer1 = new Thread(() -> {
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        Thread producer = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
-                Person tmp = new Person(i, RandomUtil.randomUUID());
-                this.rList.leftPush(tmp);
+                this.rList.leftPush(new Person(i, RandomUtil.randomUUID()));
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
                     log.error("error:", e);
                 }
             }
-            countDownLatch1.countDown();
+            countDownLatch.countDown();
         });
 
-        AtomicLong count1 = new AtomicLong();
+        AtomicLong count = new AtomicLong();
 
-        //hold 2秒
-        Thread consumer1 = new Thread(() -> {
-            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2L);
+        //hold 5秒
+        Thread consumer = new Thread(() -> {
+            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
             while (System.currentTimeMillis() < expiredTime) {
-                Person person = this.rList.blockRightPop(500, TimeUnit.MILLISECONDS);
+                Person person = this.rList.blockRightPop(1, TimeUnit.SECONDS);
                 if (person == null) {
                     log.info("无结果1秒超时释放");
                 } else {
-                    count1.getAndIncrement();
+                    count.getAndIncrement();
                     log.info("person:{}", JsonUtil.toJson(person));
                 }
             }
-            countDownLatch1.countDown();
+            countDownLatch.countDown();
         });
-        producer1.start();
-        consumer1.start();
-        countDownLatch1.await();
-        Assertions.assertThat(count1.get()).isEqualTo(7);
+        producer.start();
+        consumer.start();
+        countDownLatch.await();
+        Assertions.assertThat(count.get()).isEqualTo(7);
     }
 }
