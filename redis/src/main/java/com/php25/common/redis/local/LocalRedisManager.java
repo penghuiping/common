@@ -77,8 +77,6 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_RANGE);
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_TRIM);
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_SIZE);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_BLOCK_LEFT_POP);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_BLOCK_RIGHT_POP);
 
         this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_PUT);
         this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_PUT_NX);

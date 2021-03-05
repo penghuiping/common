@@ -26,7 +26,11 @@ class CmdResponse {
 
     public Optional<Object> getResult(long timeout, TimeUnit unit) {
         try {
-            return this.pipe.poll(timeout, unit);
+            Optional<Object> res = this.pipe.poll(timeout, unit);
+            if (res == null) {
+                return Optional.empty();
+            }
+            return res;
         } catch (InterruptedException e) {
             log.error("获取redis执行指令结果出错!", e);
             return Optional.empty();

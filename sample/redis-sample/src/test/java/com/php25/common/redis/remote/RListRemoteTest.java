@@ -1,4 +1,4 @@
-package com.php25.common.redis.local;
+package com.php25.common.redis.remote;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.util.JsonUtil;
@@ -6,15 +6,21 @@ import com.php25.common.core.util.RandomUtil;
 import com.php25.common.redis.Person;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
+import com.php25.common.redis.impl.RedisManagerImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.GenericContainer;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -23,20 +29,32 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author penghuiping
- * @date 2021/3/2 17:37
+ * @date 2021/3/3 20:52
  */
 @SpringBootTest
 @ContextConfiguration(classes = {CommonAutoConfigure.class})
 @RunWith(SpringRunner.class)
-public class RListLocalTest {
-    private static final Logger log = LoggerFactory.getLogger(RListLocalTest.class);
-    private RList<Person> rList;
-    private RedisManager redisManager;
+public class RListRemoteTest {
 
+    private static final Logger log = LoggerFactory.getLogger(RListRemoteTest.class);
+    @Rule
+    public GenericContainer redis = new GenericContainer<>("redis:5.0.3-alpine").withExposedPorts(6379);
+    private RedisManager redisManager;
+    private RList<Person> rList;
 
     @Before
-    public void before() throws Exception {
-        this.redisManager = new LocalRedisManager(1024);
+    public void before() {
+        String address = redis.getContainerIpAddress();
+        Integer port = redis.getFirstMappedPort();
+        //单机
+        RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
+        redisConfiguration.setDatabase(0);
+        redisConfiguration.setHostName(address);
+        redisConfiguration.setPort(port);
+        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisConfiguration);
+        lettuceConnectionFactory.afterPropertiesSet();
+        this.redisManager = new RedisManagerImpl(new StringRedisTemplate(lettuceConnectionFactory));
+
         this.rList = redisManager.list("my_list", Person.class);
         this.rList.leftPush(new Person(12, "jack"));
         this.rList.leftPush(new Person(13, "mary"));
@@ -115,7 +133,7 @@ public class RListLocalTest {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Thread producer = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
-                this.rList.leftPush(new Person(i, RandomUtil.randomUUID()));
+                this.rList.leftPush(new Person(1, RandomUtil.randomUUID()));
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
@@ -127,11 +145,11 @@ public class RListLocalTest {
 
         AtomicLong count = new AtomicLong();
 
-        //hold 2秒
+        //hold 5秒
         Thread consumer = new Thread(() -> {
-            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2L);
+            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
             while (System.currentTimeMillis() < expiredTime) {
-                Person person = this.rList.blockLeftPop(500, TimeUnit.MILLISECONDS);
+                Person person = this.rList.blockLeftPop(1, TimeUnit.SECONDS);
                 if (person == null) {
                     log.info("无结果1秒超时释放");
                 } else {
@@ -149,39 +167,38 @@ public class RListLocalTest {
 
     @Test
     public void blockRightPop() throws Exception {
-        CountDownLatch countDownLatch1 = new CountDownLatch(2);
-        Thread producer1 = new Thread(() -> {
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        Thread producer = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
-                Person tmp = new Person(i, RandomUtil.randomUUID());
-                this.rList.leftPush(tmp);
+                this.rList.leftPush(new Person(1, RandomUtil.randomUUID()));
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
                     log.error("error:", e);
                 }
             }
-            countDownLatch1.countDown();
+            countDownLatch.countDown();
         });
 
-        AtomicLong count1 = new AtomicLong();
+        AtomicLong count = new AtomicLong();
 
-        //hold 2秒
-        Thread consumer1 = new Thread(() -> {
-            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2L);
+        //hold 5秒
+        Thread consumer = new Thread(() -> {
+            long expiredTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
             while (System.currentTimeMillis() < expiredTime) {
-                Person person = this.rList.blockRightPop(500, TimeUnit.MILLISECONDS);
+                Person person = this.rList.blockRightPop(1, TimeUnit.SECONDS);
                 if (person == null) {
                     log.info("无结果1秒超时释放");
                 } else {
-                    count1.getAndIncrement();
+                    count.getAndIncrement();
                     log.info("person:{}", JsonUtil.toJson(person));
                 }
             }
-            countDownLatch1.countDown();
+            countDownLatch.countDown();
         });
-        producer1.start();
-        consumer1.start();
-        countDownLatch1.await();
-        Assertions.assertThat(count1.get()).isEqualTo(7);
+        producer.start();
+        consumer.start();
+        countDownLatch.await();
+        Assertions.assertThat(count.get()).isEqualTo(7);
     }
 }

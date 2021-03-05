@@ -3,6 +3,8 @@ package com.php25.common.redis.local;
 import org.springframework.data.util.Pair;
 
 import java.util.LinkedList;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 /**
  * @author penghuiping
@@ -14,22 +16,38 @@ public class RedisListHandlers {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
         Object element = request.getParams().get(1);
+        Lock lock = (Lock) request.getParams().get(2);
+        Condition listNotEmpty = (Condition) request.getParams().get(3);
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
         list.addLast(element);
         flush(cache, key, list);
         response.setResult(list.size());
+        lock.lock();
+        try {
+            listNotEmpty.signalAll();
+        } finally {
+            lock.unlock();
+        }
     });
 
     static final Pair<String, RedisCmdHandler> LIST_LEFT_PUSH = Pair.of(RedisCmd.LIST_LEFT_PUSH, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
         Object element = request.getParams().get(1);
+        Lock lock = (Lock) request.getParams().get(2);
+        Condition listNotEmpty = (Condition) request.getParams().get(3);
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
         list.addFirst(element);
         flush(cache, key, list);
         response.setResult(list.size());
+        lock.lock();
+        try {
+            listNotEmpty.signalAll();
+        } finally {
+            lock.unlock();
+        }
     });
 
     static final Pair<String, RedisCmdHandler> LIST_RIGHT_POP = Pair.of(RedisCmd.LIST_RIGHT_POP, (redisManager, request, response) -> {
@@ -37,6 +55,10 @@ public class RedisListHandlers {
         String key = request.getParams().get(0).toString();
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
+        if (list.isEmpty()) {
+            response.setResult(null);
+            return;
+        }
         Object res = list.removeLast();
         flush(cache, key, list);
         response.setResult(res);
@@ -47,6 +69,10 @@ public class RedisListHandlers {
         String key = request.getParams().get(0).toString();
         ExpiredCache expiredCache = getCacheValue(cache, key);
         LinkedList<Object> list = (LinkedList<Object>) expiredCache.getValue();
+        if (list.isEmpty()) {
+            response.setResult(null);
+            return;
+        }
         Object res = list.removeFirst();
         flush(cache, key, list);
         response.setResult(res);
@@ -82,14 +108,6 @@ public class RedisListHandlers {
         response.setResult(list.size());
     });
 
-
-    static final Pair<String, RedisCmdHandler> LIST_BLOCK_LEFT_POP = Pair.of(RedisCmd.LIST_BLOCK_LEFT_POP, (redisManager, request, response) -> {
-
-    });
-
-    static final Pair<String, RedisCmdHandler> LIST_BLOCK_RIGHT_POP = Pair.of(RedisCmd.LIST_BLOCK_RIGHT_POP, (redisManager, request, response) -> {
-
-    });
 
     private static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
         ExpiredCache expiredCache = cache.getValue(key);

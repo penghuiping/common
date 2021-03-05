@@ -37,8 +37,6 @@ class RedisCmd {
     public static final String LIST_LEFT_RANGE = "list_left_range";
     public static final String LIST_LEFT_TRIM = "list_left_trim";
     public static final String LIST_SIZE = "list_size";
-    public static final String LIST_BLOCK_LEFT_POP = "list_block_left_pop";
-    public static final String LIST_BLOCK_RIGHT_POP = "list_block_right_pop";
 
     public static final String HASH_PUT = "hash_put";
     public static final String HASH_PUT_NX = "hash_put_nx";
