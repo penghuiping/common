@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 模仿redis的api的本地list实现
@@ -28,21 +27,28 @@ public class LocalList<T> implements RList<T> {
 
     private final Class<T> cls;
 
-    private final Lock lock;
+    private Lock lock;
 
-    private final Condition listNotEmpty;
+    private Condition listNotEmpty;
 
     public LocalList(String listKey, Class<T> cls, LocalRedisManager redisManager) {
         this.listKey = listKey;
         this.redisManager = redisManager;
         this.cls = cls;
-        lock = new ReentrantLock();
-        listNotEmpty = lock.newCondition();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_INIT, Lists.newArrayList(this.listKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            LinkedListPlus<Object> list = (LinkedListPlus<Object>) res.get();
+            this.lock = list.getLock();
+            this.listNotEmpty = list.getNotEmpty();
+        }
     }
 
     @Override
     public Long rightPush(T value) {
-        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_PUSH, Lists.newArrayList(this.listKey, value, lock, listNotEmpty));
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_PUSH, Lists.newArrayList(this.listKey, value));
         CmdResponse cmdResponse = new CmdResponse();
         this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
@@ -55,7 +61,7 @@ public class LocalList<T> implements RList<T> {
 
     @Override
     public Long leftPush(T value) {
-        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_PUSH, Lists.newArrayList(this.listKey, value, lock, listNotEmpty));
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_PUSH, Lists.newArrayList(this.listKey, value));
         CmdResponse cmdResponse = new CmdResponse();
         this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);

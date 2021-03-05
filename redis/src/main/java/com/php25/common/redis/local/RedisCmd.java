@@ -30,6 +30,7 @@ class RedisCmd {
     public static final String SET_SIZE = "set_size";
     public static final String SET_GET_RANDOM_MEMBER = "set_get_random_member";
 
+    public static final String LIST_INIT = "list_init";
     public static final String LIST_RIGHT_PUSH = "list_right_push";
     public static final String LIST_LEFT_PUSH = "list_left_push";
     public static final String LIST_RIGHT_POP = "list_right_pop";
