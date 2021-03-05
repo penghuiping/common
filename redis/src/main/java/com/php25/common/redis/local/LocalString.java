@@ -108,11 +108,25 @@ public class LocalString implements RString {
 
     @Override
     public Boolean setBit(String key, long offset, boolean value) {
-        return null;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.STRING_SET_BIT, Lists.newArrayList(key, offset, value));
+        CmdResponse cmdResponse = new CmdResponse();
+        redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        }
+        return false;
     }
 
     @Override
     public Boolean getBit(String key, long offset) {
-        return null;
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.STRING_GET_BIT, Lists.newArrayList(key, offset));
+        CmdResponse cmdResponse = new CmdResponse();
+        redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Boolean) res.get();
+        }
+        return false;
     }
 }

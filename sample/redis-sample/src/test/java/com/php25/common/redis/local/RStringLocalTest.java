@@ -175,4 +175,19 @@ public class RStringLocalTest {
         System.out.println("结果为:" + res);
         Assertions.assertThat(res).isEqualTo(0);
     }
+
+    @Test
+    public void setBitTest() throws Exception {
+        this.redisManager.string().setBit("test_set_bit", 3, true);//8L
+        this.redisManager.string().setBit("test_set_bit", 2, true);//4L
+
+        Assertions.assertThat(this.redisManager.string().getBit("test_set_bit", 3)).isTrue();
+        Assertions.assertThat(this.redisManager.string().getBit("test_set_bit", 2)).isTrue();
+
+        this.redisManager.string().setBit("test_set_bit", 3, false);
+        Assertions.assertThat(this.redisManager.string().getBit("test_set_bit", 3)).isFalse();
+        Assertions.assertThat(this.redisManager.string().getBit("test_set_bit", 2)).isTrue();
+    }
+
+
 }

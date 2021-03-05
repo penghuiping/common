@@ -51,6 +51,8 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_NX);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_INCR);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_DECR);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_BIT);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_GET_BIT);
 
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.REMOVE);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXISTS);

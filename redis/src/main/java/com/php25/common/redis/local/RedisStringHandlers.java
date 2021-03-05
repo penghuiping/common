@@ -172,4 +172,46 @@ class RedisStringHandlers {
         }
         response.setResult(expiredCache.getValue());
     });
+
+    final static Pair<String, RedisCmdHandler> STRING_SET_BIT = Pair.of(RedisCmd.STRING_SET_BIT, (redisManager, request, response) -> {
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        long offset = Long.parseLong(request.getParams().get(1).toString());
+        boolean value = Boolean.parseBoolean(request.getParams().get(2).toString());
+        ExpiredCache expiredCache = cache.getValue(key);
+        if (null == expiredCache) {
+            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, 0L);
+            cache.putValue(key, expiredCache);
+        }
+        long val0 = Long.parseLong(expiredCache.getValue().toString());
+        if (value) {
+            //设置1
+            long val = 1L << offset;
+            val0 = val0 | val;
+
+        } else {
+            //设置0
+            long val = ~(1L << offset);
+            val0 = val0 & val;
+        }
+        expiredCache.setValue(val0);
+        cache.putValue(key, expiredCache);
+        response.setResult(true);
+    });
+
+    final static Pair<String, RedisCmdHandler> STRING_GET_BIT = Pair.of(RedisCmd.STRING_GET_BIT, (redisManager, request, response) -> {
+        LruCachePlus cache = redisManager.cache;
+        String key = request.getParams().get(0).toString();
+        long offset = Long.parseLong(request.getParams().get(1).toString());
+        ExpiredCache expiredCache = cache.getValue(key);
+        if (null == expiredCache) {
+            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, 0L);
+            cache.putValue(key, expiredCache);
+        }
+        Long val0 = Long.parseLong(expiredCache.getValue().toString());
+        long val = 1L << offset;
+        val0 = val0 & val;
+        val0 = val0 >> offset;
+        response.setResult(val0 == 1);
+    });
 }
