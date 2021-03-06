@@ -41,6 +41,7 @@
         <oracle-testcontainer>1.12.3</oracle-testcontainer>
         <assertj>3.17.2</assertj>
         <netty>4.1.52.Final</netty>
+        <jjwt>0.10.7</jjwt>
 
         <php-common.db>2.3.2-SNAPSHOT</php-common.db>
         <php-common.core>2.3.2-SNAPSHOT</php-common.core>
@@ -256,6 +257,23 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <version>4.0.1</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
