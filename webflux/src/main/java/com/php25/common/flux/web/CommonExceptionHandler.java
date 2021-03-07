@@ -31,7 +31,7 @@ public class CommonExceptionHandler {
         log.error("请求访问参数错误!!", e);
         FieldError fieldError = e.getBindingResult().getFieldError();
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
         if (fieldError == null) {
             jsonResponse.setMessage("input_params_error");
         } else {
@@ -44,7 +44,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleWebExchangeBindException(WebExchangeBindException e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
         FieldError fieldError = e.getFieldError();
         if (fieldError == null) {
             jsonResponse.setMessage("input_params_error");
@@ -58,7 +58,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleBindException(BindException e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
         FieldError fieldError = e.getFieldError();
         if (fieldError == null) {
             jsonResponse.setMessage("input_params_error");
@@ -72,7 +72,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleInputParamsError(Exception e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
         jsonResponse.setMessage(e.getMessage());
         return ResponseEntity.ok(jsonResponse);
     }
@@ -81,7 +81,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.error("请求http_request_method方式错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.http_method_not_support.value);
+        jsonResponse.setCode(ApiErrorCode.http_method_not_support.value);
         jsonResponse.setMessage("http_request_method_not_supported");
         return ResponseEntity.ok(jsonResponse);
     }
@@ -90,7 +90,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleBusinessException(BusinessException e) {
         log.error("出现业务错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(e.getCode());
+        jsonResponse.setCode(e.getCode());
         jsonResponse.setMessage(e.getMessage());
         return ResponseEntity.ok(jsonResponse);
     }
@@ -99,7 +99,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleException(Exception e) {
         log.error("服务器未知错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setErrorCode(ApiErrorCode.unknown_error.value);
+        jsonResponse.setCode(ApiErrorCode.unknown_error.value);
         jsonResponse.setMessage("unknown_error");
         return ResponseEntity.ok(jsonResponse);
     }
