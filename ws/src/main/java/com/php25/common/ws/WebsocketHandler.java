@@ -24,6 +24,9 @@ public class WebsocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
         BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload, BaseRetryMsg.class);
+        if (!(baseRetryMsg instanceof Ping)) {
+            log.info("ws request msg:{}", JsonUtil.toJson(baseRetryMsg));
+        }
         ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
         baseRetryMsg.setSessionId(expirationSocketSession.getSessionId());
         innerMsgRetryQueue.put(baseRetryMsg);

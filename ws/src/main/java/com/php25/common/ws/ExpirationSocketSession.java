@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Setter
 @Getter
 @Slf4j
-public class ExpirationSocketSession implements Delayed {
+public class ExpirationSocketSession {
 
     private String sessionId;
 
@@ -59,24 +58,6 @@ public class ExpirationSocketSession implements Delayed {
     @Override
     public int hashCode() {
         return Objects.hashCode(sessionId);
-    }
-
-    public synchronized long getTimestamp() {
-        return timestamp;
-    }
-
-    public synchronized void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public long getDelay(TimeUnit unit) {
-        return (timeout - (System.currentTimeMillis() - getTimestamp())) * 1000000;
-    }
-
-    @Override
-    public int compareTo(Delayed o) {
-        return (int) (this.getDelay(TimeUnit.NANOSECONDS) - o.getDelay(TimeUnit.NANOSECONDS));
     }
 
     public void stop() {

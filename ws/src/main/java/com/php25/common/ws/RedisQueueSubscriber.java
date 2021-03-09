@@ -3,13 +3,11 @@ package com.php25.common.ws;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.impl.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.data.redis.core.BoundListOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ExecutorService;
@@ -37,7 +35,7 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
-    public RedisQueueSubscriber(RedisManager redisService, String serverId,InnerMsgRetryQueue innerMsgRetryQueue) {
+    public RedisQueueSubscriber(RedisManager redisService, String serverId, InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
         this.serverId = serverId;
         this.innerMsgRetryQueue = innerMsgRetryQueue;
@@ -66,11 +64,10 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
                         .build());
 
         this.singleThreadExecutor.execute(() -> {
-            RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
             while (isRunning.get()) {
                 try {
-                    BoundListOperations<String, String> boundListOperations = redisSpringBootService.getRedisTemplate().boundListOps(Constants.prefix + this.serverId);
-                    String msg = boundListOperations.rightPop(1, TimeUnit.SECONDS);
+                    RList<String> rList = redisService.list(Constants.prefix + this.serverId, String.class);
+                    String msg = rList.blockRightPop(1, TimeUnit.SECONDS);
                     if (!StringUtil.isBlank(msg)) {
                         BaseRetryMsg baseRetry = JsonUtil.fromJson(msg, BaseRetryMsg.class);
                         innerMsgRetryQueue.put(baseRetry);
@@ -84,17 +81,12 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private void registerRedisQueue() {
         log.info("register redis Queue....;serverId:{}", serverId);
-        RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
-        StringRedisTemplate stringRedisTemplate = redisSpringBootService.getRedisTemplate();
-        BoundListOperations<String, String> boundListOperations = stringRedisTemplate.boundListOps(Constants.prefix + serverId);
-        boundListOperations.expire(2, TimeUnit.HOURS);
+        redisService.expire(Constants.prefix + serverId, 2L, TimeUnit.HOURS);
     }
 
     private void unRegisterRedisQueue() {
         log.info("unregister redis Queue...;serverId:{}", serverId);
-        RedisManagerImpl redisSpringBootService = (RedisManagerImpl) redisService;
-        StringRedisTemplate stringRedisTemplate = redisSpringBootService.getRedisTemplate();
-        stringRedisTemplate.delete(Constants.prefix + serverId);
+        redisService.remove(Constants.prefix + serverId);
     }
 
     /**

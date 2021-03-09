@@ -80,9 +80,11 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
                     msg = delayQueue.poll(2, TimeUnit.SECONDS);
                     if (null != msg) {
                         if (msg.getCount() <= msg.getMaxRetry()) {
-                            ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(msg.getSessionId());
-                            if (null != expirationSocketSession) {
-                                expirationSocketSession.put(msg);
+                            if (null != this.get(msg.getMsgId(), msg.getAction())) {
+                                ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(msg.getSessionId());
+                                if (null != expirationSocketSession) {
+                                    expirationSocketSession.put(msg);
+                                }
                             }
                         }
                     }
@@ -132,9 +134,6 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
     }
 
     public void remove(BaseRetryMsg baseRetry) {
-        if (baseRetry.getInterval() > 0) {
-            delayQueue.remove(baseRetry);
-        }
         msgs.invalidate(baseRetry.getMsgId() + baseRetry.getAction());
     }
 

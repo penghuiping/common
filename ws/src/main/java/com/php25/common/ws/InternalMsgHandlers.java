@@ -1,6 +1,5 @@
 package com.php25.common.ws;
 
-import com.php25.common.core.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -15,9 +14,8 @@ public class InternalMsgHandlers {
     @WsAction("ack")
     public void ackHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         Ack ack = (Ack) msg;
-        log.info("ack...;msgid:{},reply_action:{}", ack.getMsgId(), ack.getReplyAction());
         BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
-        if (null != srcMsg) {
+        if (null == srcMsg) {
             return;
         }
         session.dispatchAck(ack.getReplyAction(), srcMsg);
@@ -29,7 +27,6 @@ public class InternalMsgHandlers {
 
     @WsAction("connection_close")
     public void connectionCloseHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
-        log.info("ConnectionCloseHandler...");
         ConnectionClose requestClose = (ConnectionClose) msg;
         WebSocketSession webSocketSession = session.get(msg.getSessionId());
         if (null != webSocketSession && webSocketSession.isOpen()) {
@@ -41,7 +38,6 @@ public class InternalMsgHandlers {
 
     @WsAction("connection_create")
     public void connectionCreateHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
-        log.info("ConnectionCreateHandler...");
         ConnectionCreate connectionCreate = (ConnectionCreate) msg;
         //发送身份认证请求
         RequestAuthInfo requestAuthInfo = new RequestAuthInfo();
@@ -54,7 +50,6 @@ public class InternalMsgHandlers {
 
     @WsAction("ping")
     public void pingHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
-        log.info("心跳ping:{}", JsonUtil.toJson(msg));
         Ping ping = (Ping) msg;
         session.updateExpireTime(ping.getSessionId());
         Pong pong = new Pong();
@@ -68,13 +63,13 @@ public class InternalMsgHandlers {
     public void replyAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
         ReplyAuthInfo replyAuthInfo = (ReplyAuthInfo) msg;
         replyAuthInfo.setCount(replyAuthInfo.getCount() + 1);
+        replyAuthInfo.setTimestamp(System.currentTimeMillis());
         replyAuthInfo.setInterval(5000);
         session.send(replyAuthInfo);
     }
 
     @WsAction("request_auth_info")
     public void requestAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
-        log.info("RequestAuthInfoHandler...");
         RequestAuthInfo requestAuthInfo = (RequestAuthInfo) msg;
         requestAuthInfo.setCount(requestAuthInfo.getCount() + 1);
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
@@ -91,7 +86,6 @@ public class InternalMsgHandlers {
 
     @WsAction("submit_auth_info")
     public void submitAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
-        log.info("SubmitAuthInfoHandler...");
         SubmitAuthInfo submitAuthInfo = (SubmitAuthInfo) msg;
         String uid = session.authenticate(submitAuthInfo.getToken());
         SidUid sidUid = new SidUid();

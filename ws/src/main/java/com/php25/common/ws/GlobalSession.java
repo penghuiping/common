@@ -1,9 +1,8 @@
 package com.php25.common.ws;
 
+import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.impl.RedisManagerImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -23,7 +22,7 @@ public class GlobalSession {
     //此session缓存用于缓存原来的sessionId与WebSocket对应关系
     private final ConcurrentHashMap<String, ExpirationSocketSession> _sessions = new ConcurrentHashMap<>(1024);
 
-    private final DelayQueue<ExpirationSocketSession> expireSessionQueue = new DelayQueue<>();
+    private final DelayQueue<ExpirationSessionId> expireSessionQueue = new DelayQueue<>();
 
     private final InnerMsgRetryQueue msgRetry;
 
@@ -96,15 +95,17 @@ public class GlobalSession {
 
 
     protected void create(WebSocketSession webSocketSession) {
+        long now = System.currentTimeMillis();
         ExpirationSocketSession expirationSocketSession = new ExpirationSocketSession();
-        expirationSocketSession.setTimestamp(System.currentTimeMillis());
+        expirationSocketSession.setTimestamp(now);
         expirationSocketSession.setWebSocketSession(webSocketSession);
         expirationSocketSession.setSessionId(generateUUID());
         expirationSocketSession.setExecutorService(executorService);
         expirationSocketSession.setMsgDispatcher(msgDispatcher);
         sessions.put(expirationSocketSession.getSessionId(), expirationSocketSession);
         _sessions.put(webSocketSession.getId(), expirationSocketSession);
-        expireSessionQueue.put(expirationSocketSession);
+        ExpirationSessionId expirationSessionId = new ExpirationSessionId(expirationSocketSession.getSessionId(), now);
+        expireSessionQueue.put(expirationSessionId);
     }
 
 
@@ -112,7 +113,6 @@ public class GlobalSession {
         ExpirationSocketSession expirationSocketSession = sessions.remove(sid);
         expirationSocketSession.setSessionId(sid);
         expirationSocketSession.stop();
-        expireSessionQueue.remove(expirationSocketSession);
         _sessions.remove(expirationSocketSession.getWebSocketSession().getId());
     }
 
@@ -135,10 +135,11 @@ public class GlobalSession {
 
 
     protected void updateExpireTime(String sid) {
+        long now = System.currentTimeMillis();
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
-        expirationSocketSession.setTimestamp(System.currentTimeMillis());
-        expireSessionQueue.remove(expirationSocketSession);
-        expireSessionQueue.add(expirationSocketSession);
+        expirationSocketSession.setTimestamp(now);
+        ExpirationSessionId expirationSessionId = new ExpirationSessionId(expirationSocketSession.getSessionId(), now);
+        expireSessionQueue.add(expirationSessionId);
     }
 
     public String getSid(String uid) {
@@ -171,11 +172,10 @@ public class GlobalSession {
                 }
             } else {
                 //获取远程session
-                RedisManagerImpl redisManagerImpl = (RedisManagerImpl) redisService;
                 SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
                 String serverId = sidUid.getServerId();
-                BoundListOperations<String, String> listOperations = redisManagerImpl.getRedisTemplate().boundListOps(Constants.prefix + serverId);
-                listOperations.leftPush(internalMsgSerializer.from(baseRetryMsg));
+                RList<String> rList = redisService.list(Constants.prefix + serverId, String.class);
+                rList.leftPush(internalMsgSerializer.from(baseRetryMsg));
             }
         } catch (Exception e) {
             log.info("通过websocket发送消息失败,sid:{}", sid, e);
@@ -196,8 +196,12 @@ public class GlobalSession {
         return this.msgRetry.get(msgId, action);
     }
 
-    protected DelayQueue<ExpirationSocketSession> getAllExpirationSessions() {
+    protected DelayQueue<ExpirationSessionId> getAllExpirationSessionIds() {
         return this.expireSessionQueue;
+    }
+
+    protected ConcurrentHashMap<String, ExpirationSocketSession> getAllExpirationSessions() {
+        return this.sessions;
     }
 
     protected String generateUUID() {

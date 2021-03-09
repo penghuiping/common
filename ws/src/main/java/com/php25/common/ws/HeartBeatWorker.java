@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -50,18 +51,22 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
         this.singleThreadExecutor.submit(() -> {
             log.info("heart beat thread start...");
             while (true) {
-                DelayQueue<ExpirationSocketSession> delayQueue = globalSession.getAllExpirationSessions();
+                DelayQueue<ExpirationSessionId> delayQueue = globalSession.getAllExpirationSessionIds();
                 while (true) {
                     try {
-                        ExpirationSocketSession expirationSocketSession = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
-                        if (null == expirationSocketSession) {
+                        ExpirationSessionId expirationSessionId = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
+                        if (null == expirationSessionId) {
                             break;
                         }
-                        ConnectionClose connectionClose = new ConnectionClose();
-                        connectionClose.setCount(1);
-                        connectionClose.setMsgId(globalSession.generateUUID());
-                        connectionClose.setSessionId(expirationSocketSession.getSessionId());
-                        globalSession.send(connectionClose);
+                        ConcurrentHashMap<String, ExpirationSocketSession> sessions = globalSession.getAllExpirationSessions();
+                        ExpirationSocketSession expirationSocketSession = sessions.get(expirationSessionId.getSessionId());
+                        if (expirationSessionId.getTimestamp() == expirationSocketSession.getTimestamp()) {
+                            ConnectionClose connectionClose = new ConnectionClose();
+                            connectionClose.setCount(1);
+                            connectionClose.setMsgId(globalSession.generateUUID());
+                            connectionClose.setSessionId(expirationSessionId.getSessionId());
+                            globalSession.send(connectionClose);
+                        }
                     } catch (InterruptedException e) {
                         log.info("HeartBeatWorker心跳线程睡眠被打断", e);
                     }
