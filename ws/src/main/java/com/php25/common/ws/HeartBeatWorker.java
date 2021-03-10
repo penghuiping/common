@@ -56,19 +56,6 @@ public class HeartBeatWorker implements InitializingBean, DisposableBean {
                     try {
                         ExpirationSessionId expirationSessionId = delayQueue.poll(interval, TimeUnit.MILLISECONDS);
                         if (null == expirationSessionId) {
-                            //优化 移除一些已经不需要的项
-                            ConcurrentHashMap<String, ExpirationSocketSession> sessions = globalSession.getAllExpirationSessions();
-                            while (true) {
-                                ExpirationSessionId expirationSessionId0 = delayQueue.peek();
-                                if (null == expirationSessionId0) {
-                                    break;
-                                }
-                                ExpirationSocketSession expirationSocketSession0 = sessions.get(expirationSessionId0.getSessionId());
-                                if (expirationSessionId0.getTimestamp() == expirationSocketSession0.getTimestamp()) {
-                                    break;
-                                }
-                                delayQueue.remove(expirationSessionId0);
-                            }
                             break;
                         }
                         ConcurrentHashMap<String, ExpirationSocketSession> sessions = globalSession.getAllExpirationSessions();

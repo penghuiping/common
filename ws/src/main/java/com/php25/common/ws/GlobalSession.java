@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import lombok.extern.slf4j.Slf4j;
@@ -135,11 +136,14 @@ public class GlobalSession {
 
 
     protected void updateExpireTime(String sid) {
-        long now = System.currentTimeMillis();
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
+        long now = System.currentTimeMillis();
+        long before = expirationSocketSession.getTimestamp();
         expirationSocketSession.setTimestamp(now);
         ExpirationSessionId expirationSessionId = new ExpirationSessionId(expirationSocketSession.getSessionId(), now);
-        expireSessionQueue.add(expirationSessionId);
+        ExpirationSessionId beforeExpirationSessionId = new ExpirationSessionId(expirationSocketSession.getSessionId(), before);
+        expireSessionQueue.remove(expirationSessionId);
+        expireSessionQueue.remove(beforeExpirationSessionId);
     }
 
     public String getSid(String uid) {
@@ -162,20 +166,31 @@ public class GlobalSession {
 
         String sid = baseRetryMsg.getSessionId();
         try {
-            //现看看sid是否本地存在
-            if (this.sessions.containsKey(sid)) {
-                //本地存在,直接通过本地session发送
-                WebSocketSession socketSession = sessions.get(sid).getWebSocketSession();
-                socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseRetryMsg)));
-                if (retry) {
-                    msgRetry.put(baseRetryMsg);
+            if (StringUtil.isBlank(sid)) {
+                //没有指定sid,则认为进行全局广播 todo 目前只实现单机全局广播
+                for (String key : sessions.keySet()) {
+                    WebSocketSession socketSession = sessions.get(key).getWebSocketSession();
+                    socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseRetryMsg)));
+                    if (retry) {
+                        msgRetry.put(baseRetryMsg);
+                    }
                 }
             } else {
-                //获取远程session
-                SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
-                String serverId = sidUid.getServerId();
-                RList<String> rList = redisService.list(Constants.prefix + serverId, String.class);
-                rList.leftPush(internalMsgSerializer.from(baseRetryMsg));
+                //现看看sid是否本地存在
+                if (this.sessions.containsKey(sid)) {
+                    //本地存在,直接通过本地session发送
+                    WebSocketSession socketSession = sessions.get(sid).getWebSocketSession();
+                    socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseRetryMsg)));
+                    if (retry) {
+                        msgRetry.put(baseRetryMsg);
+                    }
+                } else {
+                    //获取远程session
+                    SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
+                    String serverId = sidUid.getServerId();
+                    RList<String> rList = redisService.list(Constants.prefix + serverId, String.class);
+                    rList.leftPush(internalMsgSerializer.from(baseRetryMsg));
+                }
             }
         } catch (Exception e) {
             log.info("通过websocket发送消息失败,sid:{}", sid, e);

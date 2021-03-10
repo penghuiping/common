@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.google.common.base.Objects;
 import lombok.Getter;
 
 import java.util.concurrent.Delayed;
@@ -15,14 +16,32 @@ public class ExpirationSessionId implements Delayed {
     private final String sessionId;
 
     private final long timestamp;
+
+    public ExpirationSessionId(String sessionId, long timestamp) {
+        this.sessionId = sessionId;
+        this.timestamp = timestamp;
+    }
+
     /**
      * 默认30秒没有收到心跳，断开连接
      */
     private final long timeout = 30000;
 
-    public ExpirationSessionId(String sessionId, long timestamp) {
-        this.sessionId = sessionId;
-        this.timestamp = timestamp;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ExpirationSessionId that = (ExpirationSessionId) o;
+        return timestamp == that.timestamp && Objects.equal(sessionId, that.sessionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(sessionId, timestamp);
     }
 
     @Override
