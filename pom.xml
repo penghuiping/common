@@ -16,7 +16,6 @@
         <module>redis</module>
         <module>validation</module>
         <module>time-tasks</module>
-        <module>auditlog</module>
         <module>ws</module>
         <module>sample/core-sample</module>
         <module>sample/time-tasks-sample</module>

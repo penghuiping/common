@@ -166,10 +166,10 @@ public abstract class BaseSqlExecute implements SqlExecute {
                 sqlParams.getClazz().getSimpleName(),
                 JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
         log.info("sql语句为:{}", targetSql);
-        Long result = this.jdbcTemplate.queryForObject(targetSql, defaultSqlParams.getParams().toArray(), Long.class);
-        if (null == result) {
-            result = -1L;
+        List<Long> result = this.jdbcTemplate.queryForList(targetSql, defaultSqlParams.getParams().toArray(), Long.class);
+        if (result.isEmpty()) {
+            return -1L;
         }
-        return result;
+        return result.get(0);
     }
 }
