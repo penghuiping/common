@@ -22,17 +22,19 @@ public class RedisMessageSubscriber implements MessageSubscriber {
     private final static Logger log = LoggerFactory.getLogger(RedisMessageSubscriber.class);
 
     private final RedisManager redisManager;
+    private final RedisQueueGroupFinder finder;
 
     private final ExecutorService executorService;
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private MessageHandler handler;
     private Future<?> threadFuture;
-    private RList<Message> buffer;
+    private RList<Message> group;
 
 
     public RedisMessageSubscriber(ExecutorService executorService, RedisManager redisManager) {
         this.executorService = executorService;
         this.redisManager = redisManager;
+        this.finder = new RedisQueueGroupFinder(this.redisManager);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
 
     @Override
     public void subscribe(String queue, String group) {
-        this.buffer = this.redisManager.list(String.format("queue:%s:%s", queue, group), Message.class);
+        this.group = this.finder.group(group);
         this.start();
     }
 
@@ -57,7 +59,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                     this.threadFuture = executorService.submit(() -> {
                         while (isRunning.get()) {
                             try {
-                                Message message0 = buffer.blockRightPop(1, TimeUnit.SECONDS);
+                                Message message0 = group.blockRightPop(1, TimeUnit.SECONDS);
                                 if (null != message0) {
                                     this.handler.handle(message0);
                                 }

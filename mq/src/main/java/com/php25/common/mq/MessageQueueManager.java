@@ -1,6 +1,8 @@
 package com.php25.common.mq;
 
 
+import java.util.List;
+
 /**
  * 消息队列相关操作
  *
@@ -44,4 +46,11 @@ public interface MessageQueueManager {
      * @return true: 绑定成功
      */
     Boolean bindDeadLetterQueue(String queue, String dlq);
+
+    /**
+     * 获取系统中所有队列
+     *
+     * @return 系统中目前所有的队列名
+     */
+    List<String> queues();
 }
