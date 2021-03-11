@@ -7,9 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
 /**
  * 模仿redis的api的本地list实现
@@ -27,9 +26,10 @@ public class LocalList<T> implements RList<T> {
 
     private final Class<T> cls;
 
-    private Lock lock;
-
-    private Condition listNotEmpty;
+    /**
+     * 用于blockRightPop与blockLeftPop操作
+     */
+    private BlockingQueue<Boolean> pipe;
 
     public LocalList(String listKey, Class<T> cls, LocalRedisManager redisManager) {
         this.listKey = listKey;
@@ -41,8 +41,7 @@ public class LocalList<T> implements RList<T> {
         Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
         if (res.isPresent()) {
             LinkedListPlus<Object> list = (LinkedListPlus<Object>) res.get();
-            this.lock = list.getLock();
-            this.listNotEmpty = list.getNotEmpty();
+            this.pipe = list.getPipe();
         }
     }
 
@@ -137,23 +136,18 @@ public class LocalList<T> implements RList<T> {
         long expiredTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         //轮训等待
         while (System.currentTimeMillis() < expiredTime) {
-            lock.lock();
+            CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_POP, Lists.newArrayList(this.listKey));
+            CmdResponse cmdResponse = new CmdResponse();
+            this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+            Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+            if (res.isPresent()) {
+                return (T) res.get();
+            }
+            //list这时候是空的,需要等待
             try {
-                CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_LEFT_POP, Lists.newArrayList(this.listKey));
-                CmdResponse cmdResponse = new CmdResponse();
-                this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
-                Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-                if (res.isPresent()) {
-                    return (T) res.get();
-                }
-                //list这时候是空的,需要等待
-                try {
-                    listNotEmpty.await(expiredTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    log.error("list为空条件变量等待出错", e);
-                }
-            } finally {
-                lock.unlock();
+                this.pipe.poll(expiredTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                log.error("RList blockLeftPop操作出错", e);
             }
         }
         return null;
@@ -165,23 +159,18 @@ public class LocalList<T> implements RList<T> {
         //轮训等待
         long expiredTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         while (System.currentTimeMillis() < expiredTime) {
-            lock.lock();
+            CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_POP, Lists.newArrayList(this.listKey));
+            CmdResponse cmdResponse = new CmdResponse();
+            this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+            Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+            if (res.isPresent()) {
+                return (T) res.get();
+            }
+            //list这时候是空的,需要等待
             try {
-                CmdRequest cmdRequest = new CmdRequest(RedisCmd.LIST_RIGHT_POP, Lists.newArrayList(this.listKey));
-                CmdResponse cmdResponse = new CmdResponse();
-                this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
-                Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-                if (res.isPresent()) {
-                    return (T) res.get();
-                }
-                //list这时候是空的,需要等待
-                try {
-                    listNotEmpty.await(expiredTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    log.error("list为空条件变量等待出错", e);
-                }
-            } finally {
-                lock.unlock();
+                this.pipe.poll(expiredTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                log.error("RList blockRightPop操作出错", e);
             }
         }
         return null;

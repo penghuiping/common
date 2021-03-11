@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author penghuiping
@@ -13,9 +13,7 @@ import java.util.concurrent.locks.Lock;
  */
 public class LinkedListPlus<T> extends LinkedList<T> {
 
-    private Lock lock;
-
-    private Condition notEmpty;
+    private final BlockingQueue<Boolean> pipe = new LinkedBlockingQueue<>();
 
     public LinkedListPlus() {
     }
@@ -24,19 +22,7 @@ public class LinkedListPlus<T> extends LinkedList<T> {
         super(c);
     }
 
-    public Lock getLock() {
-        return lock;
-    }
-
-    public void setLock(Lock lock) {
-        this.lock = lock;
-    }
-
-    public Condition getNotEmpty() {
-        return notEmpty;
-    }
-
-    public void setNotEmpty(Condition notEmpty) {
-        this.notEmpty = notEmpty;
+    public BlockingQueue<Boolean> getPipe() {
+        return pipe;
     }
 }

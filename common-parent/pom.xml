@@ -45,10 +45,10 @@
 
         <php-common.db>2.3.2-SNAPSHOT</php-common.db>
         <php-common.core>2.3.2-SNAPSHOT</php-common.core>
-        <php-common.mvc>2.3.2-SNAPSHOT</php-common.mvc>
+        <php-common.mq>2.3.2-SNAPSHOT</php-common.mq>
         <php-common.redis>2.3.2-SNAPSHOT</php-common.redis>
         <php-common.validation>2.3.2-SNAPSHOT</php-common.validation>
-        <php-common.auditlog>2.3.2-SNAPSHOT</php-common.auditlog>
+        <php-common.webflux>2.3.2-SNAPSHOT</php-common.webflux>
         <php-common.time-tasks>2.3.2-SNAPSHOT</php-common.time-tasks>
         <uid-generator>2.3.2-SNAPSHOT</uid-generator>
     </properties>
@@ -160,8 +160,8 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
-                <artifactId>auditlog</artifactId>
-                <version>${php-common.auditlog}</version>
+                <artifactId>webflux</artifactId>
+                <version>${php-common.webflux}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
@@ -184,8 +184,8 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
-                <artifactId>mvc</artifactId>
-                <version>${php-common.mvc}</version>
+                <artifactId>mq</artifactId>
+                <version>${php-common.mq}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
