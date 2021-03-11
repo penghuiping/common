@@ -30,19 +30,20 @@ public interface MessageQueueManager {
      */
     Boolean send(String queue, Message message);
 
+
     /**
-     * 从队列中主动pull消息
+     * 对某个messageId进行ack:用于表示消费成功
      *
-     * @param queue 队列名
-     * @return null如果队列中不存在消息, 存在返回队列中拉到的消息
+     * @param messageId 消息id
+     * @return true: ack成功
      */
-    Message pull(String queue);
+    Boolean ack(String messageId);
 
     /**
      * 给某个队列绑定死信队列
      *
      * @param queue 队列名
-     * @param dlq   死信队列
+     * @param dlq   死信队列名
      * @return true: 绑定成功
      */
     Boolean bindDeadLetterQueue(String queue, String dlq);

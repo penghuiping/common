@@ -6,6 +6,7 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.mq.MessageSubscriber;
+import com.php25.common.redis.RHash;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
@@ -81,8 +82,7 @@ public class RedisMessageQueueManager implements MessageQueueManager {
         });
     }
 
-    @Override
-    public Message pull(String queue) {
+    private Message pull(String queue) {
         return this.finder.queue(queue).rightPop();
     }
 
@@ -94,5 +94,12 @@ public class RedisMessageQueueManager implements MessageQueueManager {
     @Override
     public List<String> queues() {
         return Lists.newArrayList(this.finder.queues().members());
+    }
+
+    @Override
+    public Boolean ack(String messageId) {
+        RHash<RedisMessage> cache = this.finder.messagesCache();
+        cache.delete(messageId);
+        return true;
     }
 }

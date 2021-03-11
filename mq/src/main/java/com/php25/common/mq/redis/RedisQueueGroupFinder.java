@@ -1,6 +1,8 @@
 package com.php25.common.mq.redis;
 
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
+import com.php25.common.redis.RHash;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
@@ -49,10 +51,34 @@ class RedisQueueGroupFinder {
     /**
      * 根据队列名获取绑定的组名
      *
-     * @param queue
-     * @return
+     * @param queue 队列名
+     * @return 队列与组关系
      */
     public RSet<String> groups(String queue) {
         return this.redisManager.set(RedisConstant.QUEUE_GROUPS_PREFIX + queue, String.class);
+    }
+
+    /**
+     * 获取系统中的消息缓存
+     *
+     * @return 消息缓存
+     */
+    public RHash<RedisMessage> messagesCache() {
+        return this.redisManager.hash(RedisConstant.MESSAGES_CACHE, RedisMessage.class);
+    }
+
+    /**
+     * 根据队列名获取死信队列
+     * 1. 如果没有绑定死信队列,
+     *
+     * @param queue 队列名
+     * @return 死信队列
+     */
+    public RList<Message> dlq(String queue) {
+        String dlq = this.redisManager.string().get(RedisConstant.QUEUE_DLQ_PREFIX + queue, String.class);
+        if (StringUtil.isBlank(dlq)) {
+            return this.redisManager.list(RedisConstant.DLQ_DEFAULT, Message.class);
+        }
+        return this.redisManager.list(RedisConstant.DLQ_PREFIX + dlq, Message.class);
     }
 }

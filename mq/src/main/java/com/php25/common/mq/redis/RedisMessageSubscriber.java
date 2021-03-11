@@ -2,6 +2,7 @@ package com.php25.common.mq.redis;
 
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
+import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.mq.MessageSubscriber;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
@@ -21,8 +22,8 @@ public class RedisMessageSubscriber implements MessageSubscriber {
 
     private final static Logger log = LoggerFactory.getLogger(RedisMessageSubscriber.class);
 
-    private final RedisManager redisManager;
     private final RedisQueueGroupFinder finder;
+    private final MessageQueueManager redisMessageQueueManager;
 
     private final ExecutorService executorService;
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
@@ -31,10 +32,12 @@ public class RedisMessageSubscriber implements MessageSubscriber {
     private RList<Message> group;
 
 
-    public RedisMessageSubscriber(ExecutorService executorService, RedisManager redisManager) {
+    public RedisMessageSubscriber(ExecutorService executorService,
+                                  RedisManager redisManager,
+                                  MessageQueueManager redisMessageQueueManager) {
         this.executorService = executorService;
-        this.redisManager = redisManager;
-        this.finder = new RedisQueueGroupFinder(this.redisManager);
+        this.finder = new RedisQueueGroupFinder(redisManager);
+        this.redisMessageQueueManager = redisMessageQueueManager;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                     this.threadFuture = executorService.submit(() -> {
                         while (isRunning.get()) {
                             try {
-                                Message message0 = group.blockRightPop(1, TimeUnit.SECONDS);
+                                Message message0 = group.blockRightPop(30, TimeUnit.SECONDS);
                                 if (null != message0) {
                                     this.handler.handle(message0);
                                 }

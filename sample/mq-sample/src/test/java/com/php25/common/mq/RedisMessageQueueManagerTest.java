@@ -42,28 +42,28 @@ public class RedisMessageQueueManagerTest {
         int messageNum = 60;
         AtomicLong count = new AtomicLong(0);
         CountDownLatch countDownLatch = new CountDownLatch(messageNum);
-        MessageSubscriber messageSubscriber0 = new RedisMessageSubscriber(pool, redisManager);
+        MessageSubscriber messageSubscriber0 = new RedisMessageSubscriber(pool, redisManager, messageQueueManager);
         messageSubscriber0.setHandler(message -> {
             log.info("messageSubscriber0:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
 
-        MessageSubscriber messageSubscriber1 = new RedisMessageSubscriber(pool, redisManager);
+        MessageSubscriber messageSubscriber1 = new RedisMessageSubscriber(pool, redisManager, messageQueueManager);
         messageSubscriber1.setHandler(message -> {
             log.info("messageSubscriber1:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
 
-        MessageSubscriber messageSubscriber2 = new RedisMessageSubscriber(pool, redisManager);
+        MessageSubscriber messageSubscriber2 = new RedisMessageSubscriber(pool, redisManager, messageQueueManager);
         messageSubscriber2.setHandler(message -> {
             log.info("messageSubscriber2:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
 
-        MessageSubscriber messageSubscriber3 = new RedisMessageSubscriber(pool, redisManager);
+        MessageSubscriber messageSubscriber3 = new RedisMessageSubscriber(pool, redisManager, messageQueueManager);
         messageSubscriber3.setHandler(message -> {
             log.info("messageSubscriber3:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
@@ -77,7 +77,7 @@ public class RedisMessageQueueManagerTest {
 
         pool.submit(() -> {
             for (int i = 0; i < messageNum; i++) {
-                messageQueueManager.send("test_queue", new Message(new HashMap<>(), "hello world:" + i));
+                messageQueueManager.send("test_queue", new Message(i + "", new HashMap<>(), "hello world:" + i));
                 try {
                     Thread.sleep(1000);
                     log.info("==============");
