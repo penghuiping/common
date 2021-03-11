@@ -2,7 +2,6 @@ package com.php25.common.mq.redis;
 
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
-import com.php25.common.redis.RHash;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
@@ -11,11 +10,11 @@ import com.php25.common.redis.RedisManager;
  * @author penghuiping
  * @date 2021/3/11 10:14
  */
-class RedisQueueGroupFinder {
+class RedisQueueGroupHelper {
 
     private final RedisManager redisManager;
 
-    public RedisQueueGroupFinder(RedisManager redisManager) {
+    public RedisQueueGroupHelper(RedisManager redisManager) {
         this.redisManager = redisManager;
     }
 
@@ -58,14 +57,6 @@ class RedisQueueGroupFinder {
         return this.redisManager.set(RedisConstant.QUEUE_GROUPS_PREFIX + queue, String.class);
     }
 
-    /**
-     * 获取系统中的消息缓存
-     *
-     * @return 消息缓存
-     */
-    public RHash<RedisMessage> messagesCache() {
-        return this.redisManager.hash(RedisConstant.MESSAGES_CACHE, RedisMessage.class);
-    }
 
     /**
      * 根据队列名获取死信队列
@@ -80,5 +71,16 @@ class RedisQueueGroupFinder {
             return this.redisManager.list(RedisConstant.DLQ_DEFAULT, Message.class);
         }
         return this.redisManager.list(RedisConstant.DLQ_PREFIX + dlq, Message.class);
+    }
+
+    /**
+     * 给队列绑定死信队列
+     *
+     * @param queue 队列名
+     * @param dlq   死信队列名
+     * @return true: 绑定成功
+     */
+    public Boolean bindDlq(String queue, String dlq) {
+        return this.redisManager.string().set(RedisConstant.QUEUE_DLQ_PREFIX + queue, dlq);
     }
 }

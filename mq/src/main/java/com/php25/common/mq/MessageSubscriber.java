@@ -15,12 +15,19 @@ public interface MessageSubscriber {
 
 
     /**
-     * 订阅
+     * 订阅(队列+消费组)
      *
      * @param queue 队列名
      * @param group 消费组名
      */
     void subscribe(String queue, String group);
+
+    /**
+     * 订阅(队列)
+     *
+     * @param queue 队列名
+     */
+    void subscribe(String queue);
 
 
 }

@@ -1,14 +1,17 @@
 package com.php25.common.mq.redis;
 
+import com.google.common.base.Charsets;
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
-import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.mq.MessageSubscriber;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -22,22 +25,18 @@ public class RedisMessageSubscriber implements MessageSubscriber {
 
     private final static Logger log = LoggerFactory.getLogger(RedisMessageSubscriber.class);
 
-    private final RedisQueueGroupFinder finder;
-    private final MessageQueueManager redisMessageQueueManager;
-
+    private final RedisQueueGroupHelper helper;
     private final ExecutorService executorService;
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private MessageHandler handler;
     private Future<?> threadFuture;
-    private RList<Message> group;
+    private RList<Message> pipe;
 
 
     public RedisMessageSubscriber(ExecutorService executorService,
-                                  RedisManager redisManager,
-                                  MessageQueueManager redisMessageQueueManager) {
+                                  RedisManager redisManager) {
         this.executorService = executorService;
-        this.finder = new RedisQueueGroupFinder(redisManager);
-        this.redisMessageQueueManager = redisMessageQueueManager;
+        this.helper = new RedisQueueGroupHelper(redisManager);
     }
 
     @Override
@@ -47,8 +46,19 @@ public class RedisMessageSubscriber implements MessageSubscriber {
 
     @Override
     public void subscribe(String queue, String group) {
-        this.group = this.finder.group(group);
+        if (!StringUtil.isBlank(queue)) {
+            this.pipe = this.helper.queue(queue);
+        }
+
+        if (!StringUtil.isBlank(group)) {
+            this.pipe = this.helper.group(group);
+        }
         this.start();
+    }
+
+    @Override
+    public void subscribe(String queue) {
+        this.subscribe(queue, null);
     }
 
     public void stop() {
@@ -62,9 +72,22 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                     this.threadFuture = executorService.submit(() -> {
                         while (isRunning.get()) {
                             try {
-                                Message message0 = group.blockRightPop(30, TimeUnit.SECONDS);
+                                Message message0 = pipe.blockRightPop(30, TimeUnit.SECONDS);
                                 if (null != message0) {
-                                    this.handler.handle(message0);
+                                    try {
+                                        this.handler.handle(message0);
+                                    } catch (Exception e) {
+                                        RList<Message> dlq = this.helper.dlq(message0.getQueue());
+                                        try (
+                                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                                PrintWriter writer = new PrintWriter(byteArrayOutputStream)
+                                        ) {
+                                            e.printStackTrace(writer);
+                                            String error = byteArrayOutputStream.toString(Charsets.UTF_8);
+                                            message0.setErrorInfo(error);
+                                            dlq.leftPush(message0);
+                                        }
+                                    }
                                 }
                             } catch (Exception e) {
                                 log.error("MessageSubscriber消费消息出错", e);

@@ -22,7 +22,7 @@ public interface MessageQueueManager {
     Boolean subscribe(String queue, String group, MessageSubscriber subscriber);
 
     /**
-     * 往队列里发送消息
+     * 指定队列名,发送消息
      *
      * @param queue   队列名
      * @param message 消息
@@ -30,14 +30,23 @@ public interface MessageQueueManager {
      */
     Boolean send(String queue, Message message);
 
+    /**
+     * 指定队列名与组名,发送消息
+     *
+     * @param queue   队列名
+     * @param group   组名名
+     * @param message 消息
+     * @return true: 表示已经发送到队列
+     */
+    Boolean send(String queue, String group, Message message);
 
     /**
-     * 对某个messageId进行ack:用于表示消费成功
+     * 主动从队列中拉取消息
      *
-     * @param messageId 消息id
-     * @return true: ack成功
+     * @param queue 队列名
+     * @return 消息
      */
-    Boolean ack(String messageId);
+    Message pull(String queue);
 
     /**
      * 给某个队列绑定死信队列

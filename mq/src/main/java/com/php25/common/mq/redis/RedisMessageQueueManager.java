@@ -6,7 +6,6 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.mq.MessageSubscriber;
-import com.php25.common.redis.RHash;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
@@ -17,12 +16,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
 /**
+ * redis版本消息队列实现
+ * <p>
+ * （注: 此版本实现存在丢消息风险，如果对消息可达性有强制要求,请选择Rabbit、Kafka、Rocket版本）
+ *
  * @author penghuiping
  * @date 2021/3/10 20:55
  */
@@ -33,21 +36,24 @@ public class RedisMessageQueueManager implements MessageQueueManager {
 
     private final ExecutorService singleThreadPool;
 
-    private final RedisQueueGroupFinder finder;
+    private final RedisQueueGroupHelper helper;
 
     private final BlockingQueue<String> pipe;
 
     public RedisMessageQueueManager(RedisManager redisManager) {
         this.redisManager = redisManager;
-        this.singleThreadPool = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("redis_message_queue_manager_thread").build());
+        this.singleThreadPool = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadFactoryBuilder().setNameFormat("redis_message_queue_manager_thread").build());
         this.pipe = new LinkedBlockingQueue<>();
-        this.finder = new RedisQueueGroupFinder(this.redisManager);
+        this.helper = new RedisQueueGroupHelper(this.redisManager);
         this.startWorker();
     }
 
     @Override
     public Boolean subscribe(String queue, String group, MessageSubscriber subscriber) {
-        RSet<String> groups = this.finder.groups(queue);
+        RSet<String> groups = this.helper.groups(queue);
         groups.add(group);
         subscriber.subscribe(queue, group);
         return true;
@@ -55,9 +61,7 @@ public class RedisMessageQueueManager implements MessageQueueManager {
 
     @Override
     public Boolean send(String queue, Message message) {
-        this.finder.queue(queue).leftPush(message);
-        this.pipe.offer(queue);
-        return true;
+        return this.send(queue, null, message);
     }
 
     private void startWorker() {
@@ -66,12 +70,14 @@ public class RedisMessageQueueManager implements MessageQueueManager {
                 try {
                     String queue = this.pipe.poll(60, TimeUnit.SECONDS);
                     if (!StringUtil.isBlank(queue)) {
-                        Message message = this.pull(queue);
-                        RSet<String> groups = this.finder.groups(queue);
-                        Set<String> groups0 = groups.members();
-                        for (String group : groups0) {
-                            RList<Message> rList = this.finder.group(group);
-                            rList.leftPush(message);
+                        RSet<String> groups = this.helper.groups(queue);
+                        if (groups.size() > 0) {
+                            Message message = this.pull(queue);
+                            Set<String> groups0 = groups.members();
+                            for (String group : groups0) {
+                                RList<Message> rList = this.helper.group(group);
+                                rList.leftPush(message);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -82,24 +88,31 @@ public class RedisMessageQueueManager implements MessageQueueManager {
         });
     }
 
-    private Message pull(String queue) {
-        return this.finder.queue(queue).rightPop();
+    @Override
+    public Message pull(String queue) {
+        return this.helper.queue(queue).rightPop();
     }
 
     @Override
     public Boolean bindDeadLetterQueue(String queue, String dlq) {
-        return null;
+        return this.helper.bindDlq(queue, dlq);
     }
 
     @Override
     public List<String> queues() {
-        return Lists.newArrayList(this.finder.queues().members());
+        return Lists.newArrayList(this.helper.queues().members());
     }
 
     @Override
-    public Boolean ack(String messageId) {
-        RHash<RedisMessage> cache = this.finder.messagesCache();
-        cache.delete(messageId);
-        return true;
+    public Boolean send(String queue, String group, Message message) {
+        if (!StringUtil.isBlank(group)) {
+            RList<Message> messages = this.helper.group(group);
+            messages.leftPush(message);
+            return true;
+        } else {
+            this.helper.queue(queue).leftPush(message);
+            this.pipe.offer(queue);
+            return true;
+        }
     }
 }
