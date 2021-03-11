@@ -77,6 +77,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                                     try {
                                         this.handler.handle(message0);
                                     } catch (Exception e) {
+                                        log.error("处理消息出错,msgId:{}", message0.getId(), e);
                                         RList<Message> dlq = this.helper.dlq(message0.getQueue());
                                         try (
                                                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

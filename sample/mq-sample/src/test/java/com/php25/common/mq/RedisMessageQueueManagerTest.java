@@ -38,7 +38,7 @@ public class RedisMessageQueueManagerTest {
 
     @Test
     public void test() throws Exception {
-        int messageNum = 60;
+        int messageNum = 10;
         AtomicLong count = new AtomicLong(0);
         CountDownLatch countDownLatch = new CountDownLatch(messageNum);
         MessageSubscriber messageSubscriber0 = new RedisMessageSubscriber(pool, redisManager);

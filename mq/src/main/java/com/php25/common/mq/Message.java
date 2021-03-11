@@ -1,5 +1,6 @@
 package com.php25.common.mq;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
@@ -36,10 +37,6 @@ public class Message {
     }
 
 
-    public void addHeader(String key, Object value) {
-        this.getHeaders().put(key, value);
-    }
-
     public Object getBody() {
         return body;
     }
@@ -48,34 +45,51 @@ public class Message {
         this.body = body;
     }
 
-    public String getId() {
-        return this.getHeaders().get("id").toString();
+    @JsonIgnore
+    public void addHeader(String key, Object value) {
+        this.getHeaders().put(key, value);
     }
 
+    @JsonIgnore
+    public String getId() {
+        Object id = this.getHeaders().get("id");
+        return null == id ? "" : id.toString();
+    }
+
+    @JsonIgnore
     public void setId(String id) {
         this.headers.put("id", id);
     }
 
+    @JsonIgnore
     public String getQueue() {
-        return this.getHeaders().get("queue").toString();
+        Object queue = this.getHeaders().get("queue");
+        return null == queue ? "" : queue.toString();
     }
 
+    @JsonIgnore
     public void setQueue(String queue) {
         this.headers.put("queue", queue);
     }
 
+    @JsonIgnore
     public String getGroup() {
-        return this.getHeaders().get("group").toString();
+        Object group = this.getHeaders().get("group");
+        return null == group ? "" : group.toString();
     }
 
+    @JsonIgnore
     public void setGroup(String group) {
         this.headers.put("group", group);
     }
 
+    @JsonIgnore
     public String getErrorInfo() {
-        return this.getHeaders().get("error").toString();
+        Object error = this.getHeaders().get("error");
+        return error == null ? "" : error.toString();
     }
 
+    @JsonIgnore
     public void setErrorInfo(String errorInfo) {
         this.headers.put("error", errorInfo);
     }
