@@ -52,16 +52,35 @@ public class RedisMessageQueueManager implements MessageQueueManager {
     }
 
     @Override
+    public Boolean subscribe(String queue, MessageSubscriber subscriber) {
+        return this.subscribe(queue, null, subscriber);
+    }
+
+    @Override
     public Boolean subscribe(String queue, String group, MessageSubscriber subscriber) {
-        RSet<String> groups = this.helper.groups(queue);
-        groups.add(group);
-        subscriber.subscribe(queue, group);
-        return true;
+        if (StringUtil.isBlank(group)) {
+            subscriber.subscribe(queue);
+            return true;
+        } else {
+            RSet<String> groups = this.helper.groups(queue);
+            groups.add(group);
+            subscriber.subscribe(queue, group);
+            return true;
+        }
     }
 
     @Override
     public Boolean send(String queue, Message message) {
         return this.send(queue, null, message);
+    }
+
+    @Override
+    public Boolean delete(String queue, String group) {
+        if (StringUtil.isBlank(group)) {
+            return this.helper.remove(queue);
+        } else {
+            return this.helper.remove(queue, group);
+        }
     }
 
     private void startWorker() {

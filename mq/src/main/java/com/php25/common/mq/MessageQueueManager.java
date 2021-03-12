@@ -12,6 +12,16 @@ import java.util.List;
 public interface MessageQueueManager {
 
     /**
+     * 订阅(队列名)
+     *
+     * @param queue      队列名
+     * @param subscriber 消费者
+     * @return true:订阅关系绑定成功
+     */
+    Boolean subscribe(String queue, MessageSubscriber subscriber);
+
+
+    /**
      * 订阅(队列名:消费组名)
      *
      * @param queue      队列名
@@ -39,6 +49,15 @@ public interface MessageQueueManager {
      * @return true: 表示已经发送到队列
      */
     Boolean send(String queue, String group, Message message);
+
+    /**
+     * 删除指定队列与组
+     *
+     * @param queue 队列名
+     * @param group 组名
+     * @return true: 表示删除成功
+     */
+    Boolean delete(String queue, String group);
 
     /**
      * 主动从队列中拉取消息
