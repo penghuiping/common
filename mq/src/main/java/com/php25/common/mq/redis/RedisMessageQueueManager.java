@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
+import com.php25.common.mq.MessageHandler;
 import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.mq.MessageSubscriber;
 import com.php25.common.redis.RList;
@@ -40,31 +41,41 @@ public class RedisMessageQueueManager implements MessageQueueManager {
 
     private final BlockingQueue<String> pipe;
 
+    private final ExecutorService subscriberThreadPool;
+
     public RedisMessageQueueManager(RedisManager redisManager) {
         this.redisManager = redisManager;
         this.singleThreadPool = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
-                new ThreadFactoryBuilder().setNameFormat("redis_message_queue_manager_thread").build());
+                new ThreadFactoryBuilder().setNameFormat("redis-message-queue-manager-thread").build());
+        this.subscriberThreadPool = new ThreadPoolExecutor(20, 20,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadFactoryBuilder().setNameFormat("redis-subscriber-thread-%d").build());
         this.pipe = new LinkedBlockingQueue<>();
         this.helper = new RedisQueueGroupHelper(this.redisManager);
         this.startWorker();
     }
 
     @Override
-    public Boolean subscribe(String queue, MessageSubscriber subscriber) {
-        return this.subscribe(queue, null, subscriber);
+    public Boolean subscribe(String queue, MessageHandler handler) {
+        return this.subscribe(queue, null, handler);
     }
 
     @Override
-    public Boolean subscribe(String queue, String group, MessageSubscriber subscriber) {
+    public Boolean subscribe(String queue, String group, MessageHandler handler) {
         if (StringUtil.isBlank(group)) {
+            MessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
             subscriber.subscribe(queue);
+            subscriber.setHandler(handler);
             return true;
         } else {
             RSet<String> groups = this.helper.groups(queue);
             groups.add(group);
+            MessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
             subscriber.subscribe(queue, group);
+            subscriber.setHandler(handler);
             return true;
         }
     }

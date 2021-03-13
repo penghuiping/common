@@ -14,22 +14,22 @@ public interface MessageQueueManager {
     /**
      * 订阅(队列名)
      *
-     * @param queue      队列名
-     * @param subscriber 消费者
+     * @param queue   队列名
+     * @param handler 消费者回调函数
      * @return true:订阅关系绑定成功
      */
-    Boolean subscribe(String queue, MessageSubscriber subscriber);
+    Boolean subscribe(String queue, MessageHandler handler);
 
 
     /**
      * 订阅(队列名:消费组名)
      *
-     * @param queue      队列名
-     * @param group      消费组名
-     * @param subscriber 消费者
+     * @param queue   队列名
+     * @param group   消费组名
+     * @param handler 消费者回调函数
      * @return true:订阅关系绑定成功
      */
-    Boolean subscribe(String queue, String group, MessageSubscriber subscriber);
+    Boolean subscribe(String queue, String group, MessageHandler handler);
 
     /**
      * 指定队列名,发送消息

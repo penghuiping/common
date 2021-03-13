@@ -36,10 +36,11 @@ public class Timer {
         cache.put(job0.getJobId(), timeout);
     }
 
-    public void stop(String jobId) {
+    public boolean stop(String jobId) {
         Timeout timeout = cache.remove(jobId);
         if (null != timeout) {
-            timeout.cancel();
+            return timeout.cancel();
         }
+        return true;
     }
 }
