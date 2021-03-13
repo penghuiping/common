@@ -49,7 +49,7 @@
         <php-common.redis>2.3.2-SNAPSHOT</php-common.redis>
         <php-common.validation>2.3.2-SNAPSHOT</php-common.validation>
         <php-common.webflux>2.3.2-SNAPSHOT</php-common.webflux>
-        <php-common.time-tasks>2.3.2-SNAPSHOT</php-common.time-tasks>
+        <php-common.timer>2.3.2-SNAPSHOT</php-common.timer>
         <uid-generator>2.3.2-SNAPSHOT</uid-generator>
     </properties>
 
@@ -166,8 +166,8 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
-                <artifactId>time-tasks</artifactId>
-                <version>${php-common.time-tasks}</version>
+                <artifactId>timer</artifactId>
+                <version>${php-common.timer}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>

@@ -15,12 +15,12 @@
         <module>webflux</module>
         <module>redis</module>
         <module>validation</module>
-        <module>time-tasks</module>
         <module>ws</module>
         <module>mq</module>
+        <module>timer</module>
         <module>sample/core-sample</module>
-        <module>sample/time-tasks-sample</module>
         <module>sample/db-sample</module>
+        <module>sample/timer-sample</module>
         <module>sample/redis-sample</module>
         <module>sample/mq-sample</module>
         <module>sample/validation-sample</module>
