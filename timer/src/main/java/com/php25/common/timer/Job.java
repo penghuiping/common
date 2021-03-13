@@ -2,10 +2,8 @@ package com.php25.common.timer;
 
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.RandomUtil;
-import com.php25.common.timer.manager.JobManager;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
-import lombok.extern.log4j.Log4j2;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -14,7 +12,6 @@ import java.util.Date;
  * @author penghuiping
  * @date 2021/3/12 21:23
  */
-@Log4j2
 public class Job implements TimerTask {
     /**
      * 任务执行时间
@@ -75,13 +72,9 @@ public class Job implements TimerTask {
     @Override
     public void run(Timeout timeout) throws Exception {
         Job job0 = (Job) timeout.task();
+        job0.getTask().run();
+        Job job = new Job(job0.getJobId(), this.cron, this.task);
         Timer timer = SpringContextHolder.getBean0(Timer.class);
-        JobManager jobManager = SpringContextHolder.getBean0(JobManager.class);
-        boolean enabled = jobManager.isEnable(job0.getJobId());
-        if (enabled) {
-            job0.getTask().run();
-            Job job = new Job(job0.getJobId(), this.cron, this.task);
-            timer.add(job);
-        }
+        timer.add(job);
     }
 }
