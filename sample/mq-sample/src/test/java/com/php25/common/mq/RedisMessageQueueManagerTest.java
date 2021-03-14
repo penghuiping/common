@@ -2,7 +2,6 @@ package com.php25.common.mq;
 
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.mq.redis.RedisMessageQueueManager;
-import com.php25.common.mq.redis.RedisMessageSubscriber;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.redis.local.LocalRedisManager;
 import org.assertj.core.api.Assertions;
@@ -41,38 +40,27 @@ public class RedisMessageQueueManagerTest {
         int messageNum = 10;
         AtomicLong count = new AtomicLong(0);
         CountDownLatch countDownLatch = new CountDownLatch(messageNum);
-        MessageSubscriber messageSubscriber0 = new RedisMessageSubscriber(pool, redisManager);
-        messageSubscriber0.setHandler(message -> {
+
+        messageQueueManager.subscribe("test_queue", "test_group_0", message -> {
             log.info("messageSubscriber0:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-
-        MessageSubscriber messageSubscriber1 = new RedisMessageSubscriber(pool, redisManager);
-        messageSubscriber1.setHandler(message -> {
+        messageQueueManager.subscribe("test_queue", "test_group_1", message -> {
             log.info("messageSubscriber1:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-
-        MessageSubscriber messageSubscriber2 = new RedisMessageSubscriber(pool, redisManager);
-        messageSubscriber2.setHandler(message -> {
+        messageQueueManager.subscribe("test_queue", "test_group_1", message -> {
             log.info("messageSubscriber2:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-
-        MessageSubscriber messageSubscriber3 = new RedisMessageSubscriber(pool, redisManager);
-        messageSubscriber3.setHandler(message -> {
+        messageQueueManager.subscribe("test_queue", "test_group_0", message -> {
             log.info("messageSubscriber3:{}", JsonUtil.toJson(message));
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-
-        messageQueueManager.subscribe("test_queue", "test_group_0", messageSubscriber0);
-        messageQueueManager.subscribe("test_queue", "test_group_1", messageSubscriber1);
-        messageQueueManager.subscribe("test_queue", "test_group_1", messageSubscriber2);
-        messageQueueManager.subscribe("test_queue", "test_group_0", messageSubscriber3);
 
         pool.submit(() -> {
             for (int i = 0; i < messageNum; i++) {
