@@ -18,6 +18,13 @@ public interface RSortedSet<T> {
     Boolean add(T t, double score);
 
     /**
+     * 返回集合元素数量
+     *
+     * @return 集合元素数量
+     */
+    Long size();
+
+    /**
      * 范围查询
      *
      * @param start 起点位置

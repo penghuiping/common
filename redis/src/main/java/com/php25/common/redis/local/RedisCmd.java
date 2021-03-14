@@ -32,6 +32,17 @@ class RedisCmd {
     public static final String SET_SIZE = "set_size";
     public static final String SET_GET_RANDOM_MEMBER = "set_get_random_member";
 
+    public static final String SORTED_SET_ADD = "sorted_set_add";
+    public static final String SORTED_SET_SIZE = "sorted_set_size";
+    public static final String SORTED_SET_RANGE = "sorted_set_range";
+    public static final String SORTED_SET_REVERSE_RANGE = "sorted_set_reverse_range";
+    public static final String SORTED_SET_RANGE_BY_SCORE = "sorted_set_range_by_score";
+    public static final String SORTED_SET_REVERSE_RANGE_BY_SCORE = "sorted_set_reverse_range_by_score";
+    public static final String SORTED_SET_RANK = "sorted_set_rank";
+    public static final String SORTED_SET_REVERSE_RANK = "sorted_set_reverse_rank";
+    public static final String SORTED_SET_REMOVE_RANGE_BY_SCORE = "sorted_set_remove_range_by_score";
+
+
     public static final String LIST_INIT = "list_init";
     public static final String LIST_RIGHT_PUSH = "list_right_push";
     public static final String LIST_LEFT_PUSH = "list_left_push";

@@ -179,7 +179,7 @@ public class LocalRedisManager implements RedisManager {
 
     @Override
     public <T> RSortedSet<T> zset(String setKey, Class<T> cls) {
-        return null;
+        return new LocalSortedSet<>(setKey, cls, this);
     }
 
     @Override

@@ -4,8 +4,8 @@ import com.php25.common.core.util.JsonUtil;
 import com.php25.common.redis.RSortedSet;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author penghuiping
@@ -33,41 +33,26 @@ public class RSortedSetImpl<T> implements RSortedSet<T> {
     @Override
     public Set<T> range(long start, long end) {
         Set<String> result = redisTemplate.opsForZSet().range(key, start, end);
-        Set<T> resultSet = null;
-        if (null != result && !result.isEmpty()) {
-            resultSet = result.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
-        }
-        return resultSet;
+        return transfer(result);
     }
 
     @Override
     public Set<T> reverseRange(long start, long end) {
         Set<String> result = redisTemplate.opsForZSet().reverseRange(key, start, end);
-        Set<T> resultSet = null;
-        if (null != result && !result.isEmpty()) {
-            resultSet = result.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
-        }
-        return resultSet;
+        return transfer(result);
     }
 
     @Override
     public Set<T> rangeByScore(double min, double max) {
         Set<String> result = redisTemplate.opsForZSet().rangeByScore(key, min, max);
-        Set<T> resultSet = null;
-        if (null != result && !result.isEmpty()) {
-            resultSet = result.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
-        }
-        return resultSet;
+        return transfer(result);
     }
+
 
     @Override
     public Set<T> reverseRangeByScore(double min, double max) {
         Set<String> result = redisTemplate.opsForZSet().reverseRangeByScore(key, min, max);
-        Set<T> resultSet = null;
-        if (null != result && !result.isEmpty()) {
-            resultSet = result.stream().map(s -> JsonUtil.fromJson(s, model)).collect(Collectors.toSet());
-        }
-        return resultSet;
+        return transfer(result);
     }
 
     @Override
@@ -82,6 +67,23 @@ public class RSortedSetImpl<T> implements RSortedSet<T> {
 
     @Override
     public Long removeRangeByScore(double min, double max) {
-        return  redisTemplate.opsForZSet().removeRangeByScore(key,min,max);
+        return redisTemplate.opsForZSet().removeRangeByScore(key, min, max);
+    }
+
+    @Override
+    public Long size() {
+        return redisTemplate.opsForZSet().size(key);
+    }
+
+    private Set<T> transfer(Set<String> values) {
+        if (null == values || values.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        Set<T> res = new LinkedHashSet<>();
+        for (String val : values) {
+            T t = JsonUtil.fromJson(val, model);
+            res.add(t);
+        }
+        return res;
     }
 }
