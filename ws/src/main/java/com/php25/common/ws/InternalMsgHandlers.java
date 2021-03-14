@@ -74,7 +74,8 @@ public class InternalMsgHandlers {
         requestAuthInfo.setCount(requestAuthInfo.getCount() + 1);
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
         requestAuthInfo.setInterval(5000);
-        if (requestAuthInfo.getCount() > 3) {
+        //第5次 断开连接
+        if (requestAuthInfo.getCount() > 4) {
             ConnectionClose connectionClose = new ConnectionClose();
             connectionClose.setMsgId(session.generateUUID());
             connectionClose.setSessionId(msg.sessionId);

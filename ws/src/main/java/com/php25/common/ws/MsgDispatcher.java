@@ -1,5 +1,6 @@
 package com.php25.common.ws;
 
+import com.php25.common.core.mess.SpringContextHolder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,8 +20,12 @@ public class MsgDispatcher {
 
     private final ConcurrentHashMap<String, ReplyAckHandler> ackHandlers = new ConcurrentHashMap<>();
 
-    public void setSession(GlobalSession session) {
-        this.session = session;
+
+    public GlobalSession getSession() {
+        if (session == null) {
+            this.session = SpringContextHolder.getBean0(GlobalSession.class);
+        }
+        return session;
     }
 
     public void dispatch(BaseRetryMsg baseRetry) {
@@ -28,7 +33,7 @@ public class MsgDispatcher {
             String action = baseRetry.getAction();
             MsgHandler<BaseRetryMsg> handler = handlers.get(action);
             if (null != handler) {
-                handler.handle(session, baseRetry);
+                handler.handle(getSession(), baseRetry);
             }
         } catch (Exception e) {
             log.error("发送websocket消息出错", e);
@@ -43,11 +48,11 @@ public class MsgDispatcher {
         ackHandlers.put(action, ackHandler);
     }
 
-    public void dispatchAck(String action,BaseRetryMsg srcMsg) {
+    public void dispatchAck(String action, BaseRetryMsg srcMsg) {
         try {
             ReplyAckHandler replyAckHandler = ackHandlers.get(action);
             if (null != replyAckHandler) {
-                replyAckHandler.handle(session, srcMsg);
+                replyAckHandler.handle(getSession(), srcMsg);
             }
         } catch (Exception e) {
             log.error("发送websocket消息出错", e);

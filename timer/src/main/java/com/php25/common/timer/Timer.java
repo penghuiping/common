@@ -30,6 +30,10 @@ public class Timer {
         this.wheelTimer.stop();
     }
 
+    public Long size() {
+        return this.wheelTimer.pendingTimeouts();
+    }
+
     public void add(Job job) {
         Timeout timeout = this.wheelTimer.newTimeout(job, job.getDelay(), TimeUnit.MILLISECONDS);
         Job job0 = (Job) timeout.task();

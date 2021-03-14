@@ -2,6 +2,7 @@ package com.php25.common.timer;
 
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.RandomUtil;
+import com.php25.common.core.util.StringUtil;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 
@@ -37,6 +38,7 @@ public class Job implements TimerTask {
         this(RandomUtil.randomUUID(), cron, task);
     }
 
+
     public Job(String jobId, String cron, Runnable task) {
         try {
             this.executeTime = new CronExpression(cron).getNextValidTimeAfter(new Date()).getTime();
@@ -46,6 +48,13 @@ public class Job implements TimerTask {
         this.jobId = jobId;
         this.cron = cron;
         this.task = task;
+    }
+
+    public Job(String jobId, long executeTime, Runnable task) {
+        this.executeTime = executeTime;
+        this.jobId = jobId;
+        this.task = task;
+        this.cron = null;
     }
 
 
@@ -73,6 +82,13 @@ public class Job implements TimerTask {
     public void run(Timeout timeout) throws Exception {
         Job job0 = (Job) timeout.task();
         job0.getTask().run();
+        if (StringUtil.isBlank(cron)) {
+            return;
+        }
+        Date date = new CronExpression(cron).getNextValidTimeAfter(new Date());
+        if (null == date) {
+            return;
+        }
         Job job = new Job(job0.getJobId(), this.cron, this.task);
         Timer timer = SpringContextHolder.getBean0(Timer.class);
         timer.add(job);

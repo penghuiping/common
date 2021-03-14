@@ -7,9 +7,6 @@ import com.google.common.base.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
-
 /**
  * 所有需要重发的消息需要继承此抽象类
  *
@@ -20,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Setter
 @Getter
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "action", visible = true)
-public class BaseRetryMsg implements Delayed {
+public class BaseRetryMsg {
 
     /**
      * 重发间隔,单位毫秒,默认0秒
@@ -84,15 +81,5 @@ public class BaseRetryMsg implements Delayed {
     @Override
     public int hashCode() {
         return Objects.hashCode(msgId, action);
-    }
-
-    @Override
-    public long getDelay(TimeUnit unit) {
-        return (interval - (System.currentTimeMillis() - timestamp)) * 1000000;
-    }
-
-    @Override
-    public int compareTo(Delayed o) {
-        return (int) (this.getDelay(TimeUnit.NANOSECONDS) - o.getDelay(TimeUnit.NANOSECONDS));
     }
 }

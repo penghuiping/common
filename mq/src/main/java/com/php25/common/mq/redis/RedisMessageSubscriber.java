@@ -84,7 +84,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                                                 PrintWriter writer = new PrintWriter(byteArrayOutputStream)
                                         ) {
                                             e.printStackTrace(writer);
-                                            String error = byteArrayOutputStream.toString(Charsets.UTF_8);
+                                            String error = byteArrayOutputStream.toString(Charsets.UTF_8.name());
                                             message0.setErrorInfo(error);
                                             dlq.leftPush(message0);
                                         }

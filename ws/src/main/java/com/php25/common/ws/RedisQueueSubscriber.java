@@ -1,6 +1,7 @@
 package com.php25.common.ws;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RList;
@@ -103,8 +104,8 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
      */
     @Scheduled(cron = "0 * * * * ? ")
     public void logStatus() {
-        innerMsgRetryQueue.stats();
-        innerMsgRetryQueue.getGlobalSession().stats();
+        SpringContextHolder.getBean0(InnerMsgRetryQueue.class).stats();
+        SpringContextHolder.getBean0(GlobalSession.class).stats();
     }
 
 }
