@@ -72,6 +72,16 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_SIZE);
         this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_GET_RANDOM_MEMBER);
 
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_ADD);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_SIZE);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANK);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANK);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE_BY_SCORE);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE_BY_SCORE);
+        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REMOVE_RANGE_BY_SCORE);
+
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_INIT);
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_RIGHT_PUSH);
         this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_PUSH);

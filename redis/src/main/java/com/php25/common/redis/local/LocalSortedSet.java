@@ -1,17 +1,11 @@
 package com.php25.common.redis.local;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeMultimap;
-import com.php25.common.core.util.JsonUtil;
 import com.php25.common.redis.RSortedSet;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
@@ -21,8 +15,6 @@ public class LocalSortedSet<T> implements RSortedSet<T> {
 
     private final String setKey;
 
-    private final TreeMultimap<Double, String> treeMap;
-
     private final LocalRedisManager redisManager;
 
     private final Class<T> cls;
@@ -31,122 +23,118 @@ public class LocalSortedSet<T> implements RSortedSet<T> {
         this.setKey = setKey;
         this.cls = cls;
         this.redisManager = redisManager;
-        this.treeMap = TreeMultimap.create();
     }
 
     @Override
-    public Boolean add(T t, double score) {
-        treeMap.put(score, JsonUtil.toJson(t));
+    public Boolean add(T element, double score) {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_ADD, Lists.newArrayList(this.setKey, score, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
         return true;
     }
 
     @Override
     public Long size() {
-        return (long) treeMap.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_SIZE, Lists.newArrayList(this.setKey));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Set<T> range(long start, long end) {
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = treeMap.asMap().entrySet().iterator();
-        int count = 0;
-        Set<T> res = new LinkedHashSet<>();
-        while (iterator.hasNext() && count <= end) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            Collection<String> values = entry.getValue();
-            for (String value : values) {
-                if (count >= start && count <= end) {
-                    res.add(JsonUtil.fromJson(value, cls));
-                    count++;
-                }
-            }
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_RANGE, Lists.newArrayList(this.setKey, this.cls, start, end));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
         }
-        return res;
     }
 
     @Override
     public Set<T> reverseRange(long start, long end) {
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = treeMap.asMap().descendingMap().entrySet().iterator();
-        int count = 0;
-        Set<T> res = new LinkedHashSet<>();
-        while (iterator.hasNext() && count <= end) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            List<String> values = Lists.newArrayList(entry.getValue());
-            for (int i = values.size() - 1; i >= 0; i--) {
-                String value = values.get(i);
-                if (count >= start && count <= end) {
-                    res.add(JsonUtil.fromJson(value, cls));
-                    count++;
-                }
-            }
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_REVERSE_RANGE, Lists.newArrayList(this.setKey, this.cls, start, end));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
         }
-        return res;
     }
 
     @Override
     public Set<T> rangeByScore(double min, double max) {
-        SortedMap<Double, Collection<String>> map = treeMap.asMap().subMap(min, true, max, true);
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = map.entrySet().iterator();
-        Set<T> res = new LinkedHashSet<>();
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            Collection<String> values = entry.getValue();
-            for (String value : values) {
-                res.add(JsonUtil.fromJson(value, cls));
-            }
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_RANGE_BY_SCORE, Lists.newArrayList(this.setKey, this.cls, min, max));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
         }
-        return res;
     }
 
     @Override
     public Set<T> reverseRangeByScore(double min, double max) {
-        SortedMap<Double, Collection<String>> map = treeMap.asMap().descendingMap().subMap(max, true, min, true);
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = map.entrySet().iterator();
-        Set<T> res = new LinkedHashSet<>();
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            List<String> values = Lists.newArrayList(entry.getValue());
-            for (int i = values.size() - 1; i >= 0; i--) {
-                String value = values.get(i);
-                res.add(JsonUtil.fromJson(value, cls));
-            }
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_REVERSE_RANGE_BY_SCORE, Lists.newArrayList(this.setKey, this.cls, min, max));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return (Set<T>) res.get();
+        } else {
+            return null;
         }
-        return res;
     }
 
     @Override
-    public Long rank(T t) {
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = treeMap.asMap().entrySet().iterator();
-        long count = 0;
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            List<String> values = Lists.newArrayList(entry.getValue());
-            for (String value : values) {
-                T val = JsonUtil.fromJson(value, cls);
-                if (t.equals(val)) {
-                    return count;
-                }
-                ++count;
-            }
+    public Long rank(T element) {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_RANK, Lists.newArrayList(this.setKey, this.cls, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
         }
-        return count;
     }
 
     @Override
-    public Long reverseRank(T t) {
-        return (this.size() - 1) - rank(t);
+    public Long reverseRank(T element) {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_REVERSE_RANK, Lists.newArrayList(this.setKey, this.cls, element));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Long removeRangeByScore(double min, double max) {
-        SortedMap<Double, Collection<String>> map = treeMap.asMap().subMap(min, true, max, true);
-        Iterator<Map.Entry<Double, Collection<String>>> iterator = map.entrySet().iterator();
-        long count = 0L;
-        while (iterator.hasNext()) {
-            Map.Entry<Double, Collection<String>> entry = iterator.next();
-            iterator.remove();
-            Collection<String> values = entry.getValue();
-            count = count + values.size();
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.SORTED_SET_REMOVE_RANGE_BY_SCORE, Lists.newArrayList(this.setKey, min, max));
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisManager.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        Optional<Object> res = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+        if (res.isPresent()) {
+            return Long.parseLong(res.get().toString());
+        } else {
+            return null;
         }
-        return count;
     }
 }
