@@ -47,4 +47,8 @@ public class Timer {
         }
         return true;
     }
+
+    void removeCache(String jobId) {
+        cache.remove(jobId);
+    }
 }

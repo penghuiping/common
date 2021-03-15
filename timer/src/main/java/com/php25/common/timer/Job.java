@@ -82,6 +82,8 @@ public class Job implements TimerTask {
     public void run(Timeout timeout) throws Exception {
         Job job0 = (Job) timeout.task();
         job0.getTask().run();
+        Timer timer = SpringContextHolder.getBean0(Timer.class);
+        timer.removeCache(jobId);
         if (StringUtil.isBlank(cron)) {
             return;
         }
@@ -90,7 +92,6 @@ public class Job implements TimerTask {
             return;
         }
         Job job = new Job(job0.getJobId(), this.cron, this.task);
-        Timer timer = SpringContextHolder.getBean0(Timer.class);
         timer.add(job);
     }
 }
