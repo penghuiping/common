@@ -34,7 +34,7 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
 
     private ExecutorService singleThreadExecutor;
 
-    private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public RedisQueueSubscriber(RedisManager redisService, String serverId, InnerMsgRetryQueue innerMsgRetryQueue) {
         this.redisService = redisService;
@@ -46,24 +46,31 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         registerRedisQueue();
+        this.singleThreadExecutor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("ws-redis-queue-subscriber-%d")
+                        .build());
+        isRunning.compareAndSet(false, true);
         this.run();
     }
 
 
     @Override
     public void destroy() throws Exception {
-        isRunning.compareAndSet(true,false);
-        this.singleThreadExecutor.shutdown();
+        try {
+            isRunning.compareAndSet(true, false);
+            boolean res = this.singleThreadExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            if (res) {
+                log.info("关闭ws:RedisQueueSubscriber成功");
+            }
+        } catch (Exception e) {
+            log.error("关闭ws:RedisQueueSubscriber出错", e);
+        }
         unRegisterRedisQueue();
     }
 
     public void run() {
-        this.singleThreadExecutor = new ThreadPoolExecutor(1, 1,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactoryBuilder().setNameFormat("ws-redis-queue-subscriber-%d")
-                        .build());
-
         this.singleThreadExecutor.execute(() -> {
             while (isRunning.get()) {
                 try {

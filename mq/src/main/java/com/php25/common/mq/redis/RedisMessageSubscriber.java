@@ -65,6 +65,10 @@ public class RedisMessageSubscriber implements MessageSubscriber {
         isRunning.compareAndSet(true, false);
     }
 
+    public boolean isStop() {
+        return !isRunning.get();
+    }
+
     public void start() {
         if (null == this.threadFuture || this.threadFuture.isDone()) {
             synchronized (this) {
@@ -72,7 +76,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                     this.threadFuture = executorService.submit(() -> {
                         while (isRunning.get()) {
                             try {
-                                Message message0 = pipe.blockRightPop(30, TimeUnit.SECONDS);
+                                Message message0 = pipe.blockRightPop(1, TimeUnit.SECONDS);
                                 if (null != message0) {
                                     try {
                                         this.handler.handle(message0);

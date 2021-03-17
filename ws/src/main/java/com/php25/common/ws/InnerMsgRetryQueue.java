@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 消息重发器,此类用于实现延时消息重发
@@ -39,6 +40,8 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
     private GlobalSession globalSession;
 
     private Timer delayQueue;
+
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public InnerMsgRetryQueue() {
         msgs = CacheBuilder.newBuilder().initialCapacity(8196)
@@ -63,23 +66,31 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() {
-        this.singleThreadExecutorNoDelay.shutdown();
+        try {
+            isRunning.compareAndSet(true, false);
+            boolean res = this.singleThreadExecutorNoDelay.awaitTermination(1, TimeUnit.SECONDS);
+            if (res) {
+                log.info("关闭ws:singleThreadExecutorNoDelay成功");
+            }
+        } catch (Exception e) {
+            log.error("关闭ws:singleThreadExecutorNoDelay出错", e);
+        }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        run();
-    }
-
-    public void run() {
         this.singleThreadExecutorNoDelay = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new ThreadFactoryBuilder().setNameFormat("ws-delay-queue-nodelay-subscriber-%d")
                         .build());
+        isRunning.compareAndSet(false, true);
+        run();
+    }
 
+    public void run() {
         this.singleThreadExecutorNoDelay.execute(() -> {
-            while (true) {
+            while (isRunning.get()) {
                 BaseRetryMsg msg = null;
                 try {
                     msg = noDelayQueue.poll(2, TimeUnit.SECONDS);

@@ -6,13 +6,15 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
 import com.php25.common.mq.MessageQueueManager;
-import com.php25.common.mq.MessageSubscriber;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -30,21 +33,30 @@ import java.util.concurrent.TimeUnit;
  * @author penghuiping
  * @date 2021/3/10 20:55
  */
-public class RedisMessageQueueManager implements MessageQueueManager {
+public class RedisMessageQueueManager implements MessageQueueManager, InitializingBean, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(RedisMessageQueueManager.class);
 
     private final RedisManager redisManager;
 
-    private final ExecutorService singleThreadPool;
 
     private final RedisQueueGroupHelper helper;
 
     private final BlockingQueue<String> pipe;
 
-    private final ExecutorService subscriberThreadPool;
+    private final List<RedisMessageSubscriber> subscribers;
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private ExecutorService singleThreadPool;
+    private ExecutorService subscriberThreadPool;
 
     public RedisMessageQueueManager(RedisManager redisManager) {
         this.redisManager = redisManager;
+        this.pipe = new LinkedBlockingQueue<>();
+        this.helper = new RedisQueueGroupHelper(this.redisManager);
+        this.subscribers = new ArrayList<>();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         this.singleThreadPool = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
@@ -53,9 +65,32 @@ public class RedisMessageQueueManager implements MessageQueueManager {
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-subscriber-thread-%d").build());
-        this.pipe = new LinkedBlockingQueue<>();
-        this.helper = new RedisQueueGroupHelper(this.redisManager);
         this.startWorker();
+    }
+
+    @Override
+    public void destroy() {
+        for (RedisMessageSubscriber subscriber : this.subscribers) {
+            subscriber.stop();
+        }
+        this.isRunning.compareAndSet(true, false);
+        try {
+            boolean res = this.subscriberThreadPool.awaitTermination(1, TimeUnit.SECONDS);
+            if (res) {
+                log.info("mq:subscriberThreadPool关闭成功");
+            }
+        } catch (Exception e) {
+            log.error("mq:subscriberThreadPool关闭出错", e);
+        }
+
+        try {
+            boolean res = this.singleThreadPool.awaitTermination(1, TimeUnit.SECONDS);
+            if (res) {
+                log.info("mq:RedisMessageQueueManager:singleThreadPool关闭成功");
+            }
+        } catch (Exception e) {
+            log.error("mq:RedisMessageQueueManager:singleThreadPool关闭出错", e);
+        }
     }
 
     @Override
@@ -66,16 +101,18 @@ public class RedisMessageQueueManager implements MessageQueueManager {
     @Override
     public Boolean subscribe(String queue, String group, MessageHandler handler) {
         if (StringUtil.isBlank(group)) {
-            MessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
+            RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
             subscriber.subscribe(queue);
             subscriber.setHandler(handler);
+            this.subscribers.add(subscriber);
             return true;
         } else {
             RSet<String> groups = this.helper.groups(queue);
             groups.add(group);
-            MessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
+            RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
             subscriber.subscribe(queue, group);
             subscriber.setHandler(handler);
+            this.subscribers.add(subscriber);
             return true;
         }
     }
@@ -95,10 +132,11 @@ public class RedisMessageQueueManager implements MessageQueueManager {
     }
 
     private void startWorker() {
+        this.isRunning.compareAndSet(false, true);
         this.singleThreadPool.submit(() -> {
-            while (true) {
+            while (this.isRunning.get()) {
                 try {
-                    String queue = this.pipe.poll(60, TimeUnit.SECONDS);
+                    String queue = this.pipe.poll(1, TimeUnit.SECONDS);
                     if (!StringUtil.isBlank(queue)) {
                         RSet<String> groups = this.helper.groups(queue);
                         if (groups.size() > 0) {
@@ -113,8 +151,8 @@ public class RedisMessageQueueManager implements MessageQueueManager {
                 } catch (Exception e) {
                     log.error("分发队列的消息给组出错!", e);
                 }
-
             }
+            log.info("mq:RedisMessageQueueManager:singleThreadPool回收");
         });
     }
 
