@@ -16,6 +16,9 @@ public class Message {
 
     private Object body;
 
+    public Message() {
+    }
+
     public Message(String id, String queue, Object body) {
         this(id, queue, null, body);
     }

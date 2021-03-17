@@ -18,7 +18,7 @@ import java.util.GregorianCalendar;
  */
 public abstract class TimeUtil {
 
-    public static final String STD_FORMAT = "yyyy-MM-dd hh:mm:ss";
+    public static final String STD_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * 把日期类型的字符串，转换成日期类型
@@ -29,6 +29,17 @@ public abstract class TimeUtil {
      */
     public static Date parseDate(String dateStr, DateTimeFormatter dateTimeFormatter) {
         return Date.from(LocalDateTime.parse(dateStr, dateTimeFormatter).toInstant(ZoneOffset.ofHours(8)));
+    }
+
+    /**
+     * 把日期类型的字符串，转换成日期类型
+     *
+     * @param dateStr           日期字符串 如:"2020-10-01"
+     * @param dateTimeFormatter 解析的日期格式 如:"yyyy-MM-dd"
+     * @return 日期时间
+     */
+    public static LocalDateTime parseDateString(String dateStr, DateTimeFormatter dateTimeFormatter) {
+        return LocalDateTime.parse(dateStr, dateTimeFormatter);
     }
 
     /**

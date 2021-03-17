@@ -3,6 +3,7 @@ package com.php25.common.core.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 字符串帮助类
@@ -19,6 +20,16 @@ public abstract class StringUtil {
      */
     public static boolean isBlank(String str) {
         return (str == null || str.trim().length() == 0);
+    }
+
+    /**
+     * 如果字符串不为为null或者""或者"  "都返回true
+     *
+     * @param str 字符串
+     * @return
+     */
+    public static boolean isNotBlank(String str) {
+        return !isBlank(str);
     }
 
     /**
@@ -137,11 +148,7 @@ public abstract class StringUtil {
      */
     public static String utf8Encode(String str) {
         if (!isEmpty(str) && str.getBytes().length != str.length()) {
-            try {
-                return URLEncoder.encode(str, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException("UnsupportedEncodingException occurred. ", e);
-            }
+            return URLEncoder.encode(str, StandardCharsets.UTF_8);
         }
         return str;
     }
@@ -155,11 +162,7 @@ public abstract class StringUtil {
      */
     public static String utf8Encode(String str, String defaultReturn) {
         if (!isEmpty(str) && str.getBytes().length != str.length()) {
-            try {
-                return URLEncoder.encode(str, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                return defaultReturn;
-            }
+            return URLEncoder.encode(str, StandardCharsets.UTF_8);
         }
         return str;
     }
