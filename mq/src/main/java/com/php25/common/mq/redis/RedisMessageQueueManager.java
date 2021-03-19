@@ -44,9 +44,12 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
     private final BlockingQueue<String> pipe;
 
     private final List<RedisMessageSubscriber> subscribers;
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
     private ExecutorService singleThreadPool;
+
     private ExecutorService subscriberThreadPool;
+
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public RedisMessageQueueManager(RedisManager redisManager) {
         this.redisManager = redisManager;
@@ -108,13 +111,18 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
             return true;
         } else {
             RSet<String> groups = this.helper.groups(queue);
-            groups.add(group);
+            String group0 = this.groupName(queue, group);
+            groups.add(group0);
             RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
-            subscriber.subscribe(queue, group);
+            subscriber.subscribe(queue, group0);
             subscriber.setHandler(handler);
             this.subscribers.add(subscriber);
             return true;
         }
+    }
+
+    private String groupName(String queue, String group) {
+        return queue + ":" + group;
     }
 
     @Override
@@ -127,7 +135,7 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
         if (StringUtil.isBlank(group)) {
             return this.helper.remove(queue);
         } else {
-            return this.helper.remove(queue, group);
+            return this.helper.remove(queue, this.groupName(queue, group));
         }
     }
 
@@ -174,7 +182,7 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
     @Override
     public Boolean send(String queue, String group, Message message) {
         if (!StringUtil.isBlank(group)) {
-            RList<Message> messages = this.helper.group(group);
+            RList<Message> messages = this.helper.group(this.groupName(queue, group));
             messages.leftPush(message);
             return true;
         } else {

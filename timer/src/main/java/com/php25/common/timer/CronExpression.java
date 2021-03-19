@@ -261,7 +261,7 @@ public final class CronExpression implements Serializable, Cloneable {
      * @param cronExpression String representation of the cron expression the
      *                       new object should represent
      * @throws ParseException if the string expression cannot be parsed into a valid
-     *                        <CODE>CronExpression</CODE>
+     *                                  <CODE>CronExpression</CODE>
      */
     public CronExpression(String cronExpression) throws ParseException {
         if (cronExpression == null) {

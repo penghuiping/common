@@ -1,6 +1,8 @@
 package com.php25.common.timer;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.php25.common.core.mess.SpringContextHolder;
+import com.php25.common.timer.model.TimerInnerLog;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 
@@ -35,13 +37,25 @@ public class Timer {
     }
 
     public void add(Job job) {
-        Timeout timeout = this.wheelTimer.newTimeout(job, job.getDelay(), TimeUnit.MILLISECONDS);
-        Job job0 = (Job) timeout.task();
-        cache.put(job0.getJobId(), timeout);
+        add(job, false);
     }
 
-    public boolean stop(String jobId) {
-        Timeout timeout = cache.remove(jobId);
+    public void add(Job job, Boolean isHighAvailable) {
+        Timeout timeout = this.wheelTimer.newTimeout(job, job.getDelay(), TimeUnit.MILLISECONDS);
+        Job job0 = (Job) timeout.task();
+        cache.put(job0.getJobExecutionId(), timeout);
+        if (isHighAvailable) {
+            TimerInnerLogManager jobExecutionLogManager = SpringContextHolder.getBean0(TimerInnerLogManager.class);
+            TimerInnerLog jobExecutionLog = new TimerInnerLog();
+            jobExecutionLog.setId(job.getJobExecutionId());
+            jobExecutionLog.setExecutionTime(job.getExecuteTime());
+            jobExecutionLog.setStatus(0);
+            jobExecutionLogManager.create(jobExecutionLog);
+        }
+    }
+
+    public boolean stop(String jobExecutionId) {
+        Timeout timeout = cache.remove(jobExecutionId);
         if (null != timeout) {
             return timeout.cancel();
         }

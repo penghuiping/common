@@ -2,7 +2,6 @@ package com.php25.common.timer;
 
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.RandomUtil;
-import com.php25.common.core.util.StringUtil;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 
@@ -20,9 +19,9 @@ public class Job implements TimerTask {
     private final long executeTime;
 
     /**
-     * 此任务
+     * 此任务执行id
      */
-    private final String jobId;
+    private final String jobExecutionId;
 
     /**
      * cron表达式
@@ -39,20 +38,20 @@ public class Job implements TimerTask {
     }
 
 
-    public Job(String jobId, String cron, Runnable task) {
+    public Job(String jobExecutionId, String cron, Runnable task) {
         try {
             this.executeTime = new CronExpression(cron).getNextValidTimeAfter(new Date()).getTime();
         } catch (ParseException e) {
             throw new CronException("cron 表达式不正确", e);
         }
-        this.jobId = jobId;
+        this.jobExecutionId = jobExecutionId;
         this.cron = cron;
         this.task = task;
     }
 
-    public Job(String jobId, long executeTime, Runnable task) {
+    public Job(String jobExecutionId, long executeTime, Runnable task) {
         this.executeTime = executeTime;
-        this.jobId = jobId;
+        this.jobExecutionId = jobExecutionId;
         this.task = task;
         this.cron = null;
     }
@@ -62,8 +61,8 @@ public class Job implements TimerTask {
         return executeTime;
     }
 
-    public String getJobId() {
-        return jobId;
+    public String getJobExecutionId() {
+        return jobExecutionId;
     }
 
     public String getCron() {
@@ -81,17 +80,7 @@ public class Job implements TimerTask {
     @Override
     public void run(Timeout timeout) throws Exception {
         Job job0 = (Job) timeout.task();
-        job0.getTask().run();
-        Timer timer = SpringContextHolder.getBean0(Timer.class);
-        timer.removeCache(jobId);
-        if (StringUtil.isBlank(cron)) {
-            return;
-        }
-        Date date = new CronExpression(cron).getNextValidTimeAfter(new Date());
-        if (null == date) {
-            return;
-        }
-        Job job = new Job(job0.getJobId(), this.cron, this.task);
-        timer.add(job);
+        TimerInnerLogManager jobExecutionLogManager = SpringContextHolder.getBean0(TimerInnerLogManager.class);
+        jobExecutionLogManager.synchronizedExecutionJob(job0);
     }
 }
