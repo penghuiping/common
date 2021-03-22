@@ -1,18 +1,16 @@
 package com.php25.common.mq;
 
 import com.php25.common.core.util.RandomUtil;
-import com.php25.common.mq.redis.RedisMessageQueueManager;
-import com.php25.common.redis.RedisManager;
-import com.php25.common.redis.impl.RedisManagerImpl;
+import com.php25.common.mq.rabbit.RabbitMessageListener;
+import com.php25.common.mq.rabbit.RabbitMessageQueueManager;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -21,40 +19,45 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author penghuiping
- * @date 2021/3/11 09:09
+ * @date 2021/3/20 19:57
  */
-public class RedisMessageQueueManagerTest {
-    private static final Logger log = LoggerFactory.getLogger(RedisMessageQueueManagerTest.class);
+public class RabbitMessageQueueManagerTest {
 
-    private RedisManager redisManager;
+    private static final Logger log = LoggerFactory.getLogger(RabbitMessageQueueManagerTest.class);
+
+    private CachingConnectionFactory connectionFactory;
 
     private MessageQueueManager messageQueueManager;
+
+    private RabbitTemplate rabbitTemplate;
 
     private ExecutorService pool;
 
     @Before
-    public void before() throws Exception {
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setDatabase(0);
-        redisStandaloneConfiguration.setHostName("localhost");
-        redisStandaloneConfiguration.setPort(36379);
-        redisStandaloneConfiguration.setPassword("");
-        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);
-        connectionFactory.afterPropertiesSet();
-        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate(connectionFactory);
-        this.redisManager = new RedisManagerImpl(stringRedisTemplate);
-        RedisMessageQueueManager redisMessageQueueManager = new RedisMessageQueueManager(redisManager);
-        redisMessageQueueManager.afterPropertiesSet();
-        this.messageQueueManager = redisMessageQueueManager;
+    public void before() {
         this.pool = Executors.newFixedThreadPool(10);
+
+        this.connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setAddresses("127.0.0.1:5672");
+        connectionFactory.setUsername("guest");
+        connectionFactory.setPassword("guest");
+        connectionFactory.setVirtualHost("/");
+        connectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.SIMPLE);
+
+        this.rabbitTemplate = new RabbitTemplate(connectionFactory);
+        RabbitMessageListener listener = new RabbitMessageListener(this.rabbitTemplate);
+        this.messageQueueManager = new RabbitMessageQueueManager(this.rabbitTemplate, listener);
     }
 
     @After
     public void after() {
         this.messageQueueManager.delete("test", "Math");
         this.messageQueueManager.delete("test", "Chinese");
-        this.messageQueueManager.delete("test0", "Math");
-        this.messageQueueManager.delete("test0", "Chinese");
+        this.messageQueueManager.delete("test0", "Math0");
+        this.messageQueueManager.delete("test0", "Chinese0");
+        this.messageQueueManager.delete("test");
+        this.messageQueueManager.delete("test0");
+
         this.messageQueueManager.delete("visitor");
         this.messageQueueManager.delete("price");
     }
@@ -89,18 +92,18 @@ public class RedisMessageQueueManagerTest {
         AtomicLong count = new AtomicLong(0);
         CountDownLatch countDownLatch = new CountDownLatch(messageNum);
 
-        messageQueueManager.subscribe("test0", "Math", message -> {
+        messageQueueManager.subscribe("test0", "Math0", message -> {
             log.info("Math testers:{}", message.getBody());
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-        messageQueueManager.subscribe("test0", "Chinese", message -> {
+        messageQueueManager.subscribe("test0", "Chinese0", message -> {
             log.info("Chinese testers:{}", message.getBody());
             count.incrementAndGet();
             countDownLatch.countDown();
         });
 
-        messageQueueManager.send("test0", "Math", new Message(RandomUtil.randomUUID(), "Math test has changed to be hold tomorrow"));
+        messageQueueManager.send("test0", "Math0", new Message(RandomUtil.randomUUID(), "Math test has changed to be hold tomorrow"));
         countDownLatch.await();
         Assertions.assertThat(count.get()).isEqualTo(messageNum);
     }
@@ -134,4 +137,5 @@ public class RedisMessageQueueManagerTest {
         countDownLatch.countDown();
         countDownLatch.await();
     }
+
 }

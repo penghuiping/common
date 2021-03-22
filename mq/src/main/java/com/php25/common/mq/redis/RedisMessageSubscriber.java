@@ -83,14 +83,16 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                                     } catch (Exception e) {
                                         log.error("处理消息出错,msgId:{}", message0.getId(), e);
                                         RList<Message> dlq = this.helper.dlq(message0.getQueue());
-                                        try (
-                                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                                PrintWriter writer = new PrintWriter(byteArrayOutputStream)
-                                        ) {
-                                            e.printStackTrace(writer);
-                                            String error = byteArrayOutputStream.toString(Charsets.UTF_8.name());
-                                            message0.setErrorInfo(error);
-                                            dlq.leftPush(message0);
+                                        if (null != dlq) {
+                                            try (
+                                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                                    PrintWriter writer = new PrintWriter(byteArrayOutputStream)
+                                            ) {
+                                                e.printStackTrace(writer);
+                                                String error = byteArrayOutputStream.toString(Charsets.UTF_8.name());
+                                                message0.setErrorInfo(error);
+                                                dlq.leftPush(message0);
+                                            }
                                         }
                                     }
                                 }

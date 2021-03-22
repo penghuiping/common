@@ -7,7 +7,8 @@ package com.php25.common.flux.web;
 
 import com.google.common.base.Charsets;
 import com.php25.common.core.exception.Exceptions;
-import org.hibernate.validator.internal.constraintvalidators.hv.SafeHtmlValidator;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -23,7 +24,6 @@ import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-
 
 /**
  * @author penghuiping
@@ -42,7 +42,6 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
         InputStream inputStream = inputMessage.getBody();
         ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
         ByteBuffer buff = ByteBuffer.allocate(512);
-
         StringBuilder content = new StringBuilder();
         while (true) {
             buff.clear();
@@ -52,11 +51,9 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             }
             content.append(new String(buff.array(), 0, buff.position(), Charsets.ISO_8859_1));
         }
-
         String result1=  new String(content.toString().getBytes(Charsets.ISO_8859_1),Charsets.UTF_8);
         log.info("request body:{}", result1);
-        SafeHtmlValidator safeHtmlValidator = initializeValidator();
-        boolean result = safeHtmlValidator.isValid(content.toString(), null);
+        boolean result = Jsoup.isValid(content.toString(), Whitelist.basicWithImages());
         if (result) {
             return new HttpInputMessage() {
                 @Override
@@ -73,7 +70,5 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             throw Exceptions.throwBusinessException("999999", "requestBody存在不安全的html内容");
         }
     }
-
-    public abstract SafeHtmlValidator initializeValidator();
 }
 

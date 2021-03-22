@@ -68,7 +68,7 @@ class RedisQueueGroupHelper {
 
     public Boolean remove(String queue, String group) {
         AssertUtil.hasText(queue, "queue不能为空");
-        if (!StringUtil.isBlank(group)) {
+        if (StringUtil.isNotBlank(group)) {
             this.redisManager.remove(RedisConstant.GROUP_PREFIX + group);
             RSet<String> rSet = this.groups(queue);
             rSet.remove(group);
@@ -76,18 +76,21 @@ class RedisQueueGroupHelper {
         }
 
         RSet<String> groups = this.groups(queue);
-        for (String group0 : groups.members()) {
-            this.redisManager.remove(RedisConstant.GROUP_PREFIX + group0);
+        if (null != groups && null != groups.members()) {
+            for (String group0 : groups.members()) {
+                this.redisManager.remove(RedisConstant.GROUP_PREFIX + group0);
+            }
+            this.redisManager.remove(RedisConstant.QUEUE_GROUPS_PREFIX + queue);
+            this.redisManager.remove(RedisConstant.QUEUE_PREFIX + queue);
+            this.redisManager.remove(RedisConstant.QUEUE_DLQ_PREFIX + queue);
         }
-        this.redisManager.remove(RedisConstant.QUEUE_GROUPS_PREFIX + queue);
-        this.redisManager.remove(RedisConstant.QUEUE_PREFIX + queue);
         return true;
     }
 
 
     /**
      * 根据队列名获取死信队列
-     * 1. 如果没有绑定死信队列,
+     * 如果没有绑定死信队列,则返回null
      *
      * @param queue 队列名
      * @return 死信队列
@@ -96,8 +99,19 @@ class RedisQueueGroupHelper {
         AssertUtil.hasText(queue, "queue不能为空");
         String dlq = this.redisManager.string().get(RedisConstant.QUEUE_DLQ_PREFIX + queue, String.class);
         if (StringUtil.isBlank(dlq)) {
-            return this.redisManager.list(RedisConstant.DLQ_DEFAULT, Message.class);
+            return null;
         }
+        return this.redisManager.list(RedisConstant.DLQ_PREFIX + dlq, Message.class);
+    }
+
+    /**
+     * 直接通过死信队列名获取队列
+     *
+     * @param dlq 死信队列名
+     * @return 死信队列
+     */
+    public RList<Message> dlq0(String dlq) {
+        AssertUtil.hasText(dlq, "dlq不能为空");
         return this.redisManager.list(RedisConstant.DLQ_PREFIX + dlq, Message.class);
     }
 

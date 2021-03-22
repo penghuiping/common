@@ -19,17 +19,10 @@ public class Message {
     public Message() {
     }
 
-    public Message(String id, String queue, Object body) {
-        this(id, queue, null, body);
-    }
-
-    public Message(String id, String queue, String group, Object body) {
+    public Message(String id, Object body) {
         this.setId(id);
-        this.setQueue(queue);
-        this.setGroup(group);
         this.body = body;
     }
-
 
     public Map<String, Object> getHeaders() {
         return headers;

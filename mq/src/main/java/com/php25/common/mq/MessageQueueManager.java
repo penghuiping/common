@@ -1,8 +1,6 @@
 package com.php25.common.mq;
 
 
-import java.util.List;
-
 /**
  * 消息队列相关操作
  *
@@ -50,6 +48,15 @@ public interface MessageQueueManager {
      */
     Boolean send(String queue, String group, Message message);
 
+
+    /**
+     * 删除指定队列
+     *
+     * @param queue 队列名
+     * @return true: 表示删除成功
+     */
+    Boolean delete(String queue);
+
     /**
      * 删除指定队列与组
      *
@@ -60,26 +67,20 @@ public interface MessageQueueManager {
     Boolean delete(String queue, String group);
 
     /**
-     * 主动从队列中拉取消息
+     * 主动从死信队列中拉取消息
      *
-     * @param queue 队列名
+     * @param queue   原队列名
+     * @param timeout 超时时间单位(毫秒)
      * @return 消息
      */
-    Message pull(String queue);
+    Message pullDlq(String queue, Long timeout);
 
     /**
      * 给某个队列绑定死信队列
+     * 绑定的死信队列为  (原队列名_dlq)
      *
      * @param queue 队列名
-     * @param dlq   死信队列名
      * @return true: 绑定成功
      */
-    Boolean bindDeadLetterQueue(String queue, String dlq);
-
-    /**
-     * 获取系统中所有队列
-     *
-     * @return 系统中目前所有的队列名
-     */
-    List<String> queues();
+    Boolean bindDeadLetterQueue(String queue);
 }
