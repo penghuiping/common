@@ -15,6 +15,8 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.DirectMessageListenerContainer;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.HashMap;
 
@@ -22,7 +24,7 @@ import java.util.HashMap;
  * @author penghuiping
  * @date 2021/3/10 20:55
  */
-public class RabbitMessageQueueManager implements MessageQueueManager {
+public class RabbitMessageQueueManager implements MessageQueueManager, InitializingBean, DisposableBean {
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -41,9 +43,17 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
         this.listenerContainer.setMessageListener(this.messageListener);
         this.listenerContainer.setConsumersPerQueue(1);
         this.listenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         this.listenerContainer.start();
     }
 
+    @Override
+    public void destroy() throws Exception {
+        this.listenerContainer.stop();
+    }
 
     @Override
     public Boolean subscribe(String queue, MessageHandler handler) {
@@ -52,13 +62,18 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
 
     @Override
     public Boolean subscribe(String queue, String group, MessageHandler handler) {
+        return this.subscribe(queue, group, false, handler);
+    }
+
+    @Override
+    public Boolean subscribe(String queue, String group, Boolean autoDelete, MessageHandler handler) {
         String directQueue = RabbitQueueGroupHelper.getDirectQueueName(queue);
         String fanoutQueue = RabbitQueueGroupHelper.getFanoutQueueName(queue);
-        String group0 = RabbitQueueGroupHelper.getGroupName(group);
+        String group0 = RabbitQueueGroupHelper.getGroupName(groupName(queue, group));
 
         this.rabbitAdmin.declareExchange(new DirectExchange(directQueue));
         this.rabbitAdmin.declareExchange(new FanoutExchange(fanoutQueue));
-        this.rabbitAdmin.declareQueue(new Queue(group0));
+        this.rabbitAdmin.declareQueue(new Queue(group0, true, false, autoDelete));
         this.rabbitAdmin.declareBinding(new Binding(group0,
                 Binding.DestinationType.QUEUE,
                 directQueue,
@@ -72,6 +87,10 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
         messageListener.addHandler(queue, group, handler);
         this.listenerContainer.addQueueNames(group0);
         return true;
+    }
+
+    private String groupName(String queue, String group) {
+        return queue + ":" + group;
     }
 
     @Override
@@ -93,7 +112,7 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
         } else {
             rabbitTemplate.convertAndSend(
                     RabbitQueueGroupHelper.getDirectQueueName(queue),
-                    RabbitQueueGroupHelper.getGroupName(group),
+                    RabbitQueueGroupHelper.getGroupName(groupName(queue, group)),
                     JsonUtil.toJson(message));
         }
         return true;
@@ -113,7 +132,7 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
     public Boolean delete(String queue, String group) {
         AssertUtil.hasText(queue, "queue不能为空");
         AssertUtil.hasText(group, "group不能为空");
-        rabbitAdmin.deleteQueue(RabbitQueueGroupHelper.getGroupName(group));
+        rabbitAdmin.deleteQueue(RabbitQueueGroupHelper.getGroupName(groupName(queue, group)));
         return true;
     }
 
@@ -121,7 +140,7 @@ public class RabbitMessageQueueManager implements MessageQueueManager {
     public Message pullDlq(String queue, Long timeout) {
         String queueName = RabbitQueueGroupHelper.getDlq(queue);
         org.springframework.amqp.core.Message message = rabbitTemplate.receive(queueName, timeout);
-        return JsonUtil.fromJson(new String(message.getBody(), Charsets.UTF_8), com.php25.common.mq.Message.class);
+        return JsonUtil.fromJson(new String(message.getBody(), Charsets.UTF_8), Message.class);
     }
 
     @Override

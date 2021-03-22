@@ -49,8 +49,7 @@ public class RabbitMessageListener implements ChannelAwareMessageListener {
         com.php25.common.mq.Message message0 = null;
         try {
             message0 = JsonUtil.fromJson(new String(message.getBody(), Charsets.UTF_8), com.php25.common.mq.Message.class);
-            String key = queue + ":" + group;
-            MessageHandler handler = map.get(key);
+            MessageHandler handler = map.get(group);
             handler.handle(message0);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {

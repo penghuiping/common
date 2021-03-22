@@ -132,7 +132,7 @@ public class RabbitMessageQueueManagerTest {
         messageQueueManager.bindDeadLetterQueue("price");
         messageQueueManager.send("price", new Message(RandomUtil.randomUUID(), "1.0"));
         messageQueueManager.send("price", new Message(RandomUtil.randomUUID(), "一快二毛"));
-        Message message1 = messageQueueManager.pullDlq("price_dlq", 5000L);
+        Message message1 = messageQueueManager.pullDlq("price", 5000L);
         log.info("dlq消息体内容为:{}", message1.getBody());
         countDownLatch.countDown();
         countDownLatch.await();

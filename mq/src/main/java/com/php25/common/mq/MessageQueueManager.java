@@ -30,6 +30,17 @@ public interface MessageQueueManager {
     Boolean subscribe(String queue, String group, MessageHandler handler);
 
     /**
+     * 订阅(队列名:消费组名)
+     *
+     * @param queue      队列名
+     * @param group      消费组名
+     * @param autoDelete 是否自动删除消费组,true:自动删除
+     * @param handler    消费者回调函数
+     * @return true:订阅关系绑定成功
+     */
+    Boolean subscribe(String queue, String group, Boolean autoDelete, MessageHandler handler);
+
+    /**
      * 指定队列名,发送消息
      *
      * @param queue   队列名

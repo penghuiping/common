@@ -1,6 +1,7 @@
 package com.php25.common.mq.redis;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
@@ -102,22 +103,21 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
 
     @Override
     public Boolean subscribe(String queue, String group, MessageHandler handler) {
-        if (StringUtil.isBlank(group)) {
-            RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
-            subscriber.subscribe(queue);
-            subscriber.setHandler(handler);
-            this.subscribers.add(subscriber);
-            return true;
-        } else {
-            RSet<String> groups = this.helper.groups(queue);
-            String group0 = this.groupName(queue, group);
-            groups.add(group0);
-            RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager);
-            subscriber.subscribe(queue, group0);
-            subscriber.setHandler(handler);
-            this.subscribers.add(subscriber);
-            return true;
-        }
+        return this.subscribe(queue, group, false, handler);
+    }
+
+    @Override
+    public Boolean subscribe(String queue, String group, Boolean autoDelete, MessageHandler handler) {
+        AssertUtil.hasText("queue", "queue不能为空");
+        AssertUtil.hasText("group", "group不能为空");
+        RSet<String> groups = this.helper.groups(queue);
+        String group0 = this.groupName(queue, group);
+        groups.add(group0);
+        RedisMessageSubscriber subscriber = new RedisMessageSubscriber(subscriberThreadPool, redisManager, autoDelete);
+        subscriber.subscribe(queue, group0);
+        subscriber.setHandler(handler);
+        this.subscribers.add(subscriber);
+        return true;
     }
 
     private String groupName(String queue, String group) {

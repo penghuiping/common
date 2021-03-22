@@ -1,7 +1,7 @@
 package com.php25.common.mq.redis;
 
 import com.google.common.base.Charsets;
-import com.php25.common.core.util.StringUtil;
+import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
 import com.php25.common.mq.MessageSubscriber;
@@ -32,11 +32,15 @@ public class RedisMessageSubscriber implements MessageSubscriber {
     private Future<?> threadFuture;
     private RList<Message> pipe;
 
+    private final Boolean autoDelete;
+    private String group;
+    private String queue;
 
     public RedisMessageSubscriber(ExecutorService executorService,
-                                  RedisManager redisManager) {
+                                  RedisManager redisManager, Boolean autoDelete) {
         this.executorService = executorService;
         this.helper = new RedisQueueGroupHelper(redisManager);
+        this.autoDelete = autoDelete;
     }
 
     @Override
@@ -46,23 +50,23 @@ public class RedisMessageSubscriber implements MessageSubscriber {
 
     @Override
     public void subscribe(String queue, String group) {
-        if (!StringUtil.isBlank(queue)) {
-            this.pipe = this.helper.queue(queue);
-        }
-
-        if (!StringUtil.isBlank(group)) {
-            this.pipe = this.helper.group(group);
-        }
+        this.queue = queue;
+        this.group = group;
+        this.pipe = this.helper.group(group);
         this.start();
     }
 
     @Override
     public void subscribe(String queue) {
-        this.subscribe(queue, null);
+        this.subscribe(queue, queue + ":" + queue);
     }
 
     public void stop() {
         isRunning.compareAndSet(true, false);
+        if (autoDelete) {
+            RedisMessageQueueManager redisMessageQueueManager = SpringContextHolder.getBean0(RedisMessageQueueManager.class);
+            redisMessageQueueManager.delete(this.queue, this.group);
+        }
     }
 
     public boolean isStop() {
