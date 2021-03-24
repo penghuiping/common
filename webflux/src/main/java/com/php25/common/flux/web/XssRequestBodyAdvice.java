@@ -51,9 +51,9 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             }
             content.append(new String(buff.array(), 0, buff.position(), Charsets.ISO_8859_1));
         }
-        String result1=  new String(content.toString().getBytes(Charsets.ISO_8859_1),Charsets.UTF_8);
+        String result1 = new String(content.toString().getBytes(Charsets.ISO_8859_1), Charsets.UTF_8);
         log.info("request body:{}", result1);
-        boolean result = Jsoup.isValid(content.toString(), Whitelist.basicWithImages());
+        boolean result = Jsoup.isValid(content.toString(), this.configWhiteList());
         if (result) {
             return new HttpInputMessage() {
                 @Override
@@ -70,5 +70,16 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             throw Exceptions.throwBusinessException("999999", "requestBody存在不安全的html内容");
         }
     }
+
+    /**
+     * 配置白名单标签
+     * <p>
+     * 如: Whitelist.basicWithImages();
+     *
+     * @return 白名单标签
+     */
+    public abstract Whitelist configWhiteList();
+
+
 }
 
