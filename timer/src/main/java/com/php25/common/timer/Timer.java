@@ -7,6 +7,7 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -62,6 +63,10 @@ public class Timer {
         return true;
     }
 
+    public Set<String> getAllLoadedExecutionIds() {
+        return cache.keySet();
+    }
+    
     void removeCache(String jobId) {
         cache.remove(jobId);
     }
