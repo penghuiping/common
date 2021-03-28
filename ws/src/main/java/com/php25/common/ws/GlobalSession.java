@@ -152,8 +152,8 @@ public class GlobalSession implements InitializingBean, DisposableBean {
 
         ExpirationSessionCallback callback = new ExpirationSessionCallback(expirationSocketSession.getSessionId());
         long executeTime = System.currentTimeMillis() + 30000L;
-        Job expirationSessionId = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
-        timer.add(expirationSessionId);
+        Job job = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
+        timer.add(job);
     }
 
 
@@ -187,14 +187,12 @@ public class GlobalSession implements InitializingBean, DisposableBean {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
         long now = System.currentTimeMillis();
         expirationSocketSession.setTimestamp(now);
-
+        log.info("收到心跳包更新sid:{}", sid);
         timer.stop(sid);
         ExpirationSessionCallback callback = new ExpirationSessionCallback(sid);
         long executeTime = System.currentTimeMillis() + 30000L;
-        Job expirationSessionId = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
-        timer.add(expirationSessionId);
-
-
+        Job job = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
+        timer.add(job);
     }
 
     public String getSid(String uid) {

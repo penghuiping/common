@@ -42,6 +42,7 @@ public class Timer {
     }
 
     public void add(Job job, Boolean isHighAvailable) {
+        job.setHighAvailable(isHighAvailable);
         Timeout timeout = this.wheelTimer.newTimeout(job, job.getDelay(), TimeUnit.MILLISECONDS);
         Job job0 = (Job) timeout.task();
         cache.put(job0.getJobExecutionId(), timeout);
@@ -66,7 +67,7 @@ public class Timer {
     public Set<String> getAllLoadedExecutionIds() {
         return cache.keySet();
     }
-    
+
     void removeCache(String jobId) {
         cache.remove(jobId);
     }

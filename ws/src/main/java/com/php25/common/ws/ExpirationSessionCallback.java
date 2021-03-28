@@ -23,6 +23,7 @@ public class ExpirationSessionCallback implements Runnable {
     @Override
     public void run() {
         try {
+            log.info("长时间未收到心跳包关闭ws连接");
             ConnectionClose connectionClose = new ConnectionClose();
             connectionClose.setCount(1);
             connectionClose.setMsgId(globalSession.generateUUID());

@@ -47,7 +47,7 @@ public class TimerInnerLogManager {
                 .andEq("executionTime", executionTime).single();
         sqlParams.setSql(sqlParams.getSql());
         TimerInnerLog jobExecutionLog = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
-        if (jobExecutionLog.getStatus() == 0) {
+        if (null != jobExecutionLog && jobExecutionLog.getStatus() == 0) {
             lock.lock();
             try {
                 jobExecutionLog = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);

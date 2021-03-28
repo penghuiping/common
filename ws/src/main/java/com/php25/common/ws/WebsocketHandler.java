@@ -28,6 +28,10 @@ public class WebsocketHandler extends TextWebSocketHandler {
             log.info("ws request msg:{}", JsonUtil.toJson(baseRetryMsg));
         }
         ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        if (null == expirationSocketSession) {
+            log.info("expirationSocketSession is null:{}", JsonUtil.toJson(baseRetryMsg));
+            return;
+        }
         baseRetryMsg.setSessionId(expirationSocketSession.getSessionId());
         innerMsgRetryQueue.put(baseRetryMsg);
     }
