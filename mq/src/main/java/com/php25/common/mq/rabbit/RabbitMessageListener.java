@@ -21,7 +21,7 @@ import java.util.Map;
 public class RabbitMessageListener implements ChannelAwareMessageListener {
     private static final Logger log = LoggerFactory.getLogger(RabbitMessageListener.class);
 
-    private final Map<String, MessageHandler> map = new HashMap<>(128);
+    private final Map<String, MessageHandlerContainer> map = new HashMap<>(128);
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -29,15 +29,26 @@ public class RabbitMessageListener implements ChannelAwareMessageListener {
         this.rabbitTemplate = template;
     }
 
-    public void addHandler(String queue, String group, MessageHandler handler) {
+    public synchronized void addHandler(String queue, String group, MessageHandler handler) {
         if (StringUtil.isBlank(queue)) {
             return;
         }
         if (StringUtil.isBlank(group)) {
-            map.putIfAbsent(queue, handler);
+            MessageHandlerContainer messageHandlerContainer = map.get(queue);
+            if (null == messageHandlerContainer) {
+                messageHandlerContainer = new MessageHandlerContainer();
+            }
+            messageHandlerContainer.add(handler);
+            map.put(queue, messageHandlerContainer);
             return;
         }
-        map.putIfAbsent(queue + ":" + group, handler);
+
+        MessageHandlerContainer messageHandlerContainer = map.get(queue + ":" + group);
+        if (null == messageHandlerContainer) {
+            messageHandlerContainer = new MessageHandlerContainer();
+        }
+        messageHandlerContainer.add(handler);
+        map.put(queue + ":" + group, messageHandlerContainer);
     }
 
     @Override
@@ -49,8 +60,8 @@ public class RabbitMessageListener implements ChannelAwareMessageListener {
         com.php25.common.mq.Message message0 = null;
         try {
             message0 = JsonUtil.fromJson(new String(message.getBody(), Charsets.UTF_8), com.php25.common.mq.Message.class);
-            MessageHandler handler = map.get(group);
-            handler.handle(message0);
+            MessageHandlerContainer container = map.get(group);
+            container.getMessageHandlerRoundRobin().handle(message0);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             rabbitTemplate.convertAndSend(

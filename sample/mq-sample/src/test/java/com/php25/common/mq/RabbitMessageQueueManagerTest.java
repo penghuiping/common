@@ -34,7 +34,7 @@ public class RabbitMessageQueueManagerTest {
     private ExecutorService pool;
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         this.pool = Executors.newFixedThreadPool(10);
 
         this.connectionFactory = new CachingConnectionFactory();
@@ -46,11 +46,13 @@ public class RabbitMessageQueueManagerTest {
 
         this.rabbitTemplate = new RabbitTemplate(connectionFactory);
         RabbitMessageListener listener = new RabbitMessageListener(this.rabbitTemplate);
-        this.messageQueueManager = new RabbitMessageQueueManager(this.rabbitTemplate, listener);
+        RabbitMessageQueueManager rabbitMessageQueueManager = new RabbitMessageQueueManager(this.rabbitTemplate, listener);
+        rabbitMessageQueueManager.afterPropertiesSet();
+        this.messageQueueManager = rabbitMessageQueueManager;
     }
 
     @After
-    public void after() {
+    public void after() throws Exception {
         this.messageQueueManager.delete("test", "Math");
         this.messageQueueManager.delete("test", "Chinese");
         this.messageQueueManager.delete("test0", "Math0");
@@ -60,6 +62,8 @@ public class RabbitMessageQueueManagerTest {
 
         this.messageQueueManager.delete("visitor");
         this.messageQueueManager.delete("price");
+        RabbitMessageQueueManager rabbitMessageQueueManager = (RabbitMessageQueueManager) this.messageQueueManager;
+        rabbitMessageQueueManager.destroy();
     }
 
     @Test
@@ -88,7 +92,7 @@ public class RabbitMessageQueueManagerTest {
 
     @Test
     public void test1() throws Exception {
-        int messageNum = 1;
+        int messageNum = 10;
         AtomicLong count = new AtomicLong(0);
         CountDownLatch countDownLatch = new CountDownLatch(messageNum);
 
@@ -97,13 +101,16 @@ public class RabbitMessageQueueManagerTest {
             count.incrementAndGet();
             countDownLatch.countDown();
         });
-        messageQueueManager.subscribe("test0", "Chinese0", message -> {
-            log.info("Chinese testers:{}", message.getBody());
+
+        messageQueueManager.subscribe("test0", "Math0", message -> {
+            log.info("Math testers1:{}", message.getBody());
             count.incrementAndGet();
             countDownLatch.countDown();
         });
 
-        messageQueueManager.send("test0", "Math0", new Message(RandomUtil.randomUUID(), "Math test has changed to be hold tomorrow"));
+        for (int i = 0; i < messageNum; i++) {
+            messageQueueManager.send("test0", "Math0", new Message(RandomUtil.randomUUID(), "Math test has changed to be hold tomorrow"));
+        }
         countDownLatch.await();
         Assertions.assertThat(count.get()).isEqualTo(messageNum);
     }
