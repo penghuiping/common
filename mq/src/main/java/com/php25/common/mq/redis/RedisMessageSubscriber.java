@@ -28,19 +28,20 @@ public class RedisMessageSubscriber implements MessageSubscriber {
     private final RedisQueueGroupHelper helper;
     private final ExecutorService executorService;
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    private final Boolean autoDelete;
     private MessageHandler handler;
     private Future<?> threadFuture;
     private RList<Message> pipe;
-
-    private final Boolean autoDelete;
     private String group;
     private String queue;
+    private final RedisManager redisManager;
 
     public RedisMessageSubscriber(ExecutorService executorService,
                                   RedisManager redisManager, Boolean autoDelete) {
         this.executorService = executorService;
         this.helper = new RedisQueueGroupHelper(redisManager);
         this.autoDelete = autoDelete;
+        this.redisManager = redisManager;
     }
 
     @Override
@@ -78,7 +79,14 @@ public class RedisMessageSubscriber implements MessageSubscriber {
             synchronized (this) {
                 if (null == this.threadFuture || this.threadFuture.isDone()) {
                     this.threadFuture = executorService.submit(() -> {
+                        int count = 0;
                         while (isRunning.get()) {
+                            if (autoDelete && count > 5) {
+                                this.redisManager.expire(RedisConstant.GROUP_PREFIX + group, 60L, TimeUnit.SECONDS);
+                                this.redisManager.expire(RedisConstant.QUEUE_GROUPS_PREFIX + queue, 60L, TimeUnit.SECONDS);
+                                count = 0;
+                            }
+                            count++;
                             try {
                                 Message message0 = pipe.blockRightPop(1, TimeUnit.SECONDS);
                                 if (null != message0) {
@@ -103,6 +111,7 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                             } catch (Exception e) {
                                 log.error("MessageSubscriber消费消息出错", e);
                             }
+
                         }
                         log.info("回收mq-subscriber线程");
                     });

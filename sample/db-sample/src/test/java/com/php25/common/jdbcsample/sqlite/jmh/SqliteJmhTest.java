@@ -1,4 +1,4 @@
-package com.php25.common.jdbcsample.mysql.jmh;
+package com.php25.common.jdbcsample.sqlite.jmh;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.mess.SnowflakeIdWorker;
@@ -7,9 +7,8 @@ import com.php25.common.db.DbType;
 import com.php25.common.db.EntitiesScan;
 import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
-import com.php25.common.jdbcsample.mysql.model.Company;
-import com.php25.common.jdbcsample.mysql.model.Customer;
-import com.zaxxer.hikari.HikariDataSource;
+import com.php25.common.jdbcsample.sqlite.model.Company;
+import com.php25.common.jdbcsample.sqlite.model.Customer;
 import org.assertj.core.api.Assertions;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
@@ -24,6 +23,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.sqlite.SQLiteDataSource;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -32,19 +32,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/14 17:01
- * @Description:
+ * @author penghuiping
+ * @date 2021/3/29 21:40
  */
 @State(Scope.Benchmark)
-public class MysqlJdbcJmhTest {
-    private final DbType dbType = DbType.MYSQL;
+public class SqliteJmhTest {
+
+    private final DbType dbType = DbType.SQLITE;
     private List<Customer> customers;
     private JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(MysqlJdbcJmhTest.class.getSimpleName())
+                .include(SqliteJmhTest.class.getSimpleName())
                 .mode(Mode.Throughput)
                 .timeout(TimeValue.valueOf("60s"))
                 .warmupIterations(1)
@@ -58,22 +58,12 @@ public class MysqlJdbcJmhTest {
         new Runner(opt).run();
     }
 
-
     public DataSource druidDataSource() {
-        HikariDataSource hikariDataSource = new HikariDataSource();
-        hikariDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        hikariDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:33306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false");
-        hikariDataSource.setUsername("root");
-//        hikariDataSource.setPassword("root");
-        hikariDataSource.setAutoCommit(true);
-        hikariDataSource.setConnectionTimeout(30000);
-        hikariDataSource.setIdleTimeout(300000);
-        hikariDataSource.setMinimumIdle(1);
-        hikariDataSource.setMaxLifetime(1800000);
-        hikariDataSource.setMaximumPoolSize(15);
-        hikariDataSource.setPoolName("hikariDataSource");
-        return hikariDataSource;
+        SQLiteDataSource sqLiteDataSource = new SQLiteDataSource();
+        sqLiteDataSource.setUrl("jdbc:sqlite:/tmp/test.db");
+        return sqLiteDataSource;
     }
+
 
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
@@ -85,10 +75,20 @@ public class MysqlJdbcJmhTest {
 
     public EntitiesScan db() {
         EntitiesScan db = new EntitiesScan();
-        db.scanPackage("com.php25.common.jdbcsample.mysql.model");
+        db.scanPackage("com.php25.common.jdbcsample.sqlite.model");
         return db;
     }
 
+    private void initMeta(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("drop table if exists t_customer");
+        jdbcTemplate.execute("drop table if exists t_company");
+        jdbcTemplate.execute("drop table if exists t_department");
+        jdbcTemplate.execute("drop table if exists t_customer_department");
+        jdbcTemplate.execute("create table t_customer (id integer primary key autoincrement,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
+        jdbcTemplate.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
+        jdbcTemplate.execute("create table t_department (id bigint primary key,name varchar(20))");
+        jdbcTemplate.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+    }
 
     @Setup(Level.Trial)
     public void init() {
@@ -97,16 +97,7 @@ public class MysqlJdbcJmhTest {
         jdbcTemplate = jdbcTemplate(dataSource);
         TransactionTemplate transactionTemplate = transactionTemplate(dataSource);
         db();
-
-        jdbcTemplate.execute("drop table if exists t_customer");
-        jdbcTemplate.execute("drop table if exists t_company");
-        jdbcTemplate.execute("drop table if exists t_department");
-        jdbcTemplate.execute("drop table if exists t_customer_department");
-
-        jdbcTemplate.execute("create table t_customer (id bigint auto_increment primary key,username varchar(20),password varchar(50),age int,create_time datetime,update_time datetime,version bigint,`enable` int,score bigint,company_id bigint)");
-        jdbcTemplate.execute("create table t_company (id bigint primary key,name varchar(20),create_time datetime,update_time datetime,`enable` int)");
-        jdbcTemplate.execute("create table t_department (id bigint primary key,name varchar(20))");
-        jdbcTemplate.execute("create table t_customer_department (customer_id bigint,department_id bigint)");
+        initMeta(jdbcTemplate);
 
         Company company = new Company();
         company.setName("test");
@@ -130,7 +121,6 @@ public class MysqlJdbcJmhTest {
             QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate)
                     .insert(Queries.of(dbType).from(Customer.class).insert(customer));
         }
-
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -145,9 +135,10 @@ public class MysqlJdbcJmhTest {
                 .insert(Queries.of(dbType).from(Customer.class).insert(customer));
     }
 
+
     @org.openjdk.jmh.annotations.Benchmark
     public void insert0() throws Exception {
-        this.jdbcTemplate.update("insert into t_customer(`username`,`password`,`age`,`create_time`,`update_time`,`version`,`enable`,`score`,`company_id`) values (?,?,?,now(),null,?,?,?,?)", "jack", "123456", 12, 1, 1, 0, 0);
+        this.jdbcTemplate.update("insert into t_customer(`username`,`password`,`age`,`create_time`,`update_time`,`version`,`enable`,`score`,`company_id`) values (?,?,?,?,null,?,?,?,?)", "jack", "123456", LocalDateTime.now(), 12, 1, 1, 0, 0);
     }
 
     @org.openjdk.jmh.annotations.Benchmark
@@ -194,7 +185,7 @@ public class MysqlJdbcJmhTest {
     @org.openjdk.jmh.annotations.Benchmark
     public void queryByUsername0() throws Exception {
         Map<String, Object> map = this.jdbcTemplate.queryForMap("select * from t_customer where username = ?", "jack0");
-        Assertions.assertThat(map.get("id")).isEqualTo(customers.get(0).getId());
+        Assertions.assertThat(new Long(map.get("id").toString())).isEqualTo(customers.get(0).getId());
     }
 
 

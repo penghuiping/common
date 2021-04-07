@@ -146,9 +146,9 @@ public abstract class StringUtil {
      * @return
      * @throws UnsupportedEncodingException if an error occurs
      */
-    public static String utf8Encode(String str) {
+    public static String utf8Encode(String str) throws UnsupportedEncodingException {
         if (!isEmpty(str) && str.getBytes().length != str.length()) {
-            return URLEncoder.encode(str, StandardCharsets.UTF_8);
+            return URLEncoder.encode(str, StandardCharsets.UTF_8.toString());
         }
         return str;
     }
@@ -160,9 +160,9 @@ public abstract class StringUtil {
      * @param defaultReturn
      * @return
      */
-    public static String utf8Encode(String str, String defaultReturn) {
+    public static String utf8Encode(String str, String defaultReturn) throws UnsupportedEncodingException {
         if (!isEmpty(str) && str.getBytes().length != str.length()) {
-            return URLEncoder.encode(str, StandardCharsets.UTF_8);
+            return URLEncoder.encode(str, StandardCharsets.UTF_8.toString());
         }
         return str;
     }

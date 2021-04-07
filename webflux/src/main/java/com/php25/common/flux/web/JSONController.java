@@ -18,15 +18,15 @@ public class JSONController {
     private static final Logger log = LoggerFactory.getLogger(JSONController.class);
 
 
-    protected JSONResponse failed(BusinessErrorStatus returnStatus) {
-        JSONResponse ret = new JSONResponse();
+    protected JSONResponse<Object> failed(BusinessErrorStatus returnStatus) {
+        JSONResponse<Object> ret = new JSONResponse<>();
         ret.setCode(returnStatus.getCode());
         ret.setMessage(returnStatus.getDesc());
         return ret;
     }
 
-    protected JSONResponse succeed(Object obj) {
-        JSONResponse ret = new JSONResponse();
+    protected <T> JSONResponse<T> succeed(T obj) {
+        JSONResponse<T> ret = new JSONResponse<>();
         ret.setCode(ApiErrorCode.ok.value);
         ret.setData(obj);
         ret.setMessage("success");

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,12 +45,9 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
     private final BlockingQueue<String> pipe;
 
     private final List<RedisMessageSubscriber> subscribers;
-
-    private ExecutorService singleThreadPool;
-
-    private ExecutorService subscriberThreadPool;
-
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private ExecutorService singleThreadPool;
+    private ExecutorService subscriberThreadPool;
 
     public RedisMessageQueueManager(RedisManager redisManager) {
         this.redisManager = redisManager;
@@ -64,9 +62,9 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-message-queue-manager-thread").build());
-        this.subscriberThreadPool = new ThreadPoolExecutor(20, 20,
+        this.subscriberThreadPool = new ThreadPoolExecutor(1, 20,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
+                new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-subscriber-thread-%d").build());
         this.startWorker();
     }

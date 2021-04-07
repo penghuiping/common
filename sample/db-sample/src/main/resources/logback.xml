@@ -8,7 +8,7 @@
               value="%X{RequestNo} - %d{yyyy-MM-dd HH:mm:ss.SSS}|%thread|%-5level|%logger{80}|%method|%line -> %msg%n"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <root level="INFO">
+    <root level="error">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
