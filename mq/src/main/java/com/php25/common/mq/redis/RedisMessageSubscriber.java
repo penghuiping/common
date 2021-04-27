@@ -1,7 +1,7 @@
 package com.php25.common.mq.redis;
 
 import com.google.common.base.Charsets;
-import com.php25.common.core.mess.SpringContextHolder;
+import com.php25.common.core.util.StringUtil;
 import com.php25.common.mq.Message;
 import com.php25.common.mq.MessageHandler;
 import com.php25.common.mq.MessageSubscriber;
@@ -62,16 +62,19 @@ public class RedisMessageSubscriber implements MessageSubscriber {
         this.subscribe(queue, queue + ":" + queue);
     }
 
+    private String groupName(String queue, String group) {
+        return queue + ":" + group;
+    }
+
     public void stop() {
         isRunning.compareAndSet(true, false);
         if (autoDelete) {
-            RedisMessageQueueManager redisMessageQueueManager = SpringContextHolder.getBean0(RedisMessageQueueManager.class);
-            redisMessageQueueManager.delete(this.queue, this.group);
+            if (StringUtil.isBlank(group)) {
+                this.helper.remove(queue);
+            } else {
+                this.helper.remove(queue, this.groupName(queue, group));
+            }
         }
-    }
-
-    public boolean isStop() {
-        return !isRunning.get();
     }
 
     public void start() {
