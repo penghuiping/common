@@ -162,9 +162,16 @@ public abstract class BaseSqlExecute implements SqlExecute {
         SingleSqlParams defaultSqlParams = (SingleSqlParams) sqlParams;
         String targetSql = defaultSqlParams.getSql();
         log.debug("替换前sql语句为:{}", targetSql);
-        targetSql = new StringFormatter(targetSql).format(ImmutableMap.of(
-                sqlParams.getClazz().getSimpleName(),
-                JdbcModelManager.getLogicalTableName(sqlParams.getClazz())));
+        Map<String, Object> map = new HashMap<>(16);
+        map.put(sqlParams.getClazz().getSimpleName(), JdbcModelManager.getLogicalTableName(sqlParams.getClazz()));
+        //join格式化
+        List<Class<?>> joinClazz = defaultSqlParams.getJoinClazz();
+        if (null != joinClazz && joinClazz.size() > 0) {
+            for (Class<?> cls : joinClazz) {
+                map.put(cls.getSimpleName(), JdbcModelManager.getLogicalTableName(cls));
+            }
+        }
+        targetSql = new StringFormatter(targetSql).format(map);
         log.info("sql语句为:{}", targetSql);
         List<Long> result = this.jdbcTemplate.queryForList(targetSql, defaultSqlParams.getParams().toArray(), Long.class);
         if (result.isEmpty()) {

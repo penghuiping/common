@@ -361,6 +361,7 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
         SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(this.clazz);
+        sqlParams.setJoinClazz(this.joinClazz);
         sqlParams.setParams(this.getParams());
         this.clear();
         return sqlParams;
@@ -422,23 +423,23 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             searchParam.getFieldName();
             String operator = searchParam.getOperator().name();
             if (!StringUtil.isBlank(operator)) {
-                if ("eq".equals(operator.toLowerCase())) {
+                if ("eq".equalsIgnoreCase(operator)) {
                     this.andEq(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("ne".equals(operator.toLowerCase())) {
+                } else if ("ne".equalsIgnoreCase(operator)) {
                     this.andNotEq(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("like".equals(operator.toLowerCase())) {
+                } else if ("like".equalsIgnoreCase(operator)) {
                     this.andLike(searchParam.getFieldName(), (String) searchParam.getValue());
-                } else if ("gt".equals(operator.toLowerCase())) {
+                } else if ("gt".equalsIgnoreCase(operator)) {
                     this.andGreat(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("lt".equals(operator.toLowerCase())) {
+                } else if ("lt".equalsIgnoreCase(operator)) {
                     this.andLess(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("gte".equals(operator.toLowerCase())) {
+                } else if ("gte".equalsIgnoreCase(operator)) {
                     this.andGreatEq(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("lte".equals(operator.toLowerCase())) {
+                } else if ("lte".equalsIgnoreCase(operator)) {
                     this.andLessEq(searchParam.getFieldName(), searchParam.getValue());
-                } else if ("in".equals(operator.toLowerCase())) {
+                } else if ("in".equalsIgnoreCase(operator)) {
                     this.andIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
-                } else if ("nin".equals(operator.toLowerCase())) {
+                } else if ("nin".equalsIgnoreCase(operator)) {
                     this.andNotIn(searchParam.getFieldName(), (Collection<?>) searchParam.getValue());
                 } else {
                     this.andEq(searchParam.getFieldName(), searchParam.getValue());

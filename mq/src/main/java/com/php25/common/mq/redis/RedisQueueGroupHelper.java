@@ -71,7 +71,7 @@ class RedisQueueGroupHelper {
         if (StringUtil.isNotBlank(group)) {
             this.redisManager.remove(RedisConstant.GROUP_PREFIX + group);
             RSet<String> rSet = this.groups(queue);
-            rSet.remove(group);
+            rSet.remove(group.substring(group.indexOf(":") + 1));
             return true;
         }
 
@@ -126,5 +126,16 @@ class RedisQueueGroupHelper {
         AssertUtil.hasText(queue, "queue不能为空");
         AssertUtil.hasText(dlq, "dlq不能为空");
         return this.redisManager.string().set(RedisConstant.QUEUE_DLQ_PREFIX + queue, dlq);
+    }
+
+    /**
+     * 判断组是否有效
+     *
+     * @param group 组名
+     * @return true 组有效
+     */
+    public Boolean groupIsValid(String group) {
+        AssertUtil.hasText(group, "group不能为空");
+        return this.redisManager.exists(RedisConstant.GROUP_PING_PREFIX + group);
     }
 }

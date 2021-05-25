@@ -83,9 +83,19 @@ public class RedisMessageSubscriber implements MessageSubscriber {
                 if (null == this.threadFuture || this.threadFuture.isDone()) {
                     this.threadFuture = executorService.submit(() -> {
                         int count = 0;
+
+                        this.redisManager.string().set(RedisConstant.GROUP_PING_PREFIX + group, 1);
+
+                        if (autoDelete) {
+                            this.redisManager.expire(RedisConstant.GROUP_PREFIX + group, 60L, TimeUnit.SECONDS);
+                            this.redisManager.expire(RedisConstant.GROUP_PING_PREFIX + group, 60L, TimeUnit.SECONDS);
+                            this.redisManager.expire(RedisConstant.QUEUE_GROUPS_PREFIX + queue, 60L, TimeUnit.SECONDS);
+                        }
+
                         while (isRunning.get()) {
                             if (autoDelete && count > 5) {
                                 this.redisManager.expire(RedisConstant.GROUP_PREFIX + group, 60L, TimeUnit.SECONDS);
+                                this.redisManager.expire(RedisConstant.GROUP_PING_PREFIX + group, 60L, TimeUnit.SECONDS);
                                 this.redisManager.expire(RedisConstant.QUEUE_GROUPS_PREFIX + queue, 60L, TimeUnit.SECONDS);
                                 count = 0;
                             }
