@@ -20,10 +20,22 @@ public class ResultDto<T> {
      */
     private T data;
 
-    public ResultDto(BusinessErrorStatus error, T data) {
-        this.error = error;
-        this.data = data;
+    private ResultDto() {
+
     }
+
+    public static <T> ResultDto<T> error(BusinessErrorStatus error) {
+        ResultDto<T> res = new ResultDto<T>();
+        res.error = error;
+        return res;
+    }
+
+    public static <T> ResultDto<T> ok(T data) {
+        ResultDto<T> res = new ResultDto<T>();
+        res.data = data;
+        return res;
+    }
+
 
     /**
      * This method is used for judging whether errors has happened
@@ -38,15 +50,7 @@ public class ResultDto<T> {
         return error;
     }
 
-    public void setError(BusinessErrorStatus error) {
-        this.error = error;
-    }
-
     public T getData() {
         return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
     }
 }

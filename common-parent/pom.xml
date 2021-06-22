@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.php25</groupId>
     <artifactId>common-parent</artifactId>
-    <version>2.3.2-SNAPSHOT</version>
+    <version>V.2.5.1</version>
 
     <packaging>pom</packaging>
 
     <parent>
         <groupId>com.php25</groupId>
         <artifactId>common</artifactId>
-        <version>2.3.2-SNAPSHOT</version>
+        <version>V.2.5.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -19,8 +19,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
-        <spring-cloud-dependencies>Hoxton.SR6</spring-cloud-dependencies>
+        <spring.boot.version>2.5.1</spring.boot.version>
+        <spring-cloud-dependencies>2020.0.3</spring-cloud-dependencies>
+        <reactor>Dysprosium-SR20</reactor>
         <guava.version>30.0-jre</guava.version>
         <jackson.version>2.11.1</jackson.version>
         <okhttp.version>4.8.0</okhttp.version>
@@ -42,15 +43,18 @@
         <assertj>3.17.2</assertj>
         <netty>4.1.52.Final</netty>
         <jjwt>0.10.7</jjwt>
+        <trie>1.2.2</trie>
+        <jsoup>1.13.1</jsoup>
+        <lombok>1.18.12</lombok>
 
-        <php-common.db>2.3.2-SNAPSHOT</php-common.db>
-        <php-common.core>2.3.2-SNAPSHOT</php-common.core>
-        <php-common.mq>2.3.2-SNAPSHOT</php-common.mq>
-        <php-common.redis>2.3.2-SNAPSHOT</php-common.redis>
-        <php-common.validation>2.3.2-SNAPSHOT</php-common.validation>
-        <php-common.webflux>2.3.2-SNAPSHOT</php-common.webflux>
-        <php-common.timer>2.3.2-SNAPSHOT</php-common.timer>
-        <uid-generator>2.3.2-SNAPSHOT</uid-generator>
+        <php-common.db>V.2.5.1</php-common.db>
+        <php-common.core>V.2.5.1</php-common.core>
+        <php-common.mq>V.2.5.1</php-common.mq>
+        <php-common.redis>V.2.5.1</php-common.redis>
+        <php-common.validation>V.2.5.1</php-common.validation>
+        <php-common.webflux>V.2.5.1</php-common.webflux>
+        <php-common.timer>V.2.5.1</php-common.timer>
+        <uid-generator>V.2.5.1</uid-generator>
     </properties>
 
     <dependencyManagement>
@@ -73,7 +77,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>Bismuth-RELEASE</version>
+                <version>${reactor}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -238,6 +242,11 @@
                 <version>${netty}</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-zipkin</artifactId>
+                <version>2.2.8.RELEASE</version>
+            </dependency>
+            <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
                 <version>2.3.2</version>
@@ -283,17 +292,17 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.12</version>
+                <version>${lombok}</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
-                <version>1.13.1</version>
+                <version>${jsoup}</version>
             </dependency>
             <dependency>
                 <groupId>com.hankcs</groupId>
                 <artifactId>aho-corasick-double-array-trie</artifactId>
-                <version>1.2.2</version>
+                <version>${trie}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>

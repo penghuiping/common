@@ -111,6 +111,14 @@ public class BaseDbRepositoryImpl<T extends Persistable<ID>, ID> extends JdbcDbR
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void deleteAllById(Iterable<? extends ID> ids) {
+        String pkName = JdbcModelManager.getPrimaryKeyColName(model);
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereIn(pkName, Lists.newArrayList(ids)).delete();
+        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).delete(sqlParams);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAll(@NotNull Iterable<? extends T> objs) {
         List<Object> ids = Lists.newArrayList(objs).stream().map(o -> JdbcModelManager.getPrimaryKeyValue(model, o)).collect(Collectors.toList());
         String pkName = JdbcModelManager.getPrimaryKeyColName(model);
