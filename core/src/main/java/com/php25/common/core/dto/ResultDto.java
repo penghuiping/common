@@ -1,5 +1,7 @@
 package com.php25.common.core.dto;
 
+import com.php25.common.core.exception.BusinessErrorStatus;
+
 /**
  * @author: penghuiping
  * @date: 2019/1/2 14:20
@@ -8,37 +10,43 @@ package com.php25.common.core.dto;
 public class ResultDto<T> {
 
     /**
-     * if status is true,then the object attribute of the ResultDto is valid
-     * else the object attribute should be ignored. It's maybe some wrong logic happened
-     * and we can't get correct data.
+     * When error happened, this field used to say what error is.
      */
-    private boolean status;
+    private BusinessErrorStatus error;
 
     /**
-     * This is a general type object, and it's specific type can only be decided on
-     * runtime
+     * When the program execution succeeded ,no error happened. Then this field stands for
+     * the right execution result of the program.
      */
-    private T object;
+    private T data;
 
-
-    public ResultDto(boolean status, T object) {
-        this.status = status;
-        this.object = object;
+    public ResultDto(BusinessErrorStatus error, T data) {
+        this.error = error;
+        this.data = data;
     }
 
-    public boolean isStatus() {
-        return status;
+    /**
+     * This method is used for judging whether errors has happened
+     *
+     * @return true: has some errors
+     */
+    public boolean hasError() {
+        return null != error && data == null;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public BusinessErrorStatus getError() {
+        return error;
     }
 
-    public T getObject() {
-        return object;
+    public void setError(BusinessErrorStatus error) {
+        this.error = error;
     }
 
-    public void setObject(T object) {
-        this.object = object;
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }
