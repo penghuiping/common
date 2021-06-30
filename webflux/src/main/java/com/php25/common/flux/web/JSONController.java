@@ -25,6 +25,13 @@ public class JSONController {
         return ret;
     }
 
+    protected <T> JSONResponse<T> failed0(BusinessErrorStatus returnStatus) {
+        JSONResponse<T> ret = new JSONResponse<>();
+        ret.setCode(returnStatus.getCode());
+        ret.setMessage(returnStatus.getDesc());
+        return ret;
+    }
+
     protected <T> JSONResponse<T> succeed(T obj) {
         JSONResponse<T> ret = new JSONResponse<>();
         ret.setCode(ApiErrorCode.ok.value);

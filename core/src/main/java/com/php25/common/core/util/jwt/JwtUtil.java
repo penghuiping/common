@@ -29,12 +29,38 @@ public abstract class JwtUtil {
      * @param privateKey RSA私钥
      * @return jwt令牌
      */
-    public static String generateToken(String jti, String username, List<String> roles, Long expireTime, String issuer, Key privateKey) {
+    public static String generateToken(String jti, String username, List<String> roles, Long expireTime,
+                                       String issuer, Key privateKey) {
         Date now = new Date();
         Date expired = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(expireTime));
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", username);
         claims.put("roles", roles);
+        return Jwts.builder().signWith(privateKey)
+                .setClaims(claims)
+                .setIssuer(issuer)
+                .setIssuedAt(new Date())
+                .setSubject(issuer)
+                .setId(jti)
+                .setExpiration(expired)
+                .compact();
+    }
+
+    /**
+     * 生成refreshToken
+     *
+     * @param jti        令牌id
+     * @param username   用户名
+     * @param expireTime 令牌有效时长(秒) 如: 1800秒为30分钟
+     * @param issuer     签发令牌者署名
+     * @param privateKey RSA私钥
+     * @return refreshToken
+     */
+    public static String generateRefreshToken(String jti, String username, Long expireTime, String issuer, Key privateKey) {
+        Date now = new Date();
+        Date expired = new Date(now.getTime() + TimeUnit.SECONDS.toMillis(expireTime));
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
         return Jwts.builder().signWith(privateKey)
                 .setClaims(claims)
                 .setIssuer(issuer)
