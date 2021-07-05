@@ -10,6 +10,7 @@ import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -84,11 +85,11 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
             }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
-        SqlParams sqlParams = query.limit(page[0], page[1]).select();
+        SqlParams sqlParams = query.limit(page[0], pageable.getPageSize()).select();
         List<T> list = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
         SqlParams sqlParams1 = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder).count();
         long total = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(sqlParams1);
-        return new PageImpl<T>(list, pageable, total);
+        return new PageImpl<T>(list, PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize()), total);
     }
 
     @Override
