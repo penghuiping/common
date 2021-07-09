@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Map;
+
 /**
  * @author: penghuiping
  * @date: 2018/8/8 16:46
@@ -17,7 +19,7 @@ import org.springframework.util.Assert;
 @Lazy(false)
 public class SpringContextHolder implements ApplicationContextAware, DisposableBean {
     private static ApplicationContext applicationContext = null;
-    private static Logger logger = LoggerFactory.getLogger(SpringContextHolder.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpringContextHolder.class);
 
     public SpringContextHolder() {
     }
@@ -37,9 +39,15 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         return (T) applicationContext.getBean(name);
     }
 
+
     public static <T> T getBean0(Class<T> requiredType) {
         assertContextInjected();
         return applicationContext.getBean(requiredType);
+    }
+
+    public static <T> Map<String, T> getBean1(Class<T> requiredType) {
+        assertContextInjected();
+        return applicationContext.getBeansOfType(requiredType);
     }
 
     public static void clearHolder() {

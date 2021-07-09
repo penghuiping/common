@@ -27,7 +27,7 @@ class CmdResponse {
     public Optional<Object> getResult(long timeout, TimeUnit unit) {
         try {
             Optional<Object> res = this.pipe.poll(timeout, unit);
-            if (res == null) {
+            if (!res.isPresent()) {
                 return Optional.empty();
             }
             return res;
