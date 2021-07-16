@@ -22,7 +22,7 @@
         <spring.boot.version>2.5.1</spring.boot.version>
         <spring-cloud-dependencies>2020.0.3</spring-cloud-dependencies>
         <reactor>Dysprosium-SR20</reactor>
-        <guava.version>30.0-jre</guava.version>
+        <guava.version>30.1.1-jre</guava.version>
         <jackson.version>2.11.1</jackson.version>
         <okhttp.version>4.8.0</okhttp.version>
         <easypoi.version>4.2.0</easypoi.version>
@@ -32,7 +32,7 @@
         <jmh.version>1.21</jmh.version>
         <jfairy.version>0.5.9</jfairy.version>
         <hikari.version>3.3.1</hikari.version>
-        <bouncycastle.version>1.60</bouncycastle.version>
+        <bouncycastle.version>1.66</bouncycastle.version>
         <hibernate-validator>6.1.5.Final</hibernate-validator>
         <oracle>11.2.0.3</oracle>
         <testcontainer>1.15.1</testcontainer>
