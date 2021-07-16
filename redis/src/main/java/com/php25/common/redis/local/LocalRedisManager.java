@@ -55,6 +55,7 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_GET_BIT);
 
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.REMOVE);
+        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.CLEAN_ALL_EXPIRE);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXISTS);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.GET_EXPIRE);
         this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXPIRE);
@@ -101,6 +102,13 @@ public class LocalRedisManager implements RedisManager {
         this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DECR);
     }
 
+    void cleanAllExpiredKeys() {
+        CmdRequest cmdRequest = new CmdRequest(RedisCmd.CLEAN_ALL_EXPIRE, null);
+        CmdResponse cmdResponse = new CmdResponse();
+        this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
+        cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+    }
+
     @Override
     public void remove(String... keys) {
         CmdRequest cmdRequest = new CmdRequest(RedisCmd.REMOVE, Lists.newArrayList(keys));
@@ -123,10 +131,7 @@ public class LocalRedisManager implements RedisManager {
         CmdResponse cmdResponse = new CmdResponse();
         this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (result.isPresent()) {
-            return (Boolean) result.get();
-        }
-        return false;
+        return result.map(o -> (Boolean) o).orElse(false);
     }
 
     @Override
@@ -135,10 +140,7 @@ public class LocalRedisManager implements RedisManager {
         CmdResponse cmdResponse = new CmdResponse();
         this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (result.isPresent()) {
-            return (Long) result.get();
-        }
-        return null;
+        return (Long) result.orElse(null);
     }
 
     @Override
@@ -147,10 +149,7 @@ public class LocalRedisManager implements RedisManager {
         CmdResponse cmdResponse = new CmdResponse();
         this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         Optional<Object> result = cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
-        if (result.isPresent()) {
-            return (Boolean) result.get();
-        }
-        return false;
+        return result.map(o -> (Boolean) o).orElse(false);
     }
 
     @Override

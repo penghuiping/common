@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 class RedisCmdDispatcher {
     private static final Logger log = LoggerFactory.getLogger(RedisCmdDispatcher.class);
     private final ExecutorService singleConsumeWorker;
+    private final ExecutorService singleExpireCacheWorker;
     private final Map<String, RedisCmdHandler> handlerMap = new HashMap<>();
     private final BlockingQueue<RedisCmdPair> buffer = new LinkedBlockingQueue<>();
     private LocalRedisManager redisManager;
@@ -30,11 +31,26 @@ class RedisCmdDispatcher {
                 new LinkedBlockingQueue<Runnable>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-cmd-consume-worker-%d")
                         .build());
+        this.singleExpireCacheWorker = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryBuilder().setNameFormat("redis-expire-cache-worker-%d")
+                        .build());
         this.consumeRedisCmd();
     }
 
     public void setRedisManager(LocalRedisManager redisManager) {
         this.redisManager = redisManager;
+        this.singleExpireCacheWorker.submit(() -> {
+            while (true) {
+                try {
+                    redisManager.cleanAllExpiredKeys();
+                    Thread.sleep(60000);
+                } catch (Exception e) {
+                    log.error("redis缓存清楚操作失败", e);
+                }
+            }
+        });
     }
 
     public void registerHandler(String key, RedisCmdHandler handler) {

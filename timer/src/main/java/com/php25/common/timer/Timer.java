@@ -22,7 +22,11 @@ public class Timer {
     private final Map<String, Timeout> cache = new ConcurrentHashMap<>(1024);
 
     public Timer() {
-        this.wheelTimer = new HashedWheelTimer(new ThreadFactoryBuilder().setNameFormat("timer-wheel-thread-%d").build(), 100, TimeUnit.MILLISECONDS, 60 * 10);
+        this(100, TimeUnit.MILLISECONDS, 60 * 10);
+    }
+
+    public Timer(Integer tickDuration, TimeUnit timeUnit, Integer ticksPerWheel) {
+        this.wheelTimer = new HashedWheelTimer(new ThreadFactoryBuilder().setNameFormat("timer-wheel-thread-%d").build(), tickDuration, timeUnit, ticksPerWheel);
     }
 
     public void start() {

@@ -9,6 +9,7 @@ class RedisCmd {
     public static final String EXISTS = "exists";
     public static final String GET_EXPIRE = "get_expire";
     public static final String EXPIRE = "expire";
+    public static final String CLEAN_ALL_EXPIRE = "clean_all_expire";
 
     public static final String BLOOM_FILTER_GET = "bloom_filter_get";
     public static final String RATE_LIMIT_GET = "rate_limit_get";

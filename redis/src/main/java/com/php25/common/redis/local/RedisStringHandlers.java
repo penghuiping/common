@@ -6,6 +6,7 @@ import com.php25.common.core.util.JsonUtil;
 import org.springframework.data.util.Pair;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -105,6 +106,12 @@ class RedisStringHandlers {
         for (Object key : keys) {
             cache.remove(key.toString());
         }
+        response.setResult(true);
+    });
+
+    final static Pair<String, RedisCmdHandler> CLEAN_ALL_EXPIRE = Pair.of(RedisCmd.CLEAN_ALL_EXPIRE, (redisManager, request, response) -> {
+        LinkedHashMap<String, ExpiredCache> cache = (LinkedHashMap<String, ExpiredCache>) redisManager.cache;
+        cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
         response.setResult(true);
     });
 
