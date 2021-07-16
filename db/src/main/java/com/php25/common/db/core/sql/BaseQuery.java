@@ -129,9 +129,9 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             //移除主键
             if (!pairList.get(i).getLeft().equals(pkName)) {
                 if (i == (pairList.size() - 1)) {
-                    stringBuilder.append(pairList.get(i).getLeft()).append("=? ");
+                    stringBuilder.append("`").append(pairList.get(i).getLeft()).append("`").append("=? ");
                 } else {
-                    stringBuilder.append(pairList.get(i).getLeft()).append("=?,");
+                    stringBuilder.append("`").append(pairList.get(i).getLeft()).append("`").append("=?,");
                 }
                 if (versionFieldOptional.isPresent()) {
                     //@version注解字段，那么每次更新的时候都应该自动+1
@@ -282,9 +282,9 @@ public abstract class BaseQuery extends BaseQuery0 implements Query {
             //移除主键
             if (!pairList.get(i).getLeft().equals(pkName)) {
                 if (i == (pairList.size() - 1)) {
-                    stringBuilder.append(pairList.get(i).getLeft()).append("=? ");
+                    stringBuilder.append("`").append(pairList.get(i).getLeft()).append("`").append("=? ");
                 } else {
-                    stringBuilder.append(pairList.get(i).getLeft()).append("=?,");
+                    stringBuilder.append("`").append(pairList.get(i).getLeft()).append("`").append("=?,");
                 }
             }
         }
