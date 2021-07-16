@@ -1,6 +1,7 @@
 package com.php25.common.redis.local;
 
 import com.php25.common.redis.RHyperLogLogs;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * @author penghuiping
@@ -10,11 +11,11 @@ public class LocalHyperLogLogs implements RHyperLogLogs {
 
     @Override
     public void add(Object... values) {
-
+        throw new NotImplementedException("local redis暂不支持HyperLogLogs数据结构");
     }
 
     @Override
     public Long size() {
-        return null;
+        throw new NotImplementedException("local redis暂不支持HyperLogLogs数据结构");
     }
 }
