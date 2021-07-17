@@ -9,7 +9,7 @@ import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.timer.model.TimerInnerLog;
+import com.php25.common.timer.entity.TimerInnerLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;

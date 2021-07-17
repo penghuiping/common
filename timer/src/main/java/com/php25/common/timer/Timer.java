@@ -2,7 +2,7 @@ package com.php25.common.timer;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.mess.SpringContextHolder;
-import com.php25.common.timer.model.TimerInnerLog;
+import com.php25.common.timer.entity.TimerInnerLog;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 

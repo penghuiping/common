@@ -1,4 +1,4 @@
-package com.php25.common.timer.model;
+package com.php25.common.timer.entity;
 
 
 import com.php25.common.db.core.annotation.Column;

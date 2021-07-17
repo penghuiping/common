@@ -35,71 +35,12 @@ public class LocalRedisManager implements RedisManager {
 
     ConversionService conversionService;
 
-
     public LocalRedisManager(Integer maxEntry) {
         this.cache = new LruCachePlusLocal(maxEntry);
         this.rString = new LocalString(this);
         this.conversionService = DefaultConversionService.getSharedInstance();
         this.redisCmdDispatcher = new RedisCmdDispatcher();
         this.redisCmdDispatcher.setRedisManager(this);
-        this.init();
-    }
-
-    private void init() {
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_GET);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_NX);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_INCR);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_DECR);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_SET_BIT);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.STRING_GET_BIT);
-
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.REMOVE);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.CLEAN_ALL_EXPIRE);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXISTS);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.GET_EXPIRE);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.EXPIRE);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.BLOOM_FILTER_GET);
-        this.redisCmdDispatcher.registerHandler0(RedisStringHandlers.RATE_LIMIT_GET);
-
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_ADD);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_REMOVE);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_MEMBERS);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_IS_MEMBER);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_POP);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_UNION);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_INTER);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_DIFF);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_SIZE);
-        this.redisCmdDispatcher.registerHandler0(RedisSetHandlers.SET_GET_RANDOM_MEMBER);
-
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_ADD);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_SIZE);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANK);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANK);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE_BY_SCORE);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE_BY_SCORE);
-        this.redisCmdDispatcher.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REMOVE_RANGE_BY_SCORE);
-
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_INIT);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_RIGHT_PUSH);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_PUSH);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_RIGHT_POP);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_POP);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_RANGE);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_LEFT_TRIM);
-        this.redisCmdDispatcher.registerHandler0(RedisListHandlers.LIST_SIZE);
-
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_PUT);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_PUT_NX);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_HAS_KEY);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_GET);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DELETE);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_INCR);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DECR);
-        this.redisCmdDispatcher.registerHandler0(RedisHashHandlers.HASH_DECR);
     }
 
     void cleanAllExpiredKeys() {

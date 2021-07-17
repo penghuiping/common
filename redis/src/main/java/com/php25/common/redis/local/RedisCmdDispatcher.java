@@ -36,21 +36,80 @@ class RedisCmdDispatcher {
                 new LinkedBlockingQueue<Runnable>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-expire-cache-worker-%d")
                         .build());
-        this.consumeRedisCmd();
+        this.init();
     }
 
     public void setRedisManager(LocalRedisManager redisManager) {
         this.redisManager = redisManager;
+        this.consumeRedisCmd();
         this.singleExpireCacheWorker.submit(() -> {
             while (true) {
                 try {
                     redisManager.cleanAllExpiredKeys();
-                    Thread.sleep(60000);
+                    log.info("cache size:{}", redisManager.cache.size());
+                    Thread.sleep(5 * 60000L);
                 } catch (Exception e) {
-                    log.error("redis缓存清楚操作失败", e);
+                    log.error("redis缓存清理操作失败", e);
                 }
             }
         });
+    }
+
+    private void init() {
+        this.registerHandler0(RedisStringHandlers.STRING_GET);
+        this.registerHandler0(RedisStringHandlers.STRING_SET);
+        this.registerHandler0(RedisStringHandlers.STRING_SET_NX);
+        this.registerHandler0(RedisStringHandlers.STRING_INCR);
+        this.registerHandler0(RedisStringHandlers.STRING_DECR);
+        this.registerHandler0(RedisStringHandlers.STRING_SET_BIT);
+        this.registerHandler0(RedisStringHandlers.STRING_GET_BIT);
+
+        this.registerHandler0(RedisStringHandlers.REMOVE);
+        this.registerHandler0(RedisStringHandlers.CLEAN_ALL_EXPIRE);
+        this.registerHandler0(RedisStringHandlers.EXISTS);
+        this.registerHandler0(RedisStringHandlers.GET_EXPIRE);
+        this.registerHandler0(RedisStringHandlers.EXPIRE);
+        this.registerHandler0(RedisStringHandlers.BLOOM_FILTER_GET);
+        this.registerHandler0(RedisStringHandlers.RATE_LIMIT_GET);
+
+        this.registerHandler0(RedisSetHandlers.SET_ADD);
+        this.registerHandler0(RedisSetHandlers.SET_REMOVE);
+        this.registerHandler0(RedisSetHandlers.SET_MEMBERS);
+        this.registerHandler0(RedisSetHandlers.SET_IS_MEMBER);
+        this.registerHandler0(RedisSetHandlers.SET_POP);
+        this.registerHandler0(RedisSetHandlers.SET_UNION);
+        this.registerHandler0(RedisSetHandlers.SET_INTER);
+        this.registerHandler0(RedisSetHandlers.SET_DIFF);
+        this.registerHandler0(RedisSetHandlers.SET_SIZE);
+        this.registerHandler0(RedisSetHandlers.SET_GET_RANDOM_MEMBER);
+
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_ADD);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_SIZE);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANK);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANK);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_RANGE_BY_SCORE);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REVERSE_RANGE_BY_SCORE);
+        this.registerHandler0(RedisSortedSetHandlers.SORTED_SET_REMOVE_RANGE_BY_SCORE);
+
+        this.registerHandler0(RedisListHandlers.LIST_INIT);
+        this.registerHandler0(RedisListHandlers.LIST_RIGHT_PUSH);
+        this.registerHandler0(RedisListHandlers.LIST_LEFT_PUSH);
+        this.registerHandler0(RedisListHandlers.LIST_RIGHT_POP);
+        this.registerHandler0(RedisListHandlers.LIST_LEFT_POP);
+        this.registerHandler0(RedisListHandlers.LIST_LEFT_RANGE);
+        this.registerHandler0(RedisListHandlers.LIST_LEFT_TRIM);
+        this.registerHandler0(RedisListHandlers.LIST_SIZE);
+
+        this.registerHandler0(RedisHashHandlers.HASH_PUT);
+        this.registerHandler0(RedisHashHandlers.HASH_PUT_NX);
+        this.registerHandler0(RedisHashHandlers.HASH_HAS_KEY);
+        this.registerHandler0(RedisHashHandlers.HASH_GET);
+        this.registerHandler0(RedisHashHandlers.HASH_DELETE);
+        this.registerHandler0(RedisHashHandlers.HASH_INCR);
+        this.registerHandler0(RedisHashHandlers.HASH_DECR);
+        this.registerHandler0(RedisHashHandlers.HASH_DECR);
     }
 
     public void registerHandler(String key, RedisCmdHandler handler) {

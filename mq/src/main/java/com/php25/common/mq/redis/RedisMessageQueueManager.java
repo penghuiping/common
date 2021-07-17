@@ -190,7 +190,7 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
         message.setQueue(queue);
         message.setGroup(group);
         if (!StringUtil.isBlank(group)) {
-            if (!this.helper.groupIsValid(group)) {
+            if (!this.helper.groupIsValid(this.groupName(queue, group))) {
                 return false;
             }
             RList<Message> messages = this.helper.group(this.groupName(queue, group));
