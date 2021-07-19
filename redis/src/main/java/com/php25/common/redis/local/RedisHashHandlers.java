@@ -8,7 +8,7 @@ import java.util.HashMap;
  * @author penghuiping
  * @date 2021/3/3 11:07
  */
-public class RedisHashHandlers {
+class RedisHashHandlers {
 
     static final Pair<String, RedisCmdHandler> HASH_PUT = Pair.of(RedisCmd.HASH_PUT, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;

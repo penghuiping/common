@@ -17,6 +17,7 @@ import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -34,14 +35,16 @@ public class RedisManagerImpl implements RedisManager {
 
     private final RString rString;
 
+    private static final String DEFAULT_REDIS_LOCK_NAME = "lock:spring_redis";
+
 
     public RedisManagerImpl(StringRedisTemplate redisTemplate) {
-        this(redisTemplate, "RedisSpringBootService_lock");
+        this(redisTemplate, DEFAULT_REDIS_LOCK_NAME);
     }
 
     public RedisManagerImpl(StringRedisTemplate redisTemplate, String redisLockKey) {
         this.redisTemplate = redisTemplate;
-        this.lockRegistry = new RedisLockRegistry(redisTemplate.getConnectionFactory(), redisLockKey);
+        this.lockRegistry = new RedisLockRegistry(Objects.requireNonNull(redisTemplate.getConnectionFactory()), redisLockKey);
         this.rString = new RStringImpl(redisTemplate);
     }
 

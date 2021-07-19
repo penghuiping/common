@@ -8,7 +8,7 @@ import org.springframework.data.util.Pair;
  * @author penghuiping
  * @date 2021/3/3 11:06
  */
-public class RedisListHandlers {
+class RedisListHandlers {
     static final Pair<String, RedisCmdHandler> LIST_INIT = Pair.of(RedisCmd.LIST_INIT, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();

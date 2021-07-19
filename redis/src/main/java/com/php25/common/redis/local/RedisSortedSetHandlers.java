@@ -17,7 +17,7 @@ import java.util.SortedMap;
  * @author penghuiping
  * @date 2021/3/14 22:52
  */
-public class RedisSortedSetHandlers {
+class RedisSortedSetHandlers {
 
     static final Pair<String, RedisCmdHandler> SORTED_SET_ADD = Pair.of(RedisCmd.SORTED_SET_ADD, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
