@@ -21,18 +21,6 @@ class RedisStringHandlers {
         LruCachePlus cache = redisManager.cache;
         String key = request.getParams().get(0).toString();
         ExpiredCache expiredCacheObject = cache.getValue(key);
-        //没有此缓存
-        if (expiredCacheObject == null) {
-            response.setResult(null);
-            return;
-        }
-
-        //缓存过期
-        if (expiredCacheObject.isExpired()) {
-            cache.remove(key);
-            response.setResult(null);
-            return;
-        }
         response.setResult(expiredCacheObject);
     });
 

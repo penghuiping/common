@@ -24,6 +24,10 @@ class RedisCmdDispatcher {
     private final Map<String, RedisCmdHandler> handlerMap = new HashMap<>();
     private final BlockingQueue<RedisCmdPair> buffer = new LinkedBlockingQueue<>();
     private LocalRedisManager redisManager;
+    /**
+     * 5分钟清除一次过期缓存
+     */
+    private static final long CLEAN_EXPIRED_KEY_INTERVAL = 300000L;
 
     public RedisCmdDispatcher() {
         this.singleConsumeWorker = new ThreadPoolExecutor(1, 1,
@@ -46,8 +50,7 @@ class RedisCmdDispatcher {
             while (true) {
                 try {
                     redisManager.cleanAllExpiredKeys();
-                    log.info("cache size:{}", redisManager.cache.size());
-                    Thread.sleep(5 * 60000L);
+                    Thread.sleep(CLEAN_EXPIRED_KEY_INTERVAL);
                 } catch (Exception e) {
                     log.error("redis缓存清理操作失败", e);
                 }

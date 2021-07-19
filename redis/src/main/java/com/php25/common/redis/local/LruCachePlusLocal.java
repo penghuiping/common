@@ -36,7 +36,15 @@ class LruCachePlusLocal extends LinkedHashMap<String, ExpiredCache> implements L
 
     @Override
     public ExpiredCache getValue(String key) {
-        return this.get(key);
+        ExpiredCache expiredCache = this.get(key);
+        if (null != expiredCache) {
+            if (expiredCache.isExpired()) {
+                //过期的缓存
+                this.remove(key);
+                return null;
+            }
+        }
+        return expiredCache;
     }
 
     @Override
