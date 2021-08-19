@@ -44,7 +44,7 @@
         <netty>4.1.52.Final</netty>
         <jjwt>0.10.7</jjwt>
         <trie>1.2.2</trie>
-        <jsoup>1.13.1</jsoup>
+        <jsoup>1.14.2</jsoup>
         <lombok>1.18.12</lombok>
 
         <php-common.db>V.2.5.1</php-common.db>
