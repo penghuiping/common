@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author penghuiping
@@ -27,7 +28,8 @@ class RedisCmdDispatcher {
     /**
      * 5分钟清除一次过期缓存
      */
-    private static final long CLEAN_EXPIRED_KEY_INTERVAL = 300000L;
+    private static final long CLEAN_EXPIRED_KEY_INTERVAL = 60000L;
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public RedisCmdDispatcher() {
         this.singleConsumeWorker = new ThreadPoolExecutor(1, 1,
@@ -43,11 +45,36 @@ class RedisCmdDispatcher {
         this.init();
     }
 
+    public void stop() {
+        this.isRunning.compareAndSet(true, false);
+        this.singleConsumeWorker.shutdown();
+        try {
+            boolean res = this.singleConsumeWorker.awaitTermination(3, TimeUnit.SECONDS);
+            if (res) {
+                log.info("redis-cmd-consume-worker线程回收成功");
+            }
+        } catch (InterruptedException e) {
+            log.error("redis-cmd-consume-worker线程回收出错", e);
+            Thread.currentThread().interrupt();
+        }
+
+        this.singleExpireCacheWorker.shutdown();
+        try {
+            boolean res = this.singleConsumeWorker.awaitTermination(3, TimeUnit.SECONDS);
+            if (res) {
+                log.info("redis-expire-cache-worker线程回收成功");
+            }
+        } catch (InterruptedException e) {
+            log.error("redis-expire-cache-worker线程回收出错", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void setRedisManager(LocalRedisManager redisManager) {
         this.redisManager = redisManager;
         this.consumeRedisCmd();
         this.singleExpireCacheWorker.submit(() -> {
-            while (true) {
+            while (this.isRunning.get()) {
                 try {
                     redisManager.cleanAllExpiredKeys();
                     Thread.sleep(CLEAN_EXPIRED_KEY_INTERVAL);
@@ -130,7 +157,7 @@ class RedisCmdDispatcher {
 
     public void consumeRedisCmd() {
         this.singleConsumeWorker.submit(() -> {
-            while (true) {
+            while (this.isRunning.get()) {
                 try {
                     RedisCmdPair redisCmdPair = buffer.poll(1, TimeUnit.SECONDS);
                     if (null != redisCmdPair) {

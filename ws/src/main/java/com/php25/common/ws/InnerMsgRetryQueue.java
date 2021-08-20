@@ -8,8 +8,10 @@ import com.php25.common.core.util.JsonUtil;
 import com.php25.common.timer.Job;
 import com.php25.common.timer.Timer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
@@ -29,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 20/8/11 10:50
  */
 @Slf4j
-public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
+public class InnerMsgRetryQueue implements InitializingBean, ApplicationListener<ContextClosedEvent> {
 
     private final BlockingQueue<BaseRetryMsg> noDelayQueue = new LinkedBlockingQueue<>();
 
@@ -65,17 +67,20 @@ public class InnerMsgRetryQueue implements InitializingBean, DisposableBean {
     }
 
     @Override
-    public void destroy() {
+    public void onApplicationEvent(@NotNull ContextClosedEvent contextClosedEvent) {
         try {
             isRunning.compareAndSet(true, false);
-            boolean res = this.singleThreadExecutorNoDelay.awaitTermination(1, TimeUnit.SECONDS);
+            this.singleThreadExecutorNoDelay.shutdown();
+            boolean res = this.singleThreadExecutorNoDelay.awaitTermination(3, TimeUnit.SECONDS);
             if (res) {
                 log.info("关闭ws:singleThreadExecutorNoDelay成功");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.error("关闭ws:singleThreadExecutorNoDelay出错", e);
+            Thread.currentThread().interrupt();
         }
     }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

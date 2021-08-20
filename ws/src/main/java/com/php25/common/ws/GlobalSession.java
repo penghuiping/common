@@ -10,8 +10,10 @@ import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Job;
 import com.php25.common.timer.Timer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -24,7 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class GlobalSession implements InitializingBean, DisposableBean {
+public class GlobalSession implements InitializingBean, ApplicationListener<ContextClosedEvent> {
     //此session缓存用于缓存自定义的sessionId与WebSocket对应关系,全局应用sessionId
     private final ConcurrentHashMap<String, ExpirationSocketSession> sessions = new ConcurrentHashMap<>(1024);
 
@@ -71,19 +73,20 @@ public class GlobalSession implements InitializingBean, DisposableBean {
         this.messageQueueManager = messageQueueManager;
     }
 
+
     @Override
-    public void destroy() throws Exception {
+    public void onApplicationEvent(@NotNull ContextClosedEvent contextClosedEvent) {
         cleanAll();
         try {
-            boolean res = this.executorService.awaitTermination(1, TimeUnit.SECONDS);
+            this.executorService.shutdown();
+            boolean res = this.executorService.awaitTermination(3, TimeUnit.SECONDS);
             if (res) {
                 log.info("关闭ws:ws-worker-thread-pool成功");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.error("关闭ws:ws-worker-thread-pool出错", e);
+            Thread.currentThread().interrupt();
         }
-
-
     }
 
     @Override

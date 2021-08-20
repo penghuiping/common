@@ -61,7 +61,7 @@ public class ExpirationSocketSession {
     }
 
     public void stop() {
-        isRunning.set(false);
+        isRunning.compareAndSet(true, false);
     }
 
     public void put(BaseRetryMsg baseRetryMsg) {

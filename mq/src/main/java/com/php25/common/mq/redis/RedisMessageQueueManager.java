@@ -62,7 +62,7 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-message-queue-manager-thread").build());
-        this.subscriberThreadPool = new ThreadPoolExecutor(1, 20,
+        this.subscriberThreadPool = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors(),
                 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-subscriber-thread-%d").build());
@@ -70,27 +70,32 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
     }
 
     @Override
-    public void destroy() {
+    public void destroy() throws Exception {
         for (RedisMessageSubscriber subscriber : this.subscribers) {
             subscriber.stop();
         }
         this.isRunning.compareAndSet(true, false);
+
         try {
-            boolean res = this.subscriberThreadPool.awaitTermination(1, TimeUnit.SECONDS);
+            this.subscriberThreadPool.shutdown();
+            boolean res = this.subscriberThreadPool.awaitTermination(3, TimeUnit.SECONDS);
             if (res) {
                 log.info("mq:subscriberThreadPool关闭成功");
             }
         } catch (Exception e) {
             log.error("mq:subscriberThreadPool关闭出错", e);
+            Thread.currentThread().interrupt();
         }
 
         try {
-            boolean res = this.singleThreadPool.awaitTermination(1, TimeUnit.SECONDS);
+            this.singleThreadPool.shutdown();
+            boolean res = this.singleThreadPool.awaitTermination(3, TimeUnit.SECONDS);
             if (res) {
                 log.info("mq:RedisMessageQueueManager:singleThreadPool关闭成功");
             }
         } catch (Exception e) {
             log.error("mq:RedisMessageQueueManager:singleThreadPool关闭出错", e);
+            Thread.currentThread().interrupt();
         }
     }
 

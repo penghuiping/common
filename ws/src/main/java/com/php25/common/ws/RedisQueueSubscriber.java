@@ -7,8 +7,10 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ExecutorService;
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2020/08/10
  */
 @Slf4j
-public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
+public class RedisQueueSubscriber implements InitializingBean, ApplicationListener<ContextClosedEvent> {
 
     private final RedisManager redisService;
 
@@ -55,17 +57,18 @@ public class RedisQueueSubscriber implements InitializingBean, DisposableBean {
         this.run();
     }
 
-
     @Override
-    public void destroy() throws Exception {
+    public void onApplicationEvent(@NotNull ContextClosedEvent contextClosedEvent) {
         try {
             isRunning.compareAndSet(true, false);
-            boolean res = this.singleThreadExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            this.singleThreadExecutor.shutdown();
+            boolean res = this.singleThreadExecutor.awaitTermination(3, TimeUnit.SECONDS);
             if (res) {
                 log.info("关闭ws:RedisQueueSubscriber成功");
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.error("关闭ws:RedisQueueSubscriber出错", e);
+            Thread.currentThread().interrupt();
         }
         unRegisterRedisQueue();
     }

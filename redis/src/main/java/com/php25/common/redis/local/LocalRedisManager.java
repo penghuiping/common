@@ -10,6 +10,7 @@ import com.php25.common.redis.RSet;
 import com.php25.common.redis.RSortedSet;
 import com.php25.common.redis.RString;
 import com.php25.common.redis.RedisManager;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author penghuiping
  * @date 2021/2/24 16:09
  */
-public class LocalRedisManager implements RedisManager {
+public class LocalRedisManager implements RedisManager, DisposableBean {
     LruCachePlus cache;
 
     RString rString;
@@ -48,6 +49,11 @@ public class LocalRedisManager implements RedisManager {
         CmdResponse cmdResponse = new CmdResponse();
         this.redisCmdDispatcher.dispatch(cmdRequest, cmdResponse);
         cmdResponse.getResult(Constants.TIME_OUT, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        this.redisCmdDispatcher.stop();
     }
 
     @Override
