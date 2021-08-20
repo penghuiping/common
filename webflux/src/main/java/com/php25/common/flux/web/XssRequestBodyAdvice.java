@@ -1,12 +1,13 @@
 package com.php25.common.flux.web;
 
-/**
+/*
  * @author penghuiping
  * @date 2019/12/26 09:07
  */
 
 import com.google.common.base.Charsets;
 import com.php25.common.core.exception.Exceptions;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -33,12 +34,13 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
     private static final Logger log = LoggerFactory.getLogger(XssRequestBodyAdvice.class);
 
     @Override
-    public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(@NotNull MethodParameter methodParameter, @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
+    @NotNull
     @Override
-    public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
+    public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, @NotNull MethodParameter parameter, @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
         InputStream inputStream = inputMessage.getBody();
         ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
         ByteBuffer buff = ByteBuffer.allocate(512);
@@ -56,11 +58,13 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
         boolean result = Jsoup.isValid(content.toString(), this.configWhiteList());
         if (result) {
             return new HttpInputMessage() {
+                @NotNull
                 @Override
-                public InputStream getBody() throws IOException {
+                public InputStream getBody() {
                     return new ByteArrayInputStream(result1.getBytes(Charsets.UTF_8));
                 }
 
+                @NotNull
                 @Override
                 public HttpHeaders getHeaders() {
                     return inputMessage.getHeaders();

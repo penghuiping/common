@@ -12,6 +12,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -19,11 +20,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoField;
 
 /**
- * @author: penghuiping
- * @date: 2019/8/5 13:35
- * @description:
+ * 调用链埋点aop方式，对注解 com.php25.common.flux.trace.annotation.Traced 进行相关注入操作
+ *
+ * @author penghuiping
+ * @date 2019/8/5 13:35
  */
 @Aspect
+@ConditionalOnBean(value = {Tracer.class})
 @Component
 public class TracedProcess {
 
@@ -38,11 +41,11 @@ public class TracedProcess {
 
     @Around("tracedAnnotation()")
     public Object traceThing(ProceedingJoinPoint pjp) throws Throwable {
-        ScopedSpan span = null;
+        ScopedSpan span;
         long start = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
         long end = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);
-        log.info("Traced:{},方法名:{},耗时:{}ms",tracer.currentSpan(),method.getName(),end-start);
+        log.info("Traced:{},方法名:{},耗时:{}ms", tracer.currentSpan(), method.getName(), end - start);
         Traced traced = method.getDeclaredAnnotation(Traced.class);
         if (null == traced || StringUtil.isBlank(traced.spanName())) {
             span = tracer.startScopedSpan(method.getName());

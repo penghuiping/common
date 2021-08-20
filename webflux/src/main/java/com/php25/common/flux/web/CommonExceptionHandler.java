@@ -3,6 +3,7 @@ package com.php25.common.flux.web;
 import com.php25.common.core.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -13,15 +14,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintDeclarationException;
 import javax.validation.ConstraintViolationException;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/18 09:41
- * @description:
+ * 统一异常处理
+ *
+ * @author penghuiping
+ * @date 2019/7/18 09:41
  */
+@SuppressWarnings("rawtypes")
 @RestControllerAdvice
+@ConditionalOnClass(HttpServletRequest.class)
 public class CommonExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CommonExceptionHandler.class);

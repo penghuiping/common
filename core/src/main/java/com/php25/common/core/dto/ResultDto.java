@@ -3,9 +3,10 @@ package com.php25.common.core.dto;
 import com.php25.common.core.exception.BusinessErrorStatus;
 
 /**
- * @author: penghuiping
- * @date: 2019/1/2 14:20
- * @description:
+ * 用于函数方法返回错误码
+ *
+ * @author penghuiping
+ * @date 2019/1/2 14:20
  */
 public class ResultDto<T> {
 
@@ -25,15 +26,31 @@ public class ResultDto<T> {
     }
 
     public static <T> ResultDto<T> error(BusinessErrorStatus error) {
-        ResultDto<T> res = new ResultDto<T>();
+        ResultDto<T> res = new ResultDto<>();
         res.error = error;
         return res;
     }
 
     public static <T> ResultDto<T> ok(T data) {
-        ResultDto<T> res = new ResultDto<T>();
+        ResultDto<T> res = new ResultDto<>();
         res.data = data;
         return res;
+    }
+
+
+    public static <T> ResultDto<T> error(String code, String description) {
+        BusinessErrorStatus businessErrorStatus = new BusinessErrorStatus() {
+            @Override
+            public String getCode() {
+                return code;
+            }
+
+            @Override
+            public String getDesc() {
+                return description;
+            }
+        };
+        return error(businessErrorStatus);
     }
 
 
