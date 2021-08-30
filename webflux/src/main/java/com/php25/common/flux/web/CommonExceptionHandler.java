@@ -31,42 +31,14 @@ public class CommonExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CommonExceptionHandler.class);
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<JSONResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("请求访问参数错误!!", e);
-        FieldError fieldError = e.getBindingResult().getFieldError();
-        JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
-        if (fieldError == null) {
-            jsonResponse.setMessage("input_params_error");
-        } else {
-            jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
-        }
-        return ResponseEntity.ok(jsonResponse);
-    }
-
-    @ExceptionHandler(WebExchangeBindException.class)
-    public ResponseEntity<JSONResponse> handleWebExchangeBindException(WebExchangeBindException e) {
-        log.error("请求访问参数错误!!", e);
-        JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
-        FieldError fieldError = e.getFieldError();
-        if (fieldError == null) {
-            jsonResponse.setMessage("input_params_error");
-        } else {
-            jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
-        }
-        return ResponseEntity.ok(jsonResponse);
-    }
-
-    @ExceptionHandler(value = {BindException.class})
+    @ExceptionHandler(value = {BindException.class, WebExchangeBindException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<JSONResponse> handleBindException(BindException e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.getCode());
         FieldError fieldError = e.getFieldError();
         if (fieldError == null) {
-            jsonResponse.setMessage("input_params_error");
+            jsonResponse.setMessage(ApiErrorCode.input_params_error.getDesc());
         } else {
             jsonResponse.setMessage(fieldError.getField() + fieldError.getDefaultMessage());
         }
@@ -77,7 +49,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleInputParamsError(Exception e) {
         log.error("请求访问参数错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.input_params_error.value);
+        jsonResponse.setCode(ApiErrorCode.input_params_error.getCode());
         jsonResponse.setMessage(e.getMessage());
         return ResponseEntity.ok(jsonResponse);
     }
@@ -86,8 +58,8 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.error("请求http_request_method方式错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.http_method_not_support.value);
-        jsonResponse.setMessage("http_request_method_not_supported");
+        jsonResponse.setCode(ApiErrorCode.http_method_not_support.getCode());
+        jsonResponse.setMessage(ApiErrorCode.http_method_not_support.getDesc());
         return ResponseEntity.ok(jsonResponse);
     }
 
@@ -104,8 +76,8 @@ public class CommonExceptionHandler {
     public ResponseEntity<JSONResponse> handleException(Exception e) {
         log.error("服务器未知错误!!", e);
         JSONResponse jsonResponse = new JSONResponse();
-        jsonResponse.setCode(ApiErrorCode.unknown_error.value);
-        jsonResponse.setMessage("unknown_error");
+        jsonResponse.setCode(ApiErrorCode.unknown_error.getCode());
+        jsonResponse.setMessage(ApiErrorCode.unknown_error.getDesc());
         return ResponseEntity.ok(jsonResponse);
     }
 }

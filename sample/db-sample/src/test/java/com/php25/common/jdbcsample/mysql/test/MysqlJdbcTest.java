@@ -315,7 +315,9 @@ public class MysqlJdbcTest extends DbTest {
 
         Customer customer1 = new Customer();
         customer1.setUsername("jack0");
-        QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).update(Queries.mysql().from(Customer.class).whereEq("username", "jack-0").update(customer1));
+        SqlParams sqlParams = Queries.mysql().from(Customer.class).whereEq("username", "jack-0")
+                .update(customer1);
+        QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).update(sqlParams);
         customer = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).single(Queries.mysql().from(Customer.class).whereEq("username", "jack0").single());
         Assertions.assertThat(customer).isNotNull();
     }

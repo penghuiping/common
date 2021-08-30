@@ -41,6 +41,15 @@ public class TwoPhaseCommitTransaction {
                 .build());
     }
 
+    public void stop() {
+        this.executor.shutdown();
+        try {
+            this.executor.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            //todo
+        }
+    }
+
     public <T> List<T> execute(TransactionCallback<T>... transactionCallbacks) {
         return this.execute(Lists.newArrayList(transactionCallbacks));
     }
