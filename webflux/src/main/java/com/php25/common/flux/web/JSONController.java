@@ -34,7 +34,7 @@ public class JSONController {
 
     protected <T> JSONResponse<T> succeed(T obj) {
         JSONResponse<T> ret = new JSONResponse<>();
-        ret.setCode(ApiErrorCode.ok.value);
+        ret.setCode(ApiErrorCode.ok.getCode());
         ret.setData(obj);
         ret.setMessage("success");
         return ret;
