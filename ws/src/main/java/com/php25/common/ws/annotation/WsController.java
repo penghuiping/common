@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.annotation;
 
 import org.springframework.stereotype.Component;
 

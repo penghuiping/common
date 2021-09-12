@@ -9,6 +9,11 @@ import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Job;
 import com.php25.common.timer.Timer;
+import com.php25.common.ws.config.Constants;
+import com.php25.common.ws.protocal.BaseMsg;
+import com.php25.common.ws.protocal.SecurityAuthentication;
+import com.php25.common.ws.serializer.InternalMsgSerializer;
+import com.php25.common.ws.serializer.VueMsgSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,16 +31,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class GlobalSession implements InitializingBean, ApplicationListener<ContextClosedEvent> {
-    //此session缓存用于缓存自定义的sessionId与WebSocket对应关系,全局应用sessionId
+public class SessionContext implements InitializingBean, ApplicationListener<ContextClosedEvent> {
+    /**
+     * 此session缓存用于缓存自定义的sessionId与WebSocket对应关系,全局应用sessionId
+     */
     private final ConcurrentHashMap<String, ExpirationSocketSession> sessions = new ConcurrentHashMap<>(1024);
 
-    //此session缓存用于缓存原来的sessionId与WebSocket对应关系,单个应用内部webSocketId
+    /**
+     * 此session缓存用于缓存原来的sessionId与WebSocket对应关系,单个应用内部webSocketId
+     */
     private final ConcurrentHashMap<String, ExpirationSocketSession> _sessions = new ConcurrentHashMap<>(1024);
 
     private final Timer timer;
 
-    private final InnerMsgRetryQueue msgRetry;
+    private final RetryMsgManager retryMsgManager;
 
     private final RedisManager redisService;
 
@@ -45,7 +54,7 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
 
     private final SecurityAuthentication securityAuthentication;
 
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     private final MsgDispatcher msgDispatcher;
 
@@ -57,20 +66,24 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
         return serverId;
     }
 
-    public GlobalSession(InnerMsgRetryQueue msgRetry,
-                         RedisManager redisService,
-                         SecurityAuthentication securityAuthentication,
-                         String serverId,
-                         MsgDispatcher msgDispatcher,
-                         Timer timer,
-                         MessageQueueManager messageQueueManager) {
-        this.msgRetry = msgRetry;
+    public SessionContext(RetryMsgManager retryMsgManager,
+                          RedisManager redisService,
+                          SecurityAuthentication securityAuthentication,
+                          String serverId,
+                          MsgDispatcher msgDispatcher,
+                          Timer timer,
+                          MessageQueueManager messageQueueManager) {
+        this.retryMsgManager = retryMsgManager;
         this.redisService = redisService;
         this.serverId = serverId;
         this.securityAuthentication = securityAuthentication;
         this.msgDispatcher = msgDispatcher;
         this.timer = timer;
         this.messageQueueManager = messageQueueManager;
+        int cpuNum = Runtime.getRuntime().availableProcessors();
+        this.executorService = new ThreadPoolExecutor(1, 2 * cpuNum,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("ws-worker-thread-%d").build(), new ThreadPoolExecutor.AbortPolicy());
     }
 
 
@@ -91,10 +104,6 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.executorService = new ThreadPoolExecutor(1, 512,
-                60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(), new ThreadFactoryBuilder().setNameFormat("ws-worker-thread-%d").build(), new ThreadPoolExecutor.AbortPolicy());
-
         this.messageQueueManager.subscribe("ws_session", serverId, true, message -> {
             for (String key : sessions.keySet()) {
                 try {
@@ -105,10 +114,6 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
                 }
             }
         });
-    }
-
-    public void dispatchAck(String action, BaseRetryMsg srcMsg) {
-        msgDispatcher.dispatchAck(action, srcMsg);
     }
 
     protected void init(SidUid sidUid) {
@@ -130,6 +135,10 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
         redisService.remove(Constants.prefix + sid);
     }
 
+    public RetryMsgManager getRetryMsgManager() {
+        return retryMsgManager;
+    }
+
     public void cleanAll() {
         log.info("GlobalSession clean all...");
         Iterator<Map.Entry<String, ExpirationSocketSession>> iterator = sessions.entrySet().iterator();
@@ -143,17 +152,11 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
 
 
     protected void create(WebSocketSession webSocketSession) {
-        long now = System.currentTimeMillis();
-        ExpirationSocketSession expirationSocketSession = new ExpirationSocketSession();
-        expirationSocketSession.setTimestamp(now);
-        expirationSocketSession.setWebSocketSession(webSocketSession);
-        expirationSocketSession.setSessionId(generateUUID());
-        expirationSocketSession.setExecutorService(executorService);
-        expirationSocketSession.setMsgDispatcher(msgDispatcher);
+        ExpirationSocketSession expirationSocketSession = new ExpirationSocketSession(generateUUID(), webSocketSession, executorService, msgDispatcher);
         sessions.put(expirationSocketSession.getSessionId(), expirationSocketSession);
         _sessions.put(webSocketSession.getId(), expirationSocketSession);
 
-        ExpirationSessionCallback callback = new ExpirationSessionCallback(expirationSocketSession.getSessionId());
+        SessionExpiredCallback callback = new SessionExpiredCallback(expirationSocketSession.getSessionId());
         long executeTime = System.currentTimeMillis() + 30000L;
         Job job = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
         timer.add(job);
@@ -177,7 +180,7 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
         return null;
     }
 
-    protected ExpirationSocketSession getExpirationSocketSession(String sid) {
+    public ExpirationSocketSession getExpirationSocketSession(String sid) {
         return sessions.get(sid);
     }
 
@@ -188,12 +191,10 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
 
     protected void updateExpireTime(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
-        long now = System.currentTimeMillis();
-        expirationSocketSession.setTimestamp(now);
+        expirationSocketSession.refreshTime();
         timer.stop(sid);
-        ExpirationSessionCallback callback = new ExpirationSessionCallback(sid);
         long executeTime = System.currentTimeMillis() + 30000L;
-        Job job = new Job(expirationSocketSession.getSessionId(), executeTime, callback);
+        Job job = new Job(expirationSocketSession.getSessionId(), executeTime, expirationSocketSession.getCallback());
         timer.add(job);
     }
 
@@ -206,37 +207,25 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
     }
 
 
-    public void send(BaseRetryMsg baseRetryMsg) {
-        this.send(baseRetryMsg, true);
-    }
-
-    public void send(BaseRetryMsg baseRetryMsg, Boolean retry) {
-        if (baseRetryMsg instanceof ConnectionCreate || baseRetryMsg instanceof ConnectionClose) {
-            msgRetry.put(baseRetryMsg);
-            return;
-        }
-
-        String sid = baseRetryMsg.getSessionId();
+    public void send(BaseMsg baseMsg) {
+        String sid = baseMsg.getSessionId();
         try {
             if (StringUtil.isBlank(sid)) {
                 //没有指定sid,则认为进行全局广播，并且广播消息不会重试
-                Message message = new Message(RandomUtil.randomUUID(), vueMsgSerializer.from(baseRetryMsg));
+                Message message = new Message(RandomUtil.randomUUID(), vueMsgSerializer.from(baseMsg));
                 messageQueueManager.send("ws_session", message);
             } else {
                 //现看看sid是否本地存在
                 if (this.sessions.containsKey(sid)) {
                     //本地存在,直接通过本地session发送
                     WebSocketSession socketSession = sessions.get(sid).getWebSocketSession();
-                    socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseRetryMsg)));
-                    if (retry) {
-                        msgRetry.put(baseRetryMsg);
-                    }
+                    socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseMsg)));
                 } else {
-                    //获取远程session
+                    //获取远程session,并往redis推送
                     SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
                     String serverId = sidUid.getServerId();
                     RList<String> rList = redisService.list(Constants.prefix + serverId, String.class);
-                    rList.leftPush(internalMsgSerializer.from(baseRetryMsg));
+                    rList.leftPush(internalMsgSerializer.from(baseMsg));
                 }
             }
         } catch (Exception e) {
@@ -247,18 +236,6 @@ public class GlobalSession implements InitializingBean, ApplicationListener<Cont
     public String authenticate(String token) {
         return this.securityAuthentication.authenticate(token);
     }
-
-    public void revokeRetry(BaseRetryMsg baseRetryMsg) {
-        //这里interval必须要大于0才能从重试队列中移除
-        baseRetryMsg.setInterval(1);
-        msgRetry.remove(baseRetryMsg);
-        timer.stop(baseRetryMsg.msgId + baseRetryMsg.getAction());
-    }
-
-    public BaseRetryMsg getMsg(String msgId, String action) {
-        return this.msgRetry.get(msgId, action);
-    }
-
 
     protected ConcurrentHashMap<String, ExpirationSocketSession> getAllExpirationSessions() {
         return this.sessions;

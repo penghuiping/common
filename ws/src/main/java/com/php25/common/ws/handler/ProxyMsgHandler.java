@@ -1,4 +1,7 @@
-package com.php25.common.ws;
+package com.php25.common.ws.handler;
+
+import com.php25.common.ws.SessionContext;
+import com.php25.common.ws.protocal.BaseMsg;
 
 import java.lang.reflect.Method;
 
@@ -6,7 +9,7 @@ import java.lang.reflect.Method;
  * @author penghuiping
  * @date 2020/9/4 13:37
  */
-public class ProxyMsgHandler implements MsgHandler<BaseRetryMsg> {
+public class ProxyMsgHandler implements MsgHandler<BaseMsg> {
 
     private final Object srcObject;
 
@@ -21,7 +24,7 @@ public class ProxyMsgHandler implements MsgHandler<BaseRetryMsg> {
     }
 
     @Override
-    public void handle(GlobalSession session,BaseRetryMsg msg) throws Exception {
+    public void handle(SessionContext session, BaseMsg msg) throws Exception {
         this.srcObjectMethod.invoke(cls.cast(this.srcObject), session, msg);
     }
 }

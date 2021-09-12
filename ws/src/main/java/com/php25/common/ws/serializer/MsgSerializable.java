@@ -1,5 +1,7 @@
-package com.php25.common.ws;
+package com.php25.common.ws.serializer;
 
+
+import com.php25.common.ws.protocal.BaseMsg;
 
 /**
  * @author penghuiping
@@ -10,8 +12,8 @@ public interface MsgSerializable {
     /**
      * 把对象转化为字符串
      *
-     * @param baseRetryMsg
+     * @param baseMsg
      * @return
      */
-    String from(BaseRetryMsg baseRetryMsg);
+    String from(BaseMsg baseMsg);
 }

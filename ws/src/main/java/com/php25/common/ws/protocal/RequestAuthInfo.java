@@ -1,5 +1,6 @@
-package com.php25.common.ws;
+package com.php25.common.ws.protocal;
 
+import com.php25.common.ws.annotation.WsMsg;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,5 +11,5 @@ import lombok.Setter;
 @Setter
 @Getter
 @WsMsg(action = "request_auth_info")
-public class RequestAuthInfo extends BaseRetryMsg {
+public class RequestAuthInfo extends BaseMsg {
 }

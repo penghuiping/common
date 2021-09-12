@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,11 +8,14 @@ import java.lang.annotation.Target;
 
 /**
  * @author penghuiping
- * @date 2020/11/5 16:19
+ * @date 2020/9/4 13:41
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface WsMsg {
-    String action() default "";
+public @interface WsAction {
+
+    String value();
+
+    boolean isReplyACK() default false;
 }

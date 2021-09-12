@@ -1,60 +1,67 @@
 package com.php25.common.ws;
 
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.ws.protocal.BaseMsg;
+import com.php25.common.ws.protocal.ConnectionClose;
+import com.php25.common.ws.protocal.ConnectionCreate;
+import com.php25.common.ws.protocal.Ping;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-
+/**
+ * websocket的消息通讯的入口
+ *
+ * @author penghuiping
+ * @date 2021-08-28
+ */
 @Slf4j
 public class WebsocketHandler extends TextWebSocketHandler {
 
-    private final GlobalSession globalSession;
 
-    private final InnerMsgRetryQueue innerMsgRetryQueue;
+    private final SessionContext sessionContext;
 
-    public WebsocketHandler(GlobalSession globalSession, InnerMsgRetryQueue innerMsgRetryQueue) {
-        this.globalSession = globalSession;
-        this.innerMsgRetryQueue = innerMsgRetryQueue;
+    public WebsocketHandler(SessionContext sessionContext) {
+        this.sessionContext = sessionContext;
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        BaseRetryMsg baseRetryMsg = JsonUtil.fromJson(payload, BaseRetryMsg.class);
-        if (!(baseRetryMsg instanceof Ping)) {
-            log.info("ws request msg:{}", JsonUtil.toJson(baseRetryMsg));
+        BaseMsg baseMsg = JsonUtil.fromJson(payload, BaseMsg.class);
+        if (!(baseMsg instanceof Ping)) {
+            log.info("ws request msg:{}", JsonUtil.toJson(baseMsg));
         }
-        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        ExpirationSocketSession expirationSocketSession = this.sessionContext.getExpirationSocketSession(session);
         if (null == expirationSocketSession) {
-            log.info("expirationSocketSession is null:{}", JsonUtil.toJson(baseRetryMsg));
+            log.info("expirationSocketSession is null:{}", JsonUtil.toJson(baseMsg));
             return;
         }
-        baseRetryMsg.setSessionId(expirationSocketSession.getSessionId());
-        innerMsgRetryQueue.put(baseRetryMsg);
+        baseMsg.setSessionId(expirationSocketSession.getSessionId());
+        expirationSocketSession.put(baseMsg);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         ConnectionClose connectionClose = new ConnectionClose();
-        connectionClose.setMsgId(globalSession.generateUUID());
-        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        connectionClose.setMsgId(this.sessionContext.generateUUID());
+        ExpirationSocketSession expirationSocketSession = this.sessionContext.getExpirationSocketSession(session);
         connectionClose.setSessionId(expirationSocketSession.getSessionId());
-        globalSession.send(connectionClose);
+        expirationSocketSession.put(connectionClose);
     }
 
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         //websocket连接建立
-        globalSession.create(session);
+        this.sessionContext.create(session);
         ConnectionCreate connectionCreate = new ConnectionCreate();
-        connectionCreate.setMsgId(globalSession.generateUUID());
-        ExpirationSocketSession expirationSocketSession = globalSession.getExpirationSocketSession(session);
+        connectionCreate.setMsgId(this.sessionContext.generateUUID());
+        ExpirationSocketSession expirationSocketSession = this.sessionContext.getExpirationSocketSession(session);
         connectionCreate.setSessionId(expirationSocketSession.getSessionId());
-        globalSession.send(connectionCreate);
+        expirationSocketSession.put(connectionCreate);
     }
 
 

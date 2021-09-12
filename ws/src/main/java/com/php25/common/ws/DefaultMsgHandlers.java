@@ -1,5 +1,16 @@
 package com.php25.common.ws;
 
+import com.php25.common.ws.annotation.WsAction;
+import com.php25.common.ws.annotation.WsController;
+import com.php25.common.ws.protocal.Ack;
+import com.php25.common.ws.protocal.BaseMsg;
+import com.php25.common.ws.protocal.ConnectionClose;
+import com.php25.common.ws.protocal.ConnectionCreate;
+import com.php25.common.ws.protocal.Ping;
+import com.php25.common.ws.protocal.Pong;
+import com.php25.common.ws.protocal.ReplyAuthInfo;
+import com.php25.common.ws.protocal.RequestAuthInfo;
+import com.php25.common.ws.protocal.SubmitAuthInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -9,24 +20,16 @@ import org.springframework.web.socket.WebSocketSession;
  */
 @Slf4j
 @WsController
-public class InternalMsgHandlers {
+public class DefaultMsgHandlers {
 
     @WsAction("ack")
-    public void ackHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void ackHandler(SessionContext session, BaseMsg msg) throws Exception {
         Ack ack = (Ack) msg;
-        BaseRetryMsg srcMsg = session.getMsg(ack.getMsgId(), ack.getReplyAction());
-        if (null == srcMsg) {
-            return;
-        }
-        session.dispatchAck(ack.getReplyAction(), srcMsg);
-        BaseRetryMsg baseRetryMsg = new BaseRetryMsg();
-        baseRetryMsg.setMsgId(msg.getMsgId());
-        baseRetryMsg.setAction(ack.getReplyAction());
-        session.revokeRetry(baseRetryMsg);
+        session.getRetryMsgManager().remove(ack.getMsgId());
     }
 
     @WsAction("connection_close")
-    public void connectionCloseHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void connectionCloseHandler(SessionContext session, BaseMsg msg) throws Exception {
         ConnectionClose requestClose = (ConnectionClose) msg;
         WebSocketSession webSocketSession = session.get(msg.getSessionId());
         if (null != webSocketSession && webSocketSession.isOpen()) {
@@ -37,56 +40,49 @@ public class InternalMsgHandlers {
     }
 
     @WsAction("connection_create")
-    public void connectionCreateHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void connectionCreateHandler(SessionContext session, BaseMsg msg) throws Exception {
         ConnectionCreate connectionCreate = (ConnectionCreate) msg;
         //发送身份认证请求
         RequestAuthInfo requestAuthInfo = new RequestAuthInfo();
         requestAuthInfo.setMsgId(connectionCreate.getMsgId());
         requestAuthInfo.setSessionId(msg.getSessionId());
-        requestAuthInfo.setInterval(5000);
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
         session.send(requestAuthInfo);
+        session.getRetryMsgManager().put(requestAuthInfo, value -> {
+            ConnectionClose connectionClose = new ConnectionClose();
+            connectionClose.setMsgId(session.generateUUID());
+            connectionClose.setSessionId(value.getSessionId());
+            ExpirationSocketSession expirationSocketSession = session.getExpirationSocketSession(value.getSessionId());
+            expirationSocketSession.put(connectionClose);
+        });
     }
 
     @WsAction("ping")
-    public void pingHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void pingHandler(SessionContext session, BaseMsg msg) throws Exception {
         Ping ping = (Ping) msg;
         session.updateExpireTime(ping.getSessionId());
         Pong pong = new Pong();
         pong.setMsgId(ping.getMsgId());
         pong.setSessionId(ping.getSessionId());
-        pong.setMaxRetry(1);
-        session.send(pong, false);
+        session.send(pong);
     }
 
     @WsAction("reply_auth_info")
-    public void replyAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void replyAuthInfoHandler(SessionContext session, BaseMsg msg) throws Exception {
         ReplyAuthInfo replyAuthInfo = (ReplyAuthInfo) msg;
-        replyAuthInfo.setCount(replyAuthInfo.getCount() + 1);
         replyAuthInfo.setTimestamp(System.currentTimeMillis());
-        replyAuthInfo.setInterval(5000);
         session.send(replyAuthInfo);
     }
 
     @WsAction("request_auth_info")
-    public void requestAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void requestAuthInfoHandler(SessionContext session, BaseMsg msg) throws Exception {
         RequestAuthInfo requestAuthInfo = (RequestAuthInfo) msg;
-        requestAuthInfo.setCount(requestAuthInfo.getCount() + 1);
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
-        requestAuthInfo.setInterval(5000);
-        //第5次 断开连接
-        if (requestAuthInfo.getCount() > 4) {
-            ConnectionClose connectionClose = new ConnectionClose();
-            connectionClose.setMsgId(session.generateUUID());
-            connectionClose.setSessionId(msg.sessionId);
-            session.send(connectionClose);
-            return;
-        }
         session.send(requestAuthInfo);
     }
 
     @WsAction("submit_auth_info")
-    public void submitAuthInfoHandler(GlobalSession session, BaseRetryMsg msg) throws Exception {
+    public void submitAuthInfoHandler(SessionContext session, BaseMsg msg) throws Exception {
         SubmitAuthInfo submitAuthInfo = (SubmitAuthInfo) msg;
         String uid = session.authenticate(submitAuthInfo.getToken());
         SidUid sidUid = new SidUid();
@@ -94,13 +90,9 @@ public class InternalMsgHandlers {
         sidUid.setSessionId(msg.getSessionId());
         sidUid.setUserId(uid);
         session.init(sidUid);
-
-        RequestAuthInfo requestAuthInfo = new RequestAuthInfo();
-        requestAuthInfo.setMsgId(msg.getMsgId());
-        session.revokeRetry(requestAuthInfo);
+        session.getRetryMsgManager().remove(msg.getMsgId());
 
         ReplyAuthInfo replyAuthInfo = new ReplyAuthInfo();
-        replyAuthInfo.setInterval(5000);
         replyAuthInfo.setMsgId(msg.getMsgId());
         replyAuthInfo.setSessionId(msg.getSessionId());
         replyAuthInfo.setUid(uid);

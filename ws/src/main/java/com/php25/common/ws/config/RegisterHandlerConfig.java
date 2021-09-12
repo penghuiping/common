@@ -1,9 +1,16 @@
-package com.php25.common.ws;
+package com.php25.common.ws.config;
 
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.jsontype.SubtypeResolver;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
+import com.php25.common.ws.MsgDispatcher;
+import com.php25.common.ws.WsException;
+import com.php25.common.ws.annotation.WsAction;
+import com.php25.common.ws.annotation.WsController;
+import com.php25.common.ws.annotation.WsMsg;
+import com.php25.common.ws.handler.ProxyMsgHandler;
+import com.php25.common.ws.protocal.BaseMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
@@ -84,13 +91,8 @@ public class RegisterHandlerConfig {
                     if (null != wsAction) {
                         //是需要找的方法
                         String action = wsAction.value();
-                        if (!wsAction.isReplyACK()) {
-                            ProxyMsgHandler proxyMsgHandler = new ProxyMsgHandler(obj, method, cls);
-                            msgDispatcher.registerHandler(action, proxyMsgHandler);
-                        } else {
-                            ProxyReplyAckHandler proxyReplyAckHandler = new ProxyReplyAckHandler(obj, method);
-                            msgDispatcher.registerAckHandler(action, proxyReplyAckHandler);
-                        }
+                        ProxyMsgHandler proxyMsgHandler = new ProxyMsgHandler(obj, method, cls);
+                        msgDispatcher.registerHandler(action, proxyMsgHandler);
                     }
                 }
             }
@@ -103,10 +105,10 @@ public class RegisterHandlerConfig {
     private void loadMessage(List<Class<?>> classes) {
         try {
             SubtypeResolver subtypeResolver = JsonUtil.getObjectMapper().getSubtypeResolver();
-            subtypeResolver.registerSubtypes(BaseRetryMsg.class);
+            subtypeResolver.registerSubtypes(BaseMsg.class);
             for (Class<?> cls : classes) {
                 Class<?> superCls = cls.getSuperclass();
-                if (superCls.equals(BaseRetryMsg.class)) {
+                if (superCls.equals(BaseMsg.class)) {
                     WsMsg wsMsg = cls.getDeclaredAnnotation(WsMsg.class);
                     String action = wsMsg.action();
                     if (!StringUtil.isBlank(action)) {

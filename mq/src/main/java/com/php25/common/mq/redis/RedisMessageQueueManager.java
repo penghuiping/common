@@ -159,10 +159,11 @@ public class RedisMessageQueueManager implements MessageQueueManager, Initializi
                             Message message = this.pull(queue);
                             Set<String> groups0 = groups.members();
                             for (String group : groups0) {
-                                if (!this.helper.groupIsValid(group)) {
-                                    groups.remove(group);
-                                    continue;
-                                }
+                                //todo 需要移除 非正常组
+//                                if (!this.helper.groupIsValid(group)) {
+//                                    groups.remove(group);
+//                                    continue;
+//                                }
                                 RList<Message> rList = this.helper.group(group);
                                 rList.leftPush(message);
                             }

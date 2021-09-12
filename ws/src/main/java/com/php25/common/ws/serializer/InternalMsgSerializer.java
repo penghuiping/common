@@ -1,7 +1,8 @@
-package com.php25.common.ws;
+package com.php25.common.ws.serializer;
 
 
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.ws.protocal.BaseMsg;
 
 /**
  * @author penghuiping
@@ -10,7 +11,7 @@ import com.php25.common.core.util.JsonUtil;
 public class InternalMsgSerializer implements MsgSerializable {
 
     @Override
-    public String from(BaseRetryMsg baseRetryMsg) {
+    public String from(BaseMsg baseRetryMsg) {
         return JsonUtil.toJson(baseRetryMsg);
     }
 }
