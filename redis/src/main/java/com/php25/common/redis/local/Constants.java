@@ -13,6 +13,8 @@ class Constants {
      */
     static final Long DEFAULT_EXPIRED_TIME = LocalDateTime.of(2099, 12, 31, 23, 59, 59).toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 
+    static final Long UNEXPIRED = -1L;
+
     static final int TIME_OUT = 5;
 
 }

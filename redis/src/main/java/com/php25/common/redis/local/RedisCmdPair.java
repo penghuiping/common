@@ -10,6 +10,9 @@ class RedisCmdPair {
 
     private CmdResponse response;
 
+    public RedisCmdPair() {
+    }
+
     public RedisCmdPair(CmdRequest request, CmdResponse response) {
         this.request = request;
         this.response = response;

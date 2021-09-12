@@ -1,15 +1,20 @@
 package com.php25.common.redis.local;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.WaitStrategy;
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,66 +25,55 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 class RedisCmdDispatcher {
     private static final Logger log = LoggerFactory.getLogger(RedisCmdDispatcher.class);
-    private final ExecutorService singleConsumeWorker;
     private final ExecutorService singleExpireCacheWorker;
-    private final Map<String, RedisCmdHandler> handlerMap = new HashMap<>();
-    private final BlockingQueue<RedisCmdPair> buffer = new LinkedBlockingQueue<>();
+    private final Map<String, RedisCmdHandler> handlerMap = new HashMap<>(128);
+    private final Disruptor<RedisCmdPair> disruptor;
     private LocalRedisManager redisManager;
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
     /**
      * 5分钟清除一次过期缓存
      */
     private static final long CLEAN_EXPIRED_KEY_INTERVAL = 60000L;
-    private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public RedisCmdDispatcher() {
-        this.singleConsumeWorker = new ThreadPoolExecutor(1, 1,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactoryBuilder().setNameFormat("redis-cmd-consume-worker-%d")
-                        .build());
+        WaitStrategy strategy = new BlockingWaitStrategy();
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("redis-cmd-consume-worker-%d").build();
+        this.disruptor =
+                new Disruptor<>(RedisCmdPair::new, 1024, threadFactory, ProducerType.MULTI, strategy);
+        disruptor.handleEventsWith((redisCmdPair, sequence, endOfBatch) -> {
+            RedisCmdHandler redisCmdHandler = handlerMap.get(redisCmdPair.getRequest().getCmd());
+            redisCmdHandler.handle(this.redisManager, redisCmdPair.getRequest(), redisCmdPair.getResponse());
+        });
+        disruptor.start();
+
         this.singleExpireCacheWorker = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactoryBuilder().setNameFormat("redis-expire-cache-worker-%d")
+                new ArrayBlockingQueue<>(128),
+                new ThreadFactoryBuilder().setDaemon(true).setNameFormat("redis-expire-cache-worker-%d")
                         .build());
         this.init();
     }
 
     public void stop() {
-        this.isRunning.compareAndSet(true, false);
-        this.singleConsumeWorker.shutdown();
-        try {
-            boolean res = this.singleConsumeWorker.awaitTermination(3, TimeUnit.SECONDS);
-            if (res) {
-                log.info("redis-cmd-consume-worker线程回收成功");
-            }
-        } catch (InterruptedException e) {
-            log.error("redis-cmd-consume-worker线程回收出错", e);
-            Thread.currentThread().interrupt();
-        }
-
+        disruptor.shutdown();
+        //定时清理过期对象线程，直接关闭不影响
         this.singleExpireCacheWorker.shutdown();
         try {
-            boolean res = this.singleConsumeWorker.awaitTermination(3, TimeUnit.SECONDS);
-            if (res) {
-                log.info("redis-expire-cache-worker线程回收成功");
-            }
+            this.singleExpireCacheWorker.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            log.error("redis-expire-cache-worker线程回收出错", e);
             Thread.currentThread().interrupt();
         }
     }
 
     public void setRedisManager(LocalRedisManager redisManager) {
         this.redisManager = redisManager;
-        this.consumeRedisCmd();
         this.singleExpireCacheWorker.submit(() -> {
             while (this.isRunning.get()) {
                 try {
                     redisManager.cleanAllExpiredKeys();
                     Thread.sleep(CLEAN_EXPIRED_KEY_INTERVAL);
-                } catch (Exception e) {
-                    log.error("redis缓存清理操作失败", e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
         });
@@ -151,24 +145,19 @@ class RedisCmdDispatcher {
     }
 
     public void dispatch(CmdRequest cmdRequest, CmdResponse cmdResponse) {
-        RedisCmdPair pair = new RedisCmdPair(cmdRequest, cmdResponse);
-        buffer.offer(pair);
+        RingBuffer<RedisCmdPair> ringBuffer = disruptor.getRingBuffer();
+        // 获取下一个可用位置的下标
+        long sequence = ringBuffer.next();
+        try {
+            // 返回可用位置的元素
+            RedisCmdPair redisCmdPair = ringBuffer.get(sequence);
+            // 设置该位置元素的值
+            redisCmdPair.setRequest(cmdRequest);
+            redisCmdPair.setResponse(cmdResponse);
+        } finally {
+            ringBuffer.publish(sequence);
+        }
     }
 
-    public void consumeRedisCmd() {
-        this.singleConsumeWorker.submit(() -> {
-            while (this.isRunning.get()) {
-                try {
-                    RedisCmdPair redisCmdPair = buffer.poll(1, TimeUnit.SECONDS);
-                    if (null != redisCmdPair) {
-                        RedisCmdHandler redisCmdHandler = handlerMap.get(redisCmdPair.getRequest().getCmd());
-                        redisCmdHandler.handle(this.redisManager, redisCmdPair.getRequest(), redisCmdPair.getResponse());
-                    }
-                } catch (Exception e) {
-                    log.error("消费local redis命令时出错!", e);
-                }
-            }
-        });
 
-    }
 }

@@ -1,20 +1,17 @@
 package com.php25.common.redis.local;
 
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author penghuiping
  * @date 2021/2/25 13:43
  */
-class ExpiredCache implements Delayed {
+class ExpiredCache {
     /**
      * 到期时间戳
      */
-    private Long expiredTime;
+    private Long expiredTime = -1L;
 
     /**
      * 缓存key
@@ -60,16 +57,17 @@ class ExpiredCache implements Delayed {
     }
 
     public boolean isExpired() {
+        if (-1L == expiredTime) {
+            //-1表示永不过期
+            return false;
+        }
         return Instant.now().toEpochMilli() - expiredTime >= 0;
     }
 
     @Override
-    public long getDelay(@NotNull TimeUnit unit) {
-        return (this.expiredTime - System.currentTimeMillis()) * 1000000;
-    }
-
-    @Override
-    public int compareTo(@NotNull Delayed o) {
-        return (int) (this.getDelay(TimeUnit.NANOSECONDS) - o.getDelay(TimeUnit.NANOSECONDS));
+    public String toString() {
+        return "ExpiredCache{" +
+                "expiredTime=" + expiredTime +
+                '}';
     }
 }

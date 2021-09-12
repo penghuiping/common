@@ -6,8 +6,9 @@ import com.php25.common.core.util.JsonUtil;
 import org.springframework.data.util.Pair;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -98,8 +99,14 @@ class RedisStringHandlers {
     });
 
     final static Pair<String, RedisCmdHandler> CLEAN_ALL_EXPIRE = Pair.of(RedisCmd.CLEAN_ALL_EXPIRE, (redisManager, request, response) -> {
-        LinkedHashMap<String, ExpiredCache> cache = (LinkedHashMap<String, ExpiredCache>) redisManager.cache;
-        cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        LruCachePlus cache = redisManager.cache;
+        Iterator<Map.Entry<String, ExpiredCache>> iterator = cache.getIterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ExpiredCache> entry = iterator.next();
+            if (entry.getValue().isExpired()) {
+                iterator.remove();
+            }
+        }
         response.setResult(true);
     });
 
@@ -108,15 +115,14 @@ class RedisStringHandlers {
         String key = request.getParams().get(0).toString();
         boolean res = cache.containsKey(key);
         response.setResult(res);
-
-        boolean isExpire = (cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli()) <= 0;
-
-        if (res && isExpire) {
-            cache.remove(key);
-            response.setResult(false);
-            return;
+        if (res) {
+            boolean isExpire = (cache.getValue(key).getExpiredTime() - Instant.now().toEpochMilli()) <= 0;
+            if (!isExpire) {
+                response.setResult(true);
+            }
         }
-        response.setResult(true);
+        cache.remove(key);
+        response.setResult(false);
     });
 
     final static Pair<String, RedisCmdHandler> GET_EXPIRE = Pair.of(RedisCmd.GET_EXPIRE, (redisManager, request, response) -> {

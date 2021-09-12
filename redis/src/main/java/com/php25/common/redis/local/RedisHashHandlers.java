@@ -8,7 +8,7 @@ import java.util.HashMap;
  * @author penghuiping
  * @date 2021/3/3 11:07
  */
-class RedisHashHandlers {
+public class RedisHashHandlers {
 
     static final Pair<String, RedisCmdHandler> HASH_PUT = Pair.of(RedisCmd.HASH_PUT, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
@@ -109,7 +109,7 @@ class RedisHashHandlers {
     private static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
         ExpiredCache expiredCache = cache.getValue(key);
         if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, new HashMap<String, Object>());
+            expiredCache = new ExpiredCache(Constants.UNEXPIRED, key, new HashMap<String, Object>());
         }
         return expiredCache;
     }

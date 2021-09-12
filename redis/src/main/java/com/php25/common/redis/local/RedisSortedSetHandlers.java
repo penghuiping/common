@@ -17,7 +17,7 @@ import java.util.SortedMap;
  * @author penghuiping
  * @date 2021/3/14 22:52
  */
-class RedisSortedSetHandlers {
+public class RedisSortedSetHandlers {
 
     static final Pair<String, RedisCmdHandler> SORTED_SET_ADD = Pair.of(RedisCmd.SORTED_SET_ADD, (redisManager, request, response) -> {
         LruCachePlus cache = redisManager.cache;
@@ -210,7 +210,7 @@ class RedisSortedSetHandlers {
     private static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
         ExpiredCache expiredCache = cache.getValue(key);
         if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, TreeMultimap.create());
+            expiredCache = new ExpiredCache(Constants.UNEXPIRED, key, TreeMultimap.create());
         }
         return expiredCache;
     }

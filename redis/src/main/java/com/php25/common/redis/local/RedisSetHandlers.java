@@ -130,7 +130,7 @@ class RedisSetHandlers {
     private static ExpiredCache getCacheValue(LruCachePlus cache, String key) {
         ExpiredCache expiredCache = cache.getValue(key);
         if (null == expiredCache) {
-            expiredCache = new ExpiredCache(Constants.DEFAULT_EXPIRED_TIME, key, new HashSet<>());
+            expiredCache = new ExpiredCache(Constants.UNEXPIRED, key, new HashSet<>());
         }
         return expiredCache;
     }
