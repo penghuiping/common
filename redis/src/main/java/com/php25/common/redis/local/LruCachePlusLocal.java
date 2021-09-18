@@ -16,10 +16,11 @@ class LruCachePlusLocal implements LruCachePlus {
     private final HashMap<String, ExpiredCache> map = new HashMap<>(16);
 
     //oldest
-    private Node<Map.Entry<String, ExpiredCache>> head;
+    private final Node<Map.Entry<String, ExpiredCache>> head;
 
     //newest
     private Node<Map.Entry<String, ExpiredCache>> tail;
+
 
     /**
      * 缓存最大数量
@@ -28,6 +29,8 @@ class LruCachePlusLocal implements LruCachePlus {
 
     public LruCachePlusLocal(int maxEntry) {
         this.maxEntry = maxEntry;
+        this.head = new Node<>(new ImmutablePair<>("_virtual_node", null));
+        this.tail = this.head;
     }
 
 
@@ -48,19 +51,8 @@ class LruCachePlusLocal implements LruCachePlus {
         }
 
         this.map.put(key, value);
-        if (null == head) {
-            Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
-            node.previous = null;
-            node.next = null;
-            head = node;
-            tail = node;
-        } else {
-            Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
-            node.previous = tail;
-            node.next = null;
-            tail.next = node;
-            tail = node;
-        }
+        Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
+        appendTail(node);
     }
 
     @Override
@@ -80,19 +72,8 @@ class LruCachePlusLocal implements LruCachePlus {
             }
         }
 
-        if (null == head) {
-            Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
-            node.previous = null;
-            node.next = null;
-            head = node;
-            tail = node;
-        } else {
-            Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
-            node.previous = tail;
-            node.next = null;
-            tail.next = node;
-            tail = node;
-        }
+        Node<Map.Entry<String, ExpiredCache>> node = new Node<>(new ImmutablePair<>(key, value));
+        appendTail(node);
     }
 
     @Override
@@ -108,12 +89,16 @@ class LruCachePlusLocal implements LruCachePlus {
             if (ptr == null) {
                 throw Exceptions.throwImpossibleException();
             }
-            tail.next = ptr;
-            ptr.previous = tail;
-            tail = ptr;
-            tail.next = null;
+            appendTail(ptr);
         }
         return expiredCache;
+    }
+
+    private void appendTail(Node<Map.Entry<String, ExpiredCache>> node) {
+        node.previous = tail;
+        node.next = null;
+        tail.next = node;
+        tail = node;
     }
 
     @Override
@@ -130,6 +115,7 @@ class LruCachePlusLocal implements LruCachePlus {
 
     private Node<Map.Entry<String, ExpiredCache>> findOldestAndExpired() {
         Node<Map.Entry<String, ExpiredCache>> ptr = head;
+        ptr = ptr.next;
         while (true) {
             if (null == ptr) {
                 break;
@@ -144,23 +130,18 @@ class LruCachePlusLocal implements LruCachePlus {
 
     private Node<Map.Entry<String, ExpiredCache>> removeFromLinkNode(String key) {
         Node<Map.Entry<String, ExpiredCache>> ptr = head;
+        ptr = ptr.next;
         while (true) {
             if (null == ptr) {
                 break;
             }
             if (ptr.value.getKey().equals(key)) {
-                Node<Map.Entry<String, ExpiredCache>> previous = ptr.previous;
-                if (null == previous) {
-                    head = ptr.next;
-                    head.previous = null;
+                ptr.previous.next = ptr.next;
+                if (null == ptr.next) {
+                    //尾节点情况
+                    tail = ptr.previous;
                 } else {
-                    if (null == ptr.next) {
-                        tail = ptr.previous;
-                        tail.next = null;
-                    } else {
-                        previous.next = ptr.next;
-                        ptr.next.previous = previous;
-                    }
+                    ptr.next.previous = ptr.previous;
                 }
                 break;
             }
@@ -182,7 +163,11 @@ class LruCachePlusLocal implements LruCachePlus {
     public String toString() {
         Node<Map.Entry<String, ExpiredCache>> ptr = head;
         StringBuilder sb = new StringBuilder(" ");
-        while (ptr != null) {
+        ptr = ptr.next;
+        while (true) {
+            if (null == ptr) {
+                break;
+            }
             sb.append(ptr.value.getKey()).append(",");
             ptr = ptr.next;
         }
@@ -190,7 +175,10 @@ class LruCachePlusLocal implements LruCachePlus {
 
         Node<Map.Entry<String, ExpiredCache>> ptr1 = tail;
         StringBuilder sb1 = new StringBuilder(" ");
-        while (ptr1 != null) {
+        while (true) {
+            if (ptr1 == head) {
+                break;
+            }
             sb1.append(ptr1.value.getKey()).append(",");
             ptr1 = ptr1.previous;
         }
