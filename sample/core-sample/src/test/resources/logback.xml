@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <!-- 日志输出格式定义 -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss})|%clr(%thread)|%clr(${LOG_LEVEL_PATTERN:-%5p})|%clr(%logger{80}){cyan}|%clr(%method){magenta}|%clr(%line) -> %msg%n"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss:SSS})|%clr(%thread)|%clr(${LOG_LEVEL_PATTERN:-%5p})|%clr(%logger{80}){cyan}|%clr(%method){magenta}|%clr(%line) -> %msg%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -11,7 +11,7 @@
         </encoder>
     </appender>
 
-    <root level="error">
+    <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
