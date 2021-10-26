@@ -9,12 +9,13 @@ import com.google.common.base.Charsets;
 import com.php25.common.core.exception.Exceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
@@ -41,6 +42,14 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
     @NotNull
     @Override
     public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, @NotNull MethodParameter parameter, @NotNull Type targetType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
+        if (null == inputMessage.getHeaders().getContentType()) {
+            return inputMessage;
+        }
+
+        if (!inputMessage.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)) {
+            return inputMessage;
+        }
+
         InputStream inputStream = inputMessage.getBody();
         ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
         ByteBuffer buff = ByteBuffer.allocate(512);
@@ -78,11 +87,11 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
     /**
      * 配置白名单标签
      * <p>
-     * 如: Whitelist.basicWithImages();
+     * 如: Safelist.basicWithImages();
      *
      * @return 白名单标签
      */
-    public abstract Whitelist configWhiteList();
+    public abstract Safelist configWhiteList();
 
 
 }

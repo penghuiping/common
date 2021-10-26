@@ -4,7 +4,7 @@ import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -44,5 +44,5 @@ public abstract class XssResponseBodyAdvice implements ResponseBodyAdvice {
      *
      * @return 白名单标签
      */
-    public abstract Whitelist configWhiteList();
+    public abstract Safelist configWhiteList();
 }
