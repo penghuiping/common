@@ -24,9 +24,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/29 23:12
- * @description:
+ * 此类用于: 数据库行数据映射为实体对象
+ *
+ * @author penghuiping
+ * @date 2018/8/29 23:12
  */
 public class JdbcModelRowMapper<T> implements RowMapper<T> {
     private final Class<T> mapperClass;

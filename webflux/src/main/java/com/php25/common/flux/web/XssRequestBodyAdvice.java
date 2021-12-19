@@ -80,7 +80,7 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
                 }
             };
         } else {
-            throw Exceptions.throwBusinessException("999999", "requestBody存在不安全的html内容");
+            throw Exceptions.throwBusinessException("A9999", "requestBody存在不安全的html内容");
         }
     }
 

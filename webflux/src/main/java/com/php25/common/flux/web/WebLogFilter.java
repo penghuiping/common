@@ -8,12 +8,14 @@ import org.springframework.web.filter.AbstractRequestLoggingFilter;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * servlet filter 通用日志打印
+ *
  * @author penghuiping
  * @date 2021/10/26 21:44
  */
-public class LoggingFilter extends AbstractRequestLoggingFilter {
+public class WebLogFilter extends AbstractRequestLoggingFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
+    private final Logger logger = LoggerFactory.getLogger(WebLogFilter.class);
 
     @Override
     protected boolean shouldLog(HttpServletRequest request) {

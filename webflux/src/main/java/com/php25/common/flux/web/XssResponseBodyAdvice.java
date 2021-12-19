@@ -32,7 +32,7 @@ public abstract class XssResponseBodyAdvice implements ResponseBodyAdvice {
         log.info("response body:{}", responseBody);
         boolean isValid = Jsoup.isValid(responseBody, this.configWhiteList());
         if (!isValid) {
-            throw Exceptions.throwBusinessException("999998", "responseBody存在不安全的html内容");
+            throw Exceptions.throwBusinessException("B9999", "responseBody存在不安全的html内容");
         }
         return body;
     }
