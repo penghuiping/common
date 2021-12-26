@@ -6,7 +6,7 @@ import java.util.List;
  * @author penghuiping
  * @date 2020/12/1 16:39
  */
-public interface QuerySql {
+public interface QueryAction {
 
     /**
      * 查询，并映射到指定类上，并指定需要映射的字段

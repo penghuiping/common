@@ -15,20 +15,20 @@ import java.util.Optional;
  * @author penghuiping
  * @date 2019/7/25
  */
-public interface JdbcDbRepository<T, ID > {
+public interface JdbcDbRepository<T, ID> {
 
     /**
      * 获取所有有效的数据项,在软删除的环境中,指的是没有软删除的数据
      *
-     * @return
+     * @return 列表实体
      */
     List<T> findAllEnabled();
 
     /**
      * 根据id获取有效数据
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return 实体
      */
     Optional<T> findByIdEnable(ID id);
 
@@ -36,7 +36,7 @@ public interface JdbcDbRepository<T, ID > {
      * 根据查询条件，查询符合条件的一条数据
      *
      * @param searchParamBuilder 查询条件
-     * @return
+     * @return 实体
      */
     Optional<T> findOne(@Nullable SearchParamBuilder searchParamBuilder);
 
@@ -44,7 +44,7 @@ public interface JdbcDbRepository<T, ID > {
      * 根据查询条件，查询符合条件的一组数据
      *
      * @param searchParamBuilder 查询条件
-     * @return
+     * @return 列表实体
      */
     List<T> findAll(@Nullable SearchParamBuilder searchParamBuilder);
 
@@ -53,7 +53,7 @@ public interface JdbcDbRepository<T, ID > {
      *
      * @param searchParamBuilder 查询条件
      * @param pageable           分页参数
-     * @return
+     * @return 分页实体
      */
     Page<T> findAll(@Nullable SearchParamBuilder searchParamBuilder, Pageable pageable);
 
@@ -62,15 +62,15 @@ public interface JdbcDbRepository<T, ID > {
      *
      * @param searchParamBuilder 查询条件
      * @param sort               排序条件
-     * @return
+     * @return 列表实体
      */
     List<T> findAll(@Nullable SearchParamBuilder searchParamBuilder, Sort sort);
 
     /**
      * 根据查询条件，统计符合条件的记录数
      *
-     * @param searchParamBuilder
-     * @return
+     * @param searchParamBuilder 查询条件
+     * @return 记录数
      */
     long count(@Nullable SearchParamBuilder searchParamBuilder);
 

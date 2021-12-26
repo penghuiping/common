@@ -27,19 +27,21 @@ public class PostgresQuery extends BaseQuery {
     private static final Logger log = LoggerFactory.getLogger(PostgresQuery.class);
 
     public PostgresQuery(Class<?> model) {
-        this.clazz = model;
+        this.queryContext.setClazz(model);
     }
 
     public PostgresQuery(Class<?> model, String alias) {
         this(model);
         if (!StringUtil.isBlank(alias)) {
-            aliasMap.put(alias, model);
-            clazzAlias = alias;
+            this.queryContext.getAliasMap().put(alias, model);
+            this.queryContext.setClazzAlias(alias);
         }
     }
 
     @Override
-    protected <M> SqlParams insert(M model, boolean ignoreNull) {
+    public <M> SqlParams insert(M model, boolean ignoreNull) {
+        Class<?> clazz = this.queryContext.getClazz();
+        List<Object> params = this.queryContext.getParams();
         //泛型获取类所有的属性
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ")
                 .append(StringFormatter.KEY_WRAPPER_PREFIX)
@@ -123,14 +125,14 @@ public class PostgresQuery extends BaseQuery {
                         stringBuilder.append(pairList.get(i).getRight());
                     } else {
                         stringBuilder.append("?");
-                        params.add(paramConvert(pairList.get(i).getRight()));
+                        params.add(AbstractQuery.paramConvert(pairList.get(i).getRight()));
                     }
                 } else {
                     if (pairList.get(i).getLeft().equals(id)) {
                         stringBuilder.append(pairList.get(i).getRight()).append(",");
                     } else {
                         stringBuilder.append("?,");
-                        params.add(paramConvert(pairList.get(i).getRight()));
+                        params.add(AbstractQuery.paramConvert(pairList.get(i).getRight()));
                     }
                 }
 
@@ -140,10 +142,10 @@ public class PostgresQuery extends BaseQuery {
             for (int i = 0; i < pairList.size(); i++) {
                 if (i == (pairList.size() - 1)) {
                     stringBuilder.append("?");
-                    params.add(paramConvert(pairList.get(i).getRight()));
+                    params.add(AbstractQuery.paramConvert(pairList.get(i).getRight()));
                 } else {
                     stringBuilder.append("?,");
-                    params.add(paramConvert(pairList.get(i).getRight()));
+                    params.add(AbstractQuery.paramConvert(pairList.get(i).getRight()));
                 }
 
             }
@@ -154,15 +156,16 @@ public class PostgresQuery extends BaseQuery {
         SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setParams(params);
         sqlParams.setSql(targetSql);
-        sqlParams.setClazz(this.clazz);
+        sqlParams.setClazz(clazz);
         sqlParams.setGenerationType(generationType);
         sqlParams.setModel(model);
-        this.clear();
+        this.queryContext.clear();
         return sqlParams;
     }
 
     @Override
     public <M> SqlParams insertBatch(List<M> models) {
+        Class<?> clazz = this.queryContext.getClazz();
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ")
                 .append(StringFormatter.KEY_WRAPPER_PREFIX)
                 .append(clazz.getSimpleName())
@@ -287,10 +290,10 @@ public class PostgresQuery extends BaseQuery {
                     if (tmp.get(i).getLeft().equals(versionColumnName)) {
                         params.add(0);
                     } else {
-                        params.add(paramConvert(tmp.get(i).getRight()));
+                        params.add(AbstractQuery.paramConvert(tmp.get(i).getRight()));
                     }
                 } else {
-                    params.add(paramConvert(tmp.get(i).getRight()));
+                    params.add(AbstractQuery.paramConvert(tmp.get(i).getRight()));
                 }
             }
             batchParams.add(params.toArray());
@@ -299,13 +302,15 @@ public class PostgresQuery extends BaseQuery {
         BatchSqlParams sqlParams = new BatchSqlParams();
         sqlParams.setSql(targetSql);
         sqlParams.setBatchParams(batchParams);
-        sqlParams.setClazz(this.clazz);
-        this.clear();
+        sqlParams.setClazz(clazz);
+        this.queryContext.clear();
         return sqlParams;
     }
 
     @Override
     public SqlParams delete() {
+        String clazzAlias = this.queryContext.getClazzAlias();
+        Class<?> clazz = this.queryContext.getClazz();
         StringBuilder sb = new StringBuilder("DELETE");
         if (!StringUtil.isBlank(clazzAlias)) {
             //存在别名
@@ -322,28 +327,28 @@ public class PostgresQuery extends BaseQuery {
                     .append(StringFormatter.KEY_WRAPPER_SUFFIX);
         }
         sb.append(" ").append(getSql());
-        this.setSql(sb);
+        this.queryContext.setSql(sb);
         String targetSql = this.getSql().toString();
         SingleSqlParams sqlParams = new SingleSqlParams();
         sqlParams.setSql(targetSql);
-        sqlParams.setClazz(this.clazz);
+        sqlParams.setClazz(clazz);
         sqlParams.setParams(this.getParams());
-        this.clear();
+        this.queryContext.clear();
         return sqlParams;
     }
 
     @Override
-    protected void addAdditionalPartSql() {
+    public void addAdditionalPartSql() {
         StringBuilder sb = this.getSql();
-        if (this.orderBy != null) {
-            sb.append(orderBy.getOrderBy()).append(" ");
+        if (this.queryContext.getOrderBy() != null) {
+            sb.append(this.queryContext.getOrderBy().getOrderBy()).append(" ");
         }
 
-        if (this.groupBy != null) {
-            sb.append(groupBy.getGroupBy()).append(" ");
+        if (this.queryContext.getGroupBy() != null) {
+            sb.append(this.queryContext.getGroupBy().getGroupBy()).append(" ");
         }
         // 增加翻页
-        if (this.startRow != -1) {
+        if (this.queryContext.getStartRow() != -1) {
             sb.append(String.format("limit ${%s} offset ${%s}", Constants.PAGE_SIZE, Constants.START_ROW)).append(" ");
         }
     }

@@ -2,8 +2,6 @@ package com.php25.common.db;
 
 
 import com.php25.common.db.core.sql.BaseQuery;
-import com.php25.common.db.core.sql.BaseQuery0;
-import com.php25.common.db.core.sql.GroupQuery;
 import com.php25.common.db.core.sql.MysqlQuery;
 import com.php25.common.db.core.sql.OracleQuery;
 import com.php25.common.db.core.sql.PostgresQuery;
@@ -40,10 +38,6 @@ public class Queries {
         return new Queries(DbType.SQLITE);
     }
 
-
-    public static BaseQuery0 group() {
-        return new GroupQuery();
-    }
 
     public BaseQuery from(Class<?> cls) {
         BaseQuery query = null;

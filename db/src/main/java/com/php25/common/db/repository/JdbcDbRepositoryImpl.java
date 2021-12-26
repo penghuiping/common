@@ -5,7 +5,7 @@ import com.php25.common.db.DbType;
 import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
 import com.php25.common.db.core.manager.JdbcModelManager;
-import com.php25.common.db.core.sql.BaseQuery;
+import com.php25.common.db.core.sql.Query;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/25 15:38
- * @description:
+ * @author penghuiping
+ * @date 2019/7/25 15:38
  */
 public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
@@ -73,7 +72,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public Page<T> findAll(SearchParamBuilder searchParamBuilder, Pageable pageable) {
-        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
+        Query query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
         Sort sort = pageable.getSort();
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
@@ -94,7 +93,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public List<T> findAll(SearchParamBuilder searchParamBuilder, Sort sort) {
-        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
+        Query query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
         Iterator<Sort.Order> iterator = sort.iterator();
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
@@ -109,7 +108,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public long count(SearchParamBuilder searchParamBuilder) {
-        BaseQuery query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
+        Query query = Queries.of(dbType).from(model).andSearchParamBuilder(searchParamBuilder);
         return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).count(query.count());
     }
 }

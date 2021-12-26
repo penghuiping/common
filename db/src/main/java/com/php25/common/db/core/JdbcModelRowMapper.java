@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,9 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
                 source -> LocalDateTime.ofInstant(Instant.ofEpochMilli(source), ZoneId.systemDefault()));
         genericConversionService.addConverter(Long.class, Date.class, source -> {
             return Date.from(Instant.ofEpochMilli(source));
+        });
+        genericConversionService.addConverter(LocalDateTime.class, Date.class, source -> {
+            return Date.from(source.toInstant(ZoneOffset.ofHours(8)));
         });
     }
 
@@ -115,7 +119,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
                 // Convert stringified value to target Number class.
                 return NumberUtils.parseNumber(value.toString(), (Class<Number>) requiredType);
             }
-        } else if (this.conversionService != null && this.conversionService.canConvert(value.getClass(), requiredType)) {
+        } else if (this.conversionService.canConvert(value.getClass(), requiredType)) {
             return this.conversionService.convert(value, requiredType);
         } else {
             throw new DbException(
