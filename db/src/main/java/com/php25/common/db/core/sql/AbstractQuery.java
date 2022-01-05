@@ -20,14 +20,6 @@ import java.util.List;
  * @date 2021/12/26 15:22
  */
 public abstract class AbstractQuery {
-    public final static String AND = "AND";
-    public final static String OR = "OR";
-    public final static String WHERE = "WHERE";
-    public final static String IN = "IN";
-    public final static String NOT_IN = "NOT IN";
-    public final static String BETWEEN = "BETWEEN";
-    public final static String NOT_BETWEEN = "NOT BETWEEN";
-
     protected QueryContext queryContext;
 
     public AbstractQuery(QueryContext queryContext) {
@@ -42,7 +34,7 @@ public abstract class AbstractQuery {
      * @param paramValue 源参数值
      * @return 最终参数值
      */
-    public static Object paramConvert(Object paramValue) {
+    static Object paramConvert(Object paramValue) {
         if (null == paramValue) {
             return null;
         }
@@ -185,16 +177,16 @@ public abstract class AbstractQuery {
     }
 
     protected void appendAndSql(String column, Object value, String opt) {
-        appendSqlBase(column, value, opt, AND);
+        appendSqlBase(column, value, opt, DbConstant.AND);
     }
 
     protected void appendOrSql(String column, Object value, String opt) {
-        appendSqlBase(column, value, opt, OR);
+        appendSqlBase(column, value, opt, DbConstant.OR);
     }
 
     protected void appendSqlBase(String column, Object value, String opt, String link) {
-        if (this.queryContext.getSql().indexOf(WHERE) < 0) {
-            link = WHERE;
+        if (this.queryContext.getSql().indexOf(DbConstant.WHERE) < 0) {
+            link = DbConstant.WHERE;
         }
         this.appendSql(link)
                 .appendSql(getCol(column))
@@ -207,8 +199,8 @@ public abstract class AbstractQuery {
 
     protected void appendInSql(String column, Collection<?> value, String opt, String link) {
         StringBuilder sql = this.queryContext.getSql();
-        if (sql.indexOf(WHERE) < 0) {
-            link = WHERE;
+        if (sql.indexOf(DbConstant.WHERE) < 0) {
+            link = DbConstant.WHERE;
         }
         this.appendSql(link)
                 .appendSql(getCol(column))
@@ -225,8 +217,8 @@ public abstract class AbstractQuery {
 
     protected void appendBetweenSql(String column, String opt, String link, Object... value) {
         StringBuilder sql = this.queryContext.getSql();
-        if (sql.indexOf(WHERE) < 0) {
-            link = WHERE;
+        if (sql.indexOf(DbConstant.WHERE) < 0) {
+            link = DbConstant.WHERE;
         }
         this.appendSql(link)
                 .appendSql(getCol(column))
@@ -242,7 +234,7 @@ public abstract class AbstractQuery {
         }
 
         //去除叠加条件中的WHERE
-        int i = condition.getSql().indexOf(WHERE);
+        int i = condition.getSql().indexOf(DbConstant.WHERE);
         if (i > -1) {
             condition.getSql().delete(i, i + 5);
         }

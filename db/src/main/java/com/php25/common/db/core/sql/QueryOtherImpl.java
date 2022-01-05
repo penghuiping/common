@@ -3,6 +3,7 @@ package com.php25.common.db.core.sql;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.GroupBy;
 import com.php25.common.db.core.OrderBy;
+import com.php25.common.db.core.sql.column.Column;
 import com.php25.common.db.exception.DbException;
 
 
@@ -26,9 +27,9 @@ public class QueryOtherImpl extends AbstractQuery implements QueryOther {
     }
 
     @Override
-    public Query groupBy(String column) {
+    public Query groupBy(Column column) {
         GroupBy groupBy = getGroupBy();
-        groupBy.add(getCol(column));
+        groupBy.add(getCol(column.toString()));
         return this.queryContext.getQuery();
     }
 
@@ -40,16 +41,16 @@ public class QueryOtherImpl extends AbstractQuery implements QueryOther {
     }
 
     @Override
-    public Query asc(String column) {
+    public Query asc(Column column) {
         this.getOrderBy();
-        this.queryContext.getOrderBy().add(getCol(column) + " ASC");
+        this.queryContext.getOrderBy().add(getCol(column.toString()) + " ASC");
         return this.queryContext.getQuery();
     }
 
     @Override
-    public Query desc(String column) {
+    public Query desc(Column column) {
         this.getOrderBy();
-        this.queryContext.getOrderBy().add(getCol(column) + " DESC");
+        this.queryContext.getOrderBy().add(getCol(column.toString()) + " DESC");
         return this.queryContext.getQuery();
     }
 
@@ -90,9 +91,9 @@ public class QueryOtherImpl extends AbstractQuery implements QueryOther {
     }
 
     @Override
-    public Query on(String leftColumn, String rightColumn) {
-        String left = getCol(leftColumn);
-        String right = getCol(rightColumn);
+    public Query on(Column leftColumn, Column rightColumn) {
+        String left = getCol(leftColumn.toString());
+        String right = getCol(rightColumn.toString());
         this.queryContext.setSql(this.queryContext.getSql().append(String.format("ON %s=%s", left, right)));
         return this.queryContext.getQuery();
     }

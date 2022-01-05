@@ -1,5 +1,7 @@
 package com.php25.common.db.core.sql;
 
+import com.php25.common.db.core.sql.column.Column;
+
 import java.util.Collection;
 
 /**
@@ -12,163 +14,88 @@ public class QueryConditionOrImpl extends AbstractQuery implements QueryConditio
         super(queryContext);
     }
 
-    @Override
-    public Query orEq(String column, Object value) {
-        appendOrSql(column, value, "=");
+
+    private Query orBaseAction(Column column, Object value, String op) {
+        appendOrSql(column.toString(), value, op);
         return this.queryContext.getQuery();
     }
-
-    @Override
-    public Query orNotEq(String column, Object value) {
-        appendOrSql(column, value, "<>");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orGreat(String column, Object value) {
-        appendOrSql(column, value, ">");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orGreatEq(String column, Object value) {
-        appendOrSql(column, value, ">=");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orLess(String column, Object value) {
-        appendOrSql(column, value, "<");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orLessEq(String column, Object value) {
-        appendOrSql(column, value, "<=");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orLike(String column, String value) {
-        appendOrSql(column, value, "LIKE");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orNotLike(String column, String value) {
-        appendOrSql(column, value, "NOT LIKE");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orIsNull(String column) {
-        appendOrSql(column, null, "IS NULL");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orIsNotNull(String column) {
-        appendOrSql(column, null, "IS NOT NULL");
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orIn(String column, Collection<?> value) {
-        appendInSql(column, value, IN, OR);
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orNotIn(String column, Collection<?> value) {
-        appendInSql(column, value, NOT_IN, OR);
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orBetween(String column, Object value1, Object value2) {
-        appendBetweenSql(column, BETWEEN, OR, value1, value2);
-        return this.queryContext.getQuery();
-    }
-
-    @Override
-    public Query orNotBetween(String column, Object value1, Object value2) {
-        appendBetweenSql(column, NOT_BETWEEN, OR, value1, value2);
-        return this.queryContext.getQuery();
-    }
-
 
     @Override
     public Query or(Query condition) {
-        return manyCondition(condition, OR);
+        return manyCondition(condition, DbConstant.OR);
     }
 
     @Override
     public Query orEq(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.EQ);
     }
 
     @Override
     public Query orNotEq(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.NOT_EQ);
     }
 
     @Override
     public Query orGreat(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.GREAT);
     }
 
     @Override
     public Query orGreatEq(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.GREAT_EQ);
     }
 
     @Override
     public Query orLess(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.LESS);
     }
 
     @Override
     public Query orLessEq(Column column, Object value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.LESS_EQ);
     }
 
     @Override
     public Query orLike(Column column, String value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.LIKE);
     }
 
     @Override
     public Query orNotLike(Column column, String value) {
-        return null;
+        return orBaseAction(column, value, DbConstant.NOT_LIKE);
     }
 
     @Override
     public Query orIsNull(Column column) {
-        return null;
+        return orBaseAction(column, null, DbConstant.IS_NULL);
     }
 
     @Override
     public Query orIsNotNull(Column column) {
-        return null;
+        return orBaseAction(column, null, DbConstant.IS_NOT_NULL);
     }
 
     @Override
     public Query orIn(Column column, Collection<?> value) {
-        return null;
+        appendInSql(column.toString(), value, DbConstant.IN, DbConstant.OR);
+        return this.queryContext.getQuery();
     }
 
     @Override
     public Query orNotIn(Column column, Collection<?> value) {
-        return null;
+        appendInSql(column.toString(), value, DbConstant.NOT_IN, DbConstant.OR);
+        return this.queryContext.getQuery();
     }
 
     @Override
     public Query orBetween(Column column, Object value1, Object value2) {
-        return null;
+        appendBetweenSql(column.toString(), DbConstant.BETWEEN, DbConstant.OR, value1, value2);
+        return this.queryContext.getQuery();
     }
 
     @Override
     public Query orNotBetween(Column column, Object value1, Object value2) {
-        return null;
+        appendBetweenSql(column.toString(), DbConstant.NOT_BETWEEN, DbConstant.OR, value1, value2);
+        return this.queryContext.getQuery();
     }
 }

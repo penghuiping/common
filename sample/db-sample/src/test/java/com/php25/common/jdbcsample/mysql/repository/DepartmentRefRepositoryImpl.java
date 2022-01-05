@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.php25.common.db.core.sql.column.Columns.col;
 /**
  * @author penghuiping
  * @date 2020/1/25 17:13
@@ -28,7 +29,7 @@ public class DepartmentRefRepositoryImpl implements DepartmentRefRepository {
         return QueriesExecute.of(dbType)
                 .singleJdbc().with(jdbcTemplate)
                 .select(Queries.of(dbType).from(DepartmentRef.class)
-                        .whereEq("customerId", customerId).select());
+                        .whereEq(col(DepartmentRef::getCustomerId), customerId).select());
     }
 
     @Override
@@ -46,7 +47,7 @@ public class DepartmentRefRepositoryImpl implements DepartmentRefRepository {
                 .with(jdbcTemplate)
                 .delete(Queries.of(dbType)
                         .from(DepartmentRef.class)
-                        .whereIn("customerId", customerIds)
+                        .whereIn(col(DepartmentRef::getCustomerId), customerIds)
                         .delete());
     }
 }

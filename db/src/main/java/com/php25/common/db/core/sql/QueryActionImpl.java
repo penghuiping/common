@@ -5,6 +5,7 @@ import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.OrderBy;
 import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.sql.column.AsColumn;
 import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.util.Assert;
@@ -25,7 +26,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
     }
 
     @Override
-    public SqlParams select(Class<?> model, String... columns) {
+    public SqlParams select(Class<?> model, AsColumn... columns) {
         AssertUtil.notNull(model, "model类型不能为null");
         StringBuilder sb = null;
         Class<?> clazz = this.queryContext.getClazz();
@@ -35,10 +36,15 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
         long startRow = this.queryContext.getStartRow();
         long pageSize = this.queryContext.getPageSize();
         OrderBy orderBy = this.queryContext.getOrderBy();
+        String[] columns0 = null;
         if (null != columns && columns.length > 0) {
+            columns0 = new String[columns.length];
             sb = new StringBuilder("SELECT ");
-            for (String column : columns) {
-                sb.append(getCol(column)).append(",");
+
+            for (int i = 0; i < columns.length; i++) {
+                AsColumn column = columns[i];
+                columns0[i] = column.toString();
+                sb.append(getCol(column.toString())).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);
         } else {
@@ -60,7 +66,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
         sqlParams.setSql(targetSql);
         sqlParams.setClazz(clazz);
         sqlParams.setJoinClazz(joinClazz);
-        sqlParams.setColumns(columns);
+        sqlParams.setColumns(columns0);
         sqlParams.setResultType(model);
         sqlParams.setParams(Lists.newCopyOnWriteArrayList(params));
         sqlParams.setStartRow((int) startRow);
@@ -76,7 +82,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
     }
 
     @Override
-    public SqlParams select(String... columns) {
+    public SqlParams select(AsColumn... columns) {
         return this.select(this.queryContext.getClazz(), columns);
     }
 

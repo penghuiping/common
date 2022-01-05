@@ -1,5 +1,7 @@
 package com.php25.common.db.core.sql;
 
+import com.php25.common.db.core.sql.column.AsColumn;
+
 import java.util.List;
 
 /**
@@ -15,14 +17,14 @@ public interface QueryAction {
      * @param columns 需要映射的字段
      * @return 返回对应sql语句
      */
-    SqlParams select(Class<?> model, String... columns);
+    SqlParams select(Class<?> model, AsColumn... columns);
 
     /***
      * 查询，并指定需要映射的字段
      * @param columns 需要映射的字段
      * @return 返回对应sql语句
      */
-    SqlParams select(String... columns);
+    SqlParams select(AsColumn... columns);
 
     /**
      * 查询唯一记录

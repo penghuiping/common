@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
+import static com.php25.common.db.core.sql.column.Columns.col;
 /**
  * @author penghuiping
  * @date 2021/3/19 10:53
@@ -43,8 +44,8 @@ public class TimerInnerLogManager {
         String executionId = task.getJobExecutionId();
         Long executionTime = task.getExecuteTime();
         SqlParams sqlParams = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq("id", executionId)
-                .andEq("executionTime", executionTime).single();
+                .whereEq(col(TimerInnerLog::getId), executionId)
+                .andEq(col(TimerInnerLog::getExecutionTime), executionTime).single();
         sqlParams.setSql(sqlParams.getSql());
         TimerInnerLog jobExecutionLog = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
         if (null != jobExecutionLog && jobExecutionLog.getStatus() == 0) {
@@ -91,8 +92,8 @@ public class TimerInnerLogManager {
     void create(TimerInnerLog jobExecutionLog) {
         Lock lock = redisManager.lock(jobExecutionLog.getId() + ":" + jobExecutionLog.getExecutionTime());
         SqlParams sqlParams0 = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq("id", jobExecutionLog.getId())
-                .andEq("executionTime", jobExecutionLog.getExecutionTime())
+                .whereEq(col(TimerInnerLog::getId), jobExecutionLog.getId())
+                .andEq(col(TimerInnerLog::getExecutionTime), jobExecutionLog.getExecutionTime())
                 .single();
         sqlParams0.setSql(sqlParams0.getSql());
         TimerInnerLog jobExecutionLog0 = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams0);
@@ -120,8 +121,8 @@ public class TimerInnerLogManager {
         TimerInnerLog timerInnerLog = new TimerInnerLog();
         timerInnerLog.setStatus(jobExecutionLog.getStatus());
         SqlParams sqlParams = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq("id", jobExecutionLog.getId())
-                .andEq("executionTime", jobExecutionLog.getExecutionTime())
+                .whereEq(col(TimerInnerLog::getId), jobExecutionLog.getId())
+                .andEq(col(TimerInnerLog::getExecutionTime), jobExecutionLog.getExecutionTime())
                 .update(timerInnerLog);
         QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).update(sqlParams);
     }

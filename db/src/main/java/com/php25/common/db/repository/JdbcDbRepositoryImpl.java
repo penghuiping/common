@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import static com.php25.common.db.core.sql.column.Columns.col;
+
 /**
  * @author penghuiping
  * @date 2019/7/25 15:38
@@ -46,13 +48,13 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
 
     @Override
     public List<T> findAllEnabled() {
-        SqlParams sqlParams = Queries.of(this.dbType).from(model).whereEq("enable", 1).select();
+        SqlParams sqlParams = Queries.of(this.dbType).from(model).whereEq(col("enable"), 1).select();
         return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(sqlParams);
     }
 
     @Override
     public Optional<T> findByIdEnable(ID id) {
-        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(pkName, id).andEq("enable", 1).single();
+        SqlParams sqlParams = Queries.of(dbType).from(model).whereEq(col(pkName), id).andEq(col("enable"), 1).single();
         T result = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
         return Optional.ofNullable(result);
     }
@@ -78,9 +80,9 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
             if (order.getDirection().isAscending()) {
-                query.asc(order.getProperty());
+                query.asc(col(order.getProperty()));
             } else {
-                query.desc(order.getProperty());
+                query.desc(col(order.getProperty()));
             }
         }
         int[] page = PageUtil.transToStartEnd(pageable.getPageNumber(), pageable.getPageSize());
@@ -98,9 +100,9 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
         while (iterator.hasNext()) {
             Sort.Order order = iterator.next();
             if (order.getDirection().isAscending()) {
-                query.asc(order.getProperty());
+                query.asc(col(order.getProperty()));
             } else {
-                query.desc(order.getProperty());
+                query.desc(col(order.getProperty()));
             }
         }
         return QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).select(query.select());

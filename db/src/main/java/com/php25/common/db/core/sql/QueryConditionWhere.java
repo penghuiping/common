@@ -1,5 +1,7 @@
 package com.php25.common.db.core.sql;
 
+import com.php25.common.db.core.sql.column.Column;
+
 import java.util.Collection;
 
 /**
@@ -13,133 +15,6 @@ public interface QueryConditionWhere {
      * @return 查询
      */
     Query whereOneEqualOne();
-
-    /**
-     * where column = value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereEq(String column, Object value);
-
-    /**
-     * where column != value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereNotEq(String column, Object value);
-
-    /**
-     * where column > value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereGreat(String column, Object value);
-
-    /**
-     * where column >= value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereGreatEq(String column, Object value);
-
-    /**
-     * where column < value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereLess(String column, Object value);
-
-    /**
-     * where column <= value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereLessEq(String column, Object value);
-
-    /**
-     * where column like value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereLike(String column, String value);
-
-    /**
-     * where column not like value
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereNotLike(String column, String value);
-
-    /**
-     * where column is null
-     *
-     * @param column 字段
-     * @return 查询
-     */
-    Query whereIsNull(String column);
-
-    /**
-     * where column is not null
-     *
-     * @param column 字段
-     * @return 查询
-     */
-    Query whereIsNotNull(String column);
-
-    /**
-     * where column in (value)
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereIn(String column, Collection<?> value);
-
-    /**
-     * where column is not in (value)
-     *
-     * @param column 字段
-     * @param value  字段值
-     * @return 查询
-     */
-    Query whereNotIn(String column, Collection<?> value);
-
-    /**
-     * where column between value1 and value2
-     *
-     * @param column 字段
-     * @param value1 字段值1
-     * @param value2 字段值2
-     * @return 查询
-     */
-    Query whereBetween(String column, Object value1, Object value2);
-
-    /**
-     * where column not between value1 and value2
-     *
-     * @param column 字段
-     * @param value1 字段值1
-     * @param value2 字段2
-     * @return 查询
-     */
-    Query whereNotBetween(String column, Object value1, Object value2);
-
 
     /***
      * 多条件组合

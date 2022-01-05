@@ -37,15 +37,15 @@ import static com.php25.common.db.core.sql.column.Columns.as;
 import static com.php25.common.db.core.sql.column.Columns.col;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/9 13:20
- * @Description:
+ * from(Customer.class,"a")join(Company.class,"b")on()where(cnd(col()),Op.eq,1)).and(cnd(as(col(),a),Op.gt,1)).or(cnd(as(col(),a),Op.gt,5)).select()
+ *
+ * @author penghuiping
+ * @date 2021/12/28 18:42
  */
 @SpringBootTest(classes = {CommonAutoConfigure.class})
 @ActiveProfiles(profiles = {"single_db"})
 @RunWith(SpringRunner.class)
-public class MysqlJdbcTest extends DbTest {
-
+public class MysqlJdbcLambdaTest extends DbTest {
     private final static Logger log = LoggerFactory.getLogger(MysqlJdbcTest.class);
 
     @ClassRule
@@ -61,101 +61,101 @@ public class MysqlJdbcTest extends DbTest {
     @Test
     public void query() {
         //like
-        SqlParams sqlParams = Queries.mysql().from(Customer.class).whereLike(col("username"), "jack%").asc(col("id")).select();
+        SqlParams sqlParams = Queries.mysql().from(Customer.class).whereLike(col(Customer::getUsername), "jack%").asc(col(Customer::getId)).select();
         List<Customer> customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUsername().startsWith("jack")).count());
 
         //not like
-        sqlParams = Queries.mysql().from(Customer.class).whereNotLike(col("username"), "jack%").asc(col("id")).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereNotLike(col(Customer::getUsername), "jack%").asc(col(Customer::getId)).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers).isNotNull();
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> !a.getUsername().startsWith("jack")).count());
 
         //eq
-        sqlParams = Queries.mysql().from(Company.class).whereEq(col("name"), "Google").single();
+        sqlParams = Queries.mysql().from(Company.class).whereEq(col(Company::getName), "Google").single();
         Company company = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).single(sqlParams);
         Assertions.assertThat(company).isNotNull();
 
         //not eq
-        sqlParams = Queries.mysql().from(Company.class).whereNotEq(col("name"), "Google").single();
+        sqlParams = Queries.mysql().from(Company.class).whereNotEq(col(Company::getName), "Google").single();
         company = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).single(sqlParams);
         Assertions.assertThat(company).isNull();
 
         //between...and..
-        sqlParams = Queries.mysql().from(Customer.class).whereBetween(col("age"), 20, 50).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereBetween(col(Customer::getAge), 20, 50).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 20 && a.getAge() <= 50).count());
 
         //not between...and..
-        sqlParams = Queries.mysql().from(Customer.class).whereNotBetween(col("age"), 20, 50).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereNotBetween(col(Customer::getAge), 20, 50).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 20 || a.getAge() > 50).count());
 
         //in
-        sqlParams = Queries.mysql().from(Customer.class).whereIn(col("age"), Lists.newArrayList(20, 40)).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereIn(col(Customer::getAge), Lists.newArrayList(20, 40)).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() == 20 || a.getAge() == 40).count());
 
         //not in
-        sqlParams = Queries.mysql().from(Customer.class).whereNotIn(col("age"), Lists.newArrayList(0, 10)).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereNotIn(col(Customer::getAge), Lists.newArrayList(0, 10)).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> (a.getAge() != 0 && a.getAge() != 10)).count());
 
         //great
-        sqlParams = Queries.mysql().from(Customer.class).whereGreat(col("age"), 40).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereGreat(col(Customer::getAge), 40).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() > 40).count());
 
         //great equal
-        sqlParams = Queries.mysql().from(Customer.class).whereGreatEq(col("age"), 40).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereGreatEq(col(Customer::getAge), 40).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() >= 40).count());
 
         //less
-        sqlParams = Queries.mysql().from(Customer.class).whereLess(col("age"), 0).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereLess(col(Customer::getAge), 0).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() < 0).count());
 
         //less equal
-        sqlParams = Queries.mysql().from(Customer.class).whereLessEq(col("age"), 0).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereLessEq(col(Customer::getAge), 0).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getAge() <= 0).count());
 
         //is null
-        sqlParams = Queries.mysql().from(Customer.class).whereIsNull(col("updateTime")).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereIsNull(col(Customer::getUpdateTime)).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //is not null
-        sqlParams = Queries.mysql().from(Customer.class).whereIsNotNull(col("updateTime")).select();
+        sqlParams = Queries.mysql().from(Customer.class).whereIsNotNull(col(Customer::getUpdateTime)).select();
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(this.customers.stream().filter(a -> a.getUpdateTime() == null).count());
 
         //join
         sqlParams = Queries.mysql().from(Customer.class).join(Company.class)
-                .on(col("Customer", "companyId"), col("Company", "id"))
+                .on(col("Customer", Customer::getCompanyId), col("Company", Company::getId))
                 .select(Customer.class);
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(customers));
         Assertions.assertThat(customers.size()).isEqualTo(6);
 
         sqlParams = Queries.mysql().from(Customer.class).join(Company.class)
-                .on(col("Customer", "companyId"), col("Company", "id"))
-                .whereEq(col("Company", "name"), "Google")
+                .on(col("Customer", Customer::getCompanyId), col("Company", Company::getId))
+                .whereEq(col("Company", Company::getName), "Google")
                 .select(Company.class,
-                        as(col("Company", "id")),
-                        as(col("Company", "name")),
-                        as(col("Company", "enable")),
-                        as(col("Company", "createTime")),
-                        as(col("Company", "updateTime")));
+                        as(col("Company", Company::getId)),
+                        as(col("Company", Company::getName)),
+                        as(col("Company", Company::getEnable)),
+                        as(col("Company", Company::getCreateTime)),
+                        as(col("Company", Company::getUpdateTime)));
         List<Company> companies = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         System.out.println(JsonUtil.toPrettyJson(companies));
         Assertions.assertThat(companies.size()).isEqualTo(6);
 
         //alias
         sqlParams = Queries.mysql().from(Customer.class, "a").join(Company.class, "b")
-                .on(col("a", "companyId"), col("b", "id"))
+                .on(col("a", Customer::getCompanyId), col("b", Company::getId))
                 .select(Customer.class);
         customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(customers.size()).isEqualTo(6);
@@ -163,21 +163,22 @@ public class MysqlJdbcTest extends DbTest {
         sqlParams = Queries.mysql()
                 .from(Customer.class, "a")
                 .join(Company.class, "b")
-                .on(col("a", "companyId"), col("b", "id"))
-                .whereEq(col("b", "name"), "Google")
+                .on(col("a", Customer::getCompanyId), col("b", Company::getId))
+                .whereEq(col("b", Company::getName), "Google")
                 .select(Company.class,
-                        as(col("b", "id")),
-                        as(col("b", "name")),
-                        as(col("b", "enable")),
-                        as(col("b", "createTime")),
-                        as(col("b", "updateTime")));
+                        as(col("b", Company::getId)),
+                        as(col("b", Company::getName)),
+                        as(col("b", Company::getEnable)),
+                        as(col("b", Company::getCreateTime)),
+                        as(col("b", Company::getUpdateTime)));
         companies = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         Assertions.assertThat(companies.size()).isEqualTo(6);
     }
 
     @Test
     public void limit() {
-        SqlParams sqlParams = Queries.mysql().from(Customer.class).asc(col("id")).limit(2, 2).select();
+        SqlParams sqlParams = Queries.mysql().from(Customer.class).asc(col(Customer::getId))
+                .limit(2, 2).select();
         List<Customer> result = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
         log.info(JsonUtil.toPrettyJson(result));
         Assertions.assertThat(result.size()).isEqualTo(2);
@@ -206,7 +207,7 @@ public class MysqlJdbcTest extends DbTest {
     public void orderBy() {
         SqlParams sqlParams = Queries.mysql().from(Customer.class).orderBy("age asc").select();
         List<Customer> customers = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams);
-        SqlParams sqlParams1 = Queries.mysql().from(Customer.class).asc(col("age")).select();
+        SqlParams sqlParams1 = Queries.mysql().from(Customer.class).asc(col(Customer::getAge)).select();
         List<Customer> customers1 = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).select(sqlParams1);
         Assertions.assertThat(customers.size()).isEqualTo(customers1.size());
         for (int i = 0; i < customers.size(); i++) {
@@ -216,9 +217,10 @@ public class MysqlJdbcTest extends DbTest {
 
     @Test
     public void groupBy() {
-        SqlParams sqlParams = Queries.mysql().from(Customer.class).groupBy(col("enable")).having("avg_age>1").select(Map.class,
-                as(col("avg(age)"), "avg_age"),
-                as(col("enable")));
+        SqlParams sqlParams = Queries.mysql().from(Customer.class).groupBy(col("enable"))
+                .having("avg_age>1").select(Map.class,
+                        as(col("avg(age)"), "avg_age"),
+                        as(col("enable")));
         List<Map> customers1 = QueriesExecute.mysql().singleJdbc().with(jdbcTemplate).mapSelect(sqlParams);
         Map<Integer, Double> result = this.customers.stream().collect(Collectors.groupingBy(Customer::getEnable, Collectors.averagingInt(Customer::getAge)));
         System.out.println(JsonUtil.toPrettyJson(result));

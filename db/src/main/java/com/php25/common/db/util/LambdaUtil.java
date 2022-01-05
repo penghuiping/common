@@ -38,4 +38,16 @@ public class LambdaUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static Class<?> classFromLambda(Serializable lambda) {
+        try {
+            Method m = lambda.getClass().getDeclaredMethod("writeReplace");
+            m.setAccessible(true);
+            SerializedLambda sl = (SerializedLambda) m.invoke(lambda);
+            String className = sl.getImplClass().replace("/", ".");
+            return Class.forName(className);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
