@@ -200,6 +200,12 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>com.php25</groupId>
+                <artifactId>id</artifactId>
+                <version>V.2.5.1</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-core</artifactId>
                 <version>${jmh.version}</version>
