@@ -42,21 +42,39 @@ public class IdInfoPo {
     @TableField("max_id")
     private Long maxId;
 
+    /**
+     * 步长,每次获取号段都会是maxId+step
+     */
     @TableField("step")
     private Integer step;
 
+    /**
+     * 每次id增量
+     */
     @TableField("delta")
     private Integer delta;
 
+    /**
+     * 余数
+     */
     @TableField("remainder")
     private Integer remainder;
 
+    /**
+     * 创建时间
+     */
     @TableField("create_time")
     private Date createTime;
 
+    /**
+     * 更新时间
+     */
     @TableField("update_time")
     private Date updateTime;
 
+    /**
+     * 版本号
+     */
     @TableField("version")
     private Long version;
 }

@@ -4,7 +4,7 @@ package com.php25.common.id.constant;
  * @author penghuiping
  * @date 2022-01-05
  */
-public abstract class Constants {
+public class Constants {
     /**
      * 预加载下个号段的百分比
      */

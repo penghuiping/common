@@ -22,11 +22,11 @@ public interface IdInfoDao extends BaseMapper<IdInfoPo> {
      * 根据id、oldMaxId、version、bizType更新最新的maxId
      *
      * @param id       主键
-     * @param newMaxId
-     * @param oldMaxId
+     * @param newMaxId 新的最大值
+     * @param oldMaxId 老的最大值
      * @param version  版本号
      * @param bizType  业务类型
-     * @return
+     * @return 大于0 更新成功
      */
     int updateMaxId(@Param("id") Long id, @Param("newMaxId") Long newMaxId,
                     @Param("oldMaxId") Long oldMaxId, @Param("version") Long version,
