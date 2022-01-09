@@ -11,48 +11,63 @@ import java.util.List;
  * @author penghuiping
  * @date 2022/1/1 21:21
  */
-public class DefaultFragment implements Fragment {
+public class DefaultFragment extends BaseFragment {
     private final List<Fragment> tables = new ArrayList<>();
 
     public DefaultFragment from(Class<?> entity) {
-        this.tables.add(new FromFragment(entity, null));
-        return this;
+        return this.from(entity, null);
     }
 
     public DefaultFragment join(Class<?> entity) {
-        this.tables.add(new JoinFragment(entity, null));
-        return this;
+        return this.join(entity, null);
     }
 
     public DefaultFragment from(Class<?> entity, String alias) {
-        this.tables.add(new FromFragment(entity, alias));
+        FromFragment fromFragment = new FromFragment(entity, alias);
+        this.tables.add(fromFragment);
         return this;
     }
 
     public DefaultFragment join(Class<?> entity, String alias) {
-        this.tables.add(new JoinFragment(entity, alias));
+        JoinFragment joinFragment = new JoinFragment(entity, alias);
+        this.tables.add(joinFragment);
         return this;
     }
 
     public DefaultFragment on(Column left, Column right) {
-        this.tables.add(new OnFragment(new OnExpression(left, right)));
+        OnExpression onExpression = new OnExpression(left, right);
+        OnFragment onFragment = new OnFragment(onExpression);
+        this.tables.add(onFragment);
         return this;
     }
 
     public DefaultFragment where(Link link) {
-        this.tables.add(new WhereFragment(link));
+        WhereFragment whereFragment = new WhereFragment(link);
+        this.tables.add(whereFragment);
         return this;
     }
 
     @Override
-    public String toString() {
+    public String printSql() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tables.size(); i++) {
             Fragment table = tables.get(i);
-            sb.append(table.toString());
+            sb.append(table.printSql());
             sb.append(" ");
         }
         return sb.toString();
+    }
+
+    @Override
+    public List<Object> params() {
+        List<Object> params = new ArrayList<>();
+        for (int i = 0; i < tables.size(); i++) {
+            Fragment table = tables.get(i);
+            if (null != table.params() && !table.params().isEmpty()) {
+                params.addAll(table.params());
+            }
+        }
+        return params;
     }
 }
 

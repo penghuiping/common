@@ -9,7 +9,7 @@ import com.php25.common.db.core.sql.DbConstant;
  * @author penghuiping
  * @date 2022/1/1 21:15
  */
-public class FromFragment implements Fragment {
+public class FromFragment extends BaseFragment {
     private final Class<?> entity;
     private final String alias;
 
@@ -19,7 +19,7 @@ public class FromFragment implements Fragment {
     }
 
     @Override
-    public String toString() {
+    public String printSql() {
         ModelMeta modelMeta = JdbcModelManager.getModelMeta(entity);
         if (StringUtil.isNotBlank(alias)) {
             return String.format("%s %s %s", DbConstant.FROM, modelMeta.getLogicalTableName(), alias);

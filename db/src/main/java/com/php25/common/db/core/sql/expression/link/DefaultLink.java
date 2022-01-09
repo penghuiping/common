@@ -9,38 +9,52 @@ import java.util.List;
  * @author penghuiping
  * @date 2021/12/28 21:47
  */
-public class DefaultLink implements Link {
+public class DefaultLink extends BaseLink {
 
     private final List<Link> links = new ArrayList<>();
 
     public DefaultLink and(Expression expression) {
-        this.links.add(new AndLink(expression));
+        AndLink andLink = new AndLink(expression);
+        this.links.add(andLink);
         return this;
     }
 
     public DefaultLink or(Expression expression) {
-        this.links.add(new OrLink(expression));
+        OrLink orLink = new OrLink(expression);
+        this.links.add(orLink);
         return this;
     }
 
     public DefaultLink group(Expression expression) {
-        this.links.add(new GroupLink(expression));
+        GroupLink groupLink = new GroupLink(expression);
+        this.links.add(groupLink);
         return this;
     }
 
     public DefaultLink cnd(Expression expression) {
-        this.links.add(new CndLink(expression));
+        CndLink cndLink = new CndLink(expression);
+        this.links.add(cndLink);
         return this;
     }
 
 
     @Override
-    public String toString() {
+    public String printSql() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < links.size(); i++) {
             Link link = links.get(i);
-            sb.append(link.toString());
+            sb.append(link.printSql());
         }
         return sb.toString();
+    }
+
+    @Override
+    public List<Object> params() {
+        List<Object> params = new ArrayList<>();
+        for (int i = 0; i < links.size(); i++) {
+            Link link = links.get(i);
+            params.addAll(link.params());
+        }
+        return params;
     }
 }

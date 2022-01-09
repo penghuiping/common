@@ -96,14 +96,15 @@ public class SqlTest {
 
     @Test
     public void test() {
-
         DefaultLink link = group(cnd(eq(col("a", Customer::getUsername), "jack"))
                 .and(eq(col("a", Customer::getAge), 10)));
-
         Fragment fragment = from(Customer.class, "a").join(Company.class, "b")
                 .on(col("a", Customer::getCompanyId), col("b", Company::getId))
                 .where(link.and(eq(col("b", Company::getName), "Google")));
-        System.out.println(fragment.toString());
+//
+//        Fragment fragment = from(Customer.class).where(cnd(eq(col("name"),"jack")).and(eq(col("age"),12)));
+        System.out.println(fragment.printSql());
+        System.out.println(fragment.params());
     }
 
 

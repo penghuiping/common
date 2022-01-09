@@ -1,7 +1,10 @@
 package com.php25.common.db.core.sql.expression;
 
+import com.google.common.collect.Lists;
 import com.php25.common.db.core.sql.DbConstant;
 import com.php25.common.db.core.sql.column.Column;
+
+import java.util.List;
 
 /**
  * @author penghuiping
@@ -14,7 +17,12 @@ public class EqExpression extends BaseExpression {
     }
 
     @Override
-    public String toString() {
+    public List<Object> params() {
+        return Lists.newArrayList(value);
+    }
+
+    @Override
+    public String printSql() {
         return String.format("%s%s?", this.column.toString(), DbConstant.EQ);
     }
 }

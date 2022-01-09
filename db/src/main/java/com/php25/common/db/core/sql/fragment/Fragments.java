@@ -7,7 +7,7 @@ package com.php25.common.db.core.sql.fragment;
 public abstract class Fragments {
 
     public static DefaultFragment from(Class<?> entity) {
-        return new DefaultFragment().from(entity);
+        return Fragments.from(entity, null);
     }
 
     public static DefaultFragment from(Class<?> entity, String alias) {

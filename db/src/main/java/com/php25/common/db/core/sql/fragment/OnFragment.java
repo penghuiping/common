@@ -6,7 +6,7 @@ import com.php25.common.db.core.sql.expression.OnExpression;
  * @author penghuiping
  * @date 2022/1/2 12:39
  */
-public class OnFragment implements Fragment {
+public class OnFragment extends BaseFragment {
 
     private final OnExpression onExpression;
 
@@ -15,7 +15,9 @@ public class OnFragment implements Fragment {
     }
 
     @Override
-    public String toString() {
-        return onExpression.toString();
+    public String printSql() {
+        return onExpression.printSql();
     }
+
+
 }
