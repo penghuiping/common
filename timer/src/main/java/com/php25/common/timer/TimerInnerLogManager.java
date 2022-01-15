@@ -1,12 +1,15 @@
 package com.php25.common.timer;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.dao.TimerInnerLogDao;
-import com.php25.common.timer.po.TimerInnerLogPo;
+import com.php25.common.timer.dao.po.TimerInnerLogPo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +39,14 @@ public class TimerInnerLogManager {
         String cron = task.getCron();
         String executionId = task.getJobExecutionId();
         Long executionTime = task.getExecuteTime();
-        TimerInnerLogPo jobExecutionLog = timerInnerLogDao.findOneByIdAndExecutionTime(executionId, executionTime);
+        LambdaQueryWrapper<TimerInnerLogPo> lambdaQueryWrapper = new QueryWrapper<TimerInnerLogPo>().lambda();
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getId, executionId);
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getExecutionTime, executionTime);
+        TimerInnerLogPo jobExecutionLog = timerInnerLogDao.selectOne(lambdaQueryWrapper);
         if (null != jobExecutionLog && jobExecutionLog.getStatus() == 0) {
             lock.lock();
             try {
-                jobExecutionLog = timerInnerLogDao.findOneByIdAndExecutionTime(executionId, executionTime);
+                jobExecutionLog = timerInnerLogDao.selectOne(lambdaQueryWrapper);
                 if (jobExecutionLog.getStatus() == 0) {
                     //job执行计划没有执行过需要执行
                     LoggerFactory.getLogger(TimerInnerLogManager.class).info("执行任务:{}:{}", executionId, task.getExecuteTime());
@@ -80,11 +86,14 @@ public class TimerInnerLogManager {
 
     void create(TimerInnerLogPo jobExecutionLog) {
         Lock lock = redisManager.lock(jobExecutionLog.getId() + ":" + jobExecutionLog.getExecutionTime());
-        TimerInnerLogPo jobExecutionLog0 = timerInnerLogDao.findOneByIdAndExecutionTime(jobExecutionLog.getId(), jobExecutionLog.getExecutionTime());
+        LambdaQueryWrapper<TimerInnerLogPo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getId, jobExecutionLog.getId());
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getExecutionTime, jobExecutionLog.getExecutionTime());
+        TimerInnerLogPo jobExecutionLog0 = timerInnerLogDao.selectOne(lambdaQueryWrapper);
         if (null == jobExecutionLog0) {
             lock.lock();
             try {
-                jobExecutionLog0 = timerInnerLogDao.findOneByIdAndExecutionTime(jobExecutionLog.getId(), jobExecutionLog.getExecutionTime());
+                jobExecutionLog0 = timerInnerLogDao.selectOne(lambdaQueryWrapper);
                 if (null == jobExecutionLog0) {
                     //查不到才新增
                     log.info("无法查询到:{}", JsonUtil.toJson(jobExecutionLog));
@@ -101,6 +110,10 @@ public class TimerInnerLogManager {
     }
 
     void update(TimerInnerLogPo timerInnerLog) {
-        timerInnerLogDao.updateStatusByIdAndExecutionTime(timerInnerLog.getStatus(), timerInnerLog.getId(), timerInnerLog.getExecutionTime());
+        LambdaUpdateWrapper<TimerInnerLogPo> lambdaQueryWrapper = new LambdaUpdateWrapper<>();
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getId, timerInnerLog.getId());
+        lambdaQueryWrapper.eq(TimerInnerLogPo::getExecutionTime, timerInnerLog.getExecutionTime());
+        lambdaQueryWrapper.set(TimerInnerLogPo::getStatus, timerInnerLog.getStatus());
+        timerInnerLogDao.update(null, lambdaQueryWrapper);
     }
 }

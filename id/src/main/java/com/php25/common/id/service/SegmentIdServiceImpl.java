@@ -7,7 +7,6 @@ import com.php25.common.id.exception.IdGeneratorException;
 import com.php25.common.id.service.entity.SegmentId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2022-01-05
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class SegmentIdServiceImpl implements SegmentIdService {
     private final IdInfoDao idInfoDao;
