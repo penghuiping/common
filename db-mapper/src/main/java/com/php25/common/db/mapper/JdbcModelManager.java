@@ -7,15 +7,15 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.mapper.annotation.Column;
 import com.php25.common.db.mapper.annotation.DbSchema;
 import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.Id;
 import com.php25.common.db.mapper.annotation.SequenceGenerator;
 import com.php25.common.db.mapper.annotation.Table;
+import com.php25.common.db.mapper.annotation.Transient;
+import com.php25.common.db.mapper.annotation.Version;
 import com.php25.common.db.mapper.exception.DbMapperException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.annotation.Version;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;

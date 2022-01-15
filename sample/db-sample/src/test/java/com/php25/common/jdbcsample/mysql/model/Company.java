@@ -10,9 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/30 09:33
- * @description:
+ * @author penghuiping
+ * @date 2018/8/30 09:33
  */
 @Table("t_company")
 public class Company implements Persistable<Long> {

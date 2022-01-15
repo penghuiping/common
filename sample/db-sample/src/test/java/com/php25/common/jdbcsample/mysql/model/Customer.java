@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * Created by penghuiping on 2018/5/1.
+ * @author penghuiping
+ * @date 2018/8/30 09:33
  */
 @Table("t_customer")
 public class Customer implements Persistable<Long> {
