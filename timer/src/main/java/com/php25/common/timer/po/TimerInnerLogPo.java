@@ -1,28 +1,24 @@
-package com.php25.common.timer.entity;
-
-
-import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.annotation.Table;
+package com.php25.common.timer.po;
 
 /**
  * @author penghuiping
  * @date 2021/3/19 10:42
  */
-@Table("t_timer_inner_log")
-public class TimerInnerLog {
+public class TimerInnerLogPo {
 
+    /**
+     * job id
+     */
     private String id;
 
     /**
      * 执行时间(单位毫秒)
      */
-    @Column("execution_time")
     private Long executionTime;
 
     /**
      * 0:未执行 1:已执行
      */
-    @Column("status")
     private Integer status;
 
     public String getId() {

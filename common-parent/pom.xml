@@ -50,7 +50,6 @@
 
         <php-common.db>V.2.5.1</php-common.db>
         <php-common.core>V.2.5.1</php-common.core>
-        <php-common.mq>V.2.5.1</php-common.mq>
         <php-common.redis>V.2.5.1</php-common.redis>
         <php-common.validation>V.2.5.1</php-common.validation>
         <php-common.webflux>V.2.5.1</php-common.webflux>
@@ -185,12 +184,6 @@
                 <groupId>com.php25</groupId>
                 <artifactId>db</artifactId>
                 <version>${php-common.db}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.php25</groupId>
-                <artifactId>mq</artifactId>
-                <version>${php-common.mq}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>

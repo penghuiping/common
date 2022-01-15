@@ -2,7 +2,7 @@ package com.php25.common.timer;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.mess.SpringContextHolder;
-import com.php25.common.timer.entity.TimerInnerLog;
+import com.php25.common.timer.po.TimerInnerLogPo;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 
@@ -52,7 +52,7 @@ public class Timer {
         cache.put(job0.getJobExecutionId(), timeout);
         if (isHighAvailable) {
             TimerInnerLogManager jobExecutionLogManager = SpringContextHolder.getBean0(TimerInnerLogManager.class);
-            TimerInnerLog jobExecutionLog = new TimerInnerLog();
+            TimerInnerLogPo jobExecutionLog = new TimerInnerLogPo();
             jobExecutionLog.setId(job.getJobExecutionId());
             jobExecutionLog.setExecutionTime(job.getExecuteTime());
             jobExecutionLog.setStatus(0);

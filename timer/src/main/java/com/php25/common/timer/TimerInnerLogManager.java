@@ -4,21 +4,16 @@ import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.DbType;
-import com.php25.common.db.Queries;
-import com.php25.common.db.QueriesExecute;
-import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.timer.entity.TimerInnerLog;
+import com.php25.common.timer.dao.TimerInnerLogDao;
+import com.php25.common.timer.po.TimerInnerLogPo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.text.ParseException;
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
-import static com.php25.common.db.core.sql.column.Columns.col;
 /**
  * @author penghuiping
  * @date 2021/3/19 10:53
@@ -26,15 +21,13 @@ import static com.php25.common.db.core.sql.column.Columns.col;
 public class TimerInnerLogManager {
     private static final Logger log = LoggerFactory.getLogger(TimerInnerLogManager.class);
 
-    private final DbType dbType;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final TimerInnerLogDao timerInnerLogDao;
 
     private final RedisManager redisManager;
 
-    public TimerInnerLogManager(DbType dbType, JdbcTemplate jdbcTemplate, RedisManager redisManager) {
-        this.dbType = dbType;
-        this.jdbcTemplate = jdbcTemplate;
+    public TimerInnerLogManager(TimerInnerLogDao timerInnerLogDao, RedisManager redisManager) {
+        this.timerInnerLogDao = timerInnerLogDao;
         this.redisManager = redisManager;
     }
 
@@ -43,21 +36,17 @@ public class TimerInnerLogManager {
         String cron = task.getCron();
         String executionId = task.getJobExecutionId();
         Long executionTime = task.getExecuteTime();
-        SqlParams sqlParams = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq(col(TimerInnerLog::getId), executionId)
-                .andEq(col(TimerInnerLog::getExecutionTime), executionTime).single();
-        sqlParams.setSql(sqlParams.getSql());
-        TimerInnerLog jobExecutionLog = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
+        TimerInnerLogPo jobExecutionLog = timerInnerLogDao.findOneByIdAndExecutionTime(executionId, executionTime);
         if (null != jobExecutionLog && jobExecutionLog.getStatus() == 0) {
             lock.lock();
             try {
-                jobExecutionLog = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams);
+                jobExecutionLog = timerInnerLogDao.findOneByIdAndExecutionTime(executionId, executionTime);
                 if (jobExecutionLog.getStatus() == 0) {
                     //job执行计划没有执行过需要执行
                     LoggerFactory.getLogger(TimerInnerLogManager.class).info("执行任务:{}:{}", executionId, task.getExecuteTime());
                     task.getTask().run();
                     //更新执行状态为已执行
-                    TimerInnerLog jobExecutionLog0 = new TimerInnerLog();
+                    TimerInnerLogPo jobExecutionLog0 = new TimerInnerLogPo();
                     jobExecutionLog0.setId(jobExecutionLog.getId());
                     jobExecutionLog0.setExecutionTime(jobExecutionLog.getExecutionTime());
                     jobExecutionLog0.setStatus(1);
@@ -89,23 +78,17 @@ public class TimerInnerLogManager {
         timer.add(job, true);
     }
 
-    void create(TimerInnerLog jobExecutionLog) {
+    void create(TimerInnerLogPo jobExecutionLog) {
         Lock lock = redisManager.lock(jobExecutionLog.getId() + ":" + jobExecutionLog.getExecutionTime());
-        SqlParams sqlParams0 = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq(col(TimerInnerLog::getId), jobExecutionLog.getId())
-                .andEq(col(TimerInnerLog::getExecutionTime), jobExecutionLog.getExecutionTime())
-                .single();
-        sqlParams0.setSql(sqlParams0.getSql());
-        TimerInnerLog jobExecutionLog0 = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams0);
+        TimerInnerLogPo jobExecutionLog0 = timerInnerLogDao.findOneByIdAndExecutionTime(jobExecutionLog.getId(), jobExecutionLog.getExecutionTime());
         if (null == jobExecutionLog0) {
             lock.lock();
             try {
-                jobExecutionLog0 = QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).single(sqlParams0);
+                jobExecutionLog0 = timerInnerLogDao.findOneByIdAndExecutionTime(jobExecutionLog.getId(), jobExecutionLog.getExecutionTime());
                 if (null == jobExecutionLog0) {
                     //查不到才新增
                     log.info("无法查询到:{}", JsonUtil.toJson(jobExecutionLog));
-                    SqlParams sqlParams = Queries.of(dbType).from(TimerInnerLog.class).insert(jobExecutionLog);
-                    QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).insert(sqlParams);
+                    timerInnerLogDao.insert(jobExecutionLog);
                 } else {
                     log.info("查询到:{}", JsonUtil.toJson(jobExecutionLog));
                 }
@@ -117,13 +100,7 @@ public class TimerInnerLogManager {
         }
     }
 
-    void update(TimerInnerLog jobExecutionLog) {
-        TimerInnerLog timerInnerLog = new TimerInnerLog();
-        timerInnerLog.setStatus(jobExecutionLog.getStatus());
-        SqlParams sqlParams = Queries.of(dbType).from(TimerInnerLog.class)
-                .whereEq(col(TimerInnerLog::getId), jobExecutionLog.getId())
-                .andEq(col(TimerInnerLog::getExecutionTime), jobExecutionLog.getExecutionTime())
-                .update(timerInnerLog);
-        QueriesExecute.of(dbType).singleJdbc().with(jdbcTemplate).update(sqlParams);
+    void update(TimerInnerLogPo timerInnerLog) {
+        timerInnerLogDao.updateStatusByIdAndExecutionTime(timerInnerLog.getStatus(), timerInnerLog.getId(), timerInnerLog.getExecutionTime());
     }
 }
