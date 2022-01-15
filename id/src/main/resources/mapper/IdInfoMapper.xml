@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.php25.common.id.dao.IdInfoDao">
+    <select id="queryByBizType" resultType="com.php25.common.id.dao.po.IdInfoPo">
+        select id,
+               biz_type,
+               begin_id,
+               max_id,
+               step,
+               delta,
+               remainder,
+               create_time,
+               update_time,
+               version
+        from t_id_info
+        where biz_type = #{bizType}
+    </select>
+
+    <update id="updateMaxId">
+        update t_id_info
+        set max_id= #{newMaxId},
+            update_time=now(),
+            version=version + 1
+        where id = #{id}
+          and max_id = #{oldMaxId}
+          and version = #{version}
+          and biz_type = #{bizType}
+    </update>
+</mapper>

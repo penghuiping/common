@@ -35,11 +35,11 @@
         <bouncycastle.version>1.67</bouncycastle.version>
         <hibernate-validator>6.1.5.Final</hibernate-validator>
         <oracle>11.2.0.3</oracle>
-        <testcontainer>1.15.1</testcontainer>
+        <testcontainer>1.16.2</testcontainer>
         <java-uuid-generator>4.0.1</java-uuid-generator>
-        <mysql-testcontainer>1.12.3</mysql-testcontainer>
-        <postgres-testcontainer>1.12.3</postgres-testcontainer>
-        <oracle-testcontainer>1.12.3</oracle-testcontainer>
+        <mysql-testcontainer>1.16.2</mysql-testcontainer>
+        <postgres-testcontainer>1.16.2</postgres-testcontainer>
+        <oracle-testcontainer>1.16.2</oracle-testcontainer>
         <assertj>3.17.2</assertj>
         <netty>4.1.52.Final</netty>
         <jjwt>0.10.7</jjwt>
@@ -196,6 +196,12 @@
                 <groupId>com.php25</groupId>
                 <artifactId>redis</artifactId>
                 <version>${php-common.redis}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.php25</groupId>
+                <artifactId>id</artifactId>
+                <version>V.2.5.1</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
