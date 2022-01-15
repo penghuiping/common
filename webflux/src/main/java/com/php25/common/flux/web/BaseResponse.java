@@ -1,9 +1,8 @@
 package com.php25.common.flux.web;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/19 09:51
- * @description:
+ * @author penghuiping
+ * @date 2019/7/19 09:51
  */
 public abstract class BaseResponse<T> {
     /**

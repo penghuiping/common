@@ -1,8 +1,6 @@
 package com.php25.common.flux.web;
 
 import com.php25.common.core.exception.BusinessErrorStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -14,29 +12,26 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @Validated
 @CrossOrigin
-public class JSONController {
-    private static final Logger log = LoggerFactory.getLogger(JSONController.class);
-
-
-    protected JSONResponse<Object> failed(BusinessErrorStatus returnStatus) {
-        JSONResponse<Object> ret = new JSONResponse<>();
+public class JsonController {
+    protected JsonResponse<Object> failed(BusinessErrorStatus returnStatus) {
+        JsonResponse<Object> ret = new JsonResponse<>();
         ret.setCode(returnStatus.getCode());
         ret.setMessage(returnStatus.getDesc());
         return ret;
     }
 
-    protected <T> JSONResponse<T> failed0(BusinessErrorStatus returnStatus) {
-        JSONResponse<T> ret = new JSONResponse<>();
+    protected <T> JsonResponse<T> failed0(BusinessErrorStatus returnStatus) {
+        JsonResponse<T> ret = new JsonResponse<>();
         ret.setCode(returnStatus.getCode());
         ret.setMessage(returnStatus.getDesc());
         return ret;
     }
 
-    protected <T> JSONResponse<T> succeed(T obj) {
-        JSONResponse<T> ret = new JSONResponse<>();
+    protected <T> JsonResponse<T> succeed(T obj) {
+        JsonResponse<T> ret = new JsonResponse<>();
         ret.setCode(ApiErrorCode.ok.getCode());
         ret.setData(obj);
-        ret.setMessage("success");
+        ret.setMessage(ApiErrorCode.ok.getDesc());
         return ret;
     }
 
