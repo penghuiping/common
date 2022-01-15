@@ -1,9 +1,9 @@
 package com.php25.common.jdbcsample.mysql.model;
 
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.Table;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.annotation.Column;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;

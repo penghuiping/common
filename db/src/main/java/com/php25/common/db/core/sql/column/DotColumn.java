@@ -1,8 +1,8 @@
 package com.php25.common.db.core.sql.column;
 
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.SFunction;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import com.php25.common.db.util.LambdaUtil;
 
 /**
@@ -26,7 +26,7 @@ public class DotColumn implements Column {
 
     static <T, K> DotColumn of(String entityAlias, SFunction<? super T, ? extends K> name) {
         Class<?> entityClass = LambdaUtil.classFromLambda(name);
-        String dbName = JdbcModelManager.getDbColumnByClassColumn(entityClass, LambdaUtil.fieldNameFromLambda(name));
+        String dbName = JdbcModelCacheManager.getDbColumnByClassColumn(entityClass, LambdaUtil.fieldNameFromLambda(name));
         return DotColumn.of(entityAlias, dbName);
     }
 

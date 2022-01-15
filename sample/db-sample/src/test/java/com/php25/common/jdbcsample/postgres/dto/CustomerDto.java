@@ -6,7 +6,8 @@ import org.springframework.data.annotation.Version;
 import java.util.Date;
 
 /**
- * Created by penghuiping on 2018/5/1.
+ * @author penghuiping
+ * @date 2018/5/1
  */
 public class CustomerDto {
 

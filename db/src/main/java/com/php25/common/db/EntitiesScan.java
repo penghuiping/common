@@ -1,7 +1,7 @@
 package com.php25.common.db;
 
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -29,7 +29,7 @@ public class EntitiesScan {
                     if (path.indexOf(basePackage0) > 0) {
                         String className = path.substring(path.indexOf(basePackage0)).split("\\.")[0].replace("/", ".");
                         Class<?> class0 = ClassUtils.getDefaultClassLoader().loadClass(className);
-                        JdbcModelManager.getModelMeta(class0);
+                        JdbcModelCacheManager.getModelMeta(class0);
                     }
                 }
             } catch (Exception e) {

@@ -1,7 +1,6 @@
 package com.php25.common.jdbcsample.mysql.test.shard;
 
 import com.google.common.collect.Lists;
-import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
@@ -29,9 +28,6 @@ import java.util.List;
  * @date 2020/12/24 17:15
  */
 public class ShardDbTest {
-    @Autowired
-    IdGenerator idGeneratorService;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -77,7 +73,7 @@ public class ShardDbTest {
             ShardCustomer customer = new ShardCustomer();
             customer.setId(id);
             customer.setUsername("jack" + i);
-            customer.setPassword(DigestUtil.MD5Str("123456"));
+            customer.setPassword(DigestUtil.md5Str("123456"));
             customer.setAge(i * 10);
             customer.setStartTime(LocalDateTime.now());
             customer.setEnable(1);
@@ -108,7 +104,7 @@ public class ShardDbTest {
             ShardCustomer customer = new ShardCustomer();
             customer.setId(id);
             customer.setUsername("mary" + i);
-            customer.setPassword(DigestUtil.MD5Str("123456"));
+            customer.setPassword(DigestUtil.md5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
             customer.setAge(i * 10);
             customer.setEnable(0);

@@ -1,10 +1,11 @@
-package com.php25.common.db.core.manager;
+package com.php25.common.db.mapper;
+
 
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.SequenceGenerator;
+import com.php25.common.db.mapper.exception.DbMapperException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,58 +18,63 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/25 14:32
- * @description:
+ * 具有缓存功能的数据模型与物理表映射关系处理类
+ *
+ * @author penghuiping
+ * @date 2019/7/25 14:32
  */
-public class JdbcModelManager {
+public class JdbcModelCacheManager {
 
-    private static final Logger log = LoggerFactory.getLogger(JdbcModelManager.class);
+    private static final Logger log = LoggerFactory.getLogger(JdbcModelCacheManager.class);
 
-    private static final Map<String, ModelMeta> modelMetas = new HashMap<>(128);
+    private static final Map<String, ModelMeta> MODEL_METAS = new HashMap<>(128);
 
-    private static final Map<String, Class<?>> modelNameToClass = new HashMap<>(128);
+    private static final Map<String, Class<?>> MODEL_NAME_TO_CLASS = new HashMap<>(128);
 
-    /****
-     * 根据实体class获取逻辑表名
-     * @param cls 实体类
+    private JdbcModelCacheManager() {
+    }
+
+    /**
+     * 根据持久化类获取逻辑表名
+     *
+     * @param cls 持久化类
      * @return 逻辑表名
      */
     public static String getLogicalTableName(Class<?> cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return modelMeta.getLogicalTableName();
         } else {
-            return JdbcModelManagerHelper.getTableName(cls);
+            return JdbcModelManager.getTableName(cls);
         }
     }
 
     /**
-     * 获取实体对象的ModelMeta
+     * 获取持久化类的数据模型信息
      *
-     * @param cls
-     * @return
+     * @param cls 持久化类
+     * @return 数据模型信息
      */
     public static ModelMeta getModelMeta(Class<?> cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return modelMeta;
         } else {
-            modelMeta = JdbcModelManagerHelper.getModelMeta(cls);
-            modelMetas.putIfAbsent(cls.getName(), modelMeta);
-            modelNameToClass.putIfAbsent(cls.getSimpleName(), cls);
+            modelMeta = JdbcModelManager.getModelMeta(cls);
+            MODEL_METAS.putIfAbsent(cls.getName(), modelMeta);
+            MODEL_NAME_TO_CLASS.putIfAbsent(cls.getSimpleName(), cls);
             return modelMeta;
         }
     }
 
     /**
-     * 通过modelName获取对应的实体类
+     * 通过数据模型名获取对应的持久化类
      *
-     * @param modelName
-     * @return
+     * @param modelName 数据模型名
+     * @return 持久化类
      */
     public static Class<?> getClassFromModelName(String modelName) {
-        return modelNameToClass.get(modelName);
+        return MODEL_NAME_TO_CLASS.get(modelName);
     }
 
     /**
@@ -77,13 +83,13 @@ public class JdbcModelManager {
      * @param cls model类对的class
      * @return model类反射对应的主键field
      */
-    public static Field getPrimaryKeyField(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static Field getPrimaryKeyField(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return modelMeta.getPkField();
         } else {
             log.warn("getPrimaryKeyField没有使用缓存");
-            return JdbcModelManagerHelper.getPrimaryKeyField(cls);
+            return JdbcModelManager.getPrimaryKeyField(cls);
         }
     }
 
@@ -93,61 +99,61 @@ public class JdbcModelManager {
      * @param cls model类对的class
      * @return model类反射对应的 version field
      */
-    public static Optional<Field> getVersionField(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static Optional<Field> getVersionField(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getVersionField());
         } else {
             log.warn("getVersionField没有使用缓存");
-            return JdbcModelManagerHelper.getVersionField(cls);
+            return JdbcModelManager.getVersionField(cls);
         }
     }
 
     /**
-     * 获取model表的主键字段名
+     * 获取持久化类的主键字段名
      *
-     * @param cls
-     * @return
+     * @param cls 持久化类
+     * @return 主键字段名
      */
-    public static String getPrimaryKeyColName(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static String getPrimaryKeyColName(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return modelMeta.getDbPkName();
         } else {
             log.warn("getPrimaryKeyColName没有使用缓存");
-            return JdbcModelManagerHelper.getPrimaryKeyColName(cls);
+            return JdbcModelManager.getPrimaryKeyColName(cls);
         }
     }
 
     /**
-     * 获取model的@GeneratedValue注解
+     * 获取持久化类的@GeneratedValue注解
      *
-     * @param cls
-     * @return
+     * @param cls 持久化类
+     * @return @GeneratedValue注解
      */
-    public static Optional<GeneratedValue> getAnnotationGeneratedValue(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static Optional<GeneratedValue> getAnnotationGeneratedValue(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getGeneratedValue());
         } else {
             log.warn("getAnnotationGeneratedValue没有使用缓存");
-            return JdbcModelManagerHelper.getAnnotationGeneratedValue(cls);
+            return JdbcModelManager.getAnnotationGeneratedValue(cls);
         }
     }
 
     /**
-     * 获取model的@SequenceGenerator注解
+     * 获取持久化类的@SequenceGenerator注解
      *
-     * @param cls
-     * @return
+     * @param cls 持久化类
+     * @return @SequenceGenerator注解
      */
-    public static Optional<SequenceGenerator> getAnnotationSequenceGenerator(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static Optional<SequenceGenerator> getAnnotationSequenceGenerator(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return Optional.ofNullable(modelMeta.getSequenceGenerator());
         } else {
             log.warn("getAnnotationSequenceGenerator没有使用缓存");
-            return JdbcModelManagerHelper.getAnnotationSequenceGenerator(cls);
+            return JdbcModelManager.getAnnotationSequenceGenerator(cls);
         }
     }
 
@@ -157,13 +163,13 @@ public class JdbcModelManager {
      * @param cls
      * @return
      */
-    public static String getPrimaryKeyFieldName(Class cls) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static String getPrimaryKeyFieldName(Class<?> cls) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             return modelMeta.getClassPkName();
         } else {
             log.warn("getPrimaryKeyFieldName没有使用缓存");
-            return JdbcModelManagerHelper.getPrimaryKeyFieldName(cls);
+            return JdbcModelManager.getPrimaryKeyFieldName(cls);
         }
     }
 
@@ -174,8 +180,8 @@ public class JdbcModelManager {
      * @param name
      * @return
      */
-    public static String getDbColumnByClassColumn(Class cls, String name) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static String getDbColumnByClassColumn(Class<?> cls, String name) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             List<String> classColumns = modelMeta.getClassColumns();
             List<String> dbColumns = modelMeta.getDbColumns();
@@ -185,10 +191,10 @@ public class JdbcModelManager {
 
                 }
             }
-            throw new DbException("无法找到相对应的column");
+            throw new DbMapperException("无法找到相对应的column");
         } else {
             log.warn("getDbColumnByClassColumn没有使用缓存");
-            return JdbcModelManagerHelper.getDbColumnByClassColumn(cls, name);
+            return JdbcModelManager.getDbColumnByClassColumn(cls, name);
         }
     }
 
@@ -199,8 +205,8 @@ public class JdbcModelManager {
      * @param name
      * @return
      */
-    public static String getClassColumnByDbColumn(Class cls, String name) {
-        ModelMeta modelMeta = modelMetas.get(cls.getName());
+    public static String getClassColumnByDbColumn(Class<?> cls, String name) {
+        ModelMeta modelMeta = MODEL_METAS.get(cls.getName());
         if (null != modelMeta) {
             List<String> classColumns = modelMeta.getClassColumns();
             List<String> dbColumns = modelMeta.getDbColumns();
@@ -214,7 +220,7 @@ public class JdbcModelManager {
             return result;
         } else {
             log.warn("getClassColumnByDbColumn没有使用缓存");
-            return JdbcModelManagerHelper.getClassColumnByDbColumn(cls, name);
+            return JdbcModelManager.getClassColumnByDbColumn(cls, name);
         }
     }
 
@@ -227,7 +233,7 @@ public class JdbcModelManager {
      * @return
      */
     public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndValue(T t, boolean ignoreNull) {
-        return JdbcModelManagerHelper.getTableColumnNameAndValue(t, ignoreNull);
+        return JdbcModelManager.getTableColumnNameAndValue(t, ignoreNull);
     }
 
     /**
@@ -238,7 +244,7 @@ public class JdbcModelManager {
      * @return
      */
     public static <T> List<ImmutablePair<String, Object>> getTableColumnNameAndCollectionValue(T t) {
-        return JdbcModelManagerHelper.getTableColumnNameAndCollectionValue(t);
+        return JdbcModelManager.getTableColumnNameAndCollectionValue(t);
     }
 
     /**
@@ -251,12 +257,12 @@ public class JdbcModelManager {
      */
     public static <T> Object getPrimaryKeyValue(Class<?> clazz, T t) {
         //获取主键值
-        String idField = JdbcModelManager.getPrimaryKeyFieldName(clazz);
+        String idField = JdbcModelCacheManager.getPrimaryKeyFieldName(clazz);
         Object id = null;
         try {
             id = ReflectUtil.getMethod(clazz, "get" + StringUtil.capitalizeFirstLetter(idField)).invoke(t);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new DbException(String.format("%s类%s方法反射调用出错", clazz.getName(), "get" + StringUtil.capitalizeFirstLetter(idField)));
+            throw new DbMapperException(String.format("%s类%s方法反射调用出错", clazz.getName(), "get" + StringUtil.capitalizeFirstLetter(idField)));
         }
         return id;
     }

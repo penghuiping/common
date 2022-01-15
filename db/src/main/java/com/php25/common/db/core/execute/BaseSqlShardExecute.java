@@ -3,14 +3,14 @@ package com.php25.common.db.core.execute;
 import com.google.common.collect.ImmutableMap;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.Constants;
-import com.php25.common.db.core.JdbcModelRowMapper;
+import com.php25.common.db.core.constant.Constants;
 import com.php25.common.db.core.shard.ShardInfo;
 import com.php25.common.db.core.shard.ShardRule;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.JdbcModelRowMapper;
 import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -127,7 +127,7 @@ public abstract class BaseSqlShardExecute implements ShardSqlExecute {
                             Comparable comparable2 = (Comparable) obj2;
                             res = comparable1.compareTo(comparable2);
                             if (res != 0) {
-                                if ("DESC".equals(right.toUpperCase())) {
+                                if ("DESC".equalsIgnoreCase(right)) {
                                     res = -res;
                                 }
                                 break;

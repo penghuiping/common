@@ -1,7 +1,6 @@
 package com.php25.common.jdbcsample.sqlite.test;
 
 import com.google.common.collect.Lists;
-import com.php25.common.core.mess.IdGenerator;
 import com.php25.common.core.mess.SnowflakeIdWorker;
 import com.php25.common.core.util.DigestUtil;
 import com.php25.common.db.Queries;
@@ -23,15 +22,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/31 10:27
- * @description:
+ * @author penghuiping
+ * @date 2018/8/31 10:27
  */
 public class DbTest {
-
-    @Autowired
-    IdGenerator idGeneratorService;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -69,7 +63,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             customer.setUsername("jack" + i);
-            customer.setPassword(DigestUtil.MD5Str("123456"));
+            customer.setPassword(DigestUtil.md5Str("123456"));
             customer.setAge(i * 10);
             customer.setStartTime(LocalDateTime.now());
             customer.setEnable(1);
@@ -86,7 +80,7 @@ public class DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             customer.setUsername("mary" + i);
-            customer.setPassword(DigestUtil.MD5Str("123456"));
+            customer.setPassword(DigestUtil.md5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
             customer.setAge(i * 20);
             customer.setEnable(0);

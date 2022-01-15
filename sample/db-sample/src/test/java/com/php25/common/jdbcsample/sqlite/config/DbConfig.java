@@ -14,9 +14,7 @@ import org.sqlite.SQLiteDataSource;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-/**
- * Created by penghuiping on 2018/5/1.
- */
+
 @Profile(value = "single_db")
 @Configuration
 public class DbConfig {

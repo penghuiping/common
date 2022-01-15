@@ -270,7 +270,7 @@ public class MysqlJdbcLambdaTest extends DbTest {
 
         Customer customer = new Customer();
         customer.setUsername("mary");
-        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setPassword(DigestUtil.md5Str("123456"));
         customer.setAge(10);
         customer.setStartTime(LocalDateTime.now());
         customer.setScore(BigDecimal.valueOf(1000L));
@@ -281,7 +281,7 @@ public class MysqlJdbcLambdaTest extends DbTest {
 
         Customer customer1 = new Customer();
         customer1.setUsername("perter");
-        customer1.setPassword(DigestUtil.MD5Str("123456"));
+        customer1.setPassword(DigestUtil.md5Str("123456"));
         customer1.setAge(10);
         customer1.setStartTime(LocalDateTime.now());
         customer1.setScore(BigDecimal.valueOf(1000L));
@@ -310,7 +310,7 @@ public class MysqlJdbcLambdaTest extends DbTest {
 
         Customer customer = new Customer();
         customer.setUsername("mary");
-        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setPassword(DigestUtil.md5Str("123456"));
         customer.setAge(10);
         customer.setScore(BigDecimal.valueOf(1000L));
         customer.setStartTime(LocalDateTime.now());
@@ -319,7 +319,7 @@ public class MysqlJdbcLambdaTest extends DbTest {
 
         Customer customer1 = new Customer();
         customer1.setUsername("perter");
-        customer1.setPassword(DigestUtil.MD5Str("123456"));
+        customer1.setPassword(DigestUtil.md5Str("123456"));
         customer1.setAge(10);
         customer1.setScore(BigDecimal.valueOf(1000L));
         customer1.setStartTime(LocalDateTime.now());

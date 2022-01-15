@@ -1,7 +1,7 @@
 package com.php25.common.jdbcsample.postgres.model;
 
-import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.annotation.Table;
+import com.php25.common.db.mapper.annotation.Column;
+import com.php25.common.db.mapper.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
@@ -10,9 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/30 09:33
- * @description:
+ * @author penghuiping
+ * @date 2018/8/30 09:33
  */
 @Table("t_company")
 public class Company implements Persistable<Long> {

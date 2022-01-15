@@ -1,6 +1,7 @@
-package com.php25.common.db.core.annotation;
+package com.php25.common.db.mapper.annotation;
 
-import com.php25.common.db.core.GenerationType;
+
+import com.php25.common.db.mapper.GenerationType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

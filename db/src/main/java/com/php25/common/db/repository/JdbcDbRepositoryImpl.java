@@ -4,9 +4,9 @@ import com.php25.common.core.util.PageUtil;
 import com.php25.common.db.DbType;
 import com.php25.common.db.Queries;
 import com.php25.common.db.QueriesExecute;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.Query;
 import com.php25.common.db.core.sql.SqlParams;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import com.php25.common.db.specification.SearchParamBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,7 +41,7 @@ public class JdbcDbRepositoryImpl<T, ID> implements JdbcDbRepository<T, ID> {
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         this.model = (Class<?>) params[0];
-        this.pkName = JdbcModelManager.getPrimaryKeyFieldName(model);
+        this.pkName = JdbcModelCacheManager.getPrimaryKeyFieldName(model);
         this.jdbcTemplate = jdbcTemplate;
         this.dbType = dbType;
     }

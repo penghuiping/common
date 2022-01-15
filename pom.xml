@@ -12,6 +12,7 @@
         <module>common-parent</module>
         <module>core</module>
         <module>db</module>
+        <module>db-mapper</module>
         <module>webflux</module>
         <module>redis</module>
         <module>validation</module>

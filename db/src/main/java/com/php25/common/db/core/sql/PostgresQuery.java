@@ -1,12 +1,12 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.Constants;
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.constant.Constants;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.SequenceGenerator;
 import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -48,10 +48,10 @@ public class PostgresQuery extends BaseQuery {
                 .append(clazz.getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(model, ignoreNull);
 
         //获取主键名
-        String id = JdbcModelManager.getPrimaryKeyColName(clazz);
+        String id = JdbcModelCacheManager.getPrimaryKeyColName(clazz);
 
         //是否是使用了sequence的情况
         boolean flag = false;
@@ -59,7 +59,7 @@ public class PostgresQuery extends BaseQuery {
         GenerationType generationType = GenerationType.AUTO;
 
         //判断主键属性上是否有@GeneratedValue注解
-        Optional<GeneratedValue> generatedValueOptional = JdbcModelManager.getAnnotationGeneratedValue(clazz);
+        Optional<GeneratedValue> generatedValueOptional = JdbcModelCacheManager.getAnnotationGeneratedValue(clazz);
         if (generatedValueOptional.isPresent()) {
             //判断策略
             GeneratedValue generatedValue = generatedValueOptional.get();
@@ -74,7 +74,7 @@ public class PostgresQuery extends BaseQuery {
                 case SEQUENCE:
                     generationType = GenerationType.SEQUENCE;
                     flag = true;
-                    Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
+                    Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelCacheManager.getAnnotationSequenceGenerator(clazz);
                     if (!sequenceGeneratorOptional.isPresent()) {
                         throw new DbException("@SequenceGenerator注解不存在");
                     } else {
@@ -99,9 +99,9 @@ public class PostgresQuery extends BaseQuery {
         }
 
         //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(clazz);
         if (versionFieldOptional.isPresent()) {
-            String versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            String versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
             //不管version有没有值,由于是insert version的值默认都从0开始
             pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(versionColumnName)).collect(Collectors.toList());
             pairList.add(new ImmutablePair<>(versionColumnName, 0));
@@ -171,16 +171,16 @@ public class PostgresQuery extends BaseQuery {
                 .append(clazz.getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(models.get(0), false);
 
         //获取主键名
-        String id = JdbcModelManager.getPrimaryKeyColName(clazz);
+        String id = JdbcModelCacheManager.getPrimaryKeyColName(clazz);
 
         //是否是使用了sequence的情况
         boolean flag = false;
 
         //判断主键属性上是否有@GeneratedValue注解
-        Optional<GeneratedValue> generatedValueOptional = JdbcModelManager.getAnnotationGeneratedValue(clazz);
+        Optional<GeneratedValue> generatedValueOptional = JdbcModelCacheManager.getAnnotationGeneratedValue(clazz);
         if (generatedValueOptional.isPresent()) {
             //判断策略
             GeneratedValue generatedValue = generatedValueOptional.get();
@@ -194,7 +194,7 @@ public class PostgresQuery extends BaseQuery {
                     throw new DbException("抱歉!postgres不支持这种模式");
                 case SEQUENCE:
                     flag = true;
-                    Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelManager.getAnnotationSequenceGenerator(clazz);
+                    Optional<SequenceGenerator> sequenceGeneratorOptional = JdbcModelCacheManager.getAnnotationSequenceGenerator(clazz);
                     if (!sequenceGeneratorOptional.isPresent()) {
                         throw new DbException("@SequenceGenerator注解不存在");
                     } else {
@@ -220,10 +220,10 @@ public class PostgresQuery extends BaseQuery {
 
 
         //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(clazz);
         String versionColumnName = null;
         if (versionFieldOptional.isPresent()) {
-            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
         }
 
         //拼装sql语句
@@ -274,7 +274,7 @@ public class PostgresQuery extends BaseQuery {
         List<Object[]> batchParams = new ArrayList<>();
         for (int j = 0; j < models.size(); j++) {
             List<Object> params = new ArrayList<>();
-            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(models.get(j), false);
+            List<ImmutablePair<String, Object>> tmp = JdbcModelCacheManager.getTableColumnNameAndValue(models.get(j), false);
             for (int i = 0; i < tmp.size(); i++) {
 
                 if (flag) {

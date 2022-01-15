@@ -1,15 +1,15 @@
-package com.php25.common.db.core.manager;
+package com.php25.common.db.mapper;
 
 import com.google.common.collect.Lists;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.annotation.DbSchema;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.core.annotation.Table;
-import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.annotation.Column;
+import com.php25.common.db.mapper.annotation.DbSchema;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.SequenceGenerator;
+import com.php25.common.db.mapper.annotation.Table;
+import com.php25.common.db.mapper.exception.DbMapperException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/25 14:37
- * @description:
+ * @author penghuiping
+ * @date 2019/7/25 14:37
  */
-class JdbcModelManagerHelper {
+class JdbcModelManager {
+    private static final Logger log = LoggerFactory.getLogger(JdbcModelManager.class);
 
-    private static final Logger log = LoggerFactory.getLogger(JdbcModelManagerHelper.class);
-
+    private JdbcModelManager() {
+    }
 
     protected static ModelMeta getModelMeta(Class<?> cls) {
         ModelMeta modelMeta = new ModelMeta();
@@ -44,7 +44,7 @@ class JdbcModelManagerHelper {
         Field[] fields = cls.getDeclaredFields();
         List<String> dbColumns = new ArrayList<>();
         List<String> classColumns = new ArrayList<>();
-        List<Class> columnsType = new ArrayList<>();
+        List<Class<?>> columnsType = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             Transient tmp = field.getAnnotation(Transient.class);
@@ -105,7 +105,7 @@ class JdbcModelManagerHelper {
 
         Table table = cls.getAnnotation(Table.class);
         if (null == table) {
-            throw new DbException(cls.getName() + ":没有Table注解");
+            throw new DbMapperException(cls.getName() + ":没有Table注解");
         }
 
         DbSchema schema = cls.getAnnotation(DbSchema.class);
@@ -314,7 +314,7 @@ class JdbcModelManagerHelper {
                     try {
                         value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new DbException(e.getMessage(), e);
+                        throw new DbMapperException(e.getMessage(), e);
                     }
                     return new ImmutablePair<>(columnName, value);
                 });
@@ -348,7 +348,7 @@ class JdbcModelManagerHelper {
                     String fieldName = field1.getName();
                     String columnName = null;
                     if (null == column || StringUtil.isBlank(column.value())) {
-                        throw new DbException("collection属性必须指定@Column注解的value值，值为中间表的关联字段名");
+                        throw new DbMapperException("collection属性必须指定@Column注解的value值，值为中间表的关联字段名");
                     } else {
                         columnName = column.value();
                     }
@@ -356,7 +356,7 @@ class JdbcModelManagerHelper {
                     try {
                         value = ReflectUtil.getMethod(t.getClass(), "get" + StringUtil.capitalizeFirstLetter(fieldName)).invoke(t);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new DbException(e.getMessage(), e);
+                        throw new DbMapperException(e.getMessage(), e);
                     }
                     return new ImmutablePair<>(columnName, value);
                 });

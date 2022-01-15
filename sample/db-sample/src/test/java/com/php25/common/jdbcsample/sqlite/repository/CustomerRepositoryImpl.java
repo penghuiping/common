@@ -7,9 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 21:53
- * @Description:
+ * @author penghuiping
+ * @date 2018/8/16 21:53
  */
 @Repository
 public class CustomerRepositoryImpl extends BaseDbRepositoryImpl<Customer, Long> implements CustomerRepository {

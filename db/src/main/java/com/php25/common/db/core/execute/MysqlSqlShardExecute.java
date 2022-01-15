@@ -3,13 +3,13 @@ package com.php25.common.db.core.execute;
 import com.google.common.collect.ImmutableMap;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.shard.ShardInfo;
 import com.php25.common.db.core.shard.ShardTableInfo;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import com.php25.common.db.util.StringFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class MysqlSqlShardExecute extends BaseSqlShardExecute {
             if (GenerationType.IDENTITY.equals(generationType)) {
                 //自增操作
                 //获取id field名
-                String idField = JdbcModelManager.getPrimaryKeyFieldName(clazz);
+                String idField = JdbcModelCacheManager.getPrimaryKeyFieldName(clazz);
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 int rows = shardInfo.getShardingDb().update(con -> {
                     PreparedStatement ps = con.prepareStatement(targetSql0, Statement.RETURN_GENERATED_KEYS);
@@ -67,7 +67,7 @@ public class MysqlSqlShardExecute extends BaseSqlShardExecute {
                 if (rows <= 0) {
                     throw new DbException("insert 操作失败");
                 }
-                Field field = JdbcModelManager.getPrimaryKeyField(clazz);
+                Field field = JdbcModelCacheManager.getPrimaryKeyField(clazz);
                 if (!field.getType().isAssignableFrom(Long.class) && !field.getType().isAssignableFrom(long.class)) {
                     throw new DbException("自增主键必须是Long类型");
                 }

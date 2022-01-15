@@ -3,8 +3,6 @@ package com.php25.common.ws;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.RandomUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.mq.Message;
-import com.php25.common.mq.MessageQueueManager;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Job;
@@ -48,8 +46,6 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
 
     private final RedisManager redisService;
 
-    private final MessageQueueManager messageQueueManager;
-
     private final String serverId;
 
     private final SecurityAuthentication securityAuthentication;
@@ -71,15 +67,13 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
                           SecurityAuthentication securityAuthentication,
                           String serverId,
                           MsgDispatcher msgDispatcher,
-                          Timer timer,
-                          MessageQueueManager messageQueueManager) {
+                          Timer timer) {
         this.retryMsgManager = retryMsgManager;
         this.redisService = redisService;
         this.serverId = serverId;
         this.securityAuthentication = securityAuthentication;
         this.msgDispatcher = msgDispatcher;
         this.timer = timer;
-        this.messageQueueManager = messageQueueManager;
         int cpuNum = Runtime.getRuntime().availableProcessors();
         this.executorService = new ThreadPoolExecutor(1, 2 * cpuNum,
                 60L, TimeUnit.SECONDS,
@@ -104,16 +98,17 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.messageQueueManager.subscribe("ws_session", serverId, true, message -> {
-            for (String key : sessions.keySet()) {
-                try {
-                    WebSocketSession socketSession = sessions.get(key).getWebSocketSession();
-                    socketSession.sendMessage(new TextMessage(message.getBody().toString()));
-                } catch (Exception e) {
-                    log.info("通过websocket发送消息失败,消息为:{}", message.getBody().toString(), e);
-                }
-            }
-        });
+        //todo
+//        this.messageQueueManager.subscribe("ws_session", serverId, true, message -> {
+//            for (String key : sessions.keySet()) {
+//                try {
+//                    WebSocketSession socketSession = sessions.get(key).getWebSocketSession();
+//                    socketSession.sendMessage(new TextMessage(message.getBody().toString()));
+//                } catch (Exception e) {
+//                    log.info("通过websocket发送消息失败,消息为:{}", message.getBody().toString(), e);
+//                }
+//            }
+//        });
     }
 
     protected void init(SidUid sidUid) {
@@ -212,8 +207,9 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
         try {
             if (StringUtil.isBlank(sid)) {
                 //没有指定sid,则认为进行全局广播，并且广播消息不会重试
-                Message message = new Message(RandomUtil.randomUUID(), vueMsgSerializer.from(baseMsg));
-                messageQueueManager.send("ws_session", message);
+                //todo
+//                Message message = new Message(RandomUtil.randomUUID(), vueMsgSerializer.from(baseMsg));
+//                messageQueueManager.send("ws_session", message);
             } else {
                 //现看看sid是否本地存在
                 if (this.sessions.containsKey(sid)) {

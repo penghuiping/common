@@ -1,6 +1,6 @@
 package com.php25.common.db.core.sql;
 
-import com.php25.common.db.core.GenerationType;
+import com.php25.common.db.mapper.GenerationType;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;

@@ -188,6 +188,12 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
+                <artifactId>db-mapper</artifactId>
+                <version>${php-common.db}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.php25</groupId>
                 <artifactId>redis</artifactId>
                 <version>${php-common.redis}</version>
                 <scope>compile</scope>

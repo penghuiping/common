@@ -4,9 +4,8 @@ import com.php25.common.db.repository.BaseDbRepository;
 import com.php25.common.jdbcsample.oracle.model.Customer;
 
 /**
- * @Auther: penghuiping
- * @Date: 2018/8/16 21:53
- * @Description:
+ * @author penghuiping
+ * @date 2018/8/16 21:53
  */
 public interface CustomerRepository extends BaseDbRepository<Customer, Long> {
 

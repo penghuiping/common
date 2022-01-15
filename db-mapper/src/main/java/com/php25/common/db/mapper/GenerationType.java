@@ -1,4 +1,4 @@
-package com.php25.common.db.core;
+package com.php25.common.db.mapper;
 
 /**
  * @author penghuiping

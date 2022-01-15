@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.db.core.OrderBy;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.column.AsColumn;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.util.Assert;
@@ -113,11 +113,11 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
                 .append(this.queryContext.getClazz().getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append(" SET ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(model, ignoreNull);
         //获取主键id
-        String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
+        String pkName = JdbcModelCacheManager.getPrimaryKeyColName(model.getClass());
         //判断是否有@version注解，如果有的话当然是进行乐观锁处理逻辑
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(this.queryContext.getClazz());
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(this.queryContext.getClazz());
         String versionColumnName = null;
         Long versionValue = 0L;
         Object pkValue = null;
@@ -140,7 +140,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
                     //@version注解字段，那么每次更新的时候都应该自动+1
                     //检查version属性是否是Long
                     Assert.isTrue(versionFieldOptional.get().getType().isAssignableFrom(Long.class), "version字段必须是Long类型");
-                    versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+                    versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
                     if (pairList.get(i).getLeft().equals(versionColumnName)) {
                         versionValue = (Long) pairList.get(i).getRight();
                         params.add(versionValue + 1L);
@@ -197,13 +197,13 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
                 .append(clazz.getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(0), false);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(models.get(0), false);
 
         //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(clazz);
         String versionColumnName = null;
         if (versionFieldOptional.isPresent()) {
-            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
         }
 
         //拼装sql语句
@@ -229,7 +229,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
         List<Object[]> batchParams = new ArrayList<>();
         for (int j = 0; j < models.size(); j++) {
             List<Object> params = new ArrayList<>();
-            List<ImmutablePair<String, Object>> tmp = JdbcModelManager.getTableColumnNameAndValue(models.get(j), false);
+            List<ImmutablePair<String, Object>> tmp = JdbcModelCacheManager.getTableColumnNameAndValue(models.get(j), false);
             for (int i = 0; i < tmp.size(); i++) {
                 //判断是否有@version注解，如果有默认给0
                 if (versionFieldOptional.isPresent()) {
@@ -273,12 +273,12 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
                 .append(clazz.getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append(" SET ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, false);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(model, false);
         //获取主键id
-        String pkName = JdbcModelManager.getPrimaryKeyColName(model.getClass());
+        String pkName = JdbcModelCacheManager.getPrimaryKeyColName(model.getClass());
 
         //判断是否有@version注解，如果有的话当然是进行乐观锁处理逻辑
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(clazz);
         String versionColumnName = null;
         Long versionValue = 0L;
 
@@ -300,7 +300,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
             //具有@version的情况
             //检查version属性是否是Long
             Assert.isTrue(versionFieldOptional.get().getType().isAssignableFrom(Long.class), "version字段必须是Long类型");
-            versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
             stringBuilder.append(String.format(" AND %s=?", versionColumnName));
         }
 
@@ -311,7 +311,7 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
         for (int j = 0; j < models.size(); j++) {
             Object pkValue = null;
             List<Object> params1 = new ArrayList<>();
-            pairList = JdbcModelManager.getTableColumnNameAndValue(models.get(j), false);
+            pairList = JdbcModelCacheManager.getTableColumnNameAndValue(models.get(j), false);
             for (int i = 0; i < pairList.size(); i++) {
                 if (!pairList.get(i).getLeft().equals(pkName)) {
                     if (versionFieldOptional.isPresent()) {
@@ -347,8 +347,8 @@ public class QueryActionImpl extends AbstractQuery implements QueryAction {
     @Override
     public <M> SqlParams delete(M model) {
         Class<?> clazz = this.queryContext.getClazz();
-        Object id = JdbcModelManager.getPrimaryKeyValue(clazz, model);
-        String pkName = JdbcModelManager.getPrimaryKeyColName(clazz);
+        Object id = JdbcModelCacheManager.getPrimaryKeyValue(clazz, model);
+        String pkName = JdbcModelCacheManager.getPrimaryKeyColName(clazz);
         appendAndSql(pkName, id, "=");
         return this.delete();
     }

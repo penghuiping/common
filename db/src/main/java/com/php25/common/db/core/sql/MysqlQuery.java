@@ -1,11 +1,11 @@
 package com.php25.common.db.core.sql;
 
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.Constants;
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.manager.JdbcModelManager;
+import com.php25.common.db.core.constant.Constants;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
 import com.php25.common.db.util.StringFormatter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -44,12 +44,12 @@ public class MysqlQuery extends BaseQuery {
                 .append(clazz.getSimpleName())
                 .append(StringFormatter.KEY_WRAPPER_SUFFIX)
                 .append("( ");
-        List<ImmutablePair<String, Object>> pairList = JdbcModelManager.getTableColumnNameAndValue(model, ignoreNull);
+        List<ImmutablePair<String, Object>> pairList = JdbcModelCacheManager.getTableColumnNameAndValue(model, ignoreNull);
 
         GenerationType generationType = GenerationType.AUTO;
 
         //判断主键属性上是否有@GeneratedValue注解
-        Optional<GeneratedValue> generatedValueOptional = JdbcModelManager.getAnnotationGeneratedValue(clazz);
+        Optional<GeneratedValue> generatedValueOptional = JdbcModelCacheManager.getAnnotationGeneratedValue(clazz);
         if (generatedValueOptional.isPresent()) {
             //判断策略
             GeneratedValue generatedValue = generatedValueOptional.get();
@@ -62,7 +62,7 @@ public class MysqlQuery extends BaseQuery {
                 case IDENTITY:
                     generationType = GenerationType.IDENTITY;
                     //获取id column名
-                    String id = JdbcModelManager.getPrimaryKeyColName(clazz);
+                    String id = JdbcModelCacheManager.getPrimaryKeyColName(clazz);
                     //由于使用了mysql auto-increment 所以直接移除id
                     pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(id)).collect(Collectors.toList());
                     break;
@@ -75,9 +75,9 @@ public class MysqlQuery extends BaseQuery {
         }
 
         //判断是否有@version注解
-        Optional<Field> versionFieldOptional = JdbcModelManager.getVersionField(clazz);
+        Optional<Field> versionFieldOptional = JdbcModelCacheManager.getVersionField(clazz);
         if (versionFieldOptional.isPresent()) {
-            String versionColumnName = JdbcModelManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
+            String versionColumnName = JdbcModelCacheManager.getDbColumnByClassColumn(clazz, versionFieldOptional.get().getName());
             //不管version有没有值,由于是insert version的值默认都从0开始
             pairList = pairList.stream().filter(stringObjectImmutablePair -> !stringObjectImmutablePair.getLeft().equals(versionColumnName)).collect(Collectors.toList());
             pairList.add(new ImmutablePair<>(versionColumnName, 0));

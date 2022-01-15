@@ -1,11 +1,9 @@
-package com.php25.common.db.core;
+package com.php25.common.db.mapper;
 
 import com.php25.common.core.util.AssertUtil;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.manager.JdbcModelManager;
-import com.php25.common.db.core.manager.ModelMeta;
-import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.exception.DbMapperException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -54,12 +52,12 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
         AssertUtil.notNull(mapperClass, "mapperClass不能为null");
         try {
             T model = mapperClass.newInstance();
-            ModelMeta modelMeta = JdbcModelManager.getModelMeta(mapperClass);
+            ModelMeta modelMeta = JdbcModelCacheManager.getModelMeta(mapperClass);
             List<String> dbColumns = modelMeta.getDbColumns();
-            List<Class> columnTypes = modelMeta.getColumnTypes();
+            List<Class<?>> columnTypes = modelMeta.getColumnTypes();
             for (int i = 0; i < dbColumns.size(); i++) {
                 String dbColumn = dbColumns.get(i);
-                String classColumn = JdbcModelManager.getClassColumnByDbColumn(mapperClass, dbColumn);
+                String classColumn = JdbcModelCacheManager.getClassColumnByDbColumn(mapperClass, dbColumn);
                 Object value = rs.getObject(dbColumn);
                 Class<?> columnType = columnTypes.get(i);
 
@@ -79,7 +77,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
                         //自定义类，直接设置主键值
                         //设置子类主键
                         Object subObj = columnType.newInstance();
-                        Field subClassPkField = JdbcModelManager.getPrimaryKeyField(columnType);
+                        Field subClassPkField = JdbcModelCacheManager.getPrimaryKeyField(columnType);
                         if (null != value) {
                             value = convertValueToRequiredType(value, subClassPkField.getType());
                         }
@@ -93,7 +91,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
             }
             return model;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new DbException("数据库数据转化为model出错,class:" + mapperClass.getName(), e);
+            throw new DbMapperException("数据库数据转化为model出错,class:" + mapperClass.getName(), e);
         }
     }
 
@@ -107,7 +105,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
             } else if (Boolean.class.isAssignableFrom(value.getClass())) {
                 return value;
             } else {
-                throw new DbException(
+                throw new DbMapperException(
                         "Value [" + value + "] is of type [" + value.getClass().getName() +
                                 "] and cannot be converted to required type [" + requiredType.getName() + "]");
             }
@@ -122,7 +120,7 @@ public class JdbcModelRowMapper<T> implements RowMapper<T> {
         } else if (this.conversionService.canConvert(value.getClass(), requiredType)) {
             return this.conversionService.convert(value, requiredType);
         } else {
-            throw new DbException(
+            throw new DbMapperException(
                     "Value [" + value + "] is of type [" + value.getClass().getName() +
                             "] and cannot be converted to required type [" + requiredType.getName() + "]");
         }

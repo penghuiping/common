@@ -2,8 +2,8 @@ package com.php25.common.db.core.sql;
 
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
@@ -51,7 +51,7 @@ public abstract class AbstractQuery {
         } else {
             if (!(Collection.class.isAssignableFrom(paramValueType))) {
                 //自定义class类，通过反射获取主键值，在加入参数列表
-                String subClassPk = JdbcModelManager.getPrimaryKeyFieldName(paramValueType);
+                String subClassPk = JdbcModelCacheManager.getPrimaryKeyFieldName(paramValueType);
                 try {
                     return ReflectUtil.getMethod(paramValueType, "get" + StringUtil.capitalizeFirstLetter(subClassPk)).invoke(paramValue);
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -78,7 +78,7 @@ public abstract class AbstractQuery {
                 Class<?> modelClass = this.queryContext.getAliasMap().getOrDefault(parts[0], null);
                 if (null == modelClass) {
                     //不存在 没使用别名，试试是否是类名
-                    modelClass = JdbcModelManager.getClassFromModelName(parts[0]);
+                    modelClass = JdbcModelCacheManager.getClassFromModelName(parts[0]);
                     if (modelClass == null) {
                         //不是，则使用原来的字符串
                         return " " + name + " ";
@@ -109,16 +109,16 @@ public abstract class AbstractQuery {
             if (StringUtil.isBlank(alias)) {
                 //没有使用别名
                 if (!clazz.equals(modelClass)) {
-                    return String.format(" ${%s}.%s ", modelClass.getSimpleName(), JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
+                    return String.format(" ${%s}.%s ", modelClass.getSimpleName(), JdbcModelCacheManager.getDbColumnByClassColumn(modelClass, name));
                 } else {
-                    return String.format(" ${%s}.%s ", clazz.getSimpleName(), JdbcModelManager.getDbColumnByClassColumn(clazz, name));
+                    return String.format(" ${%s}.%s ", clazz.getSimpleName(), JdbcModelCacheManager.getDbColumnByClassColumn(clazz, name));
                 }
             } else {
                 //使用了别名
                 if (!clazz.equals(modelClass)) {
-                    return String.format(" %s.%s ", alias, JdbcModelManager.getDbColumnByClassColumn(modelClass, name));
+                    return String.format(" %s.%s ", alias, JdbcModelCacheManager.getDbColumnByClassColumn(modelClass, name));
                 } else {
-                    return String.format(" %s.%s ", alias, JdbcModelManager.getDbColumnByClassColumn(clazz, name));
+                    return String.format(" %s.%s ", alias, JdbcModelCacheManager.getDbColumnByClassColumn(clazz, name));
                 }
             }
         } catch (Exception e) {

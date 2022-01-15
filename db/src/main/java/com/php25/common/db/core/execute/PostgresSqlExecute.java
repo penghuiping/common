@@ -3,11 +3,11 @@ package com.php25.common.db.core.execute;
 import com.google.common.collect.ImmutableMap;
 import com.php25.common.core.util.ReflectUtil;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.manager.JdbcModelManager;
 import com.php25.common.db.core.sql.SingleSqlParams;
 import com.php25.common.db.core.sql.SqlParams;
 import com.php25.common.db.exception.DbException;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.JdbcModelCacheManager;
 import com.php25.common.db.util.StringFormatter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -32,13 +32,13 @@ public class PostgresSqlExecute extends BaseSqlExecute {
         GenerationType generationType = defaultSqlParams.getGenerationType();
         Object model = defaultSqlParams.getModel();
         log.debug("替换前sql语句为:{}", targetSql);
-        String targetSql0 = new StringFormatter(targetSql).format(ImmutableMap.of(clazz.getSimpleName(), JdbcModelManager.getLogicalTableName(clazz)));
+        String targetSql0 = new StringFormatter(targetSql).format(ImmutableMap.of(clazz.getSimpleName(), JdbcModelCacheManager.getLogicalTableName(clazz)));
         log.info("sql语句为:{}", targetSql0);
         try {
             if (GenerationType.SEQUENCE.equals(generationType)) {
                 //sequence情况
                 //获取id field名
-                String idField = JdbcModelManager.getPrimaryKeyFieldName(clazz);
+                String idField = JdbcModelCacheManager.getPrimaryKeyFieldName(clazz);
 
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 int rows = this.jdbcTemplate.update(con -> {
@@ -52,7 +52,7 @@ public class PostgresSqlExecute extends BaseSqlExecute {
                 if (rows <= 0) {
                     throw new DbException("insert 操作失败");
                 }
-                Field field = JdbcModelManager.getPrimaryKeyField(clazz);
+                Field field = JdbcModelCacheManager.getPrimaryKeyField(clazz);
                 if (!field.getType().isAssignableFrom(Long.class)) {
                     throw new DbException("主键必须是Long类型");
                 }

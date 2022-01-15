@@ -109,7 +109,7 @@ public class PostgresRepositoryTest extends DbTest {
 
         Customer customer = new Customer();
         customer.setUsername("jack" + 4);
-        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setPassword(DigestUtil.md5Str("123456"));
         customer.setStartTime(LocalDateTime.now());
         customer.setAge(4 * 10);
         customer.setCompanyId(company.getId());
@@ -140,7 +140,7 @@ public class PostgresRepositoryTest extends DbTest {
         for (int i = 0; i < 3; i++) {
             Customer customer = new Customer();
             customer.setUsername("jack" + i);
-            customer.setPassword(DigestUtil.MD5Str("123456"));
+            customer.setPassword(DigestUtil.md5Str("123456"));
             customer.setStartTime(LocalDateTime.now());
             customer.setAge((i + 1) * 10);
             customer.setNew(true);
@@ -239,7 +239,7 @@ public class PostgresRepositoryTest extends DbTest {
         //人员
         Customer customer = new Customer();
         customer.setUsername("jack12313");
-        customer.setPassword(DigestUtil.MD5Str("123456"));
+        customer.setPassword(DigestUtil.md5Str("123456"));
         customer.setStartTime(LocalDateTime.now());
         customer.setAge(10);
         customer.setNew(true);

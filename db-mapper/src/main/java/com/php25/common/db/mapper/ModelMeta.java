@@ -1,15 +1,16 @@
-package com.php25.common.db.core.manager;
+package com.php25.common.db.mapper;
 
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.SequenceGenerator;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.SequenceGenerator;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/29 23:30
- * @description:
+ * 数据模型信息
+ *
+ * @author penghuiping
+ * @date 2018/8/29 23:30
  */
 public class ModelMeta {
 
@@ -25,7 +26,7 @@ public class ModelMeta {
 
     private List<String> dbColumns;
 
-    private List<Class> columnTypes;
+    private List<Class<?>> columnTypes;
 
     private Field versionField;
 
@@ -61,7 +62,6 @@ public class ModelMeta {
     public void setLogicalTableName(String logicalTableName) {
         this.logicalTableName = logicalTableName;
     }
-
 
 
     public String getDbPkName() {
@@ -112,11 +112,11 @@ public class ModelMeta {
         this.sequenceGenerator = sequenceGenerator;
     }
 
-    public List<Class> getColumnTypes() {
+    public List<Class<?>> getColumnTypes() {
         return columnTypes;
     }
 
-    public void setColumnTypes(List<Class> columnTypes) {
+    public void setColumnTypes(List<Class<?>> columnTypes) {
         this.columnTypes = columnTypes;
     }
 

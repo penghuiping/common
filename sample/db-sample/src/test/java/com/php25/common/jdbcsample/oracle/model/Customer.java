@@ -1,10 +1,10 @@
 package com.php25.common.jdbcsample.oracle.model;
 
-import com.php25.common.db.core.GenerationType;
-import com.php25.common.db.core.annotation.Column;
-import com.php25.common.db.core.annotation.GeneratedValue;
-import com.php25.common.db.core.annotation.SequenceGenerator;
-import com.php25.common.db.core.annotation.Table;
+import com.php25.common.db.mapper.GenerationType;
+import com.php25.common.db.mapper.annotation.Column;
+import com.php25.common.db.mapper.annotation.GeneratedValue;
+import com.php25.common.db.mapper.annotation.SequenceGenerator;
+import com.php25.common.db.mapper.annotation.Table;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * Created by penghuiping on 2018/5/1.
+ * @author penghuiping
+ * @date 2018/5/1
  */
 @Table("t_customer")
 public class Customer implements Persistable<Long> {
