@@ -6,6 +6,8 @@ import com.google.common.base.Objects;
 import java.util.LinkedList;
 
 /**
+ * 数节点
+ *
  * @author penghuiping
  * @date 2020/7/1 15:01
  */

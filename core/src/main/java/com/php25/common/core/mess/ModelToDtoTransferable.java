@@ -12,8 +12,8 @@ public interface ModelToDtoTransferable<MODEL, DTO> {
     /**
      * model转dto
      *
-     * @param model
-     * @param dto
+     * @param model 业务实体对象
+     * @param dto   数据传输对象
      */
     void modelToDto(MODEL model, DTO dto);
 }

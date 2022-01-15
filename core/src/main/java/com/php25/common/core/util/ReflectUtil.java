@@ -9,12 +9,12 @@ import java.lang.reflect.Method;
 /**
  * 反射帮助类
  *
- * @author: penghuiping
- * @date: 2018/8/10 16:04
+ * @author penghuiping
+ * @date 2018/8/10 16:04
  */
 public abstract class ReflectUtil {
-    private static ConcurrentReferenceHashMap<String, Field> fieldMap = new ConcurrentReferenceHashMap<>();
-    private static ConcurrentReferenceHashMap<String, Method> methodMap = new ConcurrentReferenceHashMap<>();
+    private static final ConcurrentReferenceHashMap<String, Field> fieldMap = new ConcurrentReferenceHashMap<>();
+    private static final ConcurrentReferenceHashMap<String, Method> methodMap = new ConcurrentReferenceHashMap<>();
 
 
     public static Method getMethod(Class<?> cls, String name, Class<?>... parameterTypes) {

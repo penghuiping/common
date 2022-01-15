@@ -27,8 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/8 17:05
+ * @author penghuiping
+ * @date 2018/8/8 17:05
  */
 public abstract class JsonUtil {
     private static final Logger log = LoggerFactory.getLogger(JsonUtil.class);

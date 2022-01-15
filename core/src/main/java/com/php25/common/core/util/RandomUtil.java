@@ -16,17 +16,17 @@ import java.util.concurrent.ThreadLocalRandom;
  * @date 2014/8/13.
  */
 public abstract class RandomUtil {
-    public static final String NUMBERS_AND_LETTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String NUMBERS = "0123456789";
-    public static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+    private static final String NUMBERS_AND_LETTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String NUMBERS = "0123456789";
+    private static final String LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String LOWER_CASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
     /**
      * 随即获取给定长度的字符串，数字+字母形式+大小写敏感
      *
-     * @param length
-     * @return
+     * @param length 随机数长度
+     * @return 随机数
      */
     public static String getRandomNumbersAndLetters(int length) {
         return getRandom(NUMBERS_AND_LETTERS, length);
@@ -35,8 +35,8 @@ public abstract class RandomUtil {
     /**
      * 获取给定长度的随机数
      *
-     * @param length
-     * @return
+     * @param length 随机数长度
+     * @return 随机数
      */
     public static String getRandomNumbers(int length) {
         return getRandom(NUMBERS, length);
@@ -45,8 +45,8 @@ public abstract class RandomUtil {
     /**
      * 获取给定长度的随即字符串，字母形式+大小写敏感
      *
-     * @param length
-     * @return
+     * @param length 随机数长度
+     * @return 随机数
      */
     public static String getRandomLetters(int length) {
         return getRandom(LETTERS, length);
@@ -55,8 +55,8 @@ public abstract class RandomUtil {
     /**
      * 获取给定长度的大写字符
      *
-     * @param length
-     * @return
+     * @param length 随机数长度
+     * @return 随机数
      */
     public static String getRandomCapitalLetters(int length) {
         return getRandom(CAPITAL_LETTERS, length);
@@ -65,8 +65,8 @@ public abstract class RandomUtil {
     /**
      * 获取给定长度的小写字符
      *
-     * @param length
-     * @return
+     * @param length 随机数长度
+     * @return 随机数
      */
     public static String getRandomLowerCaseLetters(int length) {
         return getRandom(LOWER_CASE_LETTERS, length);
@@ -86,8 +86,8 @@ public abstract class RandomUtil {
     /**
      * 给定字符串数据源，从中生产随机字符串
      *
-     * @param sourceChar
-     * @param length
+     * @param sourceChar 字符串数据源
+     * @param length     随机数长度
      * @return 如果数据源为null或者""，返回null
      */
     public static String getRandom(char[] sourceChar, int length) {
@@ -132,7 +132,7 @@ public abstract class RandomUtil {
     /**
      * 随机返回0到max之间的数字
      *
-     * @param max
+     * @param max 最大的整形数字
      * @return 如果max小于0 则返回0
      */
     public static int getRandom(int max) {
@@ -142,8 +142,8 @@ public abstract class RandomUtil {
     /**
      * 随机返回min与max之间的数字
      *
-     * @param min
-     * @param max
+     * @param min 最小的整形数字
+     * @param max 最大的整形数字
      * @return 如果min大于max返回0，如果min等于max返回min
      */
     public static int getRandom(int min, int max) {
@@ -235,7 +235,7 @@ public abstract class RandomUtil {
     /**
      * 获取随机uuid
      *
-     * @return
+     * @return uuid
      */
     public static String randomUUID() {
         return UUID.randomUUID().toString();

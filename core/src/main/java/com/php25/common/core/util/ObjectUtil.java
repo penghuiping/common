@@ -7,7 +7,8 @@ import java.lang.reflect.Type;
 /**
  * 对象工具类，包括判空、克隆、序列化等操作
  *
- * @author Looly
+ * @author penghuiping
+ * @date 2022-01-15
  */
 public abstract class ObjectUtil {
 
@@ -101,13 +102,9 @@ public abstract class ObjectUtil {
     public static boolean isValidIfNumber(Object obj) {
         if (obj != null && obj instanceof Number) {
             if (obj instanceof Double) {
-                if (((Double) obj).isInfinite() || ((Double) obj).isNaN()) {
-                    return false;
-                }
+                return !((Double) obj).isInfinite() && !((Double) obj).isNaN();
             } else if (obj instanceof Float) {
-                if (((Float) obj).isInfinite() || ((Float) obj).isNaN()) {
-                    return false;
-                }
+                return !((Float) obj).isInfinite() && !((Float) obj).isNaN();
             }
         }
         return true;

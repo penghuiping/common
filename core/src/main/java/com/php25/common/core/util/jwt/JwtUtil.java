@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * jwt令牌类
+ *
  * @author penghuiping
  * @date 2021/3/6 09:12
  */

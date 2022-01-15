@@ -14,11 +14,11 @@ import java.security.PublicKey;
  */
 public class SecretKeyPair {
 
-    private String privateKey;
+    private final String privateKey;
 
-    private String publicKey;
+    private final String publicKey;
 
-    private UnSymmetricAlgorithm unSymmetricAlgorithm;
+    private final UnSymmetricAlgorithm unSymmetricAlgorithm;
 
     public SecretKeyPair(KeyPair keyPair, UnSymmetricAlgorithm unSymmetricAlgorithm) {
         AssertUtil.notNull(keyPair, "keyPair不能为null");

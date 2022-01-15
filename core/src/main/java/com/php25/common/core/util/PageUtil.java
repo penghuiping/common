@@ -4,7 +4,7 @@ package com.php25.common.core.util;
  * 分页帮助类
  *
  * @author penghuiping
- * @date 14-8-16
+ * @date 2014-8-16
  */
 public abstract class PageUtil {
     /**

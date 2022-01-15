@@ -20,7 +20,7 @@ public class Trees {
      *
      * @param nodes 一维数组转链表树
      * @param <T>   节点数据类型
-     * @return
+     * @return 树
      */
     public static <T extends TreeAble<?>> TreeNode<T> buildTree(List<T> nodes) {
         AssertUtil.notEmpty(nodes, "树节点不能为空");
@@ -37,10 +37,9 @@ public class Trees {
     /**
      * 从树中找出本节点的子孙节点(包含本节点)
      *
-     * @param rootNode
-     * @param node
-     * @param <T>
-     * @return
+     * @param rootNode 树根节点
+     * @param node     节点
+     * @return 子孙节点
      */
     public static <T extends TreeAble<?>> List<T> getAllSuccessorNodes(TreeNode<T> rootNode, T node) {
         List<T> list = new ArrayList<>();
@@ -54,10 +53,9 @@ public class Trees {
     /**
      * 获取树中本节点的所有祖先节点(包含本节点)
      *
-     * @param rootNode
-     * @param node
-     * @param <T>
-     * @return
+     * @param rootNode 树根节点
+     * @param node     本节点
+     * @return 祖先节点
      */
     public static <T extends TreeAble<?>> List<T> getAllPredecessor(TreeNode<T> rootNode, T node) {
         List<T> list = new ArrayList<>();
@@ -74,8 +72,8 @@ public class Trees {
 
     /***
      * 访问遍历树节点，从上至下，从左到右
-     * @param node
-     * @param handler
+     * @param node 节点
+     * @param handler 访问回调函数
      */
     public static <T extends TreeAble<?>, S> void visit(TreeNode<T> node, VisitHandler<TreeNode<T>, S> handler, S context) {
         handler.handle(node, context);
@@ -92,7 +90,7 @@ public class Trees {
      *
      * @param node 树节点
      * @param <T>  节点数据类型
-     * @return
+     * @return true:是叶子节点
      */
     public static <T extends TreeAble<?>> boolean isLeafNode(TreeNode<T> node) {
         return node.getChildren() == null || node.getChildren().isEmpty();

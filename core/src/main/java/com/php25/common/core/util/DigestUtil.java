@@ -1,7 +1,9 @@
 package com.php25.common.core.util;
 
+import com.google.common.base.Charsets;
 import com.php25.common.core.exception.Exceptions;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -31,11 +33,11 @@ public abstract class DigestUtil {
      * @param str 需要加密的字符串
      * @return byte[]  md5加密后的结果
      */
-    private static byte[] MD5(String str) {
+    private static byte[] md5(String str) {
         AssertUtil.hasText(str, "str不能为空");
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            return messageDigest.digest(str.getBytes("utf8"));
+            return messageDigest.digest(str.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
@@ -47,8 +49,8 @@ public abstract class DigestUtil {
      * @param str 需要加密的字符串
      * @return string 直接返回32位的md5加密字符串
      */
-    public static String MD5Str(String str) {
-        return new String(DigestUtil.bytes2hex(DigestUtil.MD5(str)));
+    public static String md5Str(String str) {
+        return new String(DigestUtil.bytes2hex(DigestUtil.md5(str)));
     }
 
 
@@ -58,8 +60,8 @@ public abstract class DigestUtil {
      * @param str 需要加密的字符串
      * @return 直接返回32位的SHA1 加密字符串
      */
-    public static String SHAStr(String str) {
-        return new String(DigestUtil.bytes2hex(DigestUtil.SHA(str, "sha-1")));
+    public static String shaStr(String str) {
+        return new String(DigestUtil.bytes2hex(DigestUtil.sha(str, "sha-1")));
     }
 
     /**
@@ -68,8 +70,8 @@ public abstract class DigestUtil {
      * @param str 需要加密的字符串
      * @return 直接返回SHA256 加密字符串
      */
-    public static String SHA256Str(String str) {
-        return new String(DigestUtil.bytes2hex(DigestUtil.SHA(str, "sha-256")));
+    public static String sha256Str(String str) {
+        return new String(DigestUtil.bytes2hex(DigestUtil.sha(str, "sha-256")));
     }
 
     /**
@@ -78,12 +80,12 @@ public abstract class DigestUtil {
      * @param str 需要加密的字符串
      * @return 返回加密结果
      */
-    private static byte[] SHA(String str, String shaAlgorithm) {
+    private static byte[] sha(String str, String shaAlgorithm) {
         AssertUtil.hasText(str, "str不能为空");
         AssertUtil.hasText(shaAlgorithm, "shaAlgorithm不能为空");
         try {
             MessageDigest md = MessageDigest.getInstance(shaAlgorithm);
-            return md.digest(str.getBytes("utf8"));
+            return md.digest(str.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
             throw Exceptions.throwIllegalStateException("出错啦!", e);
         }

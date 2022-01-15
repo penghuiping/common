@@ -2,8 +2,6 @@ package com.php25.common.core.mess;
 
 
 /**
- * @author penghuiping
- * @date 2018-05-12
  * <p>
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
@@ -15,6 +13,9 @@ package com.php25.common.core.mess;
  * 12位序列，毫秒内的计数，12位的计数顺序号支持每个节点每毫秒(同一机器，同一时间截)产生4096个ID序号<br>
  * 加起来刚好64位，为一个Long型。<br>
  * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
+ *
+ * @author penghuiping
+ * @date 2018-05-12
  */
 public class SnowflakeIdWorker {
     // ==============================Fields===========================================
@@ -71,12 +72,12 @@ public class SnowflakeIdWorker {
     /**
      * 工作机器ID(0~31)
      */
-    private long workerId;
+    private final long workerId;
 
     /**
      * 数据中心ID(0~31)
      */
-    private long datacenterId;
+    private final long datacenterId;
 
     /**
      * 毫秒内序列(0~4095)

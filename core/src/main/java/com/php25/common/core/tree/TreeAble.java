@@ -10,14 +10,14 @@ public interface TreeAble<T> {
     /**
      * 用于获取parentId
      *
-     * @return
+     * @return parentId
      */
     T getParentId();
 
     /**
      * 用于获取id
      *
-     * @return
+     * @return id
      */
     T getId();
 

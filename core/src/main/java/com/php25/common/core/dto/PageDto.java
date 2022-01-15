@@ -6,38 +6,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DataGrid 所需要的数据结构类型
+ * 分页所需要的数据结构类型
  *
  * @author penghuiping
  * @date 2016/2/16.
  */
-public class DataGridPageDto<T> {
+public class PageDto<T> {
 
     /**
      * 总记录数
      */
-    private Long recordsTotal;
+    private Long total;
 
+    /**
+     * 分页数据
+     */
     private List<T> data;
 
-    public DataGridPageDto() {
+    public PageDto() {
         this.data = new ArrayList<>();
-        this.recordsTotal = 0L;
+        this.total = 0L;
     }
 
-    public DataGridPageDto(Page<T> page) {
+    public PageDto(Page<T> page) {
         this.data = page.getContent();
-        this.recordsTotal = page.getTotalElements();
+        this.total = page.getTotalElements();
     }
 
-    public Long getRecordsTotal() {
-        return recordsTotal;
+    public static <T> PageDto<T> empty() {
+        return new PageDto<>();
     }
 
-    public void setRecordsTotal(Long recordsTotal) {
-        this.recordsTotal = recordsTotal;
+    public Long getTotal() {
+        return total;
     }
 
+    public void setTotal(Long total) {
+        this.total = total;
+    }
 
     public List<T> getData() {
         return data;

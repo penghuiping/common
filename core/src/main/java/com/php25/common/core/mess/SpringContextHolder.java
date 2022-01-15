@@ -12,8 +12,10 @@ import org.springframework.util.Assert;
 import java.util.Map;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/8 16:46
+ * 用于获取spring上下文(ApplicationContext)
+ *
+ * @author penghuiping
+ * @date 2018/8/8 16:46
  */
 @Service
 @Lazy(false)
@@ -58,7 +60,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     }
 
     private static void assertContextInjected() {
-        Assert.isTrue(applicationContext != null, "applicaitonContext属性未注入, 请在applicationContext.xml中定义SpringContextHolder.");
+        Assert.isTrue(applicationContext != null, "applicationContext属性未注入, 请在applicationContext.xml中定义SpringContextHolder");
     }
 
     @Override

@@ -13,8 +13,8 @@ import java.time.ZoneId;
 import java.util.TimeZone;
 
 /**
- * @author: penghuiping
- * @date: 2018/8/15 10:12
+ * @author penghuiping
+ * @date 2018/8/15 10:12
  */
 public abstract class XmlUtil {
     private static final XmlMapper xmlMapper = new XmlMapper();

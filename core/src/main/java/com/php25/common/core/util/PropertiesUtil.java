@@ -11,9 +11,10 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * @author: penghuiping
- * @date: 2019/9/3 10:15
- * @description:
+ * 用于加载Property文件
+ *
+ * @author penghuiping
+ * @date 2019/9/3 10:15
  */
 public abstract class PropertiesUtil {
 

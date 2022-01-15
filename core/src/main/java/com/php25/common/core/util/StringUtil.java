@@ -15,8 +15,8 @@ public abstract class StringUtil {
     /**
      * 如果字符串为null或者""或者"  "都返回true
      *
-     * @param str
-     * @return
+     * @param str 字符串
+     * @return true:为空字符串
      */
     public static boolean isBlank(String str) {
         return (str == null || str.trim().length() == 0);
@@ -26,7 +26,7 @@ public abstract class StringUtil {
      * 如果字符串不为为null或者""或者"  "都返回true
      *
      * @param str 字符串
-     * @return
+     * @return true:不为空字符串
      */
     public static boolean isNotBlank(String str) {
         return !isBlank(str);
@@ -35,8 +35,8 @@ public abstract class StringUtil {
     /**
      * 如果字符串为null或者""返回true
      *
-     * @param str
-     * @return
+     * @param str 字符串
+     * @return true: 为空字符串,但是" "不算空字符串
      */
     public static boolean isEmpty(String str) {
         return (str == null || str.length() == 0);
