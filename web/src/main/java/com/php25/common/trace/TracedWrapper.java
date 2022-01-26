@@ -1,4 +1,4 @@
-package com.php25.common.flux.trace;
+package com.php25.common.trace;
 
 import brave.ScopedSpan;
 import brave.Tracer;

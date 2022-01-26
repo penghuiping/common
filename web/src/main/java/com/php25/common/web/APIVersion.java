@@ -1,4 +1,4 @@
-package com.php25.common.flux.web;
+package com.php25.common.web;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

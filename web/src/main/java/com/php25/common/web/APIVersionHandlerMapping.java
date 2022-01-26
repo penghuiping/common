@@ -1,4 +1,4 @@
-package com.php25.common.flux.web;
+package com.php25.common.web;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;

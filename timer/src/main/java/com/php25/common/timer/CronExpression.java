@@ -261,7 +261,7 @@ public final class CronExpression implements Serializable, Cloneable {
      * @param cronExpression String representation of the cron expression the
      *                       new object should represent
      * @throws ParseException if the string expression cannot be parsed into a valid
-     *                                  <CODE>CronExpression</CODE>
+     *                        <CODE>CronExpression</CODE>
      */
     public CronExpression(String cronExpression) throws ParseException {
         if (cronExpression == null) {
@@ -513,7 +513,7 @@ public final class CronExpression implements Serializable, Cloneable {
             throw pe;
         } catch (Exception e) {
             throw new ParseException("Illegal cron expression format ("
-                    + e.toString() + ")", 0);
+                    + e + ")", 0);
         }
     }
 
@@ -746,8 +746,9 @@ public final class CronExpression implements Serializable, Cloneable {
             } else {
                 throw new ParseException("'W' option is not valid here. (pos=" + i + ")", i);
             }
-            if (val > 31)
+            if (val > 31) {
                 throw new ParseException("The 'W' option does not make sense with values larger than 31 (max number of days in a month)", i);
+            }
             TreeSet<Integer> set = getSet(type);
             set.add(val);
             i++;
@@ -1438,10 +1439,7 @@ public final class CronExpression implements Serializable, Cloneable {
                         daysToAdd = dow + (7 - cDow);
                     }
 
-                    boolean dayShifted = false;
-                    if (daysToAdd > 0) {
-                        dayShifted = true;
-                    }
+                    boolean dayShifted = daysToAdd > 0;
 
                     day += daysToAdd;
                     int weekOfMonth = day / 7;

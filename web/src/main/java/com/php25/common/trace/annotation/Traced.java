@@ -1,4 +1,4 @@
-package com.php25.common.flux.trace.annotation;
+package com.php25.common.trace.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

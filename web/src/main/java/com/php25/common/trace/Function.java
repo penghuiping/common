@@ -1,4 +1,4 @@
-package com.php25.common.flux.trace;
+package com.php25.common.trace;
 
 /**
  * @author penghuiping

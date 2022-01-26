@@ -1,9 +1,9 @@
-package com.php25.common.flux.trace.aop;
+package com.php25.common.trace.aop;
 
 import brave.ScopedSpan;
 import brave.Tracer;
 import com.php25.common.core.util.StringUtil;
-import com.php25.common.flux.trace.annotation.Traced;
+import com.php25.common.trace.annotation.Traced;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,7 +35,7 @@ public class TracedProcess {
     @Autowired
     Tracer tracer;
 
-    @Pointcut("@annotation(com.php25.common.flux.trace.annotation.Traced)")
+    @Pointcut("@annotation(com.php25.common.trace.annotation.Traced)")
     private void tracedAnnotation() {
     }//定义一个切入点
 

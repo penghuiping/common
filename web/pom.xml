@@ -4,7 +4,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.php25</groupId>
-    <artifactId>webflux</artifactId>
+    <artifactId>web</artifactId>
     <version>V.2.5.1</version>
     <parent>
         <groupId>com.php25</groupId>

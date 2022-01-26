@@ -1,4 +1,4 @@
-package com.php25.common.flux.web;
+package com.php25.common.web;
 
 import com.php25.common.core.exception.BusinessException;
 import org.slf4j.Logger;
