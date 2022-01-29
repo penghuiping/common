@@ -4,9 +4,9 @@ package com.php25.common.db.sql;
 import com.php25.common.db.sql.expression.Expression;
 import com.php25.common.db.sql.expression.link.DefaultLink;
 import com.php25.common.db.sql.fragment.Fragment;
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.php25.common.db.sql.column.Columns.col;
 import static com.php25.common.db.sql.expression.Expressions.eq;
