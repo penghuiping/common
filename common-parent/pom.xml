@@ -23,7 +23,7 @@
         <spring-cloud-dependencies>2020.0.3</spring-cloud-dependencies>
         <reactor>Dysprosium-SR20</reactor>
         <guava.version>30.1.1-jre</guava.version>
-        <jackson.version>2.11.1</jackson.version>
+        <jackson.version>2.13.2.1</jackson.version>
         <okhttp.version>4.8.0</okhttp.version>
         <easypoi.version>4.2.0</easypoi.version>
         <commons-collections.version>3.2.2</commons-collections.version>
