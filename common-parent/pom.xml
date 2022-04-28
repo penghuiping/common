@@ -42,7 +42,7 @@
         <oracle-testcontainer>1.12.3</oracle-testcontainer>
         <assertj>3.17.2</assertj>
         <netty>4.1.52.Final</netty>
-        <jjwt>0.10.7</jjwt>
+        <jjwt>0.11.4</jjwt>
         <trie>1.2.2</trie>
         <jsoup>1.14.2</jsoup>
         <lombok>1.18.12</lombok>
