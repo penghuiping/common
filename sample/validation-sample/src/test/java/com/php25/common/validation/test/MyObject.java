@@ -7,10 +7,10 @@ import com.php25.common.validation.annotation.Ipv6;
 import com.php25.common.validation.annotation.Mobile;
 import com.php25.common.validation.annotation.MoneyString;
 import com.php25.common.validation.annotation.ZipCode;
+import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotBlank;
 
 /**
  * @author penghuiping

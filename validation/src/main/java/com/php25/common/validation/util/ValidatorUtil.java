@@ -1,10 +1,11 @@
 package com.php25.common.validation.util;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.executable.ExecutableValidator;
-import javax.validation.groups.Default;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.executable.ExecutableValidator;
+import jakarta.validation.groups.Default;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +17,8 @@ import java.util.Set;
  */
 public class ValidatorUtil {
 
-    private static Validator validator;
-    private static ExecutableValidator executableValidator;
+    private static final Validator validator;
+    private static final ExecutableValidator executableValidator;
 
     static {
         validator = Validation.buildDefaultValidatorFactory().getValidator();

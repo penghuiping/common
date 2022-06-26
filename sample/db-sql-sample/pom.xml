@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.php25</groupId>
     <artifactId>db-sql-sample</artifactId>
-    <version>V.2.5.1</version>
+    <version>V.2.7.1</version>
     <parent>
         <groupId>com.php25</groupId>
         <artifactId>common-parent</artifactId>
-        <version>V.2.5.1</version>
+        <version>V.2.7.1</version>
         <relativePath>../../common-parent/pom.xml</relativePath>
     </parent>
     <dependencies>

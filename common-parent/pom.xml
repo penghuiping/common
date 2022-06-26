@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.php25</groupId>
     <artifactId>common-parent</artifactId>
-    <version>V.2.5.1</version>
+    <version>V.2.7.1</version>
 
     <packaging>pom</packaging>
 
     <parent>
         <groupId>com.php25</groupId>
         <artifactId>common</artifactId>
-        <version>V.2.5.1</version>
+        <version>V.2.7.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -19,42 +19,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <spring.boot.version>2.5.1</spring.boot.version>
-        <spring-cloud-dependencies>2020.0.3</spring-cloud-dependencies>
-        <reactor>Dysprosium-SR20</reactor>
-        <guava.version>30.1.1-jre</guava.version>
-        <jackson.version>2.11.1</jackson.version>
-        <okhttp.version>4.8.0</okhttp.version>
-        <easypoi.version>4.2.0</easypoi.version>
+        <spring.boot.version>2.7.1</spring.boot.version>
+        <spring-cloud-dependencies>2021.0.3</spring-cloud-dependencies>
+        <reactor>2020.0.20</reactor>
+        <guava.version>31.1-jre</guava.version>
+        <jackson.version>2.13.3</jackson.version>
+        <okhttp.version>4.10.0</okhttp.version>
+        <easypoi.version>4.4.0</easypoi.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <commons-lang3.version>3.10</commons-lang3.version>
-        <jmh.version>1.21</jmh.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <jmh.version>1.35</jmh.version>
         <jfairy.version>0.5.9</jfairy.version>
         <hikari.version>3.3.1</hikari.version>
-        <bouncycastle.version>1.67</bouncycastle.version>
-        <hibernate-validator>6.1.5.Final</hibernate-validator>
-        <oracle>11.2.0.3</oracle>
-        <testcontainer>1.16.2</testcontainer>
         <java-uuid-generator>4.0.1</java-uuid-generator>
-        <mysql-testcontainer>1.16.2</mysql-testcontainer>
-        <postgres-testcontainer>1.16.2</postgres-testcontainer>
-        <oracle-testcontainer>1.16.2</oracle-testcontainer>
+        <bouncycastle.version>1.70</bouncycastle.version>
+        <hibernate-validator>7.0.4.Final</hibernate-validator>
+        <oracle>11.2.0.3</oracle>
+        <testcontainer>1.17.2</testcontainer>
         <assertj>3.17.2</assertj>
         <netty>4.1.52.Final</netty>
         <jjwt>0.10.7</jjwt>
         <trie>1.2.2</trie>
         <jsoup>1.14.2</jsoup>
-        <lombok>1.18.12</lombok>
+        <lombok>1.18.24</lombok>
         <disruptor>3.4.4</disruptor>
 
-        <php-common.db>V.2.5.1</php-common.db>
-        <php-common.core>V.2.5.1</php-common.core>
-        <php-common.redis>V.2.5.1</php-common.redis>
-        <php-common.validation>V.2.5.1</php-common.validation>
-        <php-common.webflux>V.2.5.1</php-common.webflux>
-        <php-common.timer>V.2.5.1</php-common.timer>
-        <uid-generator>V.2.5.1</uid-generator>
+        <php-common.core>V.2.7.1</php-common.core>
     </properties>
 
     <dependencyManagement>
@@ -165,49 +156,49 @@
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>webflux</artifactId>
-                <version>${php-common.webflux}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>timer</artifactId>
-                <version>${php-common.timer}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>validation</artifactId>
-                <version>${php-common.validation}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>db</artifactId>
-                <version>${php-common.db}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>db-mapper</artifactId>
-                <version>${php-common.db}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>db-sql</artifactId>
-                <version>${php-common.db}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>redis</artifactId>
-                <version>${php-common.redis}</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>id</artifactId>
-                <version>V.2.5.1</version>
+                <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
@@ -257,6 +248,11 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-zipkin</artifactId>
                 <version>2.2.8.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>3.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
@@ -335,19 +331,19 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>mysql</artifactId>
-                <version>${mysql-testcontainer}</version>
+                <version>${testcontainer}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>${postgres-testcontainer}</version>
+                <version>${testcontainer}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>oracle-xe</artifactId>
-                <version>${oracle-testcontainer}</version>
+                <version>${testcontainer}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -364,10 +360,10 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.10.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>17</source>
+                        <target>17</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
