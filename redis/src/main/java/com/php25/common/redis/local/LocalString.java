@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.redis.RString;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -128,5 +129,10 @@ public class LocalString implements RString {
             return (Boolean) res.get();
         }
         return false;
+    }
+
+    @Override
+    public Long incrWithInitialValueAndSetExpiration(String key, Long value, Long expiration) {
+        throw new NotImplementedException();
     }
 }

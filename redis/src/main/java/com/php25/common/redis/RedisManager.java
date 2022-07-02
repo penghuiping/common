@@ -126,4 +126,12 @@ public interface RedisManager {
      * @return
      */
     RRateLimiter rateLimiter(int rate, String id);
+
+    /**
+     * 每天一次的序列号
+     *
+     * @param prefix 前缀
+     * @return 序列号 yyyyMMdd000000000000
+     */
+    String getDatetimeSequenceNumber(String prefix);
 }

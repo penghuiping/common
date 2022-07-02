@@ -94,9 +94,20 @@ public interface RString {
 
     /**
      * bitmap操作,获取指定位置的bit值
-     * @param key 缓存key
+     *
+     * @param key    缓存key
      * @param offset 位置
      * @return bit值
      */
     Boolean getBit(final String key, long offset);
+
+    /**
+     * 线程安全的对某个key赋予一个初始值, 并且设置key的有效期，且key的有效期内只会赋值一次，且每次调用都会增1
+     *
+     * @param key        缓存key
+     * @param value      初始值
+     * @param expiration 过期时长(单位毫秒)
+     * @return value+1后的值
+     */
+    Long incrWithInitialValueAndSetExpiration(String key, Long value, Long expiration);
 }

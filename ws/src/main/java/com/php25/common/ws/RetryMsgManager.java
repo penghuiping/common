@@ -6,7 +6,7 @@ import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.retry.DefaultRetryQueue;
 import com.php25.common.ws.retry.RejectAction;
 import com.php25.common.ws.retry.RetryQueue;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
@@ -21,7 +21,7 @@ import org.springframework.context.event.ContextClosedEvent;
  * @author penghuiping
  * @date 2021/8/26 15:56
  */
-@Log4j2
+@Slf4j
 public class RetryMsgManager implements InitializingBean, ApplicationListener<ContextClosedEvent> {
 
     private final RetryQueue<BaseMsg> retryQueue;

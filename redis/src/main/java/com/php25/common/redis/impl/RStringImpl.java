@@ -1,10 +1,12 @@
 package com.php25.common.redis.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Lists;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RString;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +15,10 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/1/4 17:36
  */
 public class RStringImpl implements RString {
+
+    private static final String LUA_SCRIPT_0 = "local flag = redis.call('SETNX', KEYS[1],tonumber(ARGV[1]))\n" +
+            "redis.call('PEXPIRE', KEYS[1], tonumber(ARGV[2]))\n" +
+            "return redis.call('INCR', KEYS[1])\n";
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -87,7 +93,14 @@ public class RStringImpl implements RString {
     }
 
     @Override
-    public Boolean getBit(String key,long offset) {
-        return stringRedisTemplate.opsForValue().getBit(key,offset);
+    public Boolean getBit(String key, long offset) {
+        return stringRedisTemplate.opsForValue().getBit(key, offset);
     }
+
+    @Override
+    public Long incrWithInitialValueAndSetExpiration(String key, Long value, Long expiration) {
+        DefaultRedisScript<Long> defaultRedisScript = new DefaultRedisScript<>(LUA_SCRIPT_0, Long.class);
+        return stringRedisTemplate.execute(defaultRedisScript, Lists.newArrayList(key), String.valueOf(value), String.valueOf(expiration));
+    }
+
 }

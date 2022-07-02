@@ -1,6 +1,8 @@
 package com.php25.common.redis.impl;
 
 import com.google.common.collect.Lists;
+import com.php25.common.core.exception.Exceptions;
+import com.php25.common.core.util.TimeUtil;
 import com.php25.common.redis.RBloomFilter;
 import com.php25.common.redis.RHash;
 import com.php25.common.redis.RHyperLogLogs;
@@ -16,6 +18,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -127,5 +131,21 @@ public class RedisManagerImpl implements RedisManager {
     @Override
     public RRateLimiter rateLimiter(int rate, String id) {
         return new RRateLimiterImpl(redisTemplate, rate, rate, id);
+    }
+
+    @Override
+    public String getDatetimeSequenceNumber(String prefix) {
+        String todayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        Long incr = this.string().incr(String.format("%s:%s", prefix, todayStr));
+        if (incr < 2) {
+            this.expireAt(String.format("%s:%s", prefix, todayStr), TimeUtil.getEndTimeOfDay(new Date()));
+        }
+
+        if (incr > 999999999999L) {
+            throw Exceptions.throwIllegalStateException("已到达序列最大值无法继续生产新的序列");
+        }
+
+        //%d,代表整数类型(十进制),%012d表示输出宽度为12，不足12位的补0
+        return todayStr + String.format("%012d", incr);
     }
 }
