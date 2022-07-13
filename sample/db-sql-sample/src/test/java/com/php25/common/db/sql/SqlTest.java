@@ -2,7 +2,6 @@ package com.php25.common.db.sql;
 
 
 import com.php25.common.db.sql.expression.Expression;
-import com.php25.common.db.sql.expression.link.DefaultLink;
 import com.php25.common.db.sql.fragment.Fragment;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,12 +25,10 @@ public class SqlTest {
     public void test() {
         Expression expression0 = eq(col("a", Customer::getUsername), "jack");
         Expression expression1 = eq(col("a", Customer::getAge), 10);
-        DefaultLink link0 = group(cnd(expression0).and(expression1));
         Expression expression2 = eq(col("b", Company::getName), "Google");
-        DefaultLink link = link0.and(expression2);
         Fragment fragment = from(Customer.class, "a").join(Company.class, "b")
                 .on(col("a", Customer::getCompanyId), col("b", Company::getId))
-                .where(link);
+                .where(group(cnd(expression0).and(expression1)).and(expression2));
 
         System.out.println(fragment.printSql());
         System.out.println(fragment.params());
