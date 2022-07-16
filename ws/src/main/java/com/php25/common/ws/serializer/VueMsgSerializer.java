@@ -4,7 +4,7 @@ package com.php25.common.ws.serializer;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.protocal.Pong;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 用于给前端vue的消息格式序列化
@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
  * @author penghuiping
  * @date 2020/9/3 10:32
  */
-@Slf4j
-public class VueMsgSerializer implements MsgSerializable {
+@Log4j2
+public class VueMsgSerializer implements MsgSerializer {
 
     @Override
     public String from(BaseMsg baseMsg) {

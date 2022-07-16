@@ -1,6 +1,6 @@
 package com.php25.common.ws.protocal;
 
-import com.php25.common.ws.annotation.WsMsg;
+import com.php25.common.ws.handler.WsMsg;
 import lombok.Getter;
 import lombok.Setter;
 

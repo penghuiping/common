@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.core;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -155,7 +155,7 @@
             </dependency>
             <dependency>
                 <groupId>com.php25</groupId>
-                <artifactId>webflux</artifactId>
+                <artifactId>web</artifactId>
                 <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>
@@ -168,24 +168,6 @@
             <dependency>
                 <groupId>com.php25</groupId>
                 <artifactId>validation</artifactId>
-                <version>${php-common.core}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.php25</groupId>
-                <artifactId>db</artifactId>
-                <version>${php-common.core}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.php25</groupId>
-                <artifactId>db-mapper</artifactId>
-                <version>${php-common.core}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.php25</groupId>
-                <artifactId>db-sql</artifactId>
                 <version>${php-common.core}</version>
                 <scope>compile</scope>
             </dependency>

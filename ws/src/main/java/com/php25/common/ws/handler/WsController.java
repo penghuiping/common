@@ -1,4 +1,6 @@
-package com.php25.common.ws.annotation;
+package com.php25.common.ws.handler;
+
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,11 +10,11 @@ import java.lang.annotation.Target;
 
 /**
  * @author penghuiping
- * @date 2020/11/5 16:19
+ * @date 2020/9/4 15:04
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface WsMsg {
-    String action() default "";
+@Component
+public @interface WsController {
 }

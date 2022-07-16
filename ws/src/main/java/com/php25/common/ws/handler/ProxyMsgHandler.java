@@ -1,6 +1,6 @@
 package com.php25.common.ws.handler;
 
-import com.php25.common.ws.SessionContext;
+import com.php25.common.ws.core.SessionContext;
 import com.php25.common.ws.protocal.BaseMsg;
 
 import java.lang.reflect.Method;

@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.core;
 
 import com.php25.common.core.mess.SpringContextHolder;
 import com.php25.common.ws.handler.MsgHandler;

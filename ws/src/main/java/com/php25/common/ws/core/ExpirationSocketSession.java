@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.core;
 
 import com.google.common.base.Objects;
 import com.php25.common.core.mess.SpringContextHolder;
@@ -7,6 +7,7 @@ import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.protocal.ConnectionClose;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -128,7 +129,7 @@ public class ExpirationSocketSession {
 /**
  * session过期后的回调处理
  */
-@Slf4j
+@Log4j2
 class SessionExpiredCallback implements Runnable {
 
     private final String sessionId;

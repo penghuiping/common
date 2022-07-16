@@ -8,7 +8,7 @@ import com.php25.common.ws.protocal.BaseMsg;
  * @author penghuiping
  * @date 2020/9/3 10:32
  */
-public class InternalMsgSerializer implements MsgSerializable {
+public class InternalMsgSerializer implements MsgSerializer {
 
     @Override
     public String from(BaseMsg baseRetryMsg) {

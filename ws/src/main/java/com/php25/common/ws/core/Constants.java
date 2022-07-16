@@ -1,4 +1,4 @@
-package com.php25.common.ws.config;
+package com.php25.common.ws.core;
 
 /**
  * @author penghuiping

@@ -1,4 +1,4 @@
-package com.php25.common.ws;
+package com.php25.common.ws.core;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.RandomUtil;
@@ -7,16 +7,19 @@ import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Job;
 import com.php25.common.timer.Timer;
-import com.php25.common.ws.config.Constants;
+import com.php25.common.ws.mq.WsChannelProcessor;
 import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.protocal.SecurityAuthentication;
 import com.php25.common.ws.serializer.InternalMsgSerializer;
+import com.php25.common.ws.serializer.MsgSerializer;
 import com.php25.common.ws.serializer.VueMsgSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -29,7 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SessionContext implements InitializingBean, ApplicationListener<ContextClosedEvent> {
+public class SessionContext implements ApplicationListener<ContextClosedEvent> {
     /**
      * 此session缓存用于缓存自定义的sessionId与WebSocket对应关系,全局应用sessionId
      */
@@ -44,7 +47,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
 
     private final RetryMsgManager retryMsgManager;
 
-    private final RedisManager redisService;
+    private final RedisManager redisManager;
 
     private final String serverId;
 
@@ -54,9 +57,11 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
 
     private final MsgDispatcher msgDispatcher;
 
-    private final VueMsgSerializer vueMsgSerializer = new VueMsgSerializer();
+    private final WsChannelProcessor wsChannelProcessor;
 
-    private final InternalMsgSerializer internalMsgSerializer = new InternalMsgSerializer();
+    private final MsgSerializer msgSerializer = new VueMsgSerializer();
+
+    private final MsgSerializer internalMsgSerializer = new InternalMsgSerializer();
 
     public String getServerId() {
         return serverId;
@@ -67,13 +72,15 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
                           SecurityAuthentication securityAuthentication,
                           String serverId,
                           MsgDispatcher msgDispatcher,
-                          Timer timer) {
+                          Timer timer,
+                          WsChannelProcessor wsChannelProcessor) {
         this.retryMsgManager = retryMsgManager;
-        this.redisService = redisService;
+        this.redisManager = redisService;
         this.serverId = serverId;
         this.securityAuthentication = securityAuthentication;
         this.msgDispatcher = msgDispatcher;
         this.timer = timer;
+        this.wsChannelProcessor = wsChannelProcessor;
         int cpuNum = Runtime.getRuntime().availableProcessors();
         this.executorService = new ThreadPoolExecutor(1, 2 * cpuNum,
                 60L, TimeUnit.SECONDS,
@@ -96,38 +103,35 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
         }
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        //todo
-//        this.messageQueueManager.subscribe("ws_session", serverId, true, message -> {
-//            for (String key : sessions.keySet()) {
-//                try {
-//                    WebSocketSession socketSession = sessions.get(key).getWebSocketSession();
-//                    socketSession.sendMessage(new TextMessage(message.getBody().toString()));
-//                } catch (Exception e) {
-//                    log.info("通过websocket发送消息失败,消息为:{}", message.getBody().toString(), e);
-//                }
-//            }
-//        });
+    @StreamListener(value = WsChannelProcessor.INPUT)
+    private void wsSessionChannel(Message<String> message) {
+        for (String key : sessions.keySet()) {
+            try {
+                WebSocketSession socketSession = sessions.get(key).getWebSocketSession();
+                socketSession.sendMessage(new TextMessage(message.getPayload()));
+            } catch (Exception e) {
+                log.info("通过websocket发送消息失败,消息为:{}", message.getPayload(), e);
+            }
+        }
     }
 
-    protected void init(SidUid sidUid) {
+    public void init(SidUid sidUid) {
         //先判断uid原来是否存在，存在就关闭原有连接，使用新的连接
-        SidUid sidUid1 = redisService.string().get(Constants.prefix + sidUid.getUserId(), SidUid.class);
+        SidUid sidUid1 = redisManager.string().get(Constants.prefix + sidUid.getUserId(), SidUid.class);
         if (sidUid1 != null) {
             clean(sidUid1.getSessionId());
             close(sidUid1.getSessionId());
         }
-        redisService.string().set(Constants.prefix + sidUid.getUserId(), sidUid, 3600L);
-        redisService.string().set(Constants.prefix + sidUid.getSessionId(), sidUid, 3600L);
+        redisManager.string().set(Constants.prefix + sidUid.getUserId(), sidUid, 3600L);
+        redisManager.string().set(Constants.prefix + sidUid.getSessionId(), sidUid, 3600L);
     }
 
-    protected void clean(String sid) {
-        SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
+    public void clean(String sid) {
+        SidUid sidUid = redisManager.string().get(Constants.prefix + sid, SidUid.class);
         if (null != sidUid) {
-            redisService.remove(Constants.prefix + sidUid.getUserId());
+            redisManager.remove(Constants.prefix + sidUid.getUserId());
         }
-        redisService.remove(Constants.prefix + sid);
+        redisManager.remove(Constants.prefix + sid);
     }
 
     public RetryMsgManager getRetryMsgManager() {
@@ -158,7 +162,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
     }
 
 
-    protected void close(String sid) {
+    public void close(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.remove(sid);
         expirationSocketSession.setSessionId(sid);
         expirationSocketSession.stop();
@@ -167,7 +171,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
     }
 
 
-    protected WebSocketSession get(String sid) {
+    public WebSocketSession get(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
         if (null != expirationSocketSession) {
             return expirationSocketSession.getWebSocketSession();
@@ -184,7 +188,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
     }
 
 
-    protected void updateExpireTime(String sid) {
+    public void updateExpireTime(String sid) {
         ExpirationSocketSession expirationSocketSession = sessions.get(sid);
         expirationSocketSession.refreshTime();
         timer.stop(sid);
@@ -194,7 +198,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
     }
 
     public String getSid(String uid) {
-        SidUid sidUid = redisService.string().get(Constants.prefix + uid, SidUid.class);
+        SidUid sidUid = redisManager.string().get(Constants.prefix + uid, SidUid.class);
         if (null != sidUid) {
             return sidUid.getSessionId();
         }
@@ -207,20 +211,19 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
         try {
             if (StringUtil.isBlank(sid)) {
                 //没有指定sid,则认为进行全局广播，并且广播消息不会重试
-                //todo
-//                Message message = new Message(RandomUtil.randomUUID(), vueMsgSerializer.from(baseMsg));
-//                messageQueueManager.send("ws_session", message);
+                Message<String> message = new GenericMessage<>(msgSerializer.from(baseMsg));
+                wsChannelProcessor.output().send(message);
             } else {
                 //现看看sid是否本地存在
                 if (this.sessions.containsKey(sid)) {
                     //本地存在,直接通过本地session发送
                     WebSocketSession socketSession = sessions.get(sid).getWebSocketSession();
-                    socketSession.sendMessage(new TextMessage(vueMsgSerializer.from(baseMsg)));
+                    socketSession.sendMessage(new TextMessage(msgSerializer.from(baseMsg)));
                 } else {
                     //获取远程session,并往redis推送
-                    SidUid sidUid = redisService.string().get(Constants.prefix + sid, SidUid.class);
+                    SidUid sidUid = redisManager.string().get(Constants.prefix + sid, SidUid.class);
                     String serverId = sidUid.getServerId();
-                    RList<String> rList = redisService.list(Constants.prefix + serverId, String.class);
+                    RList<String> rList = redisManager.list(Constants.prefix + serverId, String.class);
                     rList.leftPush(internalMsgSerializer.from(baseMsg));
                 }
             }
@@ -237,7 +240,7 @@ public class SessionContext implements InitializingBean, ApplicationListener<Con
         return this.sessions;
     }
 
-    protected String generateUUID() {
+    public String generateUUID() {
         return RandomUtil.randomUUID().replace("_", "");
     }
 

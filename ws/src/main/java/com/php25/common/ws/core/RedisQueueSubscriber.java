@@ -1,11 +1,10 @@
-package com.php25.common.ws;
+package com.php25.common.ws.core;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.php25.common.core.util.JsonUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
-import com.php25.common.ws.config.Constants;
 import com.php25.common.ws.protocal.BaseMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;

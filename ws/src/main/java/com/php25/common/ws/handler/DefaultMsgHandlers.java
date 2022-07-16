@@ -1,7 +1,8 @@
-package com.php25.common.ws;
+package com.php25.common.ws.handler;
 
-import com.php25.common.ws.annotation.WsAction;
-import com.php25.common.ws.annotation.WsController;
+import com.php25.common.ws.core.ExpirationSocketSession;
+import com.php25.common.ws.core.SessionContext;
+import com.php25.common.ws.core.SidUid;
 import com.php25.common.ws.protocal.Ack;
 import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.protocal.ConnectionClose;
@@ -48,13 +49,6 @@ public class DefaultMsgHandlers {
         requestAuthInfo.setSessionId(msg.getSessionId());
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
         session.send(requestAuthInfo);
-        session.getRetryMsgManager().put(requestAuthInfo, value -> {
-            ConnectionClose connectionClose = new ConnectionClose();
-            connectionClose.setMsgId(session.generateUUID());
-            connectionClose.setSessionId(value.getSessionId());
-            ExpirationSocketSession expirationSocketSession = session.getExpirationSocketSession(value.getSessionId());
-            expirationSocketSession.put(connectionClose);
-        });
     }
 
     @WsAction("ping")
@@ -79,6 +73,13 @@ public class DefaultMsgHandlers {
         RequestAuthInfo requestAuthInfo = (RequestAuthInfo) msg;
         requestAuthInfo.setTimestamp(System.currentTimeMillis());
         session.send(requestAuthInfo);
+        session.getRetryMsgManager().put(requestAuthInfo, value -> {
+            ConnectionClose connectionClose = new ConnectionClose();
+            connectionClose.setMsgId(session.generateUUID());
+            connectionClose.setSessionId(value.getSessionId());
+            ExpirationSocketSession expirationSocketSession = session.getExpirationSocketSession(value.getSessionId());
+            expirationSocketSession.put(connectionClose);
+        });
     }
 
     @WsAction("submit_auth_info")

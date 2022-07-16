@@ -1,6 +1,8 @@
 package com.php25.common.ws;
 
 import com.php25.common.core.mess.SpringContextHolder;
+import com.php25.common.ws.core.RetryMsgManager;
+import com.php25.common.ws.core.SessionContext;
 
 /**
  * @author penghuiping

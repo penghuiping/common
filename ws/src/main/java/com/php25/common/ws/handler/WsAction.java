@@ -1,4 +1,4 @@
-package com.php25.common.ws.annotation;
+package com.php25.common.ws.handler;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
