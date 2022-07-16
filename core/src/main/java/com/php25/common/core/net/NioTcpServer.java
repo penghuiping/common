@@ -3,7 +3,6 @@ package com.php25.common.core.net;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -11,33 +10,31 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-import java.util.List;
-
 /**
  * @author penghuiping
  * @date 2022/7/15 20:29
  */
 public class NioTcpServer {
-    private final List<ChannelHandler> channelHandlers;
+    private final PipelineHandlerConfig pipelineHandlerConfig;
     private Integer serverPort = 8080;
     private Integer bossThreadNumbers = 1;
     private Integer workThreadNumbers = Runtime.getRuntime().availableProcessors();
 
 
-    public NioTcpServer(List<ChannelHandler> channelHandlers) {
-        this.channelHandlers = channelHandlers;
+    public NioTcpServer(PipelineHandlerConfig pipelineHandlerConfig) {
+        this.pipelineHandlerConfig = pipelineHandlerConfig;
     }
 
-    public NioTcpServer(Integer serverPort, List<ChannelHandler> channelHandlers) {
+    public NioTcpServer(Integer serverPort, PipelineHandlerConfig pipelineHandlerConfig) {
         this.serverPort = serverPort;
-        this.channelHandlers = channelHandlers;
+        this.pipelineHandlerConfig = pipelineHandlerConfig;
     }
 
-    public NioTcpServer(Integer port, List<ChannelHandler> channelHandlers, Integer bossThreadNumbers, Integer workThreadNumbers) {
-        if (null == channelHandlers || channelHandlers.isEmpty()) {
-            throw new IllegalArgumentException("至少需要有一个ChannelHandler");
+    public NioTcpServer(Integer port, PipelineHandlerConfig pipelineHandlerConfig, Integer bossThreadNumbers, Integer workThreadNumbers) {
+        if (null == pipelineHandlerConfig) {
+            throw new IllegalArgumentException("需要配置pipelineHandlerConfig");
         }
-        this.channelHandlers = channelHandlers;
+        this.pipelineHandlerConfig = pipelineHandlerConfig;
 
         if (null != serverPort) {
             this.serverPort = port;
@@ -59,16 +56,13 @@ public class NioTcpServer {
             b.group(boss, group);
             b.channel(NioServerSocketChannel.class);
             b.localAddress(this.serverPort);
-            b.option(ChannelOption.SO_KEEPALIVE, true);
             b.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
             b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel channel) {
                     ChannelPipeline channelPipeline = channel.pipeline();
-                    for (ChannelHandler channelHandler : NioTcpServer.this.channelHandlers) {
-                        channelPipeline.addLast(channelHandler);
-                    }
+                    NioTcpServer.this.pipelineHandlerConfig.config(channelPipeline);
                 }
             });
             ChannelFuture f = b.bind().sync();
