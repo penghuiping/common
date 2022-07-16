@@ -11,9 +11,6 @@
     <modules>
         <module>common-parent</module>
         <module>core</module>
-        <module>db</module>
-        <module>db-mapper</module>
-        <module>db-sql</module>
         <module>web</module>
         <module>redis</module>
         <module>validation</module>
@@ -21,8 +18,6 @@
         <module>timer</module>
         <module>id</module>
         <module>sample/core-sample</module>
-        <module>sample/db-sample</module>
-        <module>sample/db-sql-sample</module>
         <module>sample/timer-sample</module>
         <module>sample/id-sample</module>
         <module>sample/redis-sample</module>
