@@ -7,12 +7,9 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author penghuiping
@@ -34,19 +31,16 @@ public abstract class HttpChannelInBoundHandler extends SimpleChannelInboundHand
         try {
             handle(request, response);
         } catch (Exception e) {
-            log.error("出错了:", e);
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-            response.content().clear().writeBytes("服务器错误".getBytes(StandardCharsets.UTF_8));
+            HttpProtocolHelper.defaultHandleError(response, e);
         }
-        HttpUtil.setContentLength(response, response.content().readableBytes());
-        ctx.writeAndFlush(response);
+        HttpProtocolHelper.writeAndFlush(ctx, request, response);
     }
 
     /**
      * 业务逻辑处理方法
      *
      * @param request  请求
-     * @param response 响应
+     * @param response 相应
      */
     public abstract void handle(FullHttpRequest request, FullHttpResponse response);
 }

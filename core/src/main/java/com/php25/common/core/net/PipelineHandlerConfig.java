@@ -10,7 +10,6 @@ public abstract class PipelineHandlerConfig {
 
     /**
      * 配置pipeline
-     *
      * @param channelPipeline pipeline
      */
     public abstract void config(ChannelPipeline channelPipeline);

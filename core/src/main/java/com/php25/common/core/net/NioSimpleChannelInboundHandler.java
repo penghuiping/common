@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
@@ -12,6 +14,7 @@ import java.nio.charset.StandardCharsets;
  * @date 2022/7/15 21:50
  */
 public abstract class NioSimpleChannelInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private static final Logger log = LoggerFactory.getLogger(NioSimpleChannelInboundHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
@@ -29,4 +32,10 @@ public abstract class NioSimpleChannelInboundHandler extends SimpleChannelInboun
      * @throws Exception 错误
      */
     protected abstract String handleRequestMessage(String requestMsg) throws Exception;
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        log.error("NioTcpServer处理请求发送错误:", cause);
+    }
 }

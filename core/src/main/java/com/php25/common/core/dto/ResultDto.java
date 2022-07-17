@@ -55,7 +55,7 @@ public class ResultDto<T> {
 
 
     /**
-     * This method is used for judging whether errors has happened
+     * This method is used for judging whether errors have happened
      *
      * @return true: has some errors
      */

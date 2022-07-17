@@ -1,12 +1,11 @@
 package com.php25.common.core.exception;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/11 09:44
- * @description:
+ * @author penghuiping
+ * @date 2019/7/11 09:44
  */
 public class BusinessException extends RuntimeException {
-    private String code;
+    private final String code;
 
 
     public BusinessException(BusinessErrorStatus businessErrorStatus) {

@@ -1,9 +1,8 @@
 package com.php25.common.core.exception;
 
 /**
- * @author: penghuiping
- * @date: 2019/7/11 10:00
- * @description:
+ * @author penghuiping
+ * @date 2019/7/11 10:00
  */
 public class Exceptions {
 
