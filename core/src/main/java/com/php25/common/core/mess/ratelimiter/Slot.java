@@ -1,4 +1,4 @@
-package com.php25.common.core.mess;
+package com.php25.common.core.mess.ratelimiter;
 
 /**
  * @author penghuiping

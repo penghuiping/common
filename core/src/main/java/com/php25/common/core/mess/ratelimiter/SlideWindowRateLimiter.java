@@ -1,17 +1,16 @@
-package com.php25.common.core.mess;
+package com.php25.common.core.mess.ratelimiter;
 
 import com.php25.common.core.util.AssertUtil;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 限流算法-滑动窗口
+ * 限流算法-滑动窗口(非线程安全)
  *
  * @author penghuiping
  * @date 2022/7/18 21:54
  */
-public class SlideWindowRateLimiter {
+public class SlideWindowRateLimiter implements RateLimiter {
     /**
      * 窗口槽计数器
      */
@@ -52,8 +51,8 @@ public class SlideWindowRateLimiter {
      * @param windowLimit    窗口限制
      * @param windowTimeSize 窗口大小，单位（纳秒）
      */
-    SlideWindowRateLimiter(long slotSize, long windowLimit, long windowTimeSize) {
-        AssertUtil.isTrue(isEven(slotSize), "slotSize必须是偶数");
+    private SlideWindowRateLimiter(long slotSize, long windowLimit, long windowTimeSize) {
+        AssertUtil.isTrue(isValidSlotNum(slotSize), "slotSize必须2的指数幂");
         this.slotSize = slotSize;
         this.slots = new Slot[(int) slotSize];
         this.windowLimit = windowLimit;
@@ -62,12 +61,13 @@ public class SlideWindowRateLimiter {
         this.slotTimeSize = (windowTimeSize / slotSize);
     }
 
-    public SlideWindowRateLimiter(long windowLimit, long windowTimeSize, ChronoUnit windowTimeSizeUnit) {
-        this(16, windowLimit, TimeUnit.of(windowTimeSizeUnit).toNanos(windowTimeSize));
+
+    private SlideWindowRateLimiter(long windowLimit, long windowTimeSize, TimeUnit windowTimeSizeUnit, long slotsNumber) {
+        this(slotsNumber, windowLimit, windowTimeSizeUnit.toNanos(windowTimeSize));
     }
 
-    public SlideWindowRateLimiter(long windowLimit, long windowTimeSize, ChronoUnit windowTimeSizeUnit, long slotsNumber) {
-        this(slotsNumber, windowLimit, TimeUnit.of(windowTimeSizeUnit).toNanos(windowTimeSize));
+    public SlideWindowRateLimiter(long windowLimit, long windowTimeSize, TimeUnit windowTimeSizeUnit) {
+        this(2 << 3, windowLimit, windowTimeSizeUnit.toNanos(windowTimeSize));
     }
 
     /**
@@ -75,7 +75,8 @@ public class SlideWindowRateLimiter {
      *
      * @return true: 是
      */
-    public boolean isAllowed() {
+    @Override
+    public Boolean isAllowed() {
         long now = System.nanoTime();
         long numbers = (now - this.startTime) / slotTimeSize;
         long offset = mod(numbers, slotSize);
@@ -135,5 +136,9 @@ public class SlideWindowRateLimiter {
      */
     private boolean isEven(long num) {
         return (num & 1) != 1;
+    }
+
+    private boolean isValidSlotNum(long num) {
+        return (num & (num - 1)) == 0;
     }
 }
