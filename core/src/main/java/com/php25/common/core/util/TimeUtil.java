@@ -1,6 +1,7 @@
 package com.php25.common.core.util;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -28,7 +29,18 @@ public abstract class TimeUtil {
      * @return 日期时间
      */
     public static Date parseDate(String dateStr, DateTimeFormatter dateTimeFormatter) {
-        return Date.from(LocalDateTime.parse(dateStr, dateTimeFormatter).toInstant(ZoneOffset.ofHours(8)));
+        return Date.from(LocalDate.parse(dateStr, dateTimeFormatter).atStartOfDay().toInstant(ZoneOffset.ofHours(8)));
+    }
+
+    /**
+     * 把日期类型的字符串，转换成日期类型
+     *
+     * @param dateTimeStr       日期字符串 如:"2020-10-01"
+     * @param dateTimeFormatter 解析的日期格式 如:"yyyy-MM-dd"
+     * @return 日期时间
+     */
+    public static Date parseDateTime(String dateTimeStr, DateTimeFormatter dateTimeFormatter) {
+        return Date.from(LocalDateTime.parse(dateTimeStr, dateTimeFormatter).toInstant(ZoneOffset.ofHours(8)));
     }
 
     /**
