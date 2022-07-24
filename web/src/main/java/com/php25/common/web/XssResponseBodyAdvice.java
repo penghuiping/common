@@ -29,7 +29,6 @@ public abstract class XssResponseBodyAdvice implements ResponseBodyAdvice {
     @Override
     public Object beforeBodyWrite(Object body, @NotNull MethodParameter returnType, @NotNull MediaType selectedContentType, @NotNull Class selectedConverterType, @NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response) {
         String responseBody = JsonUtil.toJson(body);
-        log.info("response body:{}", responseBody);
         boolean isValid = Jsoup.isValid(responseBody, this.configWhiteList());
         if (!isValid) {
             throw Exceptions.throwBusinessException("B9999", "responseBody存在不安全的html内容");

@@ -63,7 +63,6 @@ public abstract class XssRequestBodyAdvice extends RequestBodyAdviceAdapter {
             content.append(new String(buff.array(), 0, buff.position(), Charsets.ISO_8859_1));
         }
         String result1 = new String(content.toString().getBytes(Charsets.ISO_8859_1), Charsets.UTF_8);
-        log.info("request body:{}", result1);
         boolean result = Jsoup.isValid(content.toString(), this.configWhiteList());
         if (result) {
             return new HttpInputMessage() {

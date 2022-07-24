@@ -1,6 +1,9 @@
 package com.php25.common.validation.util;
 
 
+import org.hibernate.validator.BaseHibernateValidatorConfiguration;
+import org.hibernate.validator.HibernateValidator;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -21,8 +24,15 @@ public class ValidatorUtil {
     private static final ExecutableValidator executableValidator;
 
     static {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        validator = Validation.byProvider(HibernateValidator.class)
+                .configure()
+                .addProperty(BaseHibernateValidatorConfiguration.FAIL_FAST, "true")
+                .buildValidatorFactory().getValidator();
         executableValidator = validator.forExecutables();
+    }
+
+    public static Validator getValidator() {
+        return validator;
     }
 
     public static <T> ValidationResult validateEntity(T obj) {
