@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <spring.boot.version>2.7.1</spring.boot.version>
+        <spring.boot.version>2.7.2</spring.boot.version>
         <spring-cloud-dependencies>2021.0.3</spring-cloud-dependencies>
         <guava.version>31.1-jre</guava.version>
         <easypoi.version>4.4.0</easypoi.version>
@@ -204,6 +204,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.10.1</version>
                     <configuration>
