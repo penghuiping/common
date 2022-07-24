@@ -120,8 +120,7 @@ public interface RedisManager {
      * 获取限流器，使用令牌桶算法
      *
      * @param rate 令牌增长率，单位时间(秒)内向令牌桶里添加令牌的数量 ,
-     *             how many requests per second you want a user to be allowed to do,
-     *             without any dropped requests. This is the rate at which the token bucket is filled
+     *             how many requests per second will be allowed to visit your system.
      * @param id   令牌桶唯一标识
      * @return
      */
