@@ -1,7 +1,5 @@
 package com.php25.common.core.dto;
 
-import org.springframework.data.domain.Page;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +24,6 @@ public class PageDto<T> {
     public PageDto() {
         this.data = new ArrayList<>();
         this.total = 0L;
-    }
-
-    public PageDto(Page<T> page) {
-        this.data = page.getContent();
-        this.total = page.getTotalElements();
     }
 
     public static <T> PageDto<T> empty() {

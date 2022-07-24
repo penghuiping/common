@@ -2,8 +2,9 @@ package com.php25.common.validation.validator;
 
 import com.php25.common.validation.annotation.Mobile;
 import com.php25.common.validation.util.Validator;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 
 /**

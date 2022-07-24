@@ -1,6 +1,7 @@
 package com.php25.common.core.mess.ratelimiter;
 
 import com.php25.common.core.util.AssertUtil;
+import com.php25.common.core.util.MathUtil;
 
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +53,7 @@ public class SlideWindowRateLimiter implements RateLimiter {
      * @param windowTimeSize 窗口大小，单位（纳秒）
      */
     private SlideWindowRateLimiter(long slotSize, long windowLimit, long windowTimeSize) {
-        AssertUtil.isTrue(isValidSlotNum(slotSize), "slotSize必须2的指数幂");
+        AssertUtil.isTrue(MathUtil.isPowerOfTwo(slotSize), "slotSize必须2的指数幂");
         this.slotSize = slotSize;
         this.slots = new Slot[(int) slotSize];
         this.windowLimit = windowLimit;
@@ -79,7 +80,7 @@ public class SlideWindowRateLimiter implements RateLimiter {
     public Boolean isAllowed() {
         long now = System.nanoTime();
         long numbers = (now - this.startTime) / slotTimeSize;
-        long offset = mod(numbers, slotSize);
+        long offset = MathUtil.mod(numbers, slotSize);
         long page = numbers / slotSize;
         Slot slot = this.slots[(int) offset];
         if (slot == null) {
@@ -115,30 +116,5 @@ public class SlideWindowRateLimiter implements RateLimiter {
             }
         }
         return total;
-    }
-
-    /**
-     * 相当于num0%num1
-     *
-     * @param num0
-     * @param num1 必须是偶数
-     * @return 余
-     */
-    private long mod(long num0, long num1) {
-        return num0 & (num1 - 1);
-    }
-
-    /**
-     * 是否是偶数
-     *
-     * @param num 数字
-     * @return true: 偶数
-     */
-    private boolean isEven(long num) {
-        return (num & 1) != 1;
-    }
-
-    private boolean isValidSlotNum(long num) {
-        return (num & (num - 1)) == 0;
     }
 }
