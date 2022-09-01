@@ -32,7 +32,7 @@
         <netty>4.1.52.Final</netty>
         <jjwt>0.10.7</jjwt>
         <trie>1.2.2</trie>
-        <jsoup>1.14.2</jsoup>
+        <jsoup>1.15.3</jsoup>
         <disruptor>3.4.4</disruptor>
         <mybatis-plus>3.5.0</mybatis-plus>
         <php-common.core>V.2.7.1</php-common.core>
