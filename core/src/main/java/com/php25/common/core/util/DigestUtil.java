@@ -2,6 +2,7 @@ package com.php25.common.core.util;
 
 import com.google.common.base.Charsets;
 import com.php25.common.core.exception.Exceptions;
+import com.php25.common.core.util.crypto.constant.GlobalBouncyCastleProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -90,6 +91,33 @@ public abstract class DigestUtil {
             throw Exceptions.throwIllegalStateException("出错啦!", e);
         }
 
+    }
+
+    /**
+     * SM3加密
+     *
+     * @param str 需要加密的字符串
+     * @return byte[]  SM3加密后的结果
+     */
+    public static byte[] sm3(String str) {
+        AssertUtil.hasText(str, "str不能为空");
+        AssertUtil.notNull(GlobalBouncyCastleProvider.INSTANCE.getProvider(), "GlobalBouncyCastleProvider不能为null");
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SM3", GlobalBouncyCastleProvider.INSTANCE.getProvider());
+            return messageDigest.digest(str.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw Exceptions.throwIllegalStateException("出错啦!", e);
+        }
+    }
+
+    /**
+     * SM3 加密
+     *
+     * @param str 需要加密的字符串
+     * @return string 直接返回32位的SM3加密字符串
+     */
+    public static String sm3Str(String str) {
+        return new String(DigestUtil.bytes2hex(DigestUtil.sm3(str)));
     }
 
 

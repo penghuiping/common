@@ -5,6 +5,10 @@ package com.php25.common.core.util.crypto.constant;
  */
 public enum SymmetricAlgorithm {
     /**
+     * 默认的SM4加密方式：SM4/CBC/PKCS5Padding
+     */
+    SM4("SM4"),
+    /**
      * 默认的AES加密方式：AES/CBC/PKCS5Padding
      */
     AES("AES"),
@@ -17,14 +21,14 @@ public enum SymmetricAlgorithm {
      */
     DESede("DESede");
 
-    private String value;
+    private final String value;
 
     /**
      * 构造
      *
      * @param value 算法的字符串表示，区分大小写
      */
-    private SymmetricAlgorithm(String value) {
+    SymmetricAlgorithm(String value) {
         this.value = value;
     }
 

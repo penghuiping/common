@@ -6,10 +6,14 @@ import com.php25.common.core.util.StringUtil;
 import com.php25.common.core.util.crypto.constant.GlobalBouncyCastleProvider;
 import com.php25.common.core.util.crypto.constant.RsaAlgorithm;
 import com.php25.common.core.util.crypto.constant.SignAlgorithm;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -47,6 +51,29 @@ public abstract class SecretKeyUtil {
             return new SecretKeySpec(secretKey.getEncoded(), "AES");
         } catch (NoSuchAlgorithmException e) {
             throw Exceptions.throwIllegalStateException("生成AES秘钥失败!", e);
+        }
+    }
+
+    /**
+     * 生成加密秘钥 16位秘钥 SM4
+     *
+     * @return
+     */
+    public static SecretKeySpec getSM4Key(final String password) {
+        //返回生成指定算法密钥生成器的 KeyGenerator 对象
+        KeyGenerator kg = null;
+        try {
+            kg = getKeyGenerator("SM4");
+            //AES 要求密钥长度为 128、192、256
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+            secureRandom.setSeed(password.getBytes());
+            kg.init(128, secureRandom);
+            //生成一个密钥
+            SecretKey secretKey = kg.generateKey();
+            // 转换为AES专用密钥
+            return new SecretKeySpec(secretKey.getEncoded(), "SM4");
+        } catch (NoSuchAlgorithmException e) {
+            throw Exceptions.throwIllegalStateException("生成SM4秘钥失败!", e);
         }
     }
 
@@ -328,6 +355,42 @@ public abstract class SecretKeyUtil {
             return algorithm.substring(0, slashIndex);
         }
         return algorithm;
+    }
+
+
+    /**
+     * 公钥转换为 {@link ECPublicKeyParameters}
+     *
+     * @param publicKey 公钥，传入null返回null
+     * @return {@link ECPublicKeyParameters}或null
+     */
+    public static ECPublicKeyParameters toPublicParams(PublicKey publicKey) {
+        if (null == publicKey) {
+            return null;
+        }
+        try {
+            return (ECPublicKeyParameters) ECUtil.generatePublicKeyParameter(publicKey);
+        } catch (InvalidKeyException e) {
+            throw Exceptions.throwIllegalStateException("publicKey不合法", e);
+        }
+    }
+
+
+    /**
+     * 私钥转换为 {@link ECPrivateKeyParameters}
+     *
+     * @param privateKey 私钥，传入null返回null
+     * @return {@link ECPrivateKeyParameters}或null
+     */
+    public static ECPrivateKeyParameters toPrivateParams(PrivateKey privateKey) {
+        if (null == privateKey) {
+            return null;
+        }
+        try {
+            return (ECPrivateKeyParameters) ECUtil.generatePrivateKeyParameter(privateKey);
+        } catch (InvalidKeyException e) {
+            throw Exceptions.throwIllegalStateException("privateKey不合法", e);
+        }
     }
 
 

@@ -9,6 +9,8 @@ public enum RsaAlgorithm implements UnSymmetricAlgorithm {
      * RSA算法
      */
     RSA("RSA"),
+
+    SM2("SM2"),
     /**
      * RSA算法，此算法用了默认补位方式为RSA/ECB/PKCS1Padding
      */
@@ -18,14 +20,14 @@ public enum RsaAlgorithm implements UnSymmetricAlgorithm {
      */
     RSA_None("RSA/None/NoPadding");
 
-    private String value;
+    private final String value;
 
     /**
      * 构造
      *
      * @param value 算法字符表示，区分大小写
      */
-    private RsaAlgorithm(String value) {
+    RsaAlgorithm(String value) {
         this.value = value;
     }
 

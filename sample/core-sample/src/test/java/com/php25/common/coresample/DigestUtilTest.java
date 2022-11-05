@@ -28,5 +28,10 @@ public class DigestUtilTest {
         Assertions.assertThat(tmp1.toLowerCase()).isEqualTo("932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef");
     }
 
+    @Test
+    public void sm3() {
+        System.out.println(DigestUtil.sm3Str("123123123"));
+    }
+
 
 }

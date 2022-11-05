@@ -1,6 +1,7 @@
 package com.php25.common.coresample;
 
 import com.php25.common.core.util.crypto.RSA;
+import com.php25.common.core.util.crypto.SM2;
 import com.php25.common.core.util.crypto.constant.KeyType;
 import com.php25.common.core.util.crypto.constant.RsaAlgorithm;
 import com.php25.common.core.util.crypto.key.SecretKeyPair;
@@ -62,11 +63,34 @@ public class RsaTest {
 
     @Test
     public void test2() {
-        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.RSA,"test12313123",2048);
+        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.RSA, "test12313123", 2048);
         SecretKeyPair secretKeyPair = new SecretKeyPair(pair, RsaAlgorithm.RSA);
         Assertions.assertThat(secretKeyPair.getPublicKey()).isNotBlank();
         Assertions.assertThat(secretKeyPair.getPrivateKey()).isNotBlank();
         log.info("publicKey:{}", secretKeyPair.getPublicKey());
         log.info("privateKey:{}", secretKeyPair.getPrivateKey());
     }
+
+    @Test
+    public void test3() {
+        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.SM2, "test12313123", 2048);
+        Assertions.assertThat(pair.getPrivate()).isNotNull();
+        Assertions.assertThat(pair.getPublic()).isNotNull();
+
+        SecretKeyPair secretKeyPair = new SecretKeyPair(pair, RsaAlgorithm.SM2);
+        Assertions.assertThat(secretKeyPair.getPublicKey()).isNotBlank();
+        Assertions.assertThat(secretKeyPair.getPrivateKey()).isNotBlank();
+        log.info("publicKey:{}", secretKeyPair.getPublicKey());
+        log.info("privateKey:{}", secretKeyPair.getPrivateKey());
+
+        pair = secretKeyPair.toKeyPair();
+
+        SM2 sm2 = new SM2(pair.getPrivate(), pair.getPublic());
+        String secureInfo1 = sm2.encryptBase64("hello world，你好".getBytes());
+        String originInfo1 = sm2.decryptBase64Str(secureInfo1);
+        log.info("secure_info1:{}", secureInfo1);
+        log.info("origin_info1:{}", originInfo1);
+    }
+
+
 }
