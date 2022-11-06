@@ -1,5 +1,6 @@
 package com.php25.common.web;
 
+import com.php25.common.core.dto.CurrentUser;
 import com.php25.common.core.exception.Exceptions;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;

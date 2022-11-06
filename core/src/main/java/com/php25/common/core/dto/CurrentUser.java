@@ -1,10 +1,9 @@
-package com.php25.common.web;
+package com.php25.common.core.dto;
 
 import java.util.List;
 
 /**
  * 当前登录用户
- *
  * @author penghuiping
  * @date 2022/11/5 18:18
  */
@@ -24,6 +23,14 @@ public abstract class CurrentUser {
      * 角色
      */
     private List<String> roles;
+
+    public String getUserCode() {
+        return userCode;
+    }
+
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
 
     public String getUsername() {
         return username;
