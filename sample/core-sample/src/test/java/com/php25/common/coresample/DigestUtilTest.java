@@ -30,7 +30,7 @@ public class DigestUtilTest {
 
     @Test
     public void sm3() {
-        System.out.println(DigestUtil.sm3Str("123123123"));
+        System.out.println(DigestUtil.sm3Str("aaaaa"));
     }
 
 

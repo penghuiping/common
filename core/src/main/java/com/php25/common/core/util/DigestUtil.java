@@ -114,7 +114,7 @@ public abstract class DigestUtil {
      * SM3 加密
      *
      * @param str 需要加密的字符串
-     * @return string 直接返回32位的SM3加密字符串
+     * @return string 直接返回64位的SM3加密字符串
      */
     public static String sm3Str(String str) {
         return new String(DigestUtil.bytes2hex(DigestUtil.sm3(str)));

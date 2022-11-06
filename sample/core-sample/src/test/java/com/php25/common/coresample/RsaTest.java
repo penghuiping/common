@@ -73,7 +73,7 @@ public class RsaTest {
 
     @Test
     public void test3() {
-        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.SM2, "test12313123", 2048);
+        KeyPair pair = SecretKeyUtil.getRsaKey(RsaAlgorithm.SM2);
         Assertions.assertThat(pair.getPrivate()).isNotNull();
         Assertions.assertThat(pair.getPublic()).isNotNull();
 
