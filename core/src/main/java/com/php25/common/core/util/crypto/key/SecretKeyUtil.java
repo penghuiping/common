@@ -2,6 +2,7 @@ package com.php25.common.core.util.crypto.key;
 
 import com.php25.common.core.exception.Exceptions;
 import com.php25.common.core.util.AssertUtil;
+import com.php25.common.core.util.DigestUtil;
 import com.php25.common.core.util.StringUtil;
 import com.php25.common.core.util.crypto.constant.GlobalBouncyCastleProvider;
 import com.php25.common.core.util.crypto.constant.RsaAlgorithm;
@@ -52,6 +53,14 @@ public abstract class SecretKeyUtil {
         } catch (NoSuchAlgorithmException e) {
             throw Exceptions.throwIllegalStateException("生成AES秘钥失败!", e);
         }
+    }
+
+    public static String getSecretKeyBase64(SecretKey spec) {
+        return DigestUtil.encodeBase64(spec.getEncoded());
+    }
+
+    public static String getSecretKeyHex(SecretKey spec) {
+        return new String(DigestUtil.bytes2hex(spec.getEncoded()));
     }
 
     /**

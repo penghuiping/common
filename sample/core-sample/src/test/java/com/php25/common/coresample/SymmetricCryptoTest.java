@@ -49,8 +49,10 @@ public class SymmetricCryptoTest {
     @Test
     public void AesTest1() {
         SecretKey secretKey = SecretKeyUtil.getAesKey("123123");
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(RandomUtil.randomBytes(16));
-        AES aes = new AES(Mode.CBC, Padding.PKCS7Padding, secretKey, ivParameterSpec);
+        log.info("秘钥：{}", SecretKeyUtil.getSecretKeyBase64(secretKey));
+//        IvParameterSpec ivParameterSpec = new IvParameterSpec(RandomUtil.randomBytes(16));
+        IvParameterSpec ivParameterSpec = new IvParameterSpec("1234567890123456".getBytes());
+        AES aes = new AES(Mode.CBC, Padding.PKCS5Padding, secretKey, ivParameterSpec);
         String result = aes.encryptBase64("hello world".getBytes());
         log.info("AES加密结果:{}", result);
         String data = aes.decryptBase64Str(result);
@@ -71,7 +73,9 @@ public class SymmetricCryptoTest {
     @Test
     public void SM4Test1() {
         SecretKey secretKey = SecretKeyUtil.getSM4Key("123123");
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(RandomUtil.randomBytes(16));
+        log.info("秘钥：{}", SecretKeyUtil.getSecretKeyBase64(secretKey));
+//        IvParameterSpec ivParameterSpec = new IvParameterSpec(RandomUtil.randomBytes(16));
+        IvParameterSpec ivParameterSpec = new IvParameterSpec("1234567890123456".getBytes());
         SM4 sm4 = new SM4(Mode.CBC, Padding.PKCS5Padding, secretKey, ivParameterSpec);
         String result = sm4.encryptBase64("hello world".getBytes());
         log.info("SM4加密结果:{}", result);

@@ -26,7 +26,6 @@ public class SM2 {
     /**
      * 算法EC
      */
-    private static final String ALGORITHM_SM2 = "SM2";
     private final Digest digest = new SM3Digest();
     private final SM2Engine.Mode mode = SM2Engine.Mode.C1C3C2;
     /**
