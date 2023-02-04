@@ -28,6 +28,13 @@ public class LocalSet<T> implements RSet<T> {
 
 
     @Override
+    public void add(Set<T> elements) {
+        for (T ele : elements) {
+            add(ele);
+        }
+    }
+
+    @Override
     public void add(T element) {
         CmdRequest cmdRequest = new CmdRequest(RedisCmd.SET_ADD, Lists.newArrayList(this.setKey, element));
         CmdResponse cmdResponse = new CmdResponse();

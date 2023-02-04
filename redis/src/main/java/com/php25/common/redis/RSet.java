@@ -16,7 +16,15 @@ public interface RSet<T> {
     void add(T element);
 
     /**
+     * 批量添加元素
+     *
+     * @param elements 元素列表
+     */
+    void add(Set<T> elements);
+
+    /**
      * 移除元素
+     *
      * @param element 元素对象
      */
     void remove(T element);

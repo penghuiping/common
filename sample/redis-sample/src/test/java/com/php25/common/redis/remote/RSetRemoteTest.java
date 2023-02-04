@@ -2,6 +2,7 @@ package com.php25.common.redis.remote;
 
 import com.php25.common.CommonAutoConfigure;
 import com.php25.common.core.util.JsonUtil;
+import com.php25.common.core.util.RandomUtil;
 import com.php25.common.redis.Person;
 import com.php25.common.redis.RSet;
 import com.php25.common.redis.RedisManager;
@@ -143,5 +144,15 @@ public class RSetRemoteTest {
         log.info("getRandomMember出的人为:{}", JsonUtil.toJson(person));
         Assertions.assertThat(person).isNotNull();
         Assertions.assertThat(this.rSet.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void getRandomNumber() throws Exception {
+        Set<String> numbers = RandomUtil.getAllPossibleDifferentNumbers(6);
+        RSet<String> numbers0 = this.redisManager.set("random_numbers", String.class);
+        numbers0.add(numbers);
+        for (int i = 0; i < 10; i++) {
+            log.info("随机数:{}", numbers0.pop());
+        }
     }
 }

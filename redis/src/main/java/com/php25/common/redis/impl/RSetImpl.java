@@ -32,6 +32,13 @@ public class RSetImpl<T> implements RSet<T> {
     }
 
     @Override
+    public void add(Set<T> elements) {
+        String[] stringElements = new String[elements.size()];
+        elements.stream().map(JsonUtil::toJson).collect(Collectors.toList()).toArray(stringElements);
+        redisTemplate.opsForSet().add(setKey, stringElements);
+    }
+
+    @Override
     public void remove(T element) {
         redisTemplate.opsForSet().remove(setKey, JsonUtil.toJson(element));
     }
