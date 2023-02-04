@@ -1,8 +1,15 @@
 package com.php25.common.core.util;
 
 
+import com.php25.common.core.exception.Exceptions;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
  * 对象工具类，包括判空、克隆、序列化等操作
@@ -11,6 +18,8 @@ import java.lang.reflect.Type;
  * @date 2022-01-15
  */
 public abstract class ObjectUtil {
+    public static String DEFAULT_FOR_NULL = "-1";
+    public static String DEFAULT_FOR_DATE = "9999-12-31 23:59:59";
 
     /**
      * 比较两个对象是否相等。<br>
@@ -200,5 +209,150 @@ public abstract class ObjectUtil {
         return null;
     }
 
+    /**
+     * 重置对象实例的属性值为-1的为null
+     *
+     * @param obj 对象实例
+     */
+
+    public static void resetFieldValueFromDefaultToNull(Object obj) {
+        Field[] fields = obj.getClass().getDeclaredFields();
+
+        Class<?> cls = obj.getClass();
+
+        for (Field field : fields) {
+
+            Class<?> fieldType = field.getType();
+
+            try {
+
+                if (Number.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null != value && DEFAULT_FOR_NULL.equals(value.toString())) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, (Object) null);
+
+                    }
+
+                } else if (String.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null != value && DEFAULT_FOR_NULL.equals(value.toString())) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, "");
+
+                    }
+
+                } else if (BigDecimal.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null != value && DEFAULT_FOR_NULL.equals(value.toString())) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, "");
+
+                    }
+
+                }
+
+            } catch (IllegalAccessException | InvocationTargetException e) {
+
+                throw Exceptions.throwIllegalStateException("把所有实例为默认值的重置成null或空字符失败", e);
+
+            }
+
+        }
+
+    }
+
+
+    /**
+     * 把对象的所有为null属性,初始化为默认值
+     *
+     * @param obj 对象实例
+     */
+    public static void resetFieldValueFromNullToDefault(Object obj) {
+
+        Field[] fields = obj.getClass().getDeclaredFields();
+
+        Class<?> cls = obj.getClass();
+
+        for (Field field : fields) {
+
+            Class<?> fieldType = field.getType();
+
+            try {
+
+                if (Integer.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, Integer.valueOf(DEFAULT_FOR_NULL));
+
+                    }
+
+                } else if (Long.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, Long.valueOf(DEFAULT_FOR_NULL));
+
+                    }
+
+                } else if (Byte.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, Byte.valueOf(DEFAULT_FOR_NULL));
+
+                    }
+
+                } else if (String.class.isAssignableFrom(fieldType)) {
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, DEFAULT_FOR_NULL);
+
+                    }
+
+                } else if (BigDecimal.class.isAssignableFrom(fieldType)) {
+
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType()).invoke(obj, new BigDecimal(DEFAULT_FOR_NULL));
+
+                    }
+
+                } else if (Date.class.isAssignableFrom(fieldType)) {
+                    Object value = ReflectUtil.getMethod(cls, "get" + StringUtil.capitalizeFirstLetter(field.getName())).invoke(obj);
+
+                    if (null == value) {
+
+                        ReflectUtil.getMethod(cls, "set" + StringUtil.capitalizeFirstLetter(field.getName()), field.getType())
+
+                                .invoke(obj, TimeUtil.parseDate("9999-12-31 23:59:59", DateTimeFormatter.ofPattern(TimeUtil.STD_FORMAT)));
+
+                    }
+
+                }
+
+            } catch (IllegalAccessException | InvocationTargetException e) {
+
+                throw Exceptions.throwIllegalStateException("把对象的所有为null属性,初始化为默认值失败", e);
+
+            }
+        }
+    }
 
 }

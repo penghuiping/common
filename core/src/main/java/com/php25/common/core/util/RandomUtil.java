@@ -5,7 +5,10 @@ import com.php25.common.core.exception.Exceptions;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -252,4 +255,31 @@ public abstract class RandomUtil {
         getRandom().nextBytes(bytes);
         return bytes;
     }
+
+    /**
+     * 生成全量的各个位数都不同的数字
+     *
+     * @param length 长度
+     * @return 所有可能得数字
+     */
+    public static Set<String> getAllPossibleDifferentNumbers(int length) {
+        int[] data = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Set<String> numbers = new HashSet<>();
+        recursionGenerateDifferentNumber(numbers, "", data, length);
+        return numbers;
+    }
+
+    private static void recursionGenerateDifferentNumber(Set<String> numbers, String number, int[] data, int deep) {
+        if (deep <= 0) {
+            numbers.add(number);
+            return;
+        }
+
+        for (final int val : data) {
+            int[] newData = Arrays.stream(data).filter(a -> a != val).toArray();
+            recursionGenerateDifferentNumber(numbers, number + val, newData, deep - 1);
+        }
+    }
+
+
 }
