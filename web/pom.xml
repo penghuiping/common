@@ -22,6 +22,10 @@
             <artifactId>validation</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.php25</groupId>
+            <artifactId>redis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>

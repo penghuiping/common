@@ -23,6 +23,11 @@ public enum ApiErrorCode implements BusinessErrorStatus {
     http_method_not_support("A0002", "不支持的http方法"),
 
     /**
+     * 操作的太快了，请稍后再试
+     */
+    AVOID_REPEAT("A0003", "操作的太快了，请稍后再试"),
+
+    /**
      * 服务器错误
      */
     unknown_error("B0001", "服务器错误,请联系管理员");

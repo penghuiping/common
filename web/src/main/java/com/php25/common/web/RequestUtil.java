@@ -4,6 +4,7 @@ import com.php25.common.core.dto.CurrentUser;
 import com.php25.common.core.exception.Exceptions;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,12 +18,14 @@ public class RequestUtil {
     private RequestUtil() {
     }
 
-    public static String getBasePath(HttpServletRequest request) {
+    public static String getBasePath() {
+        HttpServletRequest request = getRequest();
         String path = request.getContextPath();
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path;
     }
 
-    public static String getRemoteIP(HttpServletRequest request) {
+    public static String getRemoteIP() {
+        HttpServletRequest request = getRequest();
         String ip = request.getHeader("x-forwarded-for");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
@@ -58,5 +61,10 @@ public class RequestUtil {
     public static void setCurrentUser(CurrentUser currentUser) {
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         requestAttributes.setAttribute(CURRENT_USER, currentUser, 0);
+    }
+
+    public static HttpServletRequest getRequest() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return requestAttributes.getRequest();
     }
 }
