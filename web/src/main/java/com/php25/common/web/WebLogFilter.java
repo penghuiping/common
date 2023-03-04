@@ -4,7 +4,6 @@ package com.php25.common.web;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.php25.common.core.util.JsonUtil;
-import com.php25.common.mask.MaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -34,18 +33,11 @@ import java.util.List;
 public class WebLogFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(WebLogFilter.class);
 
-    private static final MaskManager maskManager = new MaskManager();
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private List<String> excludeUriPatterns;
 
     public void setExcludeUriPatterns(String... excludeUriPatterns) {
         this.excludeUriPatterns = Lists.newArrayList(excludeUriPatterns);
-    }
-
-    public void setMaskPattern(String... maskPatterns) {
-        for (int i = 0; i < maskPatterns.length; i++) {
-            maskManager.addMaskPattern(maskPatterns[i]);
-        }
     }
 
     @Override
@@ -79,7 +71,6 @@ public class WebLogFilter extends OncePerRequestFilter {
             String result = new String(contentCachingResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
             if (MediaType.APPLICATION_JSON_VALUE.equals(respContentType)
                     || MediaType.APPLICATION_JSON_UTF8_VALUE.equals(respContentType)) {
-                result = maskManager.maskMessage(result);
                 log.info("response params为:{}", result);
             }
             response.getOutputStream().write(result.getBytes(StandardCharsets.UTF_8));
