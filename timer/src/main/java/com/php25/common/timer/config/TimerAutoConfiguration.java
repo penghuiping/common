@@ -2,6 +2,7 @@ package com.php25.common.timer.config;
 
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Timer;
+import com.php25.common.timer.TimerInnerLogDbManager;
 import com.php25.common.timer.TimerInnerLogManager;
 import com.php25.common.timer.dao.TimerInnerLogDao;
 import org.mybatis.spring.annotation.MapperScan;
@@ -19,7 +20,7 @@ public class TimerAutoConfiguration {
 
     @Bean
     TimerInnerLogManager timerInnerLogManager(TimerInnerLogDao timerInnerLogDao, RedisManager redisManager) {
-        return new TimerInnerLogManager(timerInnerLogDao, redisManager);
+        return new TimerInnerLogDbManager(timerInnerLogDao);
     }
 
     @Bean
@@ -27,4 +28,3 @@ public class TimerAutoConfiguration {
         return new Timer();
     }
 }
-
