@@ -37,7 +37,7 @@ public class SentinelRedisConfig {
 
         LettucePoolingClientConfiguration.LettucePoolingClientConfigurationBuilder builder = LettucePoolingClientConfiguration.builder();
 
-        if (redisProperties.isSsl()) {
+        if (redisProperties.getSsl().isEnabled()) {
             builder.useSsl();
         }
 

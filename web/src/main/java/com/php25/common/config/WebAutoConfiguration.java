@@ -51,7 +51,7 @@ public class WebAutoConfiguration extends WebMvcConfigurationSupport {
     FilterRegistrationBean<WebLogFilter> loggingFilter() {
         FilterRegistrationBean<WebLogFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
         WebLogFilter webLogFilter = new WebLogFilter();
-        webLogFilter.setMaskPattern("password.{1,2}:.{1,2}([A-Za-z0-9]{6,}).{1,2},");
+        //webLogFilter.setMaskPattern("password.{1,2}:.{1,2}([A-Za-z0-9]{6,}).{1,2},");
         webLogFilter.setExcludeUriPatterns();
         filterFilterRegistrationBean.setFilter(webLogFilter);
         filterFilterRegistrationBean.setOrder(1);

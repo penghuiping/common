@@ -46,7 +46,7 @@ public class ReactorTest {
             person.setId(integer);
             person.setName(RandomUtil.getRandomLetters(4));
             return person;
-        }).publishOn(Schedulers.elastic()).subscribe(person -> {
+        }).publishOn(Schedulers.boundedElastic()).subscribe(person -> {
             log.info("=========================>subscribe thread:" + Thread.currentThread().getName());
             log.info(JsonUtil.toPrettyJson(person));
             countDownLatch.countDown();
@@ -88,7 +88,7 @@ public class ReactorTest {
         }).flatMap(integers -> {
             log.info("==");
             return Mono.just(integers);
-        }).publishOn(Schedulers.single()).subscribeOn(Schedulers.elastic()).subscribe(integers -> {
+        }).publishOn(Schedulers.single()).subscribeOn(Schedulers.boundedElastic()).subscribe(integers -> {
             log.info(integers.toString());
         });
         Thread.sleep(2000);

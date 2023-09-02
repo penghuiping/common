@@ -2,11 +2,10 @@ package com.php25.common.web;
 
 import com.php25.common.core.dto.CurrentUser;
 import com.php25.common.core.exception.Exceptions;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author penghuiping

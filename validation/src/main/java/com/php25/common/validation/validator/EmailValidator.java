@@ -2,9 +2,8 @@ package com.php25.common.validation.validator;
 
 import com.php25.common.validation.annotation.Email;
 import com.php25.common.validation.util.Validator;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 
 /**

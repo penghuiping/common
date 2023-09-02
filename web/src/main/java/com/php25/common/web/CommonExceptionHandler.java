@@ -1,6 +1,9 @@
 package com.php25.common.web;
 
 import com.php25.common.core.exception.BusinessException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintDeclarationException;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -13,10 +16,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintDeclarationException;
-import javax.validation.ConstraintViolationException;
 
 /**
  * 统一异常处理
