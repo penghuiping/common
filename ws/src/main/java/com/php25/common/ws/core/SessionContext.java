@@ -7,7 +7,6 @@ import com.php25.common.redis.RList;
 import com.php25.common.redis.RedisManager;
 import com.php25.common.timer.Job;
 import com.php25.common.timer.Timer;
-import com.php25.common.ws.mq.WsChannelProcessor;
 import com.php25.common.ws.protocal.BaseMsg;
 import com.php25.common.ws.protocal.SecurityAuthentication;
 import com.php25.common.ws.serializer.InternalMsgSerializer;
@@ -15,7 +14,7 @@ import com.php25.common.ws.serializer.MsgSerializer;
 import com.php25.common.ws.serializer.VueMsgSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.messaging.Message;
@@ -57,7 +56,7 @@ public class SessionContext implements ApplicationListener<ContextClosedEvent> {
 
     private final MsgDispatcher msgDispatcher;
 
-    private final WsChannelProcessor wsChannelProcessor;
+    private final StreamBridge streamBridge;
 
     private final MsgSerializer msgSerializer = new VueMsgSerializer();
 
@@ -73,14 +72,14 @@ public class SessionContext implements ApplicationListener<ContextClosedEvent> {
                           String serverId,
                           MsgDispatcher msgDispatcher,
                           Timer timer,
-                          WsChannelProcessor wsChannelProcessor) {
+                          StreamBridge streamBridge) {
         this.retryMsgManager = retryMsgManager;
         this.redisManager = redisService;
         this.serverId = serverId;
         this.securityAuthentication = securityAuthentication;
         this.msgDispatcher = msgDispatcher;
         this.timer = timer;
-        this.wsChannelProcessor = wsChannelProcessor;
+        this.streamBridge = streamBridge;
         int cpuNum = Runtime.getRuntime().availableProcessors();
         this.executorService = new ThreadPoolExecutor(1, 2 * cpuNum,
                 60L, TimeUnit.SECONDS,
@@ -103,7 +102,6 @@ public class SessionContext implements ApplicationListener<ContextClosedEvent> {
         }
     }
 
-    @StreamListener(value = WsChannelProcessor.INPUT)
     private void wsSessionChannel(Message<String> message) {
         for (String key : sessions.keySet()) {
             try {
@@ -212,7 +210,7 @@ public class SessionContext implements ApplicationListener<ContextClosedEvent> {
             if (StringUtil.isBlank(sid)) {
                 //没有指定sid,则认为进行全局广播，并且广播消息不会重试
                 Message<String> message = new GenericMessage<>(msgSerializer.from(baseMsg));
-                wsChannelProcessor.output().send(message);
+                streamBridge.send("wsSessionChannel-in-0", message);
             } else {
                 //现看看sid是否本地存在
                 if (this.sessions.containsKey(sid)) {

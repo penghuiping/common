@@ -14,7 +14,7 @@
         <module>web</module>
         <module>redis</module>
         <module>validation</module>
-        <!--        <module>ws</module>-->
+        <module>ws</module>
         <module>timer</module>
         <module>id</module>
         <module>sample/core-sample</module>
