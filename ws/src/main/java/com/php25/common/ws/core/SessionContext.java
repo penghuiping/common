@@ -210,7 +210,7 @@ public class SessionContext implements ApplicationListener<ContextClosedEvent> {
             if (StringUtil.isBlank(sid)) {
                 //没有指定sid,则认为进行全局广播，并且广播消息不会重试
                 Message<String> message = new GenericMessage<>(msgSerializer.from(baseMsg));
-                streamBridge.send("wsSessionChannel-in-0", message);
+                streamBridge.send("wsSessionChannel-out-0", message);
             } else {
                 //现看看sid是否本地存在
                 if (this.sessions.containsKey(sid)) {

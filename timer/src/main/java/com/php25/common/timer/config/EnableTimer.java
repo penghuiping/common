@@ -15,8 +15,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({TimerAutoConfiguration.class})
+@Import({TimerDatabaseAutoConfiguration.class})
 public @interface EnableTimer {
+    TimerType type() default TimerType.USING_DATABASE;
 }
 
 

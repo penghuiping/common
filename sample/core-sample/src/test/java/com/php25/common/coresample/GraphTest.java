@@ -40,6 +40,5 @@ public class GraphTest {
             String val = iter1.next();
             System.out.println(val);
         }
-
     }
 }
